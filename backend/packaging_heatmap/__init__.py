@@ -1,0 +1,19 @@
+"""Packaging heatmap module — click-based package testing for product surveys."""
+
+from backend.packaging_heatmap.constants import (
+    PACKAGING_HEATMAP_GRID_SIZE,
+    PACKAGING_HEATMAP_INTENTS,
+    PACKAGING_HEATMAP_MAX_CLICKS,
+    PACKAGING_IMAGE_SIDES,
+    PACKAGING_IMAGE_BUCKET,
+    ALLOWED_PACKAGING_IMAGE_MIMES,
+)
+
+__all__ = [
+    "PACKAGING_HEATMAP_GRID_SIZE",
+    "PACKAGING_HEATMAP_INTENTS",
+    "PACKAGING_HEATMAP_MAX_CLICKS",
+    "PACKAGING_IMAGE_SIDES",
+    "PACKAGING_IMAGE_BUCKET",
+    "ALLOWED_PACKAGING_IMAGE_MIMES",
+]

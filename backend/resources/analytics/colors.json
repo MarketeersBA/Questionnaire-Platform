@@ -1,0 +1,102 @@
+{
+  "comment": "Strategic Command Center - Executive Color Palette",
+  "custom_colors": {
+    "brand_navy": [
+      0,
+      31,
+      63
+    ],
+    "brand_emerald": [
+      0,
+      153,
+      102
+    ],
+    "brand_pink": [
+      255,
+      102,
+      128
+    ],
+    "brand_deep_blue": [
+      14,
+      48,
+      71
+    ],
+    "brand_slate": [
+      71,
+      85,
+      105
+    ],
+    "brand_glass_blue": [
+      241,
+      245,
+      249
+    ],
+    "brand_gold": [
+      184,
+      152,
+      100
+    ],
+    "brand_crimson": [
+      153,
+      27,
+      27
+    ],
+    "brand_2_blue": [
+      30,
+      58,
+      138
+    ],
+    "brand_3_blue": [
+      59,
+      130,
+      246
+    ],
+    "brand_4_blue": [
+      147,
+      197,
+      253
+    ],
+    "brand_gray": [
+      156,
+      163,
+      175
+    ],
+    "brand_light_gray": [
+      229,
+      231,
+      235
+    ]
+  },
+  "css_colors": {
+    "black": [
+      15,
+      23,
+      42
+    ],
+    "white": [
+      255,
+      255,
+      255
+    ],
+    "navy": [
+      0,
+      31,
+      63
+    ],
+    "darkblue": [
+      30,
+      58,
+      138
+    ],
+    "darkgray": [
+      71,
+      85,
+      105
+    ],
+    "lightgray": [
+      241,
+      245,
+      249
+    ]
+  }
+}

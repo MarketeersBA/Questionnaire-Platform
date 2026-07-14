@@ -1,0 +1,61 @@
+# --- Stage 1: Builder ---
+FROM python:3.11-slim AS builder
+
+WORKDIR /app
+
+# Install build dependencies if any (e.g., for some pandas/numpy versions)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY backend/requirements.txt backend/requirements-dev.txt ./
+RUN pip install --user --no-cache-dir -r requirements-dev.txt
+
+# --- Stage 2: Production ---
+FROM python:3.11-slim AS production
+
+WORKDIR /app
+
+# Copy installed packages from builder
+COPY --from=builder /root/.local /root/.local
+ENV PATH=/root/.local/bin:$PATH
+
+# Playwright Chromium for hybrid PPTX chart capture and FFmpeg for audio processing
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ffmpeg \
+    libnss3 \
+    libnspr4 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libcups2 \
+    libdrm2 \
+    libdbus-1-3 \
+    libxkbcommon0 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxfixes3 \
+    libxrandr2 \
+    libgbm1 \
+    libasound2 \
+    libpango-1.0-0 \
+    libcairo2 \
+    && rm -rf /var/lib/apt/lists/* \
+    && playwright install chromium
+
+# Copy application code and resources
+COPY backend/ ./backend/
+# Resources are already under backend/resources/ theoretically, 
+# but if they were outside in the repo, we'd copy them here.
+
+# Set environment variables
+ENV PYTHONPATH=/app
+ENV PORT=8080
+ENV ANALYTICS_RESOURCES_DIR=/app/backend/resources/analytics
+ENV ANALYTICS_OUTPUT_DIR=/tmp/reports
+
+# Create output directory
+RUN mkdir -p /tmp/reports
+
+EXPOSE 8080
+
+CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8080"]

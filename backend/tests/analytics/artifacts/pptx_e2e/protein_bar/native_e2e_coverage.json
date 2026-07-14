@@ -1,0 +1,3067 @@
+{
+  "generated_at": "2026-07-07T10:20:45.862552+00:00",
+  "render_mode": "native",
+  "report_name": "Protein Bar Taste Benchmark",
+  "research_type": "Taste Test",
+  "survey_id": "69ce229eeed39ea9d5282afa",
+  "chart_count": 21,
+  "passed_chart_count": 21,
+  "failed_chart_count": 0,
+  "production_passes_gate": true,
+  "validation_mode": "production",
+  "slide_count": 47,
+  "render_tally": {
+    "rendered_chart_count": 19,
+    "failed_chart_count": 0,
+    "skipped_empty_data_count": 0,
+    "image_capture_count": 0,
+    "native_render_count": 19
+  },
+  "chart_parity": {
+    "screen_chart_ids": [
+      "brand_card_abu_auf",
+      "brand_card_cadbury",
+      "brand_card_haj_arfaa",
+      "criteria_table",
+      "brand_profile_snake",
+      "likeness_profile_chart",
+      "brand_comparison_pi_ol",
+      "purchase_funnel",
+      "purchase_intent",
+      "brand_awareness",
+      "purchase_funnel_ratio_cards",
+      "purchase_funnel_reference_table",
+      "nps_recommend",
+      "open_end_improvements",
+      "open_end_dislikes",
+      "open_end_likes",
+      "importance_combined",
+      "sigma_intent",
+      "audience_affinity",
+      "competitive_position_matrix",
+      "market_position_sigma"
+    ],
+    "rendered_chart_ids": [
+      "audience_affinity",
+      "competitive_position_matrix",
+      "market_position_sigma",
+      "criteria_table",
+      "brand_profile_snake",
+      "likeness_profile_chart",
+      "brand_comparison_pi_ol",
+      "purchase_funnel",
+      "purchase_intent",
+      "brand_awareness",
+      "purchase_funnel_ratio_cards",
+      "purchase_funnel_reference_table",
+      "nps_recommend",
+      "importance_combined",
+      "sigma_intent",
+      "sigma_intent",
+      "open_end_improvements",
+      "open_end_dislikes",
+      "open_end_likes"
+    ],
+    "rendered_pptx_slide_ids": [
+      "audience_affinity::affinity_heatmap",
+      "competitive_position_matrix::scatter_bubble",
+      "market_position_sigma::market_position_radar",
+      "criteria_table::criteria_table",
+      "brand_profile_snake::profile_chart",
+      "likeness_profile_chart::likeness_profile",
+      "brand_comparison_pi_ol::brand_comparison",
+      "purchase_funnel::snake_line",
+      "purchase_intent::stacked_bar",
+      "brand_awareness::horizontal_bar",
+      "purchase_funnel_ratio_cards::funnel_ratio_cards",
+      "purchase_funnel_reference_table::reference_table",
+      "nps_recommend::gauge",
+      "importance_combined::importance_combined",
+      "sigma_intent::sigma_intent_scatter",
+      "sigma_intent::sigma_intent_scatter",
+      "open_end_improvements::wordcloud",
+      "open_end_dislikes::wordcloud",
+      "open_end_likes::wordcloud"
+    ],
+    "missing_from_pptx": [
+      "brand_card_abu_auf",
+      "brand_card_cadbury",
+      "brand_card_haj_arfaa"
+    ],
+    "extra_in_pptx": [],
+    "order_mismatch": true,
+    "rendered_count": 19,
+    "screen_count": 21,
+    "chart_contracts": [
+      {
+        "chart_id": "criteria_table",
+        "chart_type": "criteria_table",
+        "title": "Criteria \u2014 Overall",
+        "subtitle": null,
+        "data": {
+          "brands": [
+            "Hero Brand",
+            "Competitor A"
+          ],
+          "my_brand": "Hero Brand",
+          "raw": [
+            {
+              "criteria_name": "Taste",
+              "significance": 0.9,
+              "brand_scores": {
+                "Hero Brand": 4.5,
+                "Competitor A": 3.8
+              },
+              "diff": 0.7
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Criteria \u2014 Overall",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "criteria_table::criteria_table",
+        "resolution": {
+          "registry_key": "criteria_table",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "brand_profile_snake",
+        "chart_type": "profile_chart",
+        "title": "Brand Performance Profile",
+        "subtitle": null,
+        "data": {
+          "labels": [
+            "Own Brand",
+            "Competitor A",
+            "Competitor B"
+          ],
+          "datasets": [
+            {
+              "label": "Brand Performance Profile",
+              "brand": "Brand Performance Profile",
+              "data": [
+                0.8,
+                0.5,
+                0.3
+              ],
+              "is_benchmark": false
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Brand Performance Profile",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "brand_profile_snake::profile_chart",
+        "resolution": {
+          "registry_key": "profile_chart",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "likeness_profile_chart",
+        "chart_type": "likeness_profile",
+        "title": "Likeness Profile Chart",
+        "subtitle": null,
+        "data": {
+          "metrics": [
+            "Modern",
+            "Premium"
+          ],
+          "labels_left": [
+            "Traditional",
+            "Value"
+          ],
+          "labels_right": [
+            "Modern",
+            "Premium"
+          ],
+          "datasets": [
+            {
+              "label": "Hero Brand",
+              "data": [
+                4.2,
+                3.9
+              ],
+              "brand": "Hero Brand"
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Likeness Profile Chart",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "likeness_profile_chart::likeness_profile",
+        "resolution": {
+          "registry_key": "likeness_profile",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "importance_combined",
+        "chart_type": "importance_combined",
+        "title": "Importance",
+        "subtitle": null,
+        "data": {
+          "main_scatter": {
+            "datasets": [
+              {
+                "label": "Hero Brand",
+                "data": [
+                  {
+                    "x": 0.82,
+                    "y": 71.0,
+                    "label": "Taste"
+                  }
+                ]
+              }
+            ]
+          },
+          "sub_scatter": {
+            "datasets": [
+              {
+                "label": "Hero Brand",
+                "data": [
+                  {
+                    "x": 0.73,
+                    "y": 69.0,
+                    "label": null
+                  }
+                ]
+              }
+            ],
+            "drill_attribute": "Taste",
+            "top_attributes": [
+              "Aftertaste"
+            ]
+          }
+        },
+        "insight": "",
+        "ai_headline": "Headline for Importance",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "importance_combined::importance_combined",
+        "resolution": {
+          "registry_key": "importance_combined",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "purchase_funnel",
+        "chart_type": "snake_line",
+        "title": "Conversion Thresholds",
+        "subtitle": null,
+        "data": {
+          "labels": [
+            "Own Brand",
+            "Competitor A",
+            "Competitor B"
+          ],
+          "datasets": [
+            {
+              "label": "Conversion Thresholds",
+              "data": [
+                0.8,
+                0.5,
+                0.3
+              ]
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Conversion Thresholds",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "purchase_funnel::snake_line",
+        "resolution": {
+          "registry_key": "purchase_funnel",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "sigma_intent",
+        "chart_type": "sigma_intent_scatter",
+        "title": "Attribute Sigma vs Purchase Intent",
+        "subtitle": null,
+        "data": {
+          "attributes": [
+            "Taste",
+            "Value"
+          ],
+          "default_attribute": "Taste",
+          "datasets": {
+            "Taste": [
+              {
+                "x": 0.8,
+                "y": 72.0,
+                "label": "Hero Brand"
+              },
+              {
+                "x": 0.2,
+                "y": 61.0,
+                "label": "Competitor A"
+              }
+            ],
+            "Value": [
+              {
+                "x": -0.1,
+                "y": 72.0,
+                "label": "Hero Brand"
+              },
+              {
+                "x": 0.4,
+                "y": 61.0,
+                "label": "Competitor A"
+              }
+            ]
+          },
+          "correlations": {
+            "Taste": 0.74,
+            "Value": 0.42
+          },
+          "headlines": {
+            "Taste": "Strong primary purchase-intent driver.",
+            "Value": "Secondary driver with competitive pressure."
+          }
+        },
+        "insight": "",
+        "ai_headline": "Headline for Attribute Sigma vs Purchase Intent",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "sigma_intent::sigma_intent_scatter",
+        "resolution": {
+          "registry_key": "sigma_intent",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "market_position_sigma",
+        "chart_type": "market_position_radar",
+        "title": "Market Positioning Intelligence",
+        "subtitle": null,
+        "data": {
+          "labels": [
+            "Taste",
+            "Value",
+            "Trust"
+          ],
+          "datasets": [
+            {
+              "label": "Hero Brand",
+              "data": [
+                4.5,
+                3.8,
+                4.2
+              ]
+            },
+            {
+              "label": "Competitor A",
+              "data": [
+                3.8,
+                4.1,
+                3.6
+              ]
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Market Positioning Intelligence",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "market_position_sigma::market_position_radar",
+        "resolution": {
+          "registry_key": "market_position_radar",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "audience_affinity",
+        "chart_type": "affinity_heatmap",
+        "title": "Audience Affinity Index (AAI)",
+        "subtitle": null,
+        "data": {
+          "brands": [
+            "Hero Brand",
+            "Competitor A"
+          ],
+          "demographics": [
+            "Urban Core",
+            "Suburban Families"
+          ],
+          "matrix": [
+            [
+              0.82,
+              0.64
+            ],
+            [
+              0.55,
+              0.48
+            ]
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Audience Affinity Index (AAI)",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "audience_affinity::affinity_heatmap",
+        "resolution": {
+          "registry_key": "affinity_heatmap",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "competitive_position_matrix",
+        "chart_type": "scatter_bubble",
+        "title": "Competitive Positioning Matrix",
+        "subtitle": null,
+        "data": {
+          "datasets": [
+            {
+              "label": "Hero Brand",
+              "data": [
+                {
+                  "x": 4.5,
+                  "y": 3.8,
+                  "size": 10,
+                  "label": "Hero Brand",
+                  "brand": "Hero Brand"
+                }
+              ]
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Competitive Positioning Matrix",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "competitive_position_matrix::scatter_bubble",
+        "resolution": {
+          "registry_key": "scatter_bubble",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "purchase_intent",
+        "chart_type": "stacked_bar",
+        "title": "Purchase Intent",
+        "subtitle": null,
+        "data": {
+          "labels": [
+            "Own Brand",
+            "Competitor A",
+            "Competitor B"
+          ],
+          "datasets": [
+            {
+              "label": "Purchase Intent",
+              "data": [
+                0.8,
+                0.5,
+                0.3
+              ]
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Purchase Intent",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "purchase_intent::stacked_bar",
+        "resolution": {
+          "registry_key": "stacked_bar",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "brand_comparison_pi_ol",
+        "chart_type": "brand_comparison",
+        "title": "Brand Strategic Comparison",
+        "subtitle": null,
+        "data": {
+          "labels": [
+            "Purchase Intent",
+            "Overall Liking"
+          ],
+          "datasets": [
+            {
+              "label": "Abu Auf",
+              "data": [
+                0.72,
+                0.81
+              ]
+            },
+            {
+              "label": "Cadbury",
+              "data": [
+                0.58,
+                0.74
+              ]
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Brand Strategic Comparison",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "brand_comparison_pi_ol::brand_comparison",
+        "resolution": {
+          "registry_key": "brand_comparison",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "brand_awareness",
+        "chart_type": "horizontal_bar",
+        "title": "Brand Awareness",
+        "subtitle": null,
+        "data": {
+          "labels": [
+            "Own Brand",
+            "Competitor A",
+            "Competitor B"
+          ],
+          "datasets": [
+            {
+              "label": "TOM",
+              "data": [
+                0.8,
+                0.5,
+                0.3
+              ]
+            },
+            {
+              "label": "Other_Unaided",
+              "data": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "label": "Aided",
+              "data": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Brand Awareness",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "brand_awareness::horizontal_bar",
+        "resolution": {
+          "registry_key": "brand_awareness",
+          "source": "chart_id_override",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "purchase_funnel_ratio_cards",
+        "chart_type": "funnel_ratio_cards",
+        "title": "Purchase Funnel \u2014 Ratio Cards",
+        "subtitle": null,
+        "data": {
+          "brand_cards": [
+            {
+              "brand": "Hero Brand",
+              "ratio_labels": [
+                {
+                  "label": "Awareness",
+                  "text": "85%"
+                },
+                {
+                  "label": "Trial",
+                  "text": "65%"
+                }
+              ],
+              "stage_bars": []
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Purchase Funnel \u2014 Ratio Cards",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "purchase_funnel_ratio_cards::funnel_ratio_cards",
+        "resolution": {
+          "registry_key": "purchase_funnel_ratio_cards",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "purchase_funnel_reference_table",
+        "chart_type": "reference_table",
+        "title": "Reference Table",
+        "subtitle": null,
+        "data": {
+          "labels": [
+            "Awareness",
+            "Trial",
+            "Loyalty"
+          ],
+          "datasets": [
+            {
+              "label": "Abu Auf",
+              "data": [
+                85.0,
+                65.0,
+                22.0
+              ]
+            },
+            {
+              "label": "Cadbury",
+              "data": [
+                62.0,
+                48.0,
+                18.0
+              ]
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Reference Table",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "purchase_funnel_reference_table::reference_table",
+        "resolution": {
+          "registry_key": "reference_table",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "nps_recommend",
+        "chart_type": "gauge",
+        "title": "Net Promoter Score",
+        "subtitle": null,
+        "data": {
+          "labels": [
+            "Hero Brand"
+          ],
+          "datasets": [
+            {
+              "label": "Detractors",
+              "data": [
+                0.2
+              ]
+            },
+            {
+              "label": "Passives",
+              "data": [
+                0.3
+              ]
+            },
+            {
+              "label": "Promoters",
+              "data": [
+                0.5
+              ]
+            }
+          ],
+          "nps_scores": {
+            "Hero Brand": 30
+          }
+        },
+        "insight": "",
+        "ai_headline": "Headline for Net Promoter Score",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "nps_recommend::gauge",
+        "resolution": {
+          "registry_key": "nps_recommend",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "brand_card_abu_auf",
+        "chart_type": "scorecard",
+        "title": "Abu Auf",
+        "subtitle": null,
+        "data": {
+          "brand": "Abu Auf",
+          "n_size": 412,
+          "metrics": [
+            {
+              "label": "Overall Score",
+              "value": 8.1
+            },
+            {
+              "label": "T2B %",
+              "value": 64
+            },
+            {
+              "label": "Evaluations",
+              "value": 412
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Abu Auf",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "brand_card_abu_auf::scorecard",
+        "resolution": {
+          "registry_key": "scorecard",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "brand_card_haj_arfaa",
+        "chart_type": "scorecard",
+        "title": "Haj Arfaa",
+        "subtitle": null,
+        "data": {
+          "brand": "Haj Arfaa",
+          "n_size": 412,
+          "metrics": [
+            {
+              "label": "Overall Score",
+              "value": 8.1
+            },
+            {
+              "label": "T2B %",
+              "value": 64
+            },
+            {
+              "label": "Evaluations",
+              "value": 412
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Haj Arfaa",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "brand_card_haj_arfaa::scorecard",
+        "resolution": {
+          "registry_key": "scorecard",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "brand_card_cadbury",
+        "chart_type": "scorecard",
+        "title": "Cadbury",
+        "subtitle": null,
+        "data": {
+          "brand": "Cadbury",
+          "n_size": 412,
+          "metrics": [
+            {
+              "label": "Overall Score",
+              "value": 8.1
+            },
+            {
+              "label": "T2B %",
+              "value": 64
+            },
+            {
+              "label": "Evaluations",
+              "value": 412
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Cadbury",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "brand_card_cadbury::scorecard",
+        "resolution": {
+          "registry_key": "scorecard",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "open_end_likes",
+        "chart_type": "wordcloud",
+        "title": "What Respondents Liked",
+        "subtitle": null,
+        "data": {
+          "words": [
+            {
+              "text": "taste",
+              "value": 120
+            },
+            {
+              "text": "value",
+              "value": 80
+            },
+            {
+              "text": "quality",
+              "value": 60
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for What Respondents Liked",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "open_end_likes::wordcloud",
+        "resolution": {
+          "registry_key": "wordcloud",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "open_end_dislikes",
+        "chart_type": "wordcloud",
+        "title": "What Respondents Disliked",
+        "subtitle": null,
+        "data": {
+          "words": [
+            {
+              "text": "taste",
+              "value": 120
+            },
+            {
+              "text": "value",
+              "value": 80
+            },
+            {
+              "text": "quality",
+              "value": 60
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for What Respondents Disliked",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "open_end_dislikes::wordcloud",
+        "resolution": {
+          "registry_key": "wordcloud",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "open_end_improvements",
+        "chart_type": "wordcloud",
+        "title": "Suggestions for Improvement",
+        "subtitle": null,
+        "data": {
+          "words": [
+            {
+              "text": "taste",
+              "value": 120
+            },
+            {
+              "text": "value",
+              "value": 80
+            },
+            {
+              "text": "quality",
+              "value": 60
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Suggestions for Improvement",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "open_end_improvements::wordcloud",
+        "resolution": {
+          "registry_key": "wordcloud",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      }
+    ],
+    "render_journal": [
+      {
+        "pptx_slide_id": "audience_affinity::affinity_heatmap",
+        "slide_index": 14,
+        "chart_id": "audience_affinity",
+        "chart_type": "affinity_heatmap",
+        "title": "Audience Affinity Index (AAI)",
+        "registry_key": "affinity_heatmap",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "competitive_position_matrix::scatter_bubble",
+        "slide_index": 15,
+        "chart_id": "competitive_position_matrix",
+        "chart_type": "scatter_bubble",
+        "title": "Competitive Positioning Matrix",
+        "registry_key": "scatter_bubble",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "market_position_sigma::market_position_radar",
+        "slide_index": 16,
+        "chart_id": "market_position_sigma",
+        "chart_type": "market_position_radar",
+        "title": "Market Positioning Intelligence",
+        "registry_key": "market_position_radar",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "criteria_table::criteria_table",
+        "slide_index": 22,
+        "chart_id": "criteria_table",
+        "chart_type": "criteria_table",
+        "title": "Criteria \u2014 Overall",
+        "registry_key": "criteria_table",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "brand_profile_snake::profile_chart",
+        "slide_index": 23,
+        "chart_id": "brand_profile_snake",
+        "chart_type": "profile_chart",
+        "title": "Brand Performance Profile",
+        "registry_key": "profile_chart",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "likeness_profile_chart::likeness_profile",
+        "slide_index": 24,
+        "chart_id": "likeness_profile_chart",
+        "chart_type": "likeness_profile",
+        "title": "Likeness Profile Chart",
+        "registry_key": "likeness_profile",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "brand_comparison_pi_ol::brand_comparison",
+        "slide_index": 26,
+        "chart_id": "brand_comparison_pi_ol",
+        "chart_type": "brand_comparison",
+        "title": "Brand Strategic Comparison",
+        "registry_key": "brand_comparison",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "purchase_funnel::snake_line",
+        "slide_index": 28,
+        "chart_id": "purchase_funnel",
+        "chart_type": "snake_line",
+        "title": "Conversion Thresholds",
+        "registry_key": "purchase_funnel",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "purchase_intent::stacked_bar",
+        "slide_index": 29,
+        "chart_id": "purchase_intent",
+        "chart_type": "stacked_bar",
+        "title": "Purchase Intent",
+        "registry_key": "stacked_bar",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "brand_awareness::horizontal_bar",
+        "slide_index": 30,
+        "chart_id": "brand_awareness",
+        "chart_type": "horizontal_bar",
+        "title": "Brand Awareness",
+        "registry_key": "brand_awareness",
+        "resolution_source": "chart_id_override",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "purchase_funnel_ratio_cards::funnel_ratio_cards",
+        "slide_index": 31,
+        "chart_id": "purchase_funnel_ratio_cards",
+        "chart_type": "funnel_ratio_cards",
+        "title": "Purchase Funnel \u2014 Ratio Cards",
+        "registry_key": "purchase_funnel_ratio_cards",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "purchase_funnel_reference_table::reference_table",
+        "slide_index": 32,
+        "chart_id": "purchase_funnel_reference_table",
+        "chart_type": "reference_table",
+        "title": "Reference Table",
+        "registry_key": "reference_table",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "nps_recommend::gauge",
+        "slide_index": 34,
+        "chart_id": "nps_recommend",
+        "chart_type": "gauge",
+        "title": "Net Promoter Score",
+        "registry_key": "nps_recommend",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "importance_combined::importance_combined",
+        "slide_index": 36,
+        "chart_id": "importance_combined",
+        "chart_type": "importance_combined",
+        "title": "Importance",
+        "registry_key": "importance_combined",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "sigma_intent::sigma_intent_scatter",
+        "slide_index": 37,
+        "chart_id": "sigma_intent",
+        "chart_type": "sigma_intent_scatter",
+        "title": "Attribute Sigma vs Purchase Intent (Taste)",
+        "registry_key": "sigma_intent",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "sigma_intent::sigma_intent_scatter",
+        "slide_index": 38,
+        "chart_id": "sigma_intent",
+        "chart_type": "sigma_intent_scatter",
+        "title": "Attribute Sigma vs Purchase Intent (Value)",
+        "registry_key": "sigma_intent",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "open_end_improvements::wordcloud",
+        "slide_index": 40,
+        "chart_id": "open_end_improvements",
+        "chart_type": "wordcloud",
+        "title": "Suggestions for Improvement",
+        "registry_key": "wordcloud",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "open_end_dislikes::wordcloud",
+        "slide_index": 41,
+        "chart_id": "open_end_dislikes",
+        "chart_type": "wordcloud",
+        "title": "What Respondents Disliked",
+        "registry_key": "wordcloud",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "open_end_likes::wordcloud",
+        "slide_index": 42,
+        "chart_id": "open_end_likes",
+        "chart_type": "wordcloud",
+        "title": "What Respondents Liked",
+        "registry_key": "wordcloud",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      }
+    ]
+  },
+  "adjusted_chart_parity": {
+    "screen_chart_ids": [
+      "brand_card_abu_auf",
+      "brand_card_cadbury",
+      "brand_card_haj_arfaa",
+      "criteria_table",
+      "brand_profile_snake",
+      "likeness_profile_chart",
+      "brand_comparison_pi_ol",
+      "purchase_funnel",
+      "purchase_intent",
+      "brand_awareness",
+      "purchase_funnel_ratio_cards",
+      "purchase_funnel_reference_table",
+      "nps_recommend",
+      "open_end_improvements",
+      "open_end_dislikes",
+      "open_end_likes",
+      "importance_combined",
+      "sigma_intent",
+      "audience_affinity",
+      "competitive_position_matrix",
+      "market_position_sigma"
+    ],
+    "rendered_chart_ids": [
+      "audience_affinity",
+      "competitive_position_matrix",
+      "market_position_sigma",
+      "criteria_table",
+      "brand_profile_snake",
+      "likeness_profile_chart",
+      "brand_comparison_pi_ol",
+      "purchase_funnel",
+      "purchase_intent",
+      "brand_awareness",
+      "purchase_funnel_ratio_cards",
+      "purchase_funnel_reference_table",
+      "nps_recommend",
+      "importance_combined",
+      "sigma_intent",
+      "sigma_intent",
+      "open_end_improvements",
+      "open_end_dislikes",
+      "open_end_likes"
+    ],
+    "rendered_pptx_slide_ids": [
+      "audience_affinity::affinity_heatmap",
+      "competitive_position_matrix::scatter_bubble",
+      "market_position_sigma::market_position_radar",
+      "criteria_table::criteria_table",
+      "brand_profile_snake::profile_chart",
+      "likeness_profile_chart::likeness_profile",
+      "brand_comparison_pi_ol::brand_comparison",
+      "purchase_funnel::snake_line",
+      "purchase_intent::stacked_bar",
+      "brand_awareness::horizontal_bar",
+      "purchase_funnel_ratio_cards::funnel_ratio_cards",
+      "purchase_funnel_reference_table::reference_table",
+      "nps_recommend::gauge",
+      "importance_combined::importance_combined",
+      "sigma_intent::sigma_intent_scatter",
+      "sigma_intent::sigma_intent_scatter",
+      "open_end_improvements::wordcloud",
+      "open_end_dislikes::wordcloud",
+      "open_end_likes::wordcloud"
+    ],
+    "missing_from_pptx": [],
+    "extra_in_pptx": [],
+    "order_mismatch": true,
+    "rendered_count": 19,
+    "screen_count": 21,
+    "chart_contracts": [
+      {
+        "chart_id": "criteria_table",
+        "chart_type": "criteria_table",
+        "title": "Criteria \u2014 Overall",
+        "subtitle": null,
+        "data": {
+          "brands": [
+            "Hero Brand",
+            "Competitor A"
+          ],
+          "my_brand": "Hero Brand",
+          "raw": [
+            {
+              "criteria_name": "Taste",
+              "significance": 0.9,
+              "brand_scores": {
+                "Hero Brand": 4.5,
+                "Competitor A": 3.8
+              },
+              "diff": 0.7
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Criteria \u2014 Overall",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "criteria_table::criteria_table",
+        "resolution": {
+          "registry_key": "criteria_table",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "brand_profile_snake",
+        "chart_type": "profile_chart",
+        "title": "Brand Performance Profile",
+        "subtitle": null,
+        "data": {
+          "labels": [
+            "Own Brand",
+            "Competitor A",
+            "Competitor B"
+          ],
+          "datasets": [
+            {
+              "label": "Brand Performance Profile",
+              "brand": "Brand Performance Profile",
+              "data": [
+                0.8,
+                0.5,
+                0.3
+              ],
+              "is_benchmark": false
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Brand Performance Profile",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "brand_profile_snake::profile_chart",
+        "resolution": {
+          "registry_key": "profile_chart",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "likeness_profile_chart",
+        "chart_type": "likeness_profile",
+        "title": "Likeness Profile Chart",
+        "subtitle": null,
+        "data": {
+          "metrics": [
+            "Modern",
+            "Premium"
+          ],
+          "labels_left": [
+            "Traditional",
+            "Value"
+          ],
+          "labels_right": [
+            "Modern",
+            "Premium"
+          ],
+          "datasets": [
+            {
+              "label": "Hero Brand",
+              "data": [
+                4.2,
+                3.9
+              ],
+              "brand": "Hero Brand"
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Likeness Profile Chart",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "likeness_profile_chart::likeness_profile",
+        "resolution": {
+          "registry_key": "likeness_profile",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "importance_combined",
+        "chart_type": "importance_combined",
+        "title": "Importance",
+        "subtitle": null,
+        "data": {
+          "main_scatter": {
+            "datasets": [
+              {
+                "label": "Hero Brand",
+                "data": [
+                  {
+                    "x": 0.82,
+                    "y": 71.0,
+                    "label": "Taste"
+                  }
+                ]
+              }
+            ]
+          },
+          "sub_scatter": {
+            "datasets": [
+              {
+                "label": "Hero Brand",
+                "data": [
+                  {
+                    "x": 0.73,
+                    "y": 69.0,
+                    "label": null
+                  }
+                ]
+              }
+            ],
+            "drill_attribute": "Taste",
+            "top_attributes": [
+              "Aftertaste"
+            ]
+          }
+        },
+        "insight": "",
+        "ai_headline": "Headline for Importance",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "importance_combined::importance_combined",
+        "resolution": {
+          "registry_key": "importance_combined",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "purchase_funnel",
+        "chart_type": "snake_line",
+        "title": "Conversion Thresholds",
+        "subtitle": null,
+        "data": {
+          "labels": [
+            "Own Brand",
+            "Competitor A",
+            "Competitor B"
+          ],
+          "datasets": [
+            {
+              "label": "Conversion Thresholds",
+              "data": [
+                0.8,
+                0.5,
+                0.3
+              ]
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Conversion Thresholds",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "purchase_funnel::snake_line",
+        "resolution": {
+          "registry_key": "purchase_funnel",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "sigma_intent",
+        "chart_type": "sigma_intent_scatter",
+        "title": "Attribute Sigma vs Purchase Intent",
+        "subtitle": null,
+        "data": {
+          "attributes": [
+            "Taste",
+            "Value"
+          ],
+          "default_attribute": "Taste",
+          "datasets": {
+            "Taste": [
+              {
+                "x": 0.8,
+                "y": 72.0,
+                "label": "Hero Brand"
+              },
+              {
+                "x": 0.2,
+                "y": 61.0,
+                "label": "Competitor A"
+              }
+            ],
+            "Value": [
+              {
+                "x": -0.1,
+                "y": 72.0,
+                "label": "Hero Brand"
+              },
+              {
+                "x": 0.4,
+                "y": 61.0,
+                "label": "Competitor A"
+              }
+            ]
+          },
+          "correlations": {
+            "Taste": 0.74,
+            "Value": 0.42
+          },
+          "headlines": {
+            "Taste": "Strong primary purchase-intent driver.",
+            "Value": "Secondary driver with competitive pressure."
+          }
+        },
+        "insight": "",
+        "ai_headline": "Headline for Attribute Sigma vs Purchase Intent",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "sigma_intent::sigma_intent_scatter",
+        "resolution": {
+          "registry_key": "sigma_intent",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "market_position_sigma",
+        "chart_type": "market_position_radar",
+        "title": "Market Positioning Intelligence",
+        "subtitle": null,
+        "data": {
+          "labels": [
+            "Taste",
+            "Value",
+            "Trust"
+          ],
+          "datasets": [
+            {
+              "label": "Hero Brand",
+              "data": [
+                4.5,
+                3.8,
+                4.2
+              ]
+            },
+            {
+              "label": "Competitor A",
+              "data": [
+                3.8,
+                4.1,
+                3.6
+              ]
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Market Positioning Intelligence",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "market_position_sigma::market_position_radar",
+        "resolution": {
+          "registry_key": "market_position_radar",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "audience_affinity",
+        "chart_type": "affinity_heatmap",
+        "title": "Audience Affinity Index (AAI)",
+        "subtitle": null,
+        "data": {
+          "brands": [
+            "Hero Brand",
+            "Competitor A"
+          ],
+          "demographics": [
+            "Urban Core",
+            "Suburban Families"
+          ],
+          "matrix": [
+            [
+              0.82,
+              0.64
+            ],
+            [
+              0.55,
+              0.48
+            ]
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Audience Affinity Index (AAI)",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "audience_affinity::affinity_heatmap",
+        "resolution": {
+          "registry_key": "affinity_heatmap",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "competitive_position_matrix",
+        "chart_type": "scatter_bubble",
+        "title": "Competitive Positioning Matrix",
+        "subtitle": null,
+        "data": {
+          "datasets": [
+            {
+              "label": "Hero Brand",
+              "data": [
+                {
+                  "x": 4.5,
+                  "y": 3.8,
+                  "size": 10,
+                  "label": "Hero Brand",
+                  "brand": "Hero Brand"
+                }
+              ]
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Competitive Positioning Matrix",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "competitive_position_matrix::scatter_bubble",
+        "resolution": {
+          "registry_key": "scatter_bubble",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "purchase_intent",
+        "chart_type": "stacked_bar",
+        "title": "Purchase Intent",
+        "subtitle": null,
+        "data": {
+          "labels": [
+            "Own Brand",
+            "Competitor A",
+            "Competitor B"
+          ],
+          "datasets": [
+            {
+              "label": "Purchase Intent",
+              "data": [
+                0.8,
+                0.5,
+                0.3
+              ]
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Purchase Intent",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "purchase_intent::stacked_bar",
+        "resolution": {
+          "registry_key": "stacked_bar",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "brand_comparison_pi_ol",
+        "chart_type": "brand_comparison",
+        "title": "Brand Strategic Comparison",
+        "subtitle": null,
+        "data": {
+          "labels": [
+            "Purchase Intent",
+            "Overall Liking"
+          ],
+          "datasets": [
+            {
+              "label": "Abu Auf",
+              "data": [
+                0.72,
+                0.81
+              ]
+            },
+            {
+              "label": "Cadbury",
+              "data": [
+                0.58,
+                0.74
+              ]
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Brand Strategic Comparison",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "brand_comparison_pi_ol::brand_comparison",
+        "resolution": {
+          "registry_key": "brand_comparison",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "brand_awareness",
+        "chart_type": "horizontal_bar",
+        "title": "Brand Awareness",
+        "subtitle": null,
+        "data": {
+          "labels": [
+            "Own Brand",
+            "Competitor A",
+            "Competitor B"
+          ],
+          "datasets": [
+            {
+              "label": "TOM",
+              "data": [
+                0.8,
+                0.5,
+                0.3
+              ]
+            },
+            {
+              "label": "Other_Unaided",
+              "data": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "label": "Aided",
+              "data": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Brand Awareness",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "brand_awareness::horizontal_bar",
+        "resolution": {
+          "registry_key": "brand_awareness",
+          "source": "chart_id_override",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "purchase_funnel_ratio_cards",
+        "chart_type": "funnel_ratio_cards",
+        "title": "Purchase Funnel \u2014 Ratio Cards",
+        "subtitle": null,
+        "data": {
+          "brand_cards": [
+            {
+              "brand": "Hero Brand",
+              "ratio_labels": [
+                {
+                  "label": "Awareness",
+                  "text": "85%"
+                },
+                {
+                  "label": "Trial",
+                  "text": "65%"
+                }
+              ],
+              "stage_bars": []
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Purchase Funnel \u2014 Ratio Cards",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "purchase_funnel_ratio_cards::funnel_ratio_cards",
+        "resolution": {
+          "registry_key": "purchase_funnel_ratio_cards",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "purchase_funnel_reference_table",
+        "chart_type": "reference_table",
+        "title": "Reference Table",
+        "subtitle": null,
+        "data": {
+          "labels": [
+            "Awareness",
+            "Trial",
+            "Loyalty"
+          ],
+          "datasets": [
+            {
+              "label": "Abu Auf",
+              "data": [
+                85.0,
+                65.0,
+                22.0
+              ]
+            },
+            {
+              "label": "Cadbury",
+              "data": [
+                62.0,
+                48.0,
+                18.0
+              ]
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Reference Table",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "purchase_funnel_reference_table::reference_table",
+        "resolution": {
+          "registry_key": "reference_table",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "nps_recommend",
+        "chart_type": "gauge",
+        "title": "Net Promoter Score",
+        "subtitle": null,
+        "data": {
+          "labels": [
+            "Hero Brand"
+          ],
+          "datasets": [
+            {
+              "label": "Detractors",
+              "data": [
+                0.2
+              ]
+            },
+            {
+              "label": "Passives",
+              "data": [
+                0.3
+              ]
+            },
+            {
+              "label": "Promoters",
+              "data": [
+                0.5
+              ]
+            }
+          ],
+          "nps_scores": {
+            "Hero Brand": 30
+          }
+        },
+        "insight": "",
+        "ai_headline": "Headline for Net Promoter Score",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "nps_recommend::gauge",
+        "resolution": {
+          "registry_key": "nps_recommend",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "brand_card_abu_auf",
+        "chart_type": "scorecard",
+        "title": "Abu Auf",
+        "subtitle": null,
+        "data": {
+          "brand": "Abu Auf",
+          "n_size": 412,
+          "metrics": [
+            {
+              "label": "Overall Score",
+              "value": 8.1
+            },
+            {
+              "label": "T2B %",
+              "value": 64
+            },
+            {
+              "label": "Evaluations",
+              "value": 412
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Abu Auf",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "brand_card_abu_auf::scorecard",
+        "resolution": {
+          "registry_key": "scorecard",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "brand_card_haj_arfaa",
+        "chart_type": "scorecard",
+        "title": "Haj Arfaa",
+        "subtitle": null,
+        "data": {
+          "brand": "Haj Arfaa",
+          "n_size": 412,
+          "metrics": [
+            {
+              "label": "Overall Score",
+              "value": 8.1
+            },
+            {
+              "label": "T2B %",
+              "value": 64
+            },
+            {
+              "label": "Evaluations",
+              "value": 412
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Haj Arfaa",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "brand_card_haj_arfaa::scorecard",
+        "resolution": {
+          "registry_key": "scorecard",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "brand_card_cadbury",
+        "chart_type": "scorecard",
+        "title": "Cadbury",
+        "subtitle": null,
+        "data": {
+          "brand": "Cadbury",
+          "n_size": 412,
+          "metrics": [
+            {
+              "label": "Overall Score",
+              "value": 8.1
+            },
+            {
+              "label": "T2B %",
+              "value": 64
+            },
+            {
+              "label": "Evaluations",
+              "value": 412
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Cadbury",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "brand_card_cadbury::scorecard",
+        "resolution": {
+          "registry_key": "scorecard",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "open_end_likes",
+        "chart_type": "wordcloud",
+        "title": "What Respondents Liked",
+        "subtitle": null,
+        "data": {
+          "words": [
+            {
+              "text": "taste",
+              "value": 120
+            },
+            {
+              "text": "value",
+              "value": 80
+            },
+            {
+              "text": "quality",
+              "value": 60
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for What Respondents Liked",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "open_end_likes::wordcloud",
+        "resolution": {
+          "registry_key": "wordcloud",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "open_end_dislikes",
+        "chart_type": "wordcloud",
+        "title": "What Respondents Disliked",
+        "subtitle": null,
+        "data": {
+          "words": [
+            {
+              "text": "taste",
+              "value": 120
+            },
+            {
+              "text": "value",
+              "value": 80
+            },
+            {
+              "text": "quality",
+              "value": 60
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for What Respondents Disliked",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "open_end_dislikes::wordcloud",
+        "resolution": {
+          "registry_key": "wordcloud",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      },
+      {
+        "chart_id": "open_end_improvements",
+        "chart_type": "wordcloud",
+        "title": "Suggestions for Improvement",
+        "subtitle": null,
+        "data": {
+          "words": [
+            {
+              "text": "taste",
+              "value": 120
+            },
+            {
+              "text": "value",
+              "value": 80
+            },
+            {
+              "text": "quality",
+              "value": 60
+            }
+          ]
+        },
+        "insight": "",
+        "ai_headline": "Headline for Suggestions for Improvement",
+        "ai_deep_analysis": [],
+        "pptx_slide_id": "open_end_improvements::wordcloud",
+        "resolution": {
+          "registry_key": "wordcloud",
+          "source": "chart_id",
+          "uses_fallback_table": false
+        }
+      }
+    ],
+    "render_journal": [
+      {
+        "pptx_slide_id": "audience_affinity::affinity_heatmap",
+        "slide_index": 14,
+        "chart_id": "audience_affinity",
+        "chart_type": "affinity_heatmap",
+        "title": "Audience Affinity Index (AAI)",
+        "registry_key": "affinity_heatmap",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "competitive_position_matrix::scatter_bubble",
+        "slide_index": 15,
+        "chart_id": "competitive_position_matrix",
+        "chart_type": "scatter_bubble",
+        "title": "Competitive Positioning Matrix",
+        "registry_key": "scatter_bubble",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "market_position_sigma::market_position_radar",
+        "slide_index": 16,
+        "chart_id": "market_position_sigma",
+        "chart_type": "market_position_radar",
+        "title": "Market Positioning Intelligence",
+        "registry_key": "market_position_radar",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "criteria_table::criteria_table",
+        "slide_index": 22,
+        "chart_id": "criteria_table",
+        "chart_type": "criteria_table",
+        "title": "Criteria \u2014 Overall",
+        "registry_key": "criteria_table",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "brand_profile_snake::profile_chart",
+        "slide_index": 23,
+        "chart_id": "brand_profile_snake",
+        "chart_type": "profile_chart",
+        "title": "Brand Performance Profile",
+        "registry_key": "profile_chart",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "likeness_profile_chart::likeness_profile",
+        "slide_index": 24,
+        "chart_id": "likeness_profile_chart",
+        "chart_type": "likeness_profile",
+        "title": "Likeness Profile Chart",
+        "registry_key": "likeness_profile",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "brand_comparison_pi_ol::brand_comparison",
+        "slide_index": 26,
+        "chart_id": "brand_comparison_pi_ol",
+        "chart_type": "brand_comparison",
+        "title": "Brand Strategic Comparison",
+        "registry_key": "brand_comparison",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "purchase_funnel::snake_line",
+        "slide_index": 28,
+        "chart_id": "purchase_funnel",
+        "chart_type": "snake_line",
+        "title": "Conversion Thresholds",
+        "registry_key": "purchase_funnel",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "purchase_intent::stacked_bar",
+        "slide_index": 29,
+        "chart_id": "purchase_intent",
+        "chart_type": "stacked_bar",
+        "title": "Purchase Intent",
+        "registry_key": "stacked_bar",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "brand_awareness::horizontal_bar",
+        "slide_index": 30,
+        "chart_id": "brand_awareness",
+        "chart_type": "horizontal_bar",
+        "title": "Brand Awareness",
+        "registry_key": "brand_awareness",
+        "resolution_source": "chart_id_override",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "purchase_funnel_ratio_cards::funnel_ratio_cards",
+        "slide_index": 31,
+        "chart_id": "purchase_funnel_ratio_cards",
+        "chart_type": "funnel_ratio_cards",
+        "title": "Purchase Funnel \u2014 Ratio Cards",
+        "registry_key": "purchase_funnel_ratio_cards",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "purchase_funnel_reference_table::reference_table",
+        "slide_index": 32,
+        "chart_id": "purchase_funnel_reference_table",
+        "chart_type": "reference_table",
+        "title": "Reference Table",
+        "registry_key": "reference_table",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "nps_recommend::gauge",
+        "slide_index": 34,
+        "chart_id": "nps_recommend",
+        "chart_type": "gauge",
+        "title": "Net Promoter Score",
+        "registry_key": "nps_recommend",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "importance_combined::importance_combined",
+        "slide_index": 36,
+        "chart_id": "importance_combined",
+        "chart_type": "importance_combined",
+        "title": "Importance",
+        "registry_key": "importance_combined",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "sigma_intent::sigma_intent_scatter",
+        "slide_index": 37,
+        "chart_id": "sigma_intent",
+        "chart_type": "sigma_intent_scatter",
+        "title": "Attribute Sigma vs Purchase Intent (Taste)",
+        "registry_key": "sigma_intent",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "sigma_intent::sigma_intent_scatter",
+        "slide_index": 38,
+        "chart_id": "sigma_intent",
+        "chart_type": "sigma_intent_scatter",
+        "title": "Attribute Sigma vs Purchase Intent (Value)",
+        "registry_key": "sigma_intent",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "open_end_improvements::wordcloud",
+        "slide_index": 40,
+        "chart_id": "open_end_improvements",
+        "chart_type": "wordcloud",
+        "title": "Suggestions for Improvement",
+        "registry_key": "wordcloud",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "open_end_dislikes::wordcloud",
+        "slide_index": 41,
+        "chart_id": "open_end_dislikes",
+        "chart_type": "wordcloud",
+        "title": "What Respondents Disliked",
+        "registry_key": "wordcloud",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      },
+      {
+        "pptx_slide_id": "open_end_likes::wordcloud",
+        "slide_index": 42,
+        "chart_id": "open_end_likes",
+        "chart_type": "wordcloud",
+        "title": "What Respondents Liked",
+        "registry_key": "wordcloud",
+        "resolution_source": "chart_id",
+        "render_mode": "native",
+        "render_status": "rendered",
+        "render_message": ""
+      }
+    ],
+    "effective_rendered_chart_ids": [
+      "audience_affinity",
+      "competitive_position_matrix",
+      "market_position_sigma",
+      "criteria_table",
+      "brand_profile_snake",
+      "likeness_profile_chart",
+      "brand_comparison_pi_ol",
+      "purchase_funnel",
+      "purchase_intent",
+      "brand_awareness",
+      "purchase_funnel_ratio_cards",
+      "purchase_funnel_reference_table",
+      "nps_recommend",
+      "importance_combined",
+      "sigma_intent",
+      "sigma_intent",
+      "open_end_improvements",
+      "open_end_dislikes",
+      "open_end_likes",
+      "brand_card_abu_auf",
+      "brand_card_haj_arfaa",
+      "brand_card_cadbury"
+    ]
+  },
+  "normalization_notes": [
+    {
+      "chart_id": "importance_combined",
+      "chart_type": "importance_combined",
+      "registry_key": "importance_combined",
+      "notes": [
+        "importance_main::normalized_scatter_points",
+        "importance_sub::normalized_scatter_points",
+        "importance_main::normalized_xy_numeric_points",
+        "importance_sub::normalized_xy_numeric_points"
+      ]
+    },
+    {
+      "chart_id": "sigma_intent",
+      "chart_type": "sigma_intent_scatter",
+      "registry_key": "sigma_intent",
+      "notes": [
+        "normalized_scatter_points",
+        "normalized_scatter_points",
+        "normalized_sigma_attribute_datasets",
+        "normalized_sigma_dict_points"
+      ]
+    },
+    {
+      "chart_id": "audience_affinity",
+      "chart_type": "affinity_heatmap",
+      "registry_key": "affinity_heatmap",
+      "notes": [
+        "normalized_affinity_heatmap_matrix"
+      ]
+    },
+    {
+      "chart_id": "competitive_position_matrix",
+      "chart_type": "scatter_bubble",
+      "registry_key": "scatter_bubble",
+      "notes": [
+        "normalized_scatter_points",
+        "normalized_positioning_matrix_points",
+        "normalized_xy_numeric_points"
+      ]
+    },
+    {
+      "chart_id": "brand_awareness",
+      "chart_type": "horizontal_bar",
+      "registry_key": "brand_awareness",
+      "notes": [
+        "normalized_awareness_waterfall_segments",
+        "normalized_waterfall_awareness_series"
+      ]
+    },
+    {
+      "chart_id": "purchase_funnel_ratio_cards",
+      "chart_type": "funnel_ratio_cards",
+      "registry_key": "purchase_funnel_ratio_cards",
+      "notes": [
+        "normalized_funnel_ratio_cards"
+      ]
+    },
+    {
+      "chart_id": "purchase_funnel_reference_table",
+      "chart_type": "reference_table",
+      "registry_key": "reference_table",
+      "notes": [
+        "table_missing_rows_columns"
+      ]
+    },
+    {
+      "chart_id": "nps_recommend",
+      "chart_type": "gauge",
+      "registry_key": "nps_recommend",
+      "notes": [
+        "transposed_nps_segment_rows_to_brand_rows"
+      ]
+    },
+    {
+      "chart_id": "brand_card_abu_auf",
+      "chart_type": "scorecard",
+      "registry_key": "scorecard",
+      "notes": [
+        "converted_profile_to_scorecard_metrics"
+      ]
+    },
+    {
+      "chart_id": "brand_card_haj_arfaa",
+      "chart_type": "scorecard",
+      "registry_key": "scorecard",
+      "notes": [
+        "converted_profile_to_scorecard_metrics"
+      ]
+    },
+    {
+      "chart_id": "brand_card_cadbury",
+      "chart_type": "scorecard",
+      "registry_key": "scorecard",
+      "notes": [
+        "converted_profile_to_scorecard_metrics"
+      ]
+    }
+  ],
+  "contract_registry_count": 26,
+  "rows": [
+    {
+      "chart_id": "criteria_table",
+      "chart_type": "criteria_table",
+      "title": "Criteria \u2014 Overall",
+      "contract_pattern": "criteria_table",
+      "contract_builder_key": "criteria_table",
+      "expected_registry_key": "criteria_table",
+      "actual_registry_key": "criteria_table",
+      "resolution_source": "chart_id",
+      "uses_fallback_table": false,
+      "contract_errors": [],
+      "render_status": "rendered",
+      "render_mode": "native",
+      "slide_index": 22,
+      "render_evidence": true,
+      "render_evidence_reason": "shape_or_text_content",
+      "numeric_samples": [
+        "0.9",
+        "4.5",
+        "3.8",
+        "0.7"
+      ],
+      "numeric_evidence": true,
+      "numeric_evidence_reason": "visible_in_slide_text",
+      "validation_issue_count": 0,
+      "validation_issues": [],
+      "passed": true
+    },
+    {
+      "chart_id": "brand_profile_snake",
+      "chart_type": "profile_chart",
+      "title": "Brand Performance Profile",
+      "contract_pattern": "brand_profile_snake",
+      "contract_builder_key": "profile_chart",
+      "expected_registry_key": "profile_chart",
+      "actual_registry_key": "profile_chart",
+      "resolution_source": "chart_id",
+      "uses_fallback_table": false,
+      "contract_errors": [],
+      "render_status": "rendered",
+      "render_mode": "native",
+      "slide_index": 23,
+      "render_evidence": true,
+      "render_evidence_reason": "native_chart_shape",
+      "numeric_samples": [
+        "0.8",
+        "0.5",
+        "0.3"
+      ],
+      "numeric_evidence": true,
+      "numeric_evidence_reason": "chart_shape_with_source_numbers",
+      "validation_issue_count": 0,
+      "validation_issues": [],
+      "passed": true
+    },
+    {
+      "chart_id": "likeness_profile_chart",
+      "chart_type": "likeness_profile",
+      "title": "Likeness Profile Chart",
+      "contract_pattern": "likeness_profile_chart",
+      "contract_builder_key": "likeness_profile",
+      "expected_registry_key": "likeness_profile",
+      "actual_registry_key": "likeness_profile",
+      "resolution_source": "chart_id",
+      "uses_fallback_table": false,
+      "contract_errors": [],
+      "render_status": "rendered",
+      "render_mode": "native",
+      "slide_index": 24,
+      "render_evidence": true,
+      "render_evidence_reason": "native_chart_shape",
+      "numeric_samples": [
+        "4.2",
+        "3.9"
+      ],
+      "numeric_evidence": true,
+      "numeric_evidence_reason": "chart_shape_with_source_numbers",
+      "validation_issue_count": 0,
+      "validation_issues": [],
+      "passed": true
+    },
+    {
+      "chart_id": "importance_combined",
+      "chart_type": "importance_combined",
+      "title": "Importance",
+      "contract_pattern": "importance_combined*",
+      "contract_builder_key": "importance_combined",
+      "expected_registry_key": "importance_combined",
+      "actual_registry_key": "importance_combined",
+      "resolution_source": "chart_id",
+      "uses_fallback_table": false,
+      "contract_errors": [],
+      "render_status": "rendered",
+      "render_mode": "native",
+      "slide_index": 36,
+      "render_evidence": true,
+      "render_evidence_reason": "shape_or_text_content",
+      "numeric_samples": [
+        "0.82",
+        "71",
+        "0.73",
+        "69"
+      ],
+      "numeric_evidence": true,
+      "numeric_evidence_reason": "shape_chart_source_numbers_present",
+      "validation_issue_count": 0,
+      "validation_issues": [],
+      "passed": true
+    },
+    {
+      "chart_id": "purchase_funnel",
+      "chart_type": "snake_line",
+      "title": "Conversion Thresholds",
+      "contract_pattern": "purchase_funnel",
+      "contract_builder_key": "purchase_funnel",
+      "expected_registry_key": "purchase_funnel",
+      "actual_registry_key": "purchase_funnel",
+      "resolution_source": "chart_id",
+      "uses_fallback_table": false,
+      "contract_errors": [],
+      "render_status": "rendered",
+      "render_mode": "native",
+      "slide_index": 28,
+      "render_evidence": true,
+      "render_evidence_reason": "native_chart_shape",
+      "numeric_samples": [
+        "0.8",
+        "0.5",
+        "0.3"
+      ],
+      "numeric_evidence": true,
+      "numeric_evidence_reason": "chart_shape_with_source_numbers",
+      "validation_issue_count": 0,
+      "validation_issues": [],
+      "passed": true
+    },
+    {
+      "chart_id": "sigma_intent",
+      "chart_type": "sigma_intent_scatter",
+      "title": "Attribute Sigma vs Purchase Intent",
+      "contract_pattern": "sigma_intent",
+      "contract_builder_key": "sigma_intent",
+      "expected_registry_key": "sigma_intent",
+      "actual_registry_key": "sigma_intent",
+      "resolution_source": "chart_id",
+      "uses_fallback_table": false,
+      "contract_errors": [],
+      "render_status": "rendered",
+      "render_mode": "native",
+      "slide_index": 37,
+      "render_evidence": true,
+      "render_evidence_reason": "shape_or_text_content",
+      "numeric_samples": [
+        "0.8",
+        "72",
+        "0.2",
+        "61",
+        "-0.1",
+        "72",
+        "0.4",
+        "61"
+      ],
+      "numeric_evidence": true,
+      "numeric_evidence_reason": "shape_chart_source_numbers_present",
+      "validation_issue_count": 0,
+      "validation_issues": [],
+      "passed": true
+    },
+    {
+      "chart_id": "market_position_sigma",
+      "chart_type": "market_position_radar",
+      "title": "Market Positioning Intelligence",
+      "contract_pattern": "market_position_sigma",
+      "contract_builder_key": "market_position_radar",
+      "expected_registry_key": "market_position_radar",
+      "actual_registry_key": "market_position_radar",
+      "resolution_source": "chart_id",
+      "uses_fallback_table": false,
+      "contract_errors": [],
+      "render_status": "rendered",
+      "render_mode": "native",
+      "slide_index": 16,
+      "render_evidence": true,
+      "render_evidence_reason": "native_chart_shape",
+      "numeric_samples": [
+        "4.5",
+        "3.8",
+        "4.2",
+        "3.8",
+        "4.1",
+        "3.6"
+      ],
+      "numeric_evidence": true,
+      "numeric_evidence_reason": "chart_shape_with_source_numbers",
+      "validation_issue_count": 0,
+      "validation_issues": [],
+      "passed": true
+    },
+    {
+      "chart_id": "audience_affinity",
+      "chart_type": "affinity_heatmap",
+      "title": "Audience Affinity Index (AAI)",
+      "contract_pattern": "audience_affinity",
+      "contract_builder_key": "affinity_heatmap",
+      "expected_registry_key": "affinity_heatmap",
+      "actual_registry_key": "affinity_heatmap",
+      "resolution_source": "chart_id",
+      "uses_fallback_table": false,
+      "contract_errors": [],
+      "render_status": "rendered",
+      "render_mode": "native",
+      "slide_index": 14,
+      "render_evidence": true,
+      "render_evidence_reason": "shape_or_text_content",
+      "numeric_samples": [
+        "0.82",
+        "0.64",
+        "0.55",
+        "0.48"
+      ],
+      "numeric_evidence": true,
+      "numeric_evidence_reason": "shape_chart_source_numbers_present",
+      "validation_issue_count": 0,
+      "validation_issues": [],
+      "passed": true
+    },
+    {
+      "chart_id": "competitive_position_matrix",
+      "chart_type": "scatter_bubble",
+      "title": "Competitive Positioning Matrix",
+      "contract_pattern": "competitive_position_matrix",
+      "contract_builder_key": "scatter_bubble",
+      "expected_registry_key": "scatter_bubble",
+      "actual_registry_key": "scatter_bubble",
+      "resolution_source": "chart_id",
+      "uses_fallback_table": false,
+      "contract_errors": [],
+      "render_status": "rendered",
+      "render_mode": "native",
+      "slide_index": 15,
+      "render_evidence": true,
+      "render_evidence_reason": "shape_or_text_content",
+      "numeric_samples": [
+        "4.5",
+        "3.8",
+        "10"
+      ],
+      "numeric_evidence": true,
+      "numeric_evidence_reason": "shape_chart_source_numbers_present",
+      "validation_issue_count": 0,
+      "validation_issues": [],
+      "passed": true
+    },
+    {
+      "chart_id": "purchase_intent",
+      "chart_type": "stacked_bar",
+      "title": "Purchase Intent",
+      "contract_pattern": "purchase_intent",
+      "contract_builder_key": "stacked_bar",
+      "expected_registry_key": "stacked_bar",
+      "actual_registry_key": "stacked_bar",
+      "resolution_source": "chart_id",
+      "uses_fallback_table": false,
+      "contract_errors": [],
+      "render_status": "rendered",
+      "render_mode": "native",
+      "slide_index": 29,
+      "render_evidence": true,
+      "render_evidence_reason": "native_chart_shape",
+      "numeric_samples": [
+        "0.8",
+        "0.5",
+        "0.3"
+      ],
+      "numeric_evidence": true,
+      "numeric_evidence_reason": "chart_shape_with_source_numbers",
+      "validation_issue_count": 0,
+      "validation_issues": [],
+      "passed": true
+    },
+    {
+      "chart_id": "brand_comparison_pi_ol",
+      "chart_type": "brand_comparison",
+      "title": "Brand Strategic Comparison",
+      "contract_pattern": "brand_comparison_pi_ol",
+      "contract_builder_key": "brand_comparison",
+      "expected_registry_key": "brand_comparison",
+      "actual_registry_key": "brand_comparison",
+      "resolution_source": "chart_id",
+      "uses_fallback_table": false,
+      "contract_errors": [],
+      "render_status": "rendered",
+      "render_mode": "native",
+      "slide_index": 26,
+      "render_evidence": true,
+      "render_evidence_reason": "native_chart_shape",
+      "numeric_samples": [
+        "0.72",
+        "0.81",
+        "0.58",
+        "0.74"
+      ],
+      "numeric_evidence": true,
+      "numeric_evidence_reason": "chart_shape_with_source_numbers",
+      "validation_issue_count": 0,
+      "validation_issues": [],
+      "passed": true
+    },
+    {
+      "chart_id": "brand_awareness",
+      "chart_type": "horizontal_bar",
+      "title": "Brand Awareness",
+      "contract_pattern": "brand_awareness",
+      "contract_builder_key": "brand_awareness",
+      "expected_registry_key": "brand_awareness",
+      "actual_registry_key": "brand_awareness",
+      "resolution_source": "chart_id_override",
+      "uses_fallback_table": false,
+      "contract_errors": [],
+      "render_status": "rendered",
+      "render_mode": "native",
+      "slide_index": 30,
+      "render_evidence": true,
+      "render_evidence_reason": "native_chart_shape",
+      "numeric_samples": [
+        "0.8",
+        "0.5",
+        "0.3",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "numeric_evidence": true,
+      "numeric_evidence_reason": "chart_shape_with_source_numbers",
+      "validation_issue_count": 0,
+      "validation_issues": [],
+      "passed": true
+    },
+    {
+      "chart_id": "purchase_funnel_ratio_cards",
+      "chart_type": "funnel_ratio_cards",
+      "title": "Purchase Funnel \u2014 Ratio Cards",
+      "contract_pattern": "purchase_funnel_ratio_cards",
+      "contract_builder_key": "purchase_funnel_ratio_cards",
+      "expected_registry_key": "purchase_funnel_ratio_cards",
+      "actual_registry_key": "purchase_funnel_ratio_cards",
+      "resolution_source": "chart_id",
+      "uses_fallback_table": false,
+      "contract_errors": [],
+      "render_status": "rendered",
+      "render_mode": "native",
+      "slide_index": 31,
+      "render_evidence": true,
+      "render_evidence_reason": "shape_or_text_content",
+      "numeric_samples": [
+        "85%",
+        "8",
+        "5",
+        "65%",
+        "6"
+      ],
+      "numeric_evidence": true,
+      "numeric_evidence_reason": "visible_in_slide_text",
+      "validation_issue_count": 0,
+      "validation_issues": [],
+      "passed": true
+    },
+    {
+      "chart_id": "purchase_funnel_reference_table",
+      "chart_type": "reference_table",
+      "title": "Reference Table",
+      "contract_pattern": "purchase_funnel_reference_table",
+      "contract_builder_key": "reference_table",
+      "expected_registry_key": "reference_table",
+      "actual_registry_key": "reference_table",
+      "resolution_source": "chart_id",
+      "uses_fallback_table": false,
+      "contract_errors": [],
+      "render_status": "rendered",
+      "render_mode": "native",
+      "slide_index": 32,
+      "render_evidence": true,
+      "render_evidence_reason": "shape_or_text_content",
+      "numeric_samples": [
+        "85",
+        "65",
+        "22",
+        "62",
+        "48",
+        "18"
+      ],
+      "numeric_evidence": true,
+      "numeric_evidence_reason": "visible_in_slide_text",
+      "validation_issue_count": 0,
+      "validation_issues": [],
+      "passed": true
+    },
+    {
+      "chart_id": "nps_recommend",
+      "chart_type": "gauge",
+      "title": "Net Promoter Score",
+      "contract_pattern": "nps_recommend",
+      "contract_builder_key": "nps_recommend",
+      "expected_registry_key": "nps_recommend",
+      "actual_registry_key": "nps_recommend",
+      "resolution_source": "chart_id",
+      "uses_fallback_table": false,
+      "contract_errors": [],
+      "render_status": "rendered",
+      "render_mode": "native",
+      "slide_index": 34,
+      "render_evidence": true,
+      "render_evidence_reason": "native_chart_shape",
+      "numeric_samples": [
+        "0.2",
+        "0.3",
+        "0.5",
+        "30"
+      ],
+      "numeric_evidence": true,
+      "numeric_evidence_reason": "visible_in_slide_text",
+      "validation_issue_count": 0,
+      "validation_issues": [],
+      "passed": true
+    },
+    {
+      "chart_id": "brand_card_abu_auf",
+      "chart_type": "scorecard",
+      "title": "Abu Auf",
+      "contract_pattern": "brand_card_*",
+      "contract_builder_key": "scorecard",
+      "expected_registry_key": "scorecard",
+      "actual_registry_key": "scorecard",
+      "resolution_source": "brand_profile_narrative",
+      "uses_fallback_table": false,
+      "contract_errors": [],
+      "render_status": "rendered_via_narrative",
+      "render_mode": "native",
+      "slide_index": null,
+      "render_evidence": true,
+      "render_evidence_reason": "brand_profile_narrative",
+      "numeric_samples": [
+        "412",
+        "8.1",
+        "2",
+        "64",
+        "412"
+      ],
+      "numeric_evidence": true,
+      "numeric_evidence_reason": "brand_card_source_numbers_present",
+      "validation_issue_count": 0,
+      "validation_issues": [],
+      "passed": true
+    },
+    {
+      "chart_id": "brand_card_haj_arfaa",
+      "chart_type": "scorecard",
+      "title": "Haj Arfaa",
+      "contract_pattern": "brand_card_*",
+      "contract_builder_key": "scorecard",
+      "expected_registry_key": "scorecard",
+      "actual_registry_key": "scorecard",
+      "resolution_source": "brand_profile_narrative",
+      "uses_fallback_table": false,
+      "contract_errors": [],
+      "render_status": "rendered_via_narrative",
+      "render_mode": "native",
+      "slide_index": null,
+      "render_evidence": true,
+      "render_evidence_reason": "brand_profile_narrative",
+      "numeric_samples": [
+        "412",
+        "8.1",
+        "2",
+        "64",
+        "412"
+      ],
+      "numeric_evidence": true,
+      "numeric_evidence_reason": "brand_card_source_numbers_present",
+      "validation_issue_count": 0,
+      "validation_issues": [],
+      "passed": true
+    },
+    {
+      "chart_id": "brand_card_cadbury",
+      "chart_type": "scorecard",
+      "title": "Cadbury",
+      "contract_pattern": "brand_card_*",
+      "contract_builder_key": "scorecard",
+      "expected_registry_key": "scorecard",
+      "actual_registry_key": "scorecard",
+      "resolution_source": "brand_profile_narrative",
+      "uses_fallback_table": false,
+      "contract_errors": [],
+      "render_status": "rendered_via_narrative",
+      "render_mode": "native",
+      "slide_index": null,
+      "render_evidence": true,
+      "render_evidence_reason": "brand_profile_narrative",
+      "numeric_samples": [
+        "412",
+        "8.1",
+        "2",
+        "64",
+        "412"
+      ],
+      "numeric_evidence": true,
+      "numeric_evidence_reason": "brand_card_source_numbers_present",
+      "validation_issue_count": 0,
+      "validation_issues": [],
+      "passed": true
+    },
+    {
+      "chart_id": "open_end_likes",
+      "chart_type": "wordcloud",
+      "title": "What Respondents Liked",
+      "contract_pattern": "open_end_*",
+      "contract_builder_key": "wordcloud",
+      "expected_registry_key": "wordcloud",
+      "actual_registry_key": "wordcloud",
+      "resolution_source": "chart_id",
+      "uses_fallback_table": false,
+      "contract_errors": [],
+      "render_status": "rendered",
+      "render_mode": "native",
+      "slide_index": 42,
+      "render_evidence": true,
+      "render_evidence_reason": "shape_or_text_content",
+      "numeric_samples": [
+        "120",
+        "80",
+        "60"
+      ],
+      "numeric_evidence": true,
+      "numeric_evidence_reason": "qualitative_exempt",
+      "validation_issue_count": 0,
+      "validation_issues": [],
+      "passed": true
+    },
+    {
+      "chart_id": "open_end_dislikes",
+      "chart_type": "wordcloud",
+      "title": "What Respondents Disliked",
+      "contract_pattern": "open_end_*",
+      "contract_builder_key": "wordcloud",
+      "expected_registry_key": "wordcloud",
+      "actual_registry_key": "wordcloud",
+      "resolution_source": "chart_id",
+      "uses_fallback_table": false,
+      "contract_errors": [],
+      "render_status": "rendered",
+      "render_mode": "native",
+      "slide_index": 41,
+      "render_evidence": true,
+      "render_evidence_reason": "shape_or_text_content",
+      "numeric_samples": [
+        "120",
+        "80",
+        "60"
+      ],
+      "numeric_evidence": true,
+      "numeric_evidence_reason": "qualitative_exempt",
+      "validation_issue_count": 0,
+      "validation_issues": [],
+      "passed": true
+    },
+    {
+      "chart_id": "open_end_improvements",
+      "chart_type": "wordcloud",
+      "title": "Suggestions for Improvement",
+      "contract_pattern": "open_end_*",
+      "contract_builder_key": "wordcloud",
+      "expected_registry_key": "wordcloud",
+      "actual_registry_key": "wordcloud",
+      "resolution_source": "chart_id",
+      "uses_fallback_table": false,
+      "contract_errors": [],
+      "render_status": "rendered",
+      "render_mode": "native",
+      "slide_index": 40,
+      "render_evidence": true,
+      "render_evidence_reason": "shape_or_text_content",
+      "numeric_samples": [
+        "120",
+        "80",
+        "60"
+      ],
+      "numeric_evidence": true,
+      "numeric_evidence_reason": "qualitative_exempt",
+      "validation_issue_count": 0,
+      "validation_issues": [],
+      "passed": true
+    }
+  ],
+  "failed_rows": [],
+  "contract_registry": [
+    {
+      "pattern": "criteria_table",
+      "chart_type": "criteria_table",
+      "builder_registry_key": "criteria_table",
+      "active_in_compute_all": true
+    },
+    {
+      "pattern": "brand_profile_snake",
+      "chart_type": "profile_chart",
+      "builder_registry_key": "profile_chart",
+      "active_in_compute_all": true
+    },
+    {
+      "pattern": "likeness_profile_chart",
+      "chart_type": "likeness_profile",
+      "builder_registry_key": "likeness_profile",
+      "active_in_compute_all": true
+    },
+    {
+      "pattern": "overall_scatter",
+      "chart_type": "scatter_plot",
+      "builder_registry_key": "scatter_plot",
+      "active_in_compute_all": true
+    },
+    {
+      "pattern": "sub_attribute_scatter",
+      "chart_type": "scatter_plot",
+      "builder_registry_key": "scatter_plot",
+      "active_in_compute_all": true
+    },
+    {
+      "pattern": "product_preference",
+      "chart_type": "grouped_bar",
+      "builder_registry_key": "grouped_bar",
+      "active_in_compute_all": true
+    },
+    {
+      "pattern": "demographic_sub_averages",
+      "chart_type": "grouped_bar",
+      "builder_registry_key": "grouped_bar",
+      "active_in_compute_all": true
+    },
+    {
+      "pattern": "purchase_funnel",
+      "chart_type": "snake_line",
+      "builder_registry_key": "purchase_funnel",
+      "active_in_compute_all": true
+    },
+    {
+      "pattern": "overall_switch",
+      "chart_type": "grouped_bar",
+      "builder_registry_key": "grouped_bar",
+      "active_in_compute_all": true
+    },
+    {
+      "pattern": "switch_per_brand",
+      "chart_type": "grouped_bar",
+      "builder_registry_key": "grouped_bar",
+      "active_in_compute_all": true
+    },
+    {
+      "pattern": "sigma_intent",
+      "chart_type": "sigma_intent_scatter",
+      "builder_registry_key": "sigma_intent",
+      "active_in_compute_all": true
+    },
+    {
+      "pattern": "market_position_sigma",
+      "chart_type": "market_position_radar",
+      "builder_registry_key": "market_position_radar",
+      "active_in_compute_all": true
+    },
+    {
+      "pattern": "attribute_radar",
+      "chart_type": "radar",
+      "builder_registry_key": "radar",
+      "active_in_compute_all": true
+    },
+    {
+      "pattern": "audience_affinity",
+      "chart_type": "affinity_heatmap",
+      "builder_registry_key": "affinity_heatmap",
+      "active_in_compute_all": true
+    },
+    {
+      "pattern": "competitive_position_matrix",
+      "chart_type": "scatter_bubble",
+      "builder_registry_key": "scatter_bubble",
+      "active_in_compute_all": true
+    },
+    {
+      "pattern": "purchase_intent",
+      "chart_type": "stacked_bar",
+      "builder_registry_key": "stacked_bar",
+      "active_in_compute_all": true
+    },
+    {
+      "pattern": "brand_comparison_pi_ol",
+      "chart_type": "brand_comparison",
+      "builder_registry_key": "brand_comparison",
+      "active_in_compute_all": true
+    },
+    {
+      "pattern": "brand_awareness",
+      "chart_type": "horizontal_bar",
+      "builder_registry_key": "brand_awareness",
+      "active_in_compute_all": true
+    },
+    {
+      "pattern": "purchase_funnel_ratio_cards",
+      "chart_type": "funnel_ratio_cards",
+      "builder_registry_key": "purchase_funnel_ratio_cards",
+      "active_in_compute_all": true
+    },
+    {
+      "pattern": "purchase_funnel_reference_table",
+      "chart_type": "reference_table",
+      "builder_registry_key": "reference_table",
+      "active_in_compute_all": true
+    },
+    {
+      "pattern": "nps_recommend",
+      "chart_type": "gauge",
+      "builder_registry_key": "nps_recommend",
+      "active_in_compute_all": true
+    },
+    {
+      "pattern": "price_sensitivity",
+      "chart_type": "horizontal_bar",
+      "builder_registry_key": "horizontal_bar",
+      "active_in_compute_all": true
+    },
+    {
+      "pattern": "brand_card_*",
+      "chart_type": "scorecard",
+      "builder_registry_key": "scorecard",
+      "active_in_compute_all": true
+    },
+    {
+      "pattern": "open_end_*",
+      "chart_type": "wordcloud",
+      "builder_registry_key": "wordcloud",
+      "active_in_compute_all": true
+    },
+    {
+      "pattern": "verbatim_ai_*",
+      "chart_type": "verbatim_analysis",
+      "builder_registry_key": "verbatim_analysis",
+      "active_in_compute_all": true
+    },
+    {
+      "pattern": "importance_combined*",
+      "chart_type": "importance_combined",
+      "builder_registry_key": "importance_combined",
+      "active_in_compute_all": false
+    }
+  ],
+  "summary": {
+    "all_charts_passed": true,
+    "native_only": true,
+    "unsupported_count": 0,
+    "error_placeholder_count": 0,
+    "layout_warning_count": 0
+  }
+}

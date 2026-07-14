@@ -1,0 +1,27 @@
+{
+    "research_types": {
+        "TasteTest": {
+            "strategy": "TasteTestStrategy",
+            "required_sections": [
+                "Taste Test",
+                "Brand Analysis"
+            ],
+            "loop_key": "comparators"
+        },
+        "BA/PF": {
+            "strategy": "StandardStrategy",
+            "specialist_context": true,
+            "required_sections": [
+                "Brand Awareness and Purchase Funnel"
+            ]
+        },
+        "ProductPlacement": {
+            "strategy": "TasteTestStrategy",
+            "section_alias": "Taste Test",
+            "loop_key": "comparators"
+        },
+        "Standard": {
+            "strategy": "StandardStrategy"
+        }
+    }
+}

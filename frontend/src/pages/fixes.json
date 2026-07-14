@@ -1,0 +1,13 @@
+[
+    {
+        "id": "fix_step_4_5",
+        "name": "Fix Step 4 and 5 closures",
+        "tasks": [
+            "Ensure Step 4 block is properly closed",
+            "Ensure Step 5 block is properly closed",
+            "Fix AnimatePresence closure",
+            "Fix main grid closure",
+            "Move helper components outside"
+        ]
+    }
+]

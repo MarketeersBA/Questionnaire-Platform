@@ -1,0 +1,53 @@
+{
+  "default_theme": "Executive",
+  "themes": {
+    "Executive": {
+      "extends": "BaseExecutive",
+      "chart_title_color": "brand_navy",
+      "chart_data_label_color": "brand_slate",
+      "one_color_palette": [
+        "brand_navy"
+      ],
+      "two_color_palette": [
+        "brand_navy",
+        "brand_emerald"
+      ],
+      "three_color_palette": [
+        "brand_navy",
+        "brand_emerald",
+        "brand_pink"
+      ],
+      "color_palette": [
+        "brand_navy",
+        "brand_emerald",
+        "brand_pink",
+        "brand_deep_blue",
+        "brand_2_blue",
+        "brand_3_blue",
+        "brand_slate",
+        "brand_gray"
+      ]
+    },
+    "BaseExecutive": {
+      "chart_font": "Pangram",
+      "chart_title_size": 24,
+      "chart_title_bold": true,
+      "chart_data_label_font_size": 12,
+      "chart_data_label_number_format": "0%",
+      "chart_axis_title_show": false,
+      "chart_axis_label_font_size": 10,
+      "chart_axis_label_color": "brand_slate",
+      "chart_legend_font_size": 10,
+      "chart_legend_font_name": "Pangram",
+      "chart_legend_color": "brand_slate",
+      "chart_legend_position": "bottom"
+    },
+    "Neutral": {
+      "extends": "BaseExecutive",
+      "color_palette": [
+        "brand_gray",
+        "brand_light_gray"
+      ]
+    }
+  }
+}

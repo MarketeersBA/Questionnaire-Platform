@@ -1,0 +1,79 @@
+# ─── Secrets & Environment ───
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# ─── Python ───
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.eggs/
+*.egg-info/
+*.egg
+.installed.cfg
+build/
+dist/
+develop-eggs/
+downloads/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+
+# ─── Node / Frontend ───
+node_modules/
+frontend/dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ─── Testing ───
+.pytest_cache/
+.coverage
+htmlcov/
+*.lcov
+
+# ─── IDE & OS ───
+.vscode/
+.idea/
+*.swp
+*.swo
+*.DS_Store
+Thumbs.db
+desktop.ini
+.system_view/
+
+# ─── Generated Outputs ───
+out/
+reports/
+*.pptx
+!backend/resources/**/*.pptx
+
+# ─── Data & Dumps ───
+*.xlsx
+!docs/**/*.xlsx
+*.csv
+dump.archive
+db_output.json
+
+# ─── Debug / Temporary ───
+tmp/
+*.txt
+!README.md
+!docs/**/*.md
+!*.md
+
+# ─── Certificates ───
+certs/
+
+# ─── Logs ───
+*.log

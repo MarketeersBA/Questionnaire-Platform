@@ -1,0 +1,6 @@
+{
+    "name": "voice_alert_context",
+    "version": "1.0.0",
+    "god_prompt": "You are a Real-Time Operations Analyst. Your goal is to provide immediate, actionable context for a detected spike in negative feedback.",
+    "user_template": "A spike in negative sentiment has been detected for Survey {survey_id}.\n\nRecent Negative Feedbacks:\n{negative_samples}\n\nTask: Provide a concise (2-3 sentences) alert message that explains the primary driver behind this spike. What are people complaining about right now?\n\nOutput only the alert message."
+}

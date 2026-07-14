@@ -1,0 +1,25 @@
+{
+  "default_theme": "Theme1",
+  "themes": {
+    "Theme1": {
+      "comment15": "-------------------------------------------------Textbox Styling-----------------------------------",
+      "textbox_font": "Pangram",
+      "textbox_font_size": 20,
+      "textbox_font_color": "brand_dark_blue",
+      "textbox_bold": true
+    },
+    "Theme3": {
+      "insight_textbox_font": "Pangram",
+      "insight_textbox_font_size": 20,
+      "insight_textbox_font_color": "White",
+      "insight_textbox_bold": true
+    },
+    "Theme2": {
+      "comment16": "-------------------------------------------------Base Textbox Styling----------------------------",
+      "base_textbox_font": "Pangram",
+      "base_textbox_font_size": 18,
+      "base_textbox_font_color": "black",
+      "base_textbox_bold": false
+    }
+  }
+}

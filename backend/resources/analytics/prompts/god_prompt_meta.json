@@ -1,0 +1,8 @@
+{
+    "name": "Immutable God Prompt",
+    "version": "2.0.0",
+    "prefix_version": "2.0.0",
+    "sha256": "d37c3c1cf97421de",
+    "last_validated": "2026-07-06",
+    "impact": "v2.0 adds Survey Intelligence Protocol, Category Intelligence Layer, and Objective Alignment Rule — invalidates prior prefix caches; expect one-time cache-miss until provider re-warms (~1900 tokens)"
+}

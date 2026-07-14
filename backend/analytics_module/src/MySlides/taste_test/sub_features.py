@@ -1,0 +1,86 @@
+from __future__ import annotations
+
+import logging
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set
+
+from backend.analytics_module.src.MySlides.base import DynamicSlideConcept
+from backend.analytics_module.src.MySlides.registry import register_slide
+from backend.analytics_module.src.MySlides.taste_test.common import _TasteTestMixin, logger
+
+SUB_FEATURES_ITEMS = [
+    ("Criteria-Sub", "comparison", {
+        "module": "comparison",
+        "inputs": {
+            "set_of_features": "sub_features",
+            "ideal": 5,
+            "purchase_intent": "comparison_purchase_intent",
+        },
+        "viz_type": "table", "new_name": "Criteria",
+    }),
+    ("Sub Averages", "comparison", {
+        "module": "comparison",
+        "inputs": {
+            "set_of_features": "sub_features",
+            "ideal": 5,
+            "purchase_intent": "comparison_purchase_intent",
+        },
+        "viz_type": "chart", "new_name": "Average Score", "xmax": 5, "ymin": 1,
+        "show_label": False, "label_column": "index",
+    }),
+]
+
+
+@register_slide(section="Taste Test")
+class TasteTestSubFeaturesSlide(DynamicSlideConcept, _TasteTestMixin):
+    INSTANCE_KEY = "slide_sub_features"
+    TEMPLATE_TITLE = "Sub Features"
+    alternate_titles = ["Sub-Features"]
+
+    def __init__(self, **kwargs) -> None:
+        super().__init__(
+            slide_id=self.INSTANCE_KEY,
+            section="Taste Test",
+            template_slide_title=self.TEMPLATE_TITLE,
+            **kwargs,
+        )
+        self.my_brand = ""
+
+    @classmethod
+    def required_input_keys(cls) -> List[str]:
+        return ["comparators", "sub_features", "comparison_purchase_intent"]
+
+    def load_inputs(self, project_inputs: dict) -> None:
+        self.my_brand = project_inputs.get("my_brand") or ""
+        self._inputs_loaded = True
+
+    def process(self, data_store, meta_data, meta_grids, codebook_df, project_inputs: dict, client: Any = None, model: str = None) -> Dict[str, Any]:
+        comp = self._get_comp(project_inputs)
+        if not comp:
+            return {}
+        payload = {"percentages": {}, "comparison": {}}
+        for vid, _, item_cfg in SUB_FEATURES_ITEMS:
+            df = self._build_comparison(item_cfg, comp, project_inputs, data_store, meta_data, codebook_df)
+            if df is not None:
+                payload["comparison"][vid] = df
+        if not payload["comparison"]:
+            return {}
+        return {self.INSTANCE_KEY: payload}
+
+    def populate(
+        self,
+        pres,
+        instance_key: str,
+        payload: Any,
+        modified_slides: Optional[Set[int]] = None,
+        log: Optional[logging.Logger] = None,
+    ) -> None:
+        log = log or logger
+        tracker = modified_slides if modified_slides is not None else set()
+        self._populate_multi_item(pres, instance_key, payload, SUB_FEATURES_ITEMS, self.my_brand, tracker, log)
+
+    def write_to_excel(self, payloads: Dict[str, Any], base_dir: Path) -> Optional[str]:
+        return None
+
+    def get_insight_summary(self, instance_key: str, payload: Any) -> str:
+        return "Taste Test Sub Features"[:500]

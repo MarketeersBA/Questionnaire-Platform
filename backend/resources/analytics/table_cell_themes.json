@@ -1,0 +1,52 @@
+{
+  "default_theme": "value_light",
+  "themes": {
+    "header_dark": {
+      "font": "Pangram",
+      "font_size": 18,
+      "bold": true,
+      "font_color": "white",
+      "fill_color": "brand_navy",
+      "align": "center"
+    },
+    "index_blue": {
+      "extends": "header_dark",
+      "font_size": 16,
+      "fill_color": "brand_index_blue"
+    },
+    "value_light": {
+      "font": "Pangram",
+      "font_size": 18,
+      "bold": false,
+      "font_color": "black",
+      "fill_color": "brand_gray",
+      "align": "center"
+    },
+    "percent_col": {
+      "extends": "value_light",
+      "align": "right"
+    },
+    "numeric_col": {
+      "extends": "value_light",
+      "align": "right"
+    },
+    "value_test": {
+      "extends": "header_dark",
+      "align": "right"
+    },
+    "value_center_white": {
+      "font": "Pangram",
+      "font_size": 18,
+      "font_color": "white",
+      "align": "center",
+      "bold": true
+    },
+    "value_center_navy": {
+      "font": "Pangram",
+      "font_size": 18,
+      "font_color": "brand_navy",
+      "align": "center",
+      "bold": true
+    }
+  }
+}

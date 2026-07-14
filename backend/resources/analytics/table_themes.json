@@ -1,0 +1,34 @@
+{
+  "default_theme": "Theme1",
+  "themes": {
+    "Theme1": {
+      "comment": "Default: one style for header, index, value (current behavior)",
+      "header": "header_dark",
+      "index": "index_blue",
+      "value": "value_light"
+    },
+    "pf_table_theme": {
+      "comment": "Purchase Funnel table – by role",
+      "header": "header_dark",
+      "index": "index_blue",
+      "value": "value_light",
+      "columns_by_header": {
+        "Awareness": "percent_col",
+        "Consideration": "percent_col",
+        "Purchase": "percent_col"
+      }
+    },
+    "criteria_table_theme": {
+      "comment": "Criteria / comparison tables – by header name",
+      "header": "header_dark",
+      "index": "index_blue",
+      "value": "value_light",
+      "columns_by_header": {
+        "Criteria": "index_blue",
+        "Importance": "numeric_col",
+        "Avg Score": "numeric_col",
+        "T2B %": "percent_col"
+      }
+    }
+  }
+}

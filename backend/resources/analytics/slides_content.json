@@ -1,0 +1,630 @@
+{
+  "slides": {
+    "slide_brand_awareness": {
+      "section": "Brand Awareness and Purchase Funnel",
+      "template_slide_title": "Brand Awareness",
+      "items": {
+        "brand awareness": {
+          "module": "percentages",
+          "metrics": {
+            "TOM": {
+              "function": "perc_of_all_values",
+              "args": [
+                "tom"
+              ]
+            },
+            "Other-Unaided": {
+              "function": "perc_of_all_values",
+              "args": [
+                "unaided"
+              ]
+            },
+            "Aided": {
+              "function": "perc_of_all_values",
+              "args": [
+                "aided"
+              ]
+            },
+            "Total Awareness": {
+              "function": "perc_of_all_values_total",
+              "args": [
+                [
+                  "tom",
+                  "unaided",
+                  "aided"
+                ]
+              ]
+            }
+          },
+          "Order_By": "Total Awareness",
+          "Limit": 10,
+          "orientation": "column",
+          "ymax": 1,
+          "ymin": 0,
+          "theme": "4th_white"
+        }
+      }
+    },
+    "slide_source_of_awareness": {
+      "section": "Brand Awareness and Purchase Funnel",
+      "template_slide_title": "Source of Awareness",
+      "items": {
+        "Source of Awareness": {
+          "module": "percentages",
+          "data": "decoded_raw_data",
+          "metrics": {
+            "Source of Awareness": {
+              "function": "perc_of_all_values",
+              "args": [
+                "source_of_awareness"
+              ]
+            }
+          },
+          "Order_By": "source_of_awareness",
+          "Limit": 10,
+          "viz_type": "chart",
+          "orientation": "column",
+          "ymax": 1,
+          "ymin": 0,
+          "sort_order": "desc"
+        }
+      }
+    },
+    "slide_purchase_funnel_chart": {
+      "section": "Brand Awareness and Purchase Funnel",
+      "template_slide_title": "Purchase Funnel",
+      "items": {
+        "purchase funnel": {
+          "module": "percentages",
+          "metrics": {
+            "Total Awareness": {
+              "function": "perc_of_all_values_total",
+              "args": [
+                [
+                  "tom",
+                  "unaided",
+                  "aided"
+                ]
+              ]
+            },
+            "Consideration": {
+              "function": "perc_of_all_values",
+              "args": [
+                "consideration"
+              ]
+            },
+            "Bought 12M": {
+              "function": "perc_of_all_values",
+              "args": [
+                "bought_12m"
+              ]
+            },
+            "Bought 3M": {
+              "function": "perc_of_all_values",
+              "args": [
+                "bought_3m"
+              ]
+            },
+            "MOU": {
+              "function": "perc_of_all_values",
+              "args": [
+                "mou"
+              ]
+            }
+          },
+          "Order_By": "Total Awareness",
+          "Limit": 10,
+          "orientation": "row",
+          "ymax": 1,
+          "ymin": 0
+        }
+      }
+    },
+    "slide_purchase_funnel_table": {
+      "section": "Brand Awareness and Purchase Funnel",
+      "template_slide_title": "Purchase Funnel Table",
+      "items": {
+        "pf_table": {
+          "module": "percentages",
+          "metrics": {
+            "Total Awareness": {
+              "function": "perc_of_all_values_total",
+              "args": [
+                [
+                  "tom",
+                  "unaided",
+                  "aided"
+                ]
+              ]
+            },
+            "Bought 12M": {
+              "function": "perc_of_all_values",
+              "args": [
+                "bought_12m"
+              ]
+            },
+            "Bought 3M": {
+              "function": "perc_of_all_values",
+              "args": [
+                "bought_3m"
+              ]
+            },
+            "MOU": {
+              "function": "perc_of_all_values",
+              "args": [
+                "mou"
+              ]
+            }
+          },
+          "Order_By": "Total Awareness",
+          "theme": "vibrant_colors",
+          "new_name": "Purchase Funnel"
+        }
+      }
+    },
+    "slide_preference": {
+      "section": "Taste Test",
+      "template_slide_title": "Product Preference",
+      "items": {
+        "Product Preference": {
+          "module": "percentages",
+          "metrics": {
+            "Product Preference": {
+              "function": "perc_of_all_values",
+              "args": [
+                "product_preference"
+              ]
+            }
+          },
+          "Order_By": "Product Preference"
+        },
+        "overall Averages": {
+          "module": "comparison",
+          "inputs": {
+            "set_of_features": "overall_features",
+            "ideal": 10,
+            "purchase_intent": "comparison_purchase_intent"
+          },
+          "viz_type": "chart",
+          "new_name": "Overall Score",
+          "xmax": 10,
+          "ymax": null,
+          "ymin": 1,
+          "show_label": false,
+          "label_column": "index",
+          "theme": "navy_legend"
+        },
+        "Criteria-Overall": {
+          "module": "comparison",
+          "inputs": {
+            "set_of_features": "overall_features",
+            "ideal": 10,
+            "purchase_intent": "comparison_purchase_intent"
+          },
+          "viz_type": "table",
+          "new_name": " "
+        }
+      }
+    },
+    "slide_importance": {
+      "section": "Taste Test",
+      "template_slide_title": "Importance",
+      "items": {
+        "Overall Scatter": {
+          "module": "comparison",
+          "inputs": {
+            "set_of_features": "overall_features",
+            "ideal": 10,
+            "purchase_intent": "comparison_purchase_intent"
+          },
+          "viz_type": "scatter",
+          "new_name": "Feature Importance",
+          "top_n": 5,
+          "show_labels": true,
+          "label_category": "Hero",
+          "highlight_top_n": 1,
+          "rect": {
+            "x_padding_slots": 2.0,
+            "y_padding_frac": 0.2
+          }
+        },
+        "Sub Scatter": {
+          "module": "comparison",
+          "inputs": {
+            "set_of_features": "of_most_important",
+            "ideal": 5,
+            "purchase_intent": "comparison_purchase_intent"
+          },
+          "viz_type": "scatter",
+          "new_name": "Sub-Features of {highest_feature}",
+          "highest_feature_from": "Overall Scatter",
+          "top_n": 5,
+          "show_labels": true,
+          "label_category": "Hero",
+          "highlight_top_n": 1,
+          "rect": {
+            "x_padding_slots": 2.0,
+            "y_padding_frac": 0.2
+          }
+        }
+      }
+    },
+    "slide_purchase_intent": {
+      "section": "Taste Test",
+      "template_slide_title": "Purchase Intent",
+      "items": {
+        "Purchase Intent": {
+          "module": "percentages",
+          "data": "pivot_scalers_decoded",
+          "metrics": {
+            "PI": {
+              "function": "perc_of_all_values",
+              "args": [
+                "comparison_purchase_intent"
+              ]
+            }
+          },
+          "group_by": [
+            "brand"
+          ],
+          "viz_type": "chart",
+          "orientation": "column",
+          "order_columns": [
+            "Definitely would buy",
+            "Probably would buy",
+            "Neutral",
+            "Probably would NOT buy",
+            "Definitely would NOT buy"
+          ],
+          "ymax": 1,
+          "ymin": 0
+        },
+        "Purchase Intent for Real Price": {
+          "module": "percentages",
+          "data": "pivot_scalers",
+          "metrics": {
+            "PIRP": {
+              "function": "perc_of_values",
+              "args": [
+                "real_price_pi",
+                [
+                  9,
+                  10
+                ]
+              ]
+            }
+          },
+          "group_by": [
+            "brand"
+          ],
+          "viz_type": "chart"
+        }
+      }
+    },
+    "slide_nps": {
+      "section": "Taste Test",
+      "template_slide_title": "NPS",
+      "items": {
+        "Recommend to others": {
+          "module": "percentages",
+          "data": "pivot_scalers",
+          "metrics": {
+            "Promoters": {
+              "function": "perc_of_values",
+              "args": [
+                "Recommend",
+                [
+                  9,
+                  10
+                ]
+              ]
+            },
+            "Neutrals": {
+              "function": "perc_of_values",
+              "args": [
+                "Recommend",
+                [
+                  7,
+                  8
+                ]
+              ]
+            },
+            "Rejecters": {
+              "function": "perc_of_values",
+              "args": [
+                "Recommend",
+                [
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6
+                ]
+              ]
+            }
+          },
+          "group_by": [
+            "brand"
+          ],
+          "viz_type": "chart",
+          "orientation": "column",
+          "order_columns": [
+            "Promoters",
+            "Neutrals",
+            "Rejecters"
+          ],
+          "ymax": 1,
+          "ymin": 0
+        }
+      }
+    },
+    "slide_sub_features": {
+      "section": "Taste Test",
+      "template_slide_title": "Sub Features",
+      "items": {
+        "Criteria-Sub": {
+          "module": "comparison",
+          "inputs": {
+            "set_of_features": "sub_features",
+            "ideal": 5,
+            "purchase_intent": "comparison_purchase_intent"
+          },
+          "viz_type": "table",
+          "new_name": "Criteria"
+        },
+        "Sub Averages": {
+          "module": "comparison",
+          "inputs": {
+            "set_of_features": "sub_features",
+            "ideal": 5,
+            "purchase_intent": "comparison_purchase_intent"
+          },
+          "viz_type": "chart",
+          "new_name": "Average Score",
+          "xmax": 10,
+          "ymax": null,
+          "ymin": 1,
+          "show_label": false,
+          "label_column": "index"
+        }
+      }
+    },
+    "slide_overall_features": {
+      "section": "Taste Test",
+      "template_slide_title": "Overall Features",
+      "items": {
+        "Criteria-Overall-1": {
+          "module": "comparison",
+          "inputs": {
+            "set_of_features": "overall_features",
+            "ideal": 10,
+            "purchase_intent": "comparison_purchase_intent"
+          },
+          "viz_type": "table",
+          "new_name": "Criteria"
+        },
+        "overall Averages": {
+          "module": "comparison",
+          "inputs": {
+            "set_of_features": "overall_features",
+            "ideal": 10,
+            "purchase_intent": "comparison_purchase_intent"
+          },
+          "viz_type": "chart",
+          "new_name": "Overall Score",
+          "xmax": 10,
+          "ymax": null,
+          "ymin": 1,
+          "show_label": false,
+          "label_column": "index"
+        }
+      }
+    },
+    "slide_improvements": {
+      "section": "Taste Test",
+      "template_slide_title": "Improvements",
+      "items": {
+        "Improvements1": {
+          "module": "percentages",
+          "data": "pivot_scalers",
+          "metrics": {
+            "Improvements": {
+              "function": "ai_percentages",
+              "args": [
+                "improvement_in_taste",
+                "improve"
+              ]
+            }
+          },
+          "filter": {
+            "column": "brand",
+            "op": "==",
+            "value": "my_brand"
+          },
+          "viz_type": "table",
+          "new_name": "Improvements My Brand"
+        },
+        "Improvements2": {
+          "module": "percentages",
+          "data": "pivot_scalers",
+          "metrics": {
+            "Improvements": {
+              "function": "ai_percentages",
+              "args": [
+                "improvement_in_taste",
+                "improve"
+              ]
+            }
+          },
+          "filter": {
+            "column": "brand",
+            "op": "==",
+            "value": "competitor1"
+          },
+          "viz_type": "table",
+          "new_name": "Improvements competitor1"
+        }
+      }
+    },
+    "slide_dislikes": {
+      "section": "Taste Test",
+      "template_slide_title": "Dislikes",
+      "items": {
+        "Dislikes1": {
+          "module": "percentages",
+          "data": "pivot_scalers",
+          "metrics": {
+            "Dislikes": {
+              "function": "ai_percentages",
+              "args": [
+                "dislike_in_taste",
+                "dislike"
+              ]
+            }
+          },
+          "filter": {
+            "column": "brand",
+            "op": "==",
+            "value": "my_brand"
+          },
+          "viz_type": "table",
+          "new_name": "Dislikes My Brand"
+        },
+        "Dislikes2": {
+          "module": "percentages",
+          "data": "pivot_scalers",
+          "metrics": {
+            "Dislikes": {
+              "function": "ai_percentages",
+              "args": [
+                "dislike_in_taste",
+                "dislike"
+              ]
+            }
+          },
+          "filter": {
+            "column": "brand",
+            "op": "==",
+            "value": "competitor1"
+          },
+          "viz_type": "table",
+          "new_name": "Dislikes competitor1"
+        }
+      }
+    },
+    "slide_likes": {
+      "section": "Taste Test",
+      "template_slide_title": "Likes",
+      "items": {
+        "Likes1": {
+          "module": "percentages",
+          "data": "pivot_scalers",
+          "metrics": {
+            "Likes": {
+              "function": "ai_percentages",
+              "args": [
+                "like_in_taste",
+                "like"
+              ]
+            }
+          },
+          "filter": {
+            "column": "brand",
+            "op": "==",
+            "value": "my_brand"
+          },
+          "viz_type": "table",
+          "new_name": "Likes My Brand"
+        },
+        "Likes2": {
+          "module": "percentages",
+          "data": "pivot_scalers",
+          "metrics": {
+            "Likes": {
+              "function": "ai_percentages",
+              "args": [
+                "like_in_taste",
+                "like"
+              ]
+            }
+          },
+          "filter": {
+            "column": "brand",
+            "op": "==",
+            "value": "competitor1"
+          },
+          "viz_type": "table",
+          "new_name": "Likes competitor1"
+        }
+      }
+    }
+  },
+  "dynamic_slides": {
+    "slide_Habits_Opinions": {
+      "section": "Habits",
+      "template_slide_title": "Habits and Opinions",
+      "sc_theme": "title_18",
+      "mc_theme": "title_18",
+      "visual_id": "Habits",
+      "module": "habits-opinions",
+      "inputs": "habits_and_opinions"
+    },
+    "slide_brand_card": {
+      "section": "Brand Cards",
+      "template_slide_title": "Brand Card",
+      "visual_id": "brand cards",
+      "module": "brand_cards",
+      "inputs": {
+        "focus_brands": "focus_brands",
+        "purchase_funnel": {
+          "Total Awareness": [
+            "tom",
+            "unaided",
+            "aided"
+          ],
+          "Consideration": "consideration",
+          "Bought 12M": "bought_12m",
+          "Bought 3M": "bought_3m",
+          "MOU": "mou",
+          "Order_By": "Total Awareness"
+        },
+        "loop_question": "loop_why_mou"
+      }
+    },
+    "slide_cross_tabs": {
+      "section": "Cross Tabs",
+      "template_slide_title": "charts",
+      "visual_id": "charts",
+      "module": "cross-tabs",
+      "inputs": "ct-inputs",
+      "sc_theme": "title_18",
+      "mc_theme": "title_18"
+    },
+    "slide_brand_analyzer": {
+      "section": "Brand Analyzer",
+      "template_slide_title": "Brand Analyzer",
+      "items": {
+        "Combined": {
+          "module": "brand_analyzer",
+          "module_input": [
+            "performance",
+            "imagery"
+          ]
+        },
+        "Performance": {
+          "module": "brand_analyzer",
+          "module_input": [
+            "performance"
+          ]
+        },
+        "Imagery": {
+          "module": "brand_analyzer",
+          "module_input": [
+            "imagery"
+          ]
+        }
+      }
+    }
+  }
+}

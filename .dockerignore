@@ -1,0 +1,57 @@
+# ─── Git & CI ───
+.git
+.github
+.gitignore
+.pre-commit-config.yaml
+
+# ─── Environment & Secrets ───
+.env
+.env.*
+!.env.example
+
+# ─── Python Dev ───
+__pycache__
+*.pyc
+*.pyo
+venv
+.pytest_cache
+.coverage
+htmlcov
+
+# ─── Node Dev ───
+node_modules
+frontend/node_modules
+frontend/dist
+
+# ─── IDE ───
+.vscode
+.idea
+.system_view
+
+# ─── Data & Docs ───
+docs
+*.xlsx
+*.csv
+*.pptx
+!backend/resources/**/*.pptx
+dump.archive
+db_output.json
+
+# ─── Outputs ───
+out
+reports
+tmp
+
+# ─── Debug Logs ───
+*.txt
+*.log
+
+# ─── Assets (not needed in backend image) ───
+03 Marketeers logo
+Pangram-FullFamily-FreeForPersonalUse
+
+# ─── Render Config ───
+render.yaml
+
+# ─── Certificates ───
+certs

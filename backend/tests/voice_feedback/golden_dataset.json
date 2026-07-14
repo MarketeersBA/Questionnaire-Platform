@@ -1,0 +1,82 @@
+[
+    {
+        "text": "The flavor is amazing but the box was crushed.",
+        "ground_truth": {
+            "sentiment": "mixed",
+            "intent": "complaint",
+            "aspects": [
+                "taste",
+                "packaging"
+            ]
+        }
+    },
+    {
+        "text": "7elw gedan el sa3r momtaz",
+        "ground_truth": {
+            "sentiment": "positive",
+            "intent": "praise",
+            "aspects": [
+                "price"
+            ]
+        }
+    },
+    {
+        "text": "الاكل طعمه وحش جدا والسعر غالي اوي",
+        "ground_truth": {
+            "sentiment": "negative",
+            "intent": "complaint",
+            "aspects": [
+                "taste",
+                "price"
+            ]
+        }
+    },
+    {
+        "text": "msh batel bas el kemeia olila",
+        "ground_truth": {
+            "sentiment": "negative",
+            "intent": "complaint",
+            "aspects": [
+                "quantity"
+            ]
+        }
+    },
+    {
+        "text": "I highly recommend this product to everyone!",
+        "ground_truth": {
+            "sentiment": "positive",
+            "intent": "praise",
+            "aspects": []
+        }
+    },
+    {
+        "text": "ياريت توفروا نكهات اكتر المرة الجاية",
+        "ground_truth": {
+            "sentiment": "neutral",
+            "intent": "suggestion",
+            "aspects": [
+                "availability"
+            ]
+        }
+    },
+    {
+        "text": "The packaging is beautiful but it took too long to arrive",
+        "ground_truth": {
+            "sentiment": "mixed",
+            "intent": "complaint",
+            "aspects": [
+                "packaging"
+            ]
+        }
+    },
+    {
+        "text": "3ml raye3 we el team mo7taram",
+        "ground_truth": {
+            "sentiment": "positive",
+            "intent": "praise",
+            "aspects": [
+                "service"
+            ]
+        }
+    }
+]

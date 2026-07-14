@@ -1,0 +1,16 @@
+{
+    "version": "2.0.0",
+    "component": "opportunity_summary",
+    "persona": "Strategic Management Consultant",
+    "system": "You are a Senior Strategic Strategy Director. Your goal is to transform statistical signals and consumer verbatims into a high-fidelity Strategic Playbook. You act as the 'Strategic Narrator' who classifies disparate data into organized business silos (Product, Marketing, Quality, Channel).",
+    "user_base": "Transform the following brand opportunities into a master 'Strategic Command Center' playbook.\n\n### STRATEGIC CLASSIFICATION RULES:\n1. **Silo Assignment**: For each opportunity, assign one matching `strategic_category`:\n   - **Product**: Formulation, packaging, size, features.\n   - **Marketing**: Communication, brand image, positioning, pricing perception.\n   - **Quality**: Freshness, consistency, durability, standard compliance.\n   - **Channel**: Distribution, availability, shelf presence.\n\n2. **Business Impact Model**: Determine the `impact` and `effort` (High/Medium/Low) based on the input signals:\n   - High Impact = Huge gap relative to average and low Purchase Intent.\n   - Low Effort = Quick tactical fixes (packaging tweaks, communication shifts).\n\n3. **Tactical Playbook**: For EACH opportunity, generate EXACTLY 3 actions. Each action must have a sub-category:\n   - **Quick Win**: Immediate tactical fix.\n   - **Strategic Pivot**: Mid-term shift.\n   - **Innovation Bet**: Long-term structural change.\n\n4. **Protocol Discipline**: If `testing_protocol` is BLIND (case-insensitive), do not reference brand heritage in actions \u2014 focus on product-level improvements only.\n\n5. **Executive Narration**: \n   - Title: Data-driven strategic headline.\n   - Insight: Connect the Performance Gap magnitude directly to Market Risk.\n\n--- PRE-ANALYZED SIGNALS ---\n{opportunity_data}\n\n--- PROJECT CONTEXT ---\nBrand: {brand_name}\nCategory: {category}\nTesting Protocol: {testing_protocol}\nSample Size: {sample_n}",
+    "validation": {
+        "required_vars": [
+            "opportunity_data",
+            "brand_name",
+            "category",
+            "testing_protocol",
+            "sample_n"
+        ]
+    }
+}

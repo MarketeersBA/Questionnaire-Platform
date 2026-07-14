@@ -1,0 +1,216 @@
+{
+  "chart_id": "sub_attribute_scatter",
+  "attempt": 1,
+  "failure_kind": "unknown",
+  "error_message": "Page.wait_for_selector: Timeout 45000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-export-ready=\\\"true\\\"]\") to be visible\n",
+  "bundle_dir": "/app/backend/presintion report/69f86a80d15ab61175e4283c/capture_artifacts/failures/sub_attribute_scatter/attempt_1",
+  "screenshot_path": "/app/backend/presintion report/69f86a80d15ab61175e4283c/capture_artifacts/failures/sub_attribute_scatter/attempt_1/screenshot.png",
+  "html_path": "/app/backend/presintion report/69f86a80d15ab61175e4283c/capture_artifacts/failures/sub_attribute_scatter/attempt_1/page.html",
+  "html_snippet": "<!DOCTYPE html><html lang=\"en\"><head> <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\"; injectIntoGlobalHook(window); window.$RefreshReg$ = () => {}; window.$RefreshSig$ = () => (type) => type;</script> <script type=\"module\" src=\"/@vite/client\"></script> <meta charset=\"UTF-8\"> <link rel=\"icon\" type=\"image/png\" href=\"/brand/logo-icon.png\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"> <title>Marketeers | Survey Protocol</title> <style type=\"text/css\">[data-sonner-toaster][dir=ltr],html[dir=ltr]{--toast-icon-margin-start:-3px;--toast-icon-margin-end:4px;--toast-svg-margin-start:-1px;--toast-svg-margin-end:0px;--toast-button-margin-start:auto;--toast-button-margin-end:0;--toast-close-button-start:0;--toast-close-button-end:unset;--toast-close-button-transform:translate(-35%, -35%)}[data-sonner-toaster][dir=rtl],html[dir=rtl]{--toast-icon-margin-start:4px;--toast-icon-margin-end:-3px;--toast-svg-margin-start:0px;--toast-svg-margin-end:-1px;--toast-button-margin-start:0;--toast-button-margin-end:auto;--toast-close-button-start:unset;--toast-close-button-end:0;--toast-close-button-transform:translate(35%, -35%)}[data-sonner-toaster]{position:fixed;width:var(--width);font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;--gray1:hsl(0, 0%, 99%);--gray2:hsl(0, 0%, 97.3%);--gray3:hsl(0, 0%, 95.1%);--gray4:hsl(0, 0%, 93%);--gray5:hsl(0, 0%, 90.9%);--gray6:hsl(0, 0%, 88.7%);--gray7:hsl(0, 0%, 85.8%);--gray8:hsl(0, 0%, 78%);--gray9:hsl(0, 0%, 56.1%);--gray10:hsl(0, 0%, 52.3%);--gray11:hsl(0, 0%, 43.5%);--gray12:hsl(0, 0%, 9%);--border-radius:8px;box-sizing:border-box;padding:0;margin:0;list-style:none;outline:0;z-index:999999999;transition:transform .4s ease}@media (hover:none) and (pointer:coarse){[data-sonner-toaster][data-lifted=true]{transform:none}}[data-sonner-toaster][data-x-position=right]{right:var(--offset-right)}[data-sonner-toaster][data-x-position=left]{left:var(--offset-left)}[data-sonner-toaster][data-x-position=center]{left:50%;transform:translateX(-50%)}[data-sonner-toaster][data-y-position=top]{top:var(--offset-top)}[data-sonner-toaster][data-y-position=bottom]{bottom:var(--offset-bottom)}[data-sonner-toast]{--y:translateY(100%);--lift-amount:calc(var(--lift) * var(--gap));z-index:var(--z-index);position:absolute;opacity:0;transform:var(--y);touch-action:none;transition:transform .4s,opacity .4s,height .4s,box-shadow .2s;box-sizing:border-box;outline:0;overflow-wrap:anywhere}[data-sonner-toast][data-styled=true]{padding:16px;background:var(--normal-bg);border:1px solid var(--normal-border);color:var(--normal-text);border-radius:var(--border-radius);box-shadow:0 4px 12px rgba(0,0,0,.1);width:var(--width);font-size:13px;display:flex;align-items:center;gap:6px}[data-sonner-toast]:focus-visible{box-shadow:0 4px 12px rgba(0,0,0,.1),0 0 0 2px rgba(0,0,0,.2)}[data-sonner-toast][data-y-position=top]{top:0;--y:translateY(-100%);--lift:1;--lift-amount:calc(1 * var(--gap))}[data-sonner-toast][data-y-position=bottom]{bottom:0;--y:translateY(100%);--lift:-1;--lift-amount:calc(var(--lift) * var(--gap))}[data-sonner-toast][data-styled=true] [data-description]{font-weight:400;line-height:1.4;color:#3f3f3f}[data-rich-colors=true][data-sonner-toast][data-styled=true] [data-description]{color:inherit}[data-sonner-toaster][data-sonner-theme=dark] [data-description]{color:#e8e8e8}[data-sonner-toast][data-styled=true] [data-title]{font-weight:500;line-height:1.5;color:inherit}[data-sonner-toast][data-styled=true] [data-icon]{display:flex;height:16px;width:16px;position:relative;justify-content:flex-start;align-items:center;flex-shrink:0;margin-left:var(--toast-icon-margin-start);margin-right:var(--toast-icon-margin-end)}[data-sonner-toast][data-promise=true] [data-icon]>svg{opacity:0;transform:scale(.8);transform-origin:center;animation:sonner-fade-in .3s ease forwards}[data-sonner-toast][data-styled=true] [data-icon]>*{flex-shrink:0}[data-sonner-toast][data-styled=true] [data-icon] svg{margin-left:var(--toast-svg-margin-start);margin-right:var(--toast-svg-margin-end)}[data-sonner-toast][data-styled=true] [data-content]{display:flex;flex-direction:column;gap:2px}[data-sonner-toast][data-styled=true] [data-button]{border-radius:4px;padding-left:8px;padding-right:8px;height:24px;font-size:12px;color:var(--normal-bg);background:var(--normal-text);margin-left:var(--toast-button-margin-start);margin-right:var(--toast-button-margin-end);border:none;font-weight:500;cursor:pointer;outline:0;display:flex;align-items:center;flex-shrink:0;transition:opacity .4s,box-shadow .2s}[data-sonner-toast][data-styled=true] [data-button]:focus-visible{box-shadow:0 0 0 2px rgba(0,0,0,.4)}[data-sonner-toast][data-styled=true] [data-button]:first-of-type{margin-left:var(--toast-button-margin-start);margin-right:var(--toast-button-margin-end)}[data-sonner-toast][data-styled=true] [data-cancel]{color:var(--normal-text);background:rgba(0,0,0,.08)}[data-sonner-toaster][data-sonner-theme=dark] [data-sonner-toast][data-styled=true] [data-cancel]{background:rgba(255,255,255,.3)}[data-sonner-toast][data-styled=true] [data-close-button]{position:absolute;left:var(--toast-close-button-start);right:var(--toast-close-button-end);top:0;height:20px;width:20px;display:flex;justify-content:center;align-items:center;padding:0;color:var(--gray12);background:var(--normal-bg);border:1px solid var(--gray4);transform:var(--toast-close-button-transform);border-radius:50%;cursor:pointer;z-index:1;transition:opacity .1s,background .2s,border-color .2s}[data-sonner-toast][data-styled=true] [data-close-button]:focus-visible{box-shadow:0 4px 12px rgba(0,0,0,.1),0 0 0 2px rgba(0,0,0,.2)}[data-sonner-toast][data-styled=true] [data-disabled=true]{cursor:not-allowed}[data-sonner-toast][data-styled=true]:hover [data-close-button]:hover{background:var(--gray2);border-color:var(--gray5)}[data-sonner-toast][data-swiping=true]::before{content:'';position:absolute;left:-100%;right:-100%;height:100%;z-index:-1}[data-sonner-toast][data-y-position=top][data-swiping=true]::before{bottom:50%;transform:scaleY(3) translateY(50%)}[data-sonner-toast][data-y-position=bottom][data-swiping=true]::before{top:50%;transform:scaleY(3) translateY(-50%)}[data-sonner-toast][data-swiping=false][data-removed=true]::before{content:'';position:absolute;inset:0;transform:scaleY(2)}[data-sonner-toast][data-expanded=true]::after{content:'';position:absolute;left:0;height:calc(var(--gap) + 1px);bottom:100%;width:100%}[data-sonner-toast][data-mounted=true]{--y:translateY(0);opacity:1}[data-sonner-toast][data-expanded=false][data-front=false]{--scale:var(--toasts-before) * 0.05 + 1;--y:translateY(calc(var(--lift-amount) * var(--toasts-before))) scale(calc(-1 * var(--scale)));height:var(--front-toast-height)}[data-sonner-toast]>*{transition:opacity .4s}[data-sonner-toast][data-x-position=right]{right:0}[data-sonner-toast][data-x-position=left]{left:0}[data-sonner-toast][data-expanded=false][data-front=false][data-styled=true]>*{opacity:0}[data-sonner-toast][data-visible=false]{opacity:0;pointer-events:none}[data-sonner-toast][data-mounted=true][data-expanded=true]{--y:translateY(calc(var(--lift) * var(--offset)));height:var(--initial-height)}[data-sonner-toast][data-removed=true][data-front=true][data-swipe-out=false]{--y:translateY(calc(var(--lift) * -100%));opacity:0}[data-sonner-toast][data-removed=true][data-front=false][data-swipe-out=false][data-expanded=true]{--y:translateY(calc(var(--lift) * var(--offset) + var(--lift) * -100%));opacity:0}[data-sonner-toast][data-removed=true][data-front=false][data-swipe-out=false][data-expanded=false]{--y:translateY(40%);opacity:0;transition:transform .5s,opacity .2s}[data-sonner-toast][data-removed=true][data-front=false]::before{height:calc(var(--initial-height) + 20%)}[data-sonner-toast][data-swiping=true]{transform:var(-\u2026[truncated]",
+  "console_errors": [
+    "[error] Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "[error] Notifier failed to poll: AxiosError: Request failed with status code 403\n    at settle (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1281:12)\n    at XMLHttpRequest.onloadend (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1638:7)\n    at Axios.request (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:2255:41)\n    at async Object.getOrphans (http://frontend:5173/src/services/api.ts:88:28)\n    at async checkEvents (http://frontend:5173/src/components/notifications/AdminNotifier.tsx:31:20)",
+    "[warning] \u26a0\ufe0f React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.",
+    "[warning] \u26a0\ufe0f React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.",
+    "[error] Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "[error] Notifier failed to poll: AxiosError: Request failed with status code 403\n    at settle (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1281:12)\n    at XMLHttpRequest.onloadend (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1638:7)\n    at Axios.request (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:2255:41)\n    at async Object.getOrphans (http://frontend:5173/src/services/api.ts:88:28)\n    at async checkEvents (http://frontend:5173/src/components/notifications/AdminNotifier.tsx:31:20)",
+    "[error] Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "[error] Notifier failed to poll: AxiosError: Request failed with status code 403\n    at settle (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1281:12)\n    at XMLHttpRequest.onloadend (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1638:7)\n    at Axios.request (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:2255:41)\n    at async Object.getOrphans (http://frontend:5173/src/services/api.ts:88:28)\n    at async checkEvents (http://frontend:5173/src/components/notifications/AdminNotifier.tsx:31:20)",
+    "[warning] \u26a0\ufe0f React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.",
+    "[warning] \u26a0\ufe0f React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.",
+    "[error] Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "[error] Notifier failed to poll: AxiosError: Request failed with status code 403\n    at settle (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1281:12)\n    at XMLHttpRequest.onloadend (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1638:7)\n    at Axios.request (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:2255:41)\n    at async Object.getOrphans (http://frontend:5173/src/services/api.ts:88:28)\n    at async checkEvents (http://frontend:5173/src/components/notifications/AdminNotifier.tsx:31:20)",
+    "[error] Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "[error] Notifier failed to poll: AxiosError: Request failed with status code 403\n    at settle (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1281:12)\n    at XMLHttpRequest.onloadend (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1638:7)\n    at Axios.request (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:2255:41)\n    at async Object.getOrphans (http://frontend:5173/src/services/api.ts:88:28)\n    at async checkEvents (http://frontend:5173/src/components/notifications/AdminNotifier.tsx:31:20)",
+    "[warning] \u26a0\ufe0f React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.",
+    "[warning] \u26a0\ufe0f React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.",
+    "[error] Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "[error] Notifier failed to poll: AxiosError: Request failed with status code 403\n    at settle (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1281:12)\n    at XMLHttpRequest.onloadend (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1638:7)\n    at Axios.request (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:2255:41)\n    at async Object.getOrphans (http://frontend:5173/src/services/api.ts:88:28)\n    at async checkEvents (http://frontend:5173/src/components/notifications/AdminNotifier.tsx:31:20)",
+    "[error] Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "[error] Notifier failed to poll: AxiosError: Request failed with status code 403\n    at settle (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1281:12)\n    at XMLHttpRequest.onloadend (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1638:7)\n    at Axios.request (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:2255:41)\n    at async Object.getOrphans (http://frontend:5173/src/services/api.ts:88:28)\n    at async checkEvents (http://frontend:5173/src/components/notifications/AdminNotifier.tsx:31:20)",
+    "[warning] \u26a0\ufe0f React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.",
+    "[warning] \u26a0\ufe0f React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.",
+    "[error] Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "[error] Notifier failed to poll: AxiosError: Request failed with status code 403\n    at settle (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1281:12)\n    at XMLHttpRequest.onloadend (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1638:7)\n    at Axios.request (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:2255:41)\n    at async Object.getOrphans (http://frontend:5173/src/services/api.ts:88:28)\n    at async checkEvents (http://frontend:5173/src/components/notifications/AdminNotifier.tsx:31:20)",
+    "[error] Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "[error] Notifier failed to poll: AxiosError: Request failed with status code 403\n    at settle (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1281:12)\n    at XMLHttpRequest.onloadend (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1638:7)\n    at Axios.request (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:2255:41)\n    at async Object.getOrphans (http://frontend:5173/src/services/api.ts:88:28)\n    at async checkEvents (http://frontend:5173/src/components/notifications/AdminNotifier.tsx:31:20)",
+    "[warning] \u26a0\ufe0f React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.",
+    "[warning] \u26a0\ufe0f React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.",
+    "[error] Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "[error] Notifier failed to poll: AxiosError: Request failed with status code 403\n    at settle (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1281:12)\n    at XMLHttpRequest.onloadend (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1638:7)\n    at Axios.request (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:2255:41)\n    at async Object.getOrphans (http://frontend:5173/src/services/api.ts:88:28)\n    at async checkEvents (http://frontend:5173/src/components/notifications/AdminNotifier.tsx:31:20)",
+    "[error] Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "[error] Notifier failed to poll: AxiosError: Request failed with status code 403\n    at settle (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1281:12)\n    at XMLHttpRequest.onloadend (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1638:7)\n    at Axios.request (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:2255:41)\n    at async Object.getOrphans (http://frontend:5173/src/services/api.ts:88:28)\n    at async checkEvents (http://frontend:5173/src/components/notifications/AdminNotifier.tsx:31:20)",
+    "[error] Warning: %s: Support for defaultProps will be removed from function components in a future major release. Use JavaScript default parameters instead.%s G \n    at G (http://frontend:5173/node_modules/.vite/deps/react-wordcloud.js?v=db27becc:11547:13)\n    at div\n    at div\n    at OpenEndCloud (http://frontend:5173/src/components/report/OpenEndCloud.tsx:18:32)\n    at ChartErrorBoundary (http://frontend:5173/src/components/report/ChartRenderer.tsx:440:5)\n    at div\n    at div\n    at ChartRenderer (http://frontend:5173/src/components/report/ChartRenderer.tsx:48:3)\n    at div\n    at ExportFrameShell (http://frontend:5173/src/export/ExportFrameShell.tsx:18:3)\n    at div\n    at ThemeProvider (http://frontend:5173/src/context/ThemeContext.tsx:21:3)\n    at ReportExportFrame (http://frontend:5173/src/pages/ReportExportFrame.tsx:36:29)\n    at NoLayoutRoute (http://frontend:5173/src/App.tsx:57:26)\n    at RenderedRoute (http://frontend:5173/node_modules/.vite/deps/react-router-dom.js?v=db27becc:4131:5)\n    at Routes (http://frontend:5173/node_modules/.vite/deps/react-router-dom.js?v=db27becc:4601:5)\n    at PopChildMeasure (http://frontend:5173/node_modules/.vite/deps/framer-motion.js?v=db27becc:7879:23)\n    at PopChild (http://frontend:5173/node_modules/.vite/deps/framer-motion.js?v=db27becc:7905:21)\n    at PresenceChild (http://frontend:5173/node_modules/.vite/deps/framer-motion.js?v=db27becc:7953:24)\n    at AnimatePresence (http://frontend:5173/node_modules/.vite/deps/framer-motion.js?v=db27becc:8030:26)\n    at div\n    at Router (http://frontend:5173/node_modules/.vite/deps/react-router-dom.js?v=db27becc:4544:15)\n    at BrowserRouter (http://frontend:5173/node_modules/.vite/deps/react-router-dom.js?v=db27becc:5290:5)\n    at AppContent (http://frontend:5173/src/App.tsx:112:21)\n    at ThemeProvider (http://frontend:5173/src/context/ThemeContext.tsx:21:3)\n    at App",
+    "[warning] \u26a0\ufe0f React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.",
+    "[warning] \u26a0\ufe0f React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.",
+    "[error] Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "[error] Notifier failed to poll: AxiosError: Request failed with status code 403\n    at settle (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1281:12)\n    at XMLHttpRequest.onloadend (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1638:7)\n    at Axios.request (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:2255:41)\n    at async Object.getOrphans (http://frontend:5173/src/services/api.ts:88:28)\n    at async checkEvents (http://frontend:5173/src/components/notifications/AdminNotifier.tsx:31:20)",
+    "[error] Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "[error] Notifier failed to poll: AxiosError: Request failed with status code 403\n    at settle (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1281:12)\n    at XMLHttpRequest.onloadend (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1638:7)\n    at Axios.request (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:2255:41)\n    at async Object.getOrphans (http://frontend:5173/src/services/api.ts:88:28)\n    at async checkEvents (http://frontend:5173/src/components/notifications/AdminNotifier.tsx:31:20)",
+    "[error] Warning: %s: Support for defaultProps will be removed from function components in a future major release. Use JavaScript default parameters instead.%s G \n    at G (http://frontend:5173/node_modules/.vite/deps/react-wordcloud.js?v=db27becc:11547:13)\n    at div\n    at div\n    at OpenEndCloud (http://frontend:5173/src/components/report/OpenEndCloud.tsx:18:32)\n    at ChartErrorBoundary (http://frontend:5173/src/components/report/ChartRenderer.tsx:440:5)\n    at div\n    at div\n    at ChartRenderer (http://frontend:5173/src/components/report/ChartRenderer.tsx:48:3)\n    at div\n    at ExportFrameShell (http://frontend:5173/src/export/ExportFrameShell.tsx:18:3)\n    at div\n    at ThemeProvider (http://frontend:5173/src/context/ThemeContext.tsx:21:3)\n    at ReportExportFrame (http://frontend:5173/src/pages/ReportExportFrame.tsx:36:29)\n    at NoLayoutRoute (http://frontend:5173/src/App.tsx:57:26)\n    at RenderedRoute (http://frontend:5173/node_modules/.vite/deps/react-router-dom.js?v=db27becc:4131:5)\n    at Routes (http://frontend:5173/node_modules/.vite/deps/react-router-dom.js?v=db27becc:4601:5)\n    at PopChildMeasure (http://frontend:5173/node_modules/.vite/deps/framer-motion.js?v=db27becc:7879:23)\n    at PopChild (http://frontend:5173/node_modules/.vite/deps/framer-motion.js?v=db27becc:7905:21)\n    at PresenceChild (http://frontend:5173/node_modules/.vite/deps/framer-motion.js?v=db27becc:7953:24)\n    at AnimatePresence (http://frontend:5173/node_modules/.vite/deps/framer-motion.js?v=db27becc:8030:26)\n    at div\n    at Router (http://frontend:5173/node_modules/.vite/deps/react-router-dom.js?v=db27becc:4544:15)\n    at BrowserRouter (http://frontend:5173/node_modules/.vite/deps/react-router-dom.js?v=db27becc:5290:5)\n    at AppContent (http://frontend:5173/src/App.tsx:112:21)\n    at ThemeProvider (http://frontend:5173/src/context/ThemeContext.tsx:21:3)\n    at App",
+    "[warning] \u26a0\ufe0f React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.",
+    "[warning] \u26a0\ufe0f React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.",
+    "[error] Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "[error] Notifier failed to poll: AxiosError: Request failed with status code 403\n    at settle (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1281:12)\n    at XMLHttpRequest.onloadend (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1638:7)\n    at Axios.request (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:2255:41)\n    at async Object.getOrphans (http://frontend:5173/src/services/api.ts:88:28)\n    at async checkEvents (http://frontend:5173/src/components/notifications/AdminNotifier.tsx:31:20)",
+    "[error] Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "[error] Notifier failed to poll: AxiosError: Request failed with status code 403\n    at settle (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1281:12)\n    at XMLHttpRequest.onloadend (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1638:7)\n    at Axios.request (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:2255:41)\n    at async Object.getOrphans (http://frontend:5173/src/services/api.ts:88:28)\n    at async checkEvents (http://frontend:5173/src/components/notifications/AdminNotifier.tsx:31:20)",
+    "[error] The above error occurred in the <ScatterPlot> component:\n\n    at ScatterPlot (http://frontend:5173/src/components/report/ScatterPlot.tsx:246:31)\n    at ChartErrorBoundary (http://frontend:5173/src/components/report/ChartRenderer.tsx:440:5)\n    at div\n    at div\n    at ChartRenderer (http://frontend:5173/src/components/report/ChartRenderer.tsx:48:3)\n    at div\n    at ExportFrameShell (http://frontend:5173/src/export/ExportFrameShell.tsx:18:3)\n    at div\n    at ThemeProvider (http://frontend:5173/src/context/ThemeContext.tsx:21:3)\n    at ReportExportFrame (http://frontend:5173/src/pages/ReportExportFrame.tsx:36:29)\n    at NoLayoutRoute (http://frontend:5173/src/App.tsx:57:26)\n    at RenderedRoute (http://frontend:5173/node_modules/.vite/deps/react-router-dom.js?v=db27becc:4131:5)\n    at Routes (http://frontend:5173/node_modules/.vite/deps/react-router-dom.js?v=db27becc:4601:5)\n    at PopChildMeasure (http://frontend:5173/node_modules/.vite/deps/framer-motion.js?v=db27becc:7879:23)\n    at PopChild (http://frontend:5173/node_modules/.vite/deps/framer-motion.js?v=db27becc:7905:21)\n    at PresenceChild (http://frontend:5173/node_modules/.vite/deps/framer-motion.js?v=db27becc:7953:24)\n    at AnimatePresence (http://frontend:5173/node_modules/.vite/deps/framer-motion.js?v=db27becc:8030:26)\n    at div\n    at Router (http://frontend:5173/node_modules/.vite/deps/react-router-dom.js?v=db27becc:4544:15)\n    at BrowserRouter (http://frontend:5173/node_modules/.vite/deps/react-router-dom.js?v=db27becc:5290:5)\n    at AppContent (http://frontend:5173/src/App.tsx:112:21)\n    at ThemeProvider (http://frontend:5173/src/context/ThemeContext.tsx:21:3)\n    at App\n\nReact will try to recreate this component tree from scratch using the error boundary you provided, ChartErrorBoundary.",
+    "[error] The above error occurred in the <ScatterPlot> component:\n\n    at ScatterPlot (http://frontend:5173/src/components/report/ScatterPlot.tsx:246:31)\n    at ChartErrorBoundary (http://frontend:5173/src/components/report/ChartRenderer.tsx:440:5)\n    at div\n    at div\n    at ChartRenderer (http://frontend:5173/src/components/report/ChartRenderer.tsx:48:3)\n    at div\n    at ExportFrameShell (http://frontend:5173/src/export/ExportFrameShell.tsx:18:3)\n    at div\n    at ThemeProvider (http://frontend:5173/src/context/ThemeContext.tsx:21:3)\n    at ReportExportFrame (http://frontend:5173/src/pages/ReportExportFrame.tsx:36:29)\n    at NoLayoutRoute (http://frontend:5173/src/App.tsx:57:26)\n    at RenderedRoute (http://frontend:5173/node_modules/.vite/deps/react-router-dom.js?v=db27becc:4131:5)\n    at Routes (http://frontend:5173/node_modules/.vite/deps/react-router-dom.js?v=db27becc:4601:5)\n    at PopChildMeasure (http://frontend:5173/node_modules/.vite/deps/framer-motion.js?v=db27becc:7879:23)\n    at PopChild (http://frontend:5173/node_modules/.vite/deps/framer-motion.js?v=db27becc:7905:21)\n    at PresenceChild (http://frontend:5173/node_modules/.vite/deps/framer-motion.js?v=db27becc:7953:24)\n    at AnimatePresence (http://frontend:5173/node_modules/.vite/deps/framer-motion.js?v=db27becc:8030:26)\n    at div\n    at Router (http://frontend:5173/node_modules/.vite/deps/react-router-dom.js?v=db27becc:4544:15)\n    at BrowserRouter (http://frontend:5173/node_modules/.vite/deps/react-router-dom.js?v=db27becc:5290:5)\n    at AppContent (http://frontend:5173/src/App.tsx:112:21)\n    at ThemeProvider (http://frontend:5173/src/context/ThemeContext.tsx:21:3)\n    at App\n\nReact will try to recreate this component tree from scratch using the error boundary you provided, ChartErrorBoundary.",
+    "[error] Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "[error] Notifier failed to poll: AxiosError: Request failed with status code 403\n    at settle (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1281:12)\n    at XMLHttpRequest.onloadend (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:1638:7)\n    at Axios.request (http://frontend:5173/node_modules/.vite/deps/axios.js?v=db27becc:2255:41)\n    at async Object.getOrphans (http://frontend:5173/src/services/api.ts:88:28)\n    at async checkEvents (http://frontend:5173/src/components/notifications/AdminNotifier.tsx:31:20)"
+  ],
+  "network_errors": [
+    {
+      "url": "http://frontend:5173/api/analytics/orphans",
+      "status": 403,
+      "status_text": "Forbidden"
+    },
+    {
+      "url": "http://frontend:5173/api/analytics/orphans",
+      "status": 403,
+      "status_text": "Forbidden"
+    },
+    {
+      "url": "http://frontend:5173/api/analytics/orphans",
+      "status": 403,
+      "status_text": "Forbidden"
+    },
+    {
+      "url": "http://frontend:5173/api/analytics/orphans",
+      "status": 403,
+      "status_text": "Forbidden"
+    },
+    {
+      "url": "http://frontend:5173/api/analytics/orphans",
+      "status": 403,
+      "status_text": "Forbidden"
+    },
+    {
+      "url": "http://frontend:5173/api/analytics/orphans",
+      "status": 403,
+      "status_text": "Forbidden"
+    },
+    {
+      "url": "http://frontend:5173/api/analytics/orphans",
+      "status": 403,
+      "status_text": "Forbidden"
+    },
+    {
+      "url": "http://frontend:5173/api/analytics/orphans",
+      "status": 403,
+      "status_text": "Forbidden"
+    },
+    {
+      "url": "http://frontend:5173/api/analytics/orphans",
+      "status": 403,
+      "status_text": "Forbidden"
+    },
+    {
+      "url": "http://frontend:5173/api/analytics/orphans",
+      "status": 403,
+      "status_text": "Forbidden"
+    },
+    {
+      "url": "http://frontend:5173/api/analytics/orphans",
+      "status": 403,
+      "status_text": "Forbidden"
+    },
+    {
+      "url": "http://frontend:5173/api/analytics/orphans",
+      "status": 403,
+      "status_text": "Forbidden"
+    },
+    {
+      "url": "http://frontend:5173/api/analytics/orphans",
+      "status": 403,
+      "status_text": "Forbidden"
+    },
+    {
+      "url": "http://frontend:5173/api/analytics/orphans",
+      "status": 403,
+      "status_text": "Forbidden"
+    },
+    {
+      "url": "http://frontend:5173/api/analytics/orphans",
+      "status": 403,
+      "status_text": "Forbidden"
+    },
+    {
+      "url": "http://frontend:5173/api/analytics/orphans",
+      "status": 403,
+      "status_text": "Forbidden"
+    },
+    {
+      "url": "http://frontend:5173/api/analytics/orphans",
+      "status": 403,
+      "status_text": "Forbidden"
+    },
+    {
+      "url": "http://frontend:5173/api/analytics/orphans",
+      "status": 403,
+      "status_text": "Forbidden"
+    },
+    {
+      "url": "http://frontend:5173/api/analytics/orphans",
+      "status": 403,
+      "status_text": "Forbidden"
+    },
+    {
+      "url": "http://frontend:5173/api/analytics/orphans",
+      "status": 403,
+      "status_text": "Forbidden"
+    },
+    {
+      "url": "http://frontend:5173/api/analytics/orphans",
+      "status": 403,
+      "status_text": "Forbidden"
+    },
+    {
+      "url": "http://frontend:5173/api/analytics/orphans",
+      "status": 403,
+      "status_text": "Forbidden"
+    },
+    {
+      "url": "http://frontend:5173/api/analytics/orphans",
+      "status": 403,
+      "status_text": "Forbidden"
+    },
+    {
+      "url": "http://frontend:5173/api/analytics/orphans",
+      "status": 403,
+      "status_text": "Forbidden"
+    },
+    {
+      "url": "http://frontend:5173/api/analytics/orphans",
+      "status": 403,
+      "status_text": "Forbidden"
+    },
+    {
+      "url": "http://frontend:5173/api/analytics/orphans",
+      "status": 403,
+      "status_text": "Forbidden"
+    },
+    {
+      "url": "http://frontend:5173/api/analytics/orphans",
+      "status": 403,
+      "status_text": "Forbidden"
+    },
+    {
+      "url": "http://frontend:5173/api/analytics/orphans",
+      "status": 403,
+      "status_text": "Forbidden"
+    },
+    {
+      "url": "http://frontend:5173/api/analytics/orphans",
+      "status": 403,
+      "status_text": "Forbidden"
+    },
+    {
+      "url": "http://frontend:5173/api/analytics/orphans",
+      "status": 403,
+      "status_text": "Forbidden"
+    }
+  ],
+  "captured_at": "2026-05-25T12:52:48.783862+00:00",
+  "viewport_url": "http://frontend:5173/surveys/69f86a4564a3943cd07f8cc6/export-frame?chart_id=sub_attribute_scatter&theme=light&frame=chart_body"
+}

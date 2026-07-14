@@ -1,0 +1,31 @@
+# infra/docker/docker-compose.prod.yml
+services:
+  backend:
+    image: ${ECR_REGISTRY}/questioner-backend:${TAG:-latest}
+    env_file: .env.production
+    ports: [ "8080:8080" ]
+    deploy:
+      resources:
+        limits: { cpus: "1.0", memory: "2G" }
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8080/health')" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  pptx-worker:
+    image: ${ECR_REGISTRY}/questioner-backend:${TAG:-latest}
+    command: python -m backend.workers.pptx_worker
+    env_file: .env.production
+    deploy:
+      resources:
+        limits: { cpus: "2.0", memory: "4G" }
+
+  frontend:
+    image: ${ECR_REGISTRY}/questioner-frontend:${TAG:-latest}
+    ports: [ "80:80" ]
+    healthcheck:
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:80/" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3

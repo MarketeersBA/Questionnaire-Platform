@@ -1,0 +1,30 @@
+{
+    "screening_mappings": {
+        "S1": "Gender",
+        "S2": "Age Group",
+        "S3": "Region",
+        "D1": "Income Level",
+        "D2": "Occupation",
+        "SEC_A": "Social Class"
+    },
+    "cohort_logic": {
+        "Age Group": {
+            "gen_z": [
+                18,
+                25
+            ],
+            "millennial": [
+                26,
+                40
+            ],
+            "gen_x": [
+                41,
+                55
+            ],
+            "boomer": [
+                56,
+                120
+            ]
+        }
+    }
+}

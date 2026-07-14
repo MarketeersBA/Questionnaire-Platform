@@ -1,0 +1,11 @@
+# Pre-commit configuration for AI Asset Governance
+repos:
+  - repo: local
+    hooks:
+      - id: ai-guardrail-validation
+        name: AI Asset Guardrail Validation
+        entry: python backend/analytics_module/src/ai/validate_ai_assets.py
+        language: system
+        files: ^backend/resources/analytics/prompts/.*\.json$|^backend/resources/analytics/prompts/god_prompt\.md$
+        pass_filenames: false
+        description: Ensures AI prompts comply with caching and stability guardrails.
