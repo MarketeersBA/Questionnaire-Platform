@@ -68,6 +68,7 @@ db_output.json
 # ─── Debug / Temporary ───
 tmp/
 *.txt
+!requirements.txt
 !README.md
 !docs/**/*.md
 !*.md
