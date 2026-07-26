@@ -1,14 +1,4 @@
 services:
-  mongodb:
-    image: mongo:latest
-    container_name: questioner_mongodb
-    ports:
-      - "127.0.0.1:27018:27017"
-    volumes:
-      - mongodb_data:/data/db
-    networks:
-      - questioner_network
-
   redis:
     image: redis:alpine
     container_name: questioner_redis
@@ -27,7 +17,6 @@ services:
     env_file:
       - ../../.env
     environment:
-      - MONGO_URI=mongodb://mongodb:27017/survey_platform
       - REDIS_URL=redis://redis:6379/0
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://localhost,http://localhost}
       - ENV=${ENV:-dev}
@@ -37,7 +26,6 @@ services:
       - PPTX_ROLLOUT_STAGE=comparison
       - PPTX_EXPORT_FRONTEND_BASE_URL=${FRONTEND_URL:-http://frontend:5173}
     depends_on:
-      - mongodb
       - redis
     networks:
       - questioner_network
@@ -54,7 +42,6 @@ services:
     env_file:
       - ../../.env
     environment:
-      - MONGO_URI=mongodb://mongodb:27017/survey_platform
       - REDIS_URL=redis://redis:6379/0
       - ENV=dev
       - REPORTS_DIR=backend/presintion report
@@ -67,7 +54,6 @@ services:
       - PPTX_STALE_RECOVERY_ENABLED=true
       - PPTX_CAPTURE_PROGRESS_ENABLED=true
     depends_on:
-      - mongodb
       - redis
       - backend
       - frontend
@@ -115,5 +101,4 @@ networks:
     driver: bridge
 
 volumes:
-  mongodb_data:
   reports_data:
