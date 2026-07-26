@@ -29,13 +29,13 @@ services:
     environment:
       - MONGO_URI=mongodb://mongodb:27017/survey_platform
       - REDIS_URL=redis://redis:6379/0
-      - ALLOWED_ORIGINS=https://192.168.1.12,https://localhost,https://127.0.0.1,http://localhost:3001
-      - ENV=dev
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://localhost,http://localhost}
+      - ENV=${ENV:-dev}
       - REPORTS_DIR=backend/presintion report
       - ANALYTICS_DEVELOPER_MODE=true
       - PPTX_RENDER_MODE=hybrid
       - PPTX_ROLLOUT_STAGE=comparison
-      - PPTX_EXPORT_FRONTEND_BASE_URL=http://frontend:5173
+      - PPTX_EXPORT_FRONTEND_BASE_URL=${FRONTEND_URL:-http://frontend:5173}
     depends_on:
       - mongodb
       - redis
@@ -88,8 +88,8 @@ services:
       - ../../frontend:/app
       - /app/node_modules
     environment:
-      - ENV=dev
-      - VITE_PUBLIC_SURVEY_BASE_URL=https://192.168.1.12
+      - ENV=${ENV:-dev}
+      - VITE_PUBLIC_SURVEY_BASE_URL=${FRONTEND_URL:-https://localhost}
     depends_on:
       - backend
     networks:
