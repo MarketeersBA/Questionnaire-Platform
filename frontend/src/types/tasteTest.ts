@@ -1,6 +1,6 @@
 export interface QuestionMeta {
     nature: "fixed" | "dynamic" | "open";
-    inputType: "scale" | "single-choice" | "multi-choice" | "bipolar" | "open-ended" | "numeric" | "packaging-heatmap";
+    inputType: "scale" | "single-choice" | "multi-choice" | "bipolar" | "open-ended" | "numeric" | "packaging-heatmap" | "media-upload";
     scaleMax?: number;
     min?: number;
     max?: number;
