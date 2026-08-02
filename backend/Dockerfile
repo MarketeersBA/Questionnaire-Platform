@@ -6,6 +6,11 @@ RUN pip install --user --no-cache-dir -r requirements.txt
 
 # --- Stage 2: Production ---
 FROM python:3.11-slim
+RUN useradd -m -r appuser
+WORKDIR /app
+COPY --from=builder /root/.local /home/appuser/.local
+ENV PATH=/home/appuser/.local/bin:$PATH
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     tini ffmpeg libnss3 libnspr4 libatk1.0-0 libatk-bridge2.0-0 \
     libcups2 libdrm2 libdbus-1-3 libxkbcommon0 libxcomposite1 \
@@ -13,10 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpango-1.0-0 libcairo2 \
     && rm -rf /var/lib/apt/lists/* \
     && playwright install chromium
-RUN useradd -m -r appuser
-WORKDIR /app
-COPY --from=builder /root/.local /home/appuser/.local
-ENV PATH=/home/appuser/.local/bin:$PATH
+
 COPY backend/ ./backend/
 RUN mkdir -p /tmp/reports && chown appuser:appuser /tmp/reports
 USER appuser
