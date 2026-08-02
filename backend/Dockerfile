@@ -8,7 +8,7 @@ RUN pip install --user --no-cache-dir -r requirements.txt
 FROM python:3.11-slim
 RUN useradd -m -r appuser
 WORKDIR /app
-COPY --from=builder /root/.local /home/appuser/.local
+COPY --chown=appuser:appuser --from=builder /root/.local /home/appuser/.local
 ENV PATH=/home/appuser/.local/bin:$PATH
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -18,8 +18,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpango-1.0-0 libcairo2 \
     && rm -rf /var/lib/apt/lists/*
 
-COPY backend/ ./backend/
-RUN mkdir -p /tmp/reports && chown -R appuser:appuser /home/appuser /tmp/reports /app
+COPY --chown=appuser:appuser backend/ ./backend/
+RUN mkdir -p /tmp/reports && chown appuser:appuser /tmp/reports
 USER appuser
 RUN playwright install chromium
 ENV PYTHONPATH=/app PORT=8080
