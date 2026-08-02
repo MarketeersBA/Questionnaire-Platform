@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import OpenEndAnswerInput from '../voice-feedback/OpenEndAnswerInput';
@@ -87,6 +88,39 @@ export default function TasteTestOpenEndQuestion({
       respondentPart,
     ));
   };
+
+  const textValue = normalizeOpenEndAnswer(value).text || '';
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      const debounceCtx = {
+        questionId,
+        questionText,
+        effectiveType,
+        timing,
+        sectionTitle,
+        aiFollowup,
+        text: textValue,
+        followUpStateMap: getFollowUpStateSnapshot(),
+      };
+      const evaluation = evaluateTasteTestTextBlurFollowUp(debounceCtx);
+      if (evaluation.shouldTrigger && onFollowUpTrigger) {
+        onFollowUpTrigger(
+          questionId,
+          textValue,
+          questionText,
+          brandName,
+          'text',
+          followUpEligibility
+        );
+      }
+    }, 3000);
+
+    return () => clearTimeout(timeout);
+  }, [
+    textValue, questionId, questionText, effectiveType, timing, sectionTitle,
+    aiFollowup, brandName, followUpEligibility, onFollowUpTrigger, getFollowUpStateSnapshot
+  ]);
 
   return (
     <>

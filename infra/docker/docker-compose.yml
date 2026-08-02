@@ -7,6 +7,8 @@ services:
     networks:
       - questioner_network
 
+
+
   backend:
     build:
       context: ../../
@@ -70,32 +72,34 @@ services:
       dockerfile: frontend/Dockerfile.dev
     container_name: questioner_frontend
     command: sh -c "npm install --legacy-peer-deps && npm run dev -- --host"
+    ports:
+      - "5173:5173"
     volumes:
       - ../../frontend:/app
       - /app/node_modules
     environment:
       - ENV=${ENV:-dev}
-      - VITE_PUBLIC_SURVEY_BASE_URL=https://questionnaire.marketeers-ba.com
+
     depends_on:
       - backend
     networks:
       - questioner_network
 
-  nginx:
-    image: nginx:alpine
-    container_name: questioner_nginx
-    ports:
-      - "443:443"
-      - "80:80"
-    volumes:
-      - ../../infra/nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
-      - /etc/letsencrypt:/etc/letsencrypt:ro
-      - ../../certs:/etc/nginx/certs:ro
-    depends_on:
-      - frontend
-      - backend
-    networks:
-      - questioner_network
+#  nginx:
+#    image: nginx:alpine
+#    container_name: questioner_nginx
+#    ports:
+#      - "443:443"
+#      - "80:80"
+#    volumes:
+#      - ../../infra/nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+#      - /etc/letsencrypt:/etc/letsencrypt:ro
+#      - ../../certs:/etc/nginx/certs:ro
+#    depends_on:
+#      - frontend
+#      - backend
+#    networks:
+#      - questioner_network
 
 networks:
   questioner_network:

@@ -154,6 +154,18 @@ export default function PublicSurvey() {
   const tasteTestNavigationPosition = tasteTestRespondentNavigation?.position ?? null;
   const tasteTestCanGoBack = tasteTestRespondentNavigation?.bounds.canGoBack ?? false;
 
+  const computedModuleLanguage = useMemo(() => {
+    if (survey?.language === 'ar') return 'ar';
+    const isArabicContext = /[\u0600-\u06FF]/.test(
+      survey?.purchase_funnel?.category_name || 
+      survey?.customizations?.brand_name || 
+      survey?.brand_usage?.target_brand || 
+      survey?.brand_pricing_behavior?.target_brand ||
+      ''
+    );
+    return isArabicContext ? 'ar' : 'en';
+  }, [survey]);
+
   const markModuleComplete = (moduleId: string) => {
     setCompletedModules(prev => new Set([...prev, moduleId]));
   };
@@ -405,12 +417,6 @@ export default function PublicSurvey() {
     window.scrollTo(0, 0);
   }, [step]);
 
-  const getPurchaseFunnelMasterBrands = () => [
-    ...(survey?.purchase_funnel?.brand_list?.map((b: any) =>
-      survey?.language === 'ar' ? b.name_ar : b.name_en
-    ) || []),
-    ...customBrands,
-  ];
 
   const renderCleanText = (text: string, brandName: string = '') => {
     if (!text) return '';
@@ -668,7 +674,7 @@ export default function PublicSurvey() {
           ? isOpenEndAnswerComplete(l2Answers[answerKey])
           : Boolean(l2Answers[answerKey]);
         if (q.required && !qComplete) {
-          const promptText = renderCleanText(q.text || q.label || '', currentBrand).split('?')[0];
+          const promptText = renderCleanText(q.text || q.label || '', currentBrand || '').split('?')[0];
           toast.error(survey?.language === 'ar' ? `يرجى الإجابة على: ${promptText}?` : `Please answer: ${promptText}?`);
           scrollToError(`q-${answerKey}`);
           return;
@@ -793,7 +799,7 @@ export default function PublicSurvey() {
             <ConfigurableModuleStep
               moduleId={currentModuleId}
               module={moduleDocs[currentModuleId]!}
-              language={survey?.language === 'ar' ? 'ar' : 'en'}
+              language={computedModuleLanguage}
               category={getModulePlaceholderCategory(survey, currentModuleId)}
               brandContext={
                 ['purchase_funnel', 'brand_analyzer', 'brand_usage', 'brand_pricing_behavior'].includes(currentModuleId)
@@ -846,7 +852,7 @@ export default function PublicSurvey() {
           >
             <ProductTestRespondentStep
               snapshot={productTestSnapshot}
-              language={survey?.language === 'ar' ? 'ar' : 'en'}
+              language={computedModuleLanguage}
               loading={loading}
               answers={productTestAnswers}
               phaseIndex={productTestPhaseIndex}
@@ -965,7 +971,7 @@ export default function PublicSurvey() {
                       {visibleSections.map((section: any, sIdx: number) => (
                           <div key={sIdx} className="space-y-12">
                             {(() => {
-                              const sectionTitle = renderCleanText(section.title || '', currentBrand);
+                              const sectionTitle = renderCleanText(section.title || '', currentBrand || '');
                               const effectiveCurrentBrand = currentBrand ? getEffectiveBrandName(currentBrand) : '';
                               return (
                                 <>
@@ -1020,7 +1026,7 @@ export default function PublicSurvey() {
                                   return true;
                                 }).map((q: any) => {
                                   const uniqueKey = buildL2AnswerKey(currentBrand, q.id);
-                                  const questionText = renderCleanText(q.text || q.label, currentBrand);
+                                  const questionText = renderCleanText(q.text || q.label || '', currentBrand || '');
                                   const scaleMax = q.questionMeta?.scaleMax || 10;
                                   const isAutoOpenEnd = q.type === 'mcq' && q.options?.length === 1 && q.options[0].toLowerCase() === 'open-end';
                                   const effectiveType = isAutoOpenEnd ? 'open-ended' : q.type;
@@ -1066,7 +1072,7 @@ export default function PublicSurvey() {
                                             onChange={(nextValue) => {
                                               setL2Answers({ ...l2Answers, [uniqueKey]: nextValue });
                                             }}
-                                            language={survey?.language === 'ar' ? 'ar' : 'en'}
+                                            language={computedModuleLanguage}
                                             minLabel={q.questionMeta?.minLabel}
                                             maxLabel={q.questionMeta?.maxLabel}
                                             numberSeparator="dash"
@@ -1077,7 +1083,7 @@ export default function PublicSurvey() {
                                       ) : effectiveType === 'bipolar' ? (
                                         <div className="space-y-4 py-2 px-2">
                                           <ScaleAnchorLabels
-                                            language={survey?.language === 'ar' ? 'ar' : 'en'}
+                                            language={computedModuleLanguage}
                                             variant="bipolar"
                                             minLabel={q.questionMeta?.minLabel}
                                             maxLabel={q.questionMeta?.maxLabel}
@@ -1119,7 +1125,7 @@ export default function PublicSurvey() {
                                           sectionTitle={sectionTitle}
                                           value={l2Answers[uniqueKey]}
                                           onChange={(next) => setL2Answers({ ...l2Answers, [uniqueKey]: next })}
-                                          language={survey?.language === 'ar' ? 'ar' : 'en'}
+                                          language={computedModuleLanguage}
                                           brandName={effectiveCurrentBrand}
                                           publicToken={token}
                                           showVoice={showVoice}
@@ -1166,7 +1172,7 @@ export default function PublicSurvey() {
                 })()}
               </div>
               <TasteTestRespondentNavBar
-                language={survey?.language === 'ar' ? 'ar' : 'en'}
+                language={computedModuleLanguage}
                 loading={loading}
                 canGoBack={tasteTestCanGoBack}
                 continueLabel={
