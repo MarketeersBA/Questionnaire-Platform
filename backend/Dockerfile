@@ -16,12 +16,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libcups2 libdrm2 libdbus-1-3 libxkbcommon0 libxcomposite1 \
     libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2 \
     libpango-1.0-0 libcairo2 \
-    && rm -rf /var/lib/apt/lists/* \
-    && playwright install chromium
+    && rm -rf /var/lib/apt/lists/*
 
 COPY backend/ ./backend/
-RUN mkdir -p /tmp/reports && chown appuser:appuser /tmp/reports
+RUN mkdir -p /tmp/reports && chown -R appuser:appuser /home/appuser /tmp/reports /app
 USER appuser
+RUN playwright install chromium
 ENV PYTHONPATH=/app PORT=8080
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
