@@ -85,21 +85,21 @@ services:
     networks:
       - questioner_network
 
-#  nginx:
-#    image: nginx:alpine
-#    container_name: questioner_nginx
-#    ports:
-#      - "443:443"
-#      - "80:80"
-#    volumes:
-#      - ../../infra/nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
-#      - /etc/letsencrypt:/etc/letsencrypt:ro
-#      - ../../certs:/etc/nginx/certs:ro
-#    depends_on:
-#      - frontend
-#      - backend
-#    networks:
-#      - questioner_network
+  nginx:
+    image: nginx:alpine
+    container_name: questioner_nginx
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ../../infra/nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - ../../certs:/etc/nginx/certs:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - questioner_network
 
 networks:
   questioner_network:
