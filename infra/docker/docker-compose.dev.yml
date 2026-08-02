@@ -1,0 +1,22 @@
+# Local-only override: use HTTP nginx.dev.conf (no Let's Encrypt).
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+services:
+  nginx:
+    volumes:
+      - ../../infra/nginx/nginx.dev.conf:/etc/nginx/nginx.conf:ro
+
+  # Inside Docker, localhost:27018 is the container itself — use the mongo service alias.
+  backend:
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/survey_platform
+
+  pptx-worker:
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/survey_platform
+
+  # Don't force production respondent URLs in local Vite.
+  # surveyLinks.ts also ignores this in DEV and uses window.location.origin.
+  frontend:
+    environment:
+      - VITE_PUBLIC_SURVEY_BASE_URL=

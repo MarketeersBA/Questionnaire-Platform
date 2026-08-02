@@ -7,6 +7,41 @@ import random
 import string
 import re
 
+# Arabic labels for taste-test main attributes shown in respondent section titles.
+TASTE_ATTRIBUTE_AR: Dict[str, str] = {
+    "Appearance": "المظهر",
+    "Visual Appearance": "المظهر البصري",
+    "Color": "اللون",
+    "Odor": "الرائحة",
+    "Aroma": "الرائحة",
+    "Aroma Profile": "خصائص الرائحة",
+    "Texture": "القوام",
+    "Texture Profile": "خصائص القوام",
+    "Physical Texture": "القوام الفيزيائي",
+    "Taste Profile": "خصائص الطعم",
+    "Before Taste": "قبل التذوق",
+    "After Taste": "بعد التذوق",
+    "Aftertaste": "الطعم المتبقي",
+    "Aftertaste & Finish": "الطعم المتبقي والنهاية",
+    "Overall Taste": "الطعم العام",
+    "Overall Likeness": "الإعجاب العام",
+    "Overall Satisfaction": "الرضا العام",
+    "Flavor Intensity": "شدة النكهة",
+    "Mouthfeel": "الإحساس في الفم",
+    "Mouthfeel Experience": "تجربة الإحساس في الفم",
+    "Freshness": "الانتعاش",
+    "Freshness Perception": "الإحساس بالانتعاش",
+    "Authenticity": "الأصالة",
+    "Product Authenticity": "أصالة المنتج",
+}
+
+
+def localize_taste_test_attribute(name: str, language: str) -> str:
+    if not name or language != "ar":
+        return name or ""
+    return TASTE_ATTRIBUTE_AR.get(name) or TASTE_ATTRIBUTE_AR.get(name.strip()) or name
+
+
 class OrchestrationService:
     def format_text(self, text: str, product: str = "product", category: str = "Category", brand: str = "Brand") -> str:
         if not text:
@@ -187,14 +222,6 @@ class OrchestrationService:
 
                 # 1. Individual Brand Evaluation (L2) Loop
                 for brand in all_brands:
-                    # Instructions
-                    l2_sections.append({
-                        "title": f"{brand} - {'تعليمات' if language == 'ar' else 'Instructions'}",
-                        "isInstruction": True,
-                        "module": "taste_test",
-                        "content": f"يرجى تذوق {brand} الآن." if language == 'ar' else f"Please taste {brand} now."
-                    })
-
                     # Attributes sequence
                     sequence = tt_config.get("attribute_sequence") or []
                     if not sequence:
@@ -222,6 +249,7 @@ class OrchestrationService:
 
                         # Custom handling
                         matching_custom = next((c for c in tt_config.get("custom_research_attributes", []) if c["main_attribute"] == main_attr), None)
+                        display_attr = localize_taste_test_attribute(main_attr, language)
                         
                         if source == "custom" or matching_custom:
                             if not attr_questions:
@@ -229,7 +257,7 @@ class OrchestrationService:
                                 attr_questions.insert(0, {
                                     "id": f"{brand}_fallback_{main_attr.replace(' ', '_')}_{''.join(random.choices(string.ascii_lowercase + string.digits, k=4))}",
                                     "type": "scale",
-                                    "text": f"ما رأيك في ({main_attr}) الخاصة بـ {brand}؟" if language == 'ar' else f"What do you think about ({main_attr}) for {brand}?",
+                                    "text": f"ما رأيك في ({display_attr}) الخاصة بـ {brand}؟" if language == 'ar' else f"What do you think about ({main_attr}) for {brand}?",
                                     "options": [],
                                     "required": True,
                                     "timing": "After Taste",
@@ -250,7 +278,7 @@ class OrchestrationService:
                                 attr_questions.append({
                                     "id": f"{brand}_custom_sub_{label.replace(' ', '_')}_{''.join(random.choices(string.ascii_lowercase + string.digits, k=4))}",
                                     "type": "scale",
-                                    "text": f"{main_attr} - {label} ({min_l} - {max_l})" if language == 'ar' else f"{main_attr}: How is the {label}? ({min_l} - {max_l})",
+                                    "text": f"{display_attr} - {label} ({min_l} - {max_l})" if language == 'ar' else f"{main_attr}: How is the {label}? ({min_l} - {max_l})",
                                     "options": [],
                                     "required": True,
                                     "timing": "After Taste",
@@ -267,7 +295,7 @@ class OrchestrationService:
                              attr_questions.append({
                                 "id": f"{brand}_fallback_{main_attr.replace(' ', '_')}_{''.join(random.choices(string.ascii_lowercase + string.digits, k=4))}",
                                 "type": "scale",
-                                "text": f"ما رأيك في ({main_attr}) الخاصة بـ {brand}؟" if language == 'ar' else f"What do you think about ({main_attr}) for {brand}?",
+                                "text": f"ما رأيك في ({display_attr}) الخاصة بـ {brand}؟" if language == 'ar' else f"What do you think about ({main_attr}) for {brand}?",
                                 "options": [],
                                 "required": True,
                                 "timing": "After Taste",
@@ -282,7 +310,7 @@ class OrchestrationService:
 
                         if attr_questions:
                             l2_sections.append({
-                                "title": f"{brand}: {main_attr}",
+                                "title": f"{brand}: {display_attr}",
                                 "brand": brand,
                                 "module": "taste_test",
                                 "attribute": main_attr,

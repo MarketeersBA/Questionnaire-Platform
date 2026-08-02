@@ -60,7 +60,7 @@ describe('HorizontalScaleSlider interactions', () => {
         });
     });
 
-    it('supports thumb drag, body scroll lock, and release restore', async () => {
+    it('supports thumb drag without locking body overflow', async () => {
         render(<SliderHarness initialValue={1} max={5} />);
 
         const thumb = screen.getAllByRole('slider').find((el) => el.tagName !== 'INPUT');
@@ -84,20 +84,18 @@ describe('HorizontalScaleSlider interactions', () => {
         });
 
         fireEvent.pointerDown(thumb!, { button: 0, pointerId: 1, clientX: 10 });
-        await waitFor(() => expect(document.body.style.overflow).toBe('hidden'));
+        expect(document.body.style.overflow).toBe('');
 
         fireEvent.pointerMove(track, { pointerId: 1, clientX: 290 });
         await waitFor(() => expect(thumb!.getAttribute('aria-valuenow')).toBe('5'));
         expect(Boolean(screen.getByText('5'))).toBe(true);
 
         fireEvent.pointerUp(track, { pointerId: 1 });
-        await waitFor(() => expect(document.body.style.overflow).toBe(''));
+        expect(document.body.style.overflow).toBe('');
     });
 
-    it('supports track tap jump and dismisses hint after first interaction', async () => {
+    it('supports track tap jump', async () => {
         render(<SliderHarness initialValue={1} max={5} />);
-
-        expect(Boolean(screen.getByText('Drag the handle or tap the bar'))).toBe(true);
 
         const thumb = screen.getAllByRole('slider').find((el) => el.tagName !== 'INPUT');
         const track = thumb!.parentElement as HTMLElement;
@@ -119,8 +117,5 @@ describe('HorizontalScaleSlider interactions', () => {
 
         fireEvent.pointerDown(track, { button: 0, pointerId: 3, clientX: 150, target: track });
         await waitFor(() => expect(thumb!.getAttribute('aria-valuenow')).toBe('3'));
-        await waitFor(() =>
-            expect(screen.queryByText('Drag the handle or tap the bar')).toBeNull(),
-        );
     });
 });

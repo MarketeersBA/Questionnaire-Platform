@@ -1,8 +1,6 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import {
-    useCallback,
     useEffect,
-    useId,
     useRef,
     useState,
 } from 'react';
@@ -16,11 +14,8 @@ import {
 import { scaleValueToPercent, type ScaleRange } from '../../utils/horizontalScaleMath';
 import ScaleAnchorLabels from './ScaleAnchorLabels';
 import {
-    getScaleDragHintText,
     HORIZONTAL_SCALE_SLIDER_RESPONSIVE_CLASSES,
     HORIZONTAL_SCALE_SLIDER_TIERS,
-    persistScaleDragHintDismissed,
-    readScaleDragHintDismissed,
     resolveTrackPaddingForSize,
     type HorizontalScaleSliderSize,
 } from './horizontalScaleSliderConfig';
@@ -130,10 +125,10 @@ function ScaleValueBadge({ value, percent, visible }: ScaleValueBadgeProps) {
     return (
         <motion.div
             role="presentation"
-            className="pointer-events-none absolute z-40 -translate-x-1/2 rounded-2xl bg-brand-blue px-3 py-1.5 text-sm font-black text-white shadow-lg"
+            className="pointer-events-none absolute z-40 -translate-x-1/2 rounded-lg bg-brand-blue px-2 py-0.5 text-xs font-black text-white shadow-md"
             style={{ left: `${percent}%`, top: '-0.25rem' }}
             initial={{ opacity: 0, y: 4, scale: 0.9 }}
-            animate={{ opacity: 1, y: -36, scale: 1 }}
+            animate={{ opacity: 1, y: -28, scale: 1 }}
             exit={{ opacity: 0, y: 4, scale: 0.9 }}
         >
             {value}
@@ -163,40 +158,20 @@ export default function HorizontalScaleSlider({
     const range: ScaleRange = { min, max };
     const isMdUp = useMdBreakpoint();
     const prefersReducedMotion = useReducedMotion();
-    const hintId = useId();
     const trackRef = useRef<HTMLDivElement>(null);
     const thumbRef = useRef<HTMLDivElement>(null);
     const rangeInputRef = useRef<HTMLInputElement>(null);
 
-    const [hintDismissed, setHintDismissed] = useState(readScaleDragHintDismissed);
-
     const visualTier = resolveVisualTier(size, isMdUp);
     const trackPadding = resolveTrackPaddingForSize(size, isMdUp);
     const useResponsiveClasses = size === 'large';
-
-    const dismissHint = useCallback(() => {
-        if (hintDismissed) {
-            return;
-        }
-
-        setHintDismissed(true);
-        persistScaleDragHintDismissed();
-    }, [hintDismissed]);
-
-    const handleChange = useCallback(
-        (nextValue: number) => {
-            dismissHint();
-            onChange(nextValue);
-        },
-        [dismissHint, onChange],
-    );
 
     const { isDragging, dragValue, trackHandlers, thumbHandlers, touchActionStyle } =
         useHorizontalScaleDrag({
             value,
             min,
             max,
-            onChange: handleChange,
+            onChange,
             trackRef,
             thumbRef,
             trackPadding,
@@ -207,8 +182,8 @@ export default function HorizontalScaleSlider({
     const fillPercent = scaleValueToPercent(displayValue, range);
     const thumbHalfPx = useResponsiveClasses
         ? size === 'large' && !isMdUp
-            ? 32
-            : 24
+            ? 22
+            : 18
         : visualTier.thumbHalfPx;
 
     const ariaLabel = buildScaleRangeAriaLabel({
@@ -248,19 +223,14 @@ export default function HorizontalScaleSlider({
         ? HORIZONTAL_SCALE_SLIDER_RESPONSIVE_CLASSES.hitAreaHeight
         : visualTier.hitAreaHeight;
 
-    useEffect(() => {
-        if (!isDragging) return;
-
-        const previousOverflow = document.body.style.overflow;
-        document.body.style.overflow = 'hidden';
-
-        return () => {
-            document.body.style.overflow = previousOverflow;
-        };
-    }, [isDragging]);
+    // Instant tracking while dragging avoids spring lag; springs only on settle.
+    const motionTransition =
+        prefersReducedMotion || isDragging
+            ? { duration: 0 }
+            : { type: 'spring' as const, stiffness: 400, damping: 32 };
 
     return (
-        <div className={`space-y-4 ${pulseError ? 'rounded-2xl ring-2 ring-rose-400/80 p-2' : ''} ${className}`.trim()}>
+        <div className={`space-y-2 ${pulseError ? 'rounded-2xl ring-2 ring-rose-400/80 p-2' : ''} ${className}`.trim()}>
             <div
                 className={`${containerClass} ${rowPaddingClass} overflow-visible focus-within:outline-none`}
             >
@@ -277,17 +247,13 @@ export default function HorizontalScaleSlider({
                     {...trackHandlers}
                 >
                     <div
-                        className={`absolute ${trackInsetClass} ${trackHeightClass} overflow-hidden rounded-full border border-slate-200 bg-slate-100 shadow-inner transition-colors dark:border-slate-800 dark:bg-slate-800/50`}
+                        className={`absolute ${trackInsetClass} top-1/2 -translate-y-1/2 ${trackHeightClass} overflow-hidden rounded-full border border-slate-200 bg-slate-100 shadow-inner transition-colors dark:border-slate-800 dark:bg-slate-800/50`}
                     >
                         <motion.div
                             className="absolute inset-y-0 left-0 bg-gradient-to-r from-brand-blue via-brand-accent to-brand-cyan shadow-[0_0_15px_rgba(37,94,145,0.3)]"
                             initial={false}
                             animate={{ width: `${fillPercent}%` }}
-                            transition={
-                                prefersReducedMotion
-                                    ? { duration: 0 }
-                                    : { type: 'spring', stiffness: 400, damping: 32 }
-                            }
+                            transition={motionTransition}
                         />
 
                         <ScaleTickMarks range={range} trackInset="inset-x-0" />
@@ -302,7 +268,7 @@ export default function HorizontalScaleSlider({
                         value={displayValue}
                         aria-label={ariaLabel}
                         aria-valuetext={ariaValueText}
-                        onChange={(event) => handleChange(parseInt(event.target.value, 10))}
+                        onChange={(event) => onChange(parseInt(event.target.value, 10))}
                         className={`absolute inset-x-0 top-1/2 z-30 w-full -translate-y-1/2 opacity-0 ${hitAreaHeightClass} cursor-pointer focus-visible:opacity-100 focus-visible:pointer-events-auto focus-visible:ring-4 focus-visible:ring-brand-blue/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900`}
                     />
 
@@ -314,15 +280,15 @@ export default function HorizontalScaleSlider({
                         aria-valuemax={max}
                         aria-valuenow={displayValue}
                         aria-valuetext={ariaValueText}
-                        aria-describedby={!hintDismissed ? hintId : undefined}
                         tabIndex={-1}
-                        className={`absolute z-20 flex cursor-grab items-center justify-center bg-white active:cursor-grabbing dark:bg-slate-900 ${thumbSizeClass} ${thumbBorderClass} ${thumbRadiusClass} border-brand-blue shadow-2xl transition-shadow ${isDragging ? 'shadow-[0_25px_50px_-12px_rgba(37,94,145,0.45)]' : ''}`}
+                        className={`absolute top-1/2 z-20 flex cursor-grab items-center justify-center bg-white active:cursor-grabbing dark:bg-slate-900 ${thumbSizeClass} ${thumbBorderClass} ${thumbRadiusClass} border-brand-blue shadow-lg transition-shadow ${isDragging ? 'shadow-[0_12px_28px_-8px_rgba(37,94,145,0.45)]' : ''}`}
                         animate={{
                             left: `calc(${fillPercent}% - ${thumbHalfPx}px)`,
-                            scale: prefersReducedMotion ? 1 : (isDragging ? 1.25 : displayValue ? 1.05 : 1),
+                            y: '-50%',
+                            scale: prefersReducedMotion ? 1 : (isDragging ? 1.08 : 1),
                         }}
                         transition={
-                            prefersReducedMotion
+                            prefersReducedMotion || isDragging
                                 ? { duration: 0 }
                                 : { type: 'spring', stiffness: 400, damping: 28 }
                         }
@@ -332,15 +298,6 @@ export default function HorizontalScaleSlider({
                     </motion.div>
                 </div>
             </div>
-
-            {!hintDismissed && isScaleDragEnabled && (
-                <p
-                    id={hintId}
-                    className="px-1 text-center text-xs font-medium text-slate-400 dark:text-slate-500"
-                >
-                    {getScaleDragHintText(language)}
-                </p>
-            )}
 
             <ScaleAnchorLabels
                 language={language}

@@ -137,12 +137,6 @@ const AudioRecorder: React.FC<Props> = ({
 
     return (
         <div className={wrapperClass}>
-            {!compact && (
-                <p className="text-[10px] font-black uppercase tracking-widest text-brand-blue flex items-center gap-2">
-                    <Mic size={14} />
-                    {isAr ? 'سجّل إجابتك صوتياً' : 'Record your answer by voice'}
-                </p>
-            )}
 
             {!audioUrl && !isRecording && (
                 <button

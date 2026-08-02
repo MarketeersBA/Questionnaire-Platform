@@ -56,17 +56,6 @@ export default function ProductTestPhaseHeader({
                 language={language}
             />
 
-            {brandDisplay && (
-                <div className="flex flex-wrap items-center gap-2 px-1">
-                    <span className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">
-                        {isArabic ? 'تقييم:' : 'Evaluating:'}
-                    </span>
-                    <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full bg-brand-blue/10 text-brand-blue border border-brand-blue/20">
-                        {brandDisplay}
-                    </span>
-                </div>
-            )}
-
             {mode === 'intro' ? (
                 <motion.div
                     initial={{ opacity: 0, y: 12 }}

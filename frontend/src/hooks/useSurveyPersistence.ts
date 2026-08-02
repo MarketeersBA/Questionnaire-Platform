@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import type { SurveyStep, ConfigurableModuleId } from '../types/surveyFlow';
 import type { ModuleAnswersMap } from '../types/moduleQuestions';
 import type { ProductTestWizardMode } from '../types/respondentNavigation';
+import type { ProductTestAnswers } from '../utils/productTestFlowOrchestration';
 import { sessions } from '../services/api';
 import { normalizeAiInsightsMap } from '../utils/followUpAnswerPersistence';
 

@@ -4,6 +4,7 @@ import {
     resolveTasteTestQuestionId,
     type TasteTestModuleMetadata,
 } from './tasteTestModuleUtils';
+import { localizeTasteTestAttribute } from './tasteTestAttributeLabels';
 
 const FALLBACK_FIXED_QUESTIONS = [
     {
@@ -174,16 +175,6 @@ export function generateTasteTestModuleSchema(
 
     // 2. The Brand Loop
     allBrands.forEach((brand) => {
-        // Instruction Block per brand
-        layer2Sections.push({
-            title: `${brand} - ${language === 'ar' ? "تعليمات" : "Instructions"}`,
-            isInstruction: true,
-            module: 'taste_test',
-            content: language === 'ar'
-                ? `يرجى تذوق ${brand} الآن.`
-                : `Please taste ${brand} now.`
-        });
-
         // Unify the Sequence Loop
         const sequence = config.attribute_sequence && config.attribute_sequence.length > 0
             ? config.attribute_sequence
@@ -211,6 +202,7 @@ export function generateTasteTestModuleSchema(
             // 2. Identify custom dimensions 
             const matchingCustom = (config.custom_research_attributes || []).find(c => c.main_attribute === mainAttr);
             const isArabic = config.language === 'ar';
+            const displayAttr = localizeTasteTestAttribute(mainAttr, language);
 
             if (source === 'custom' || matchingCustom) {
 
@@ -220,7 +212,7 @@ export function generateTasteTestModuleSchema(
                         id: `${brand}_fallback_${mainAttr.replace(/\s+/g, '_')}_${Math.random().toString(36).substr(2, 4)}`,
                         type: 'scale',
                         text: isArabic
-                            ? `ما رأيك في (${mainAttr}) الخاصة بـ ${brand}؟`
+                            ? `ما رأيك في (${displayAttr}) الخاصة بـ ${brand}؟`
                             : `What do you think about (${mainAttr}) for ${brand}?`,
                         options: [],
                         required: true,
@@ -245,7 +237,7 @@ export function generateTasteTestModuleSchema(
                         id: `${brand}_custom_sub_${label.replace(/\s+/g, '_')}_${Math.random().toString(36).substr(2, 4)}`,
                         type: 'scale',
                         text: isArabic
-                            ? `${mainAttr} - ${label} (${minL} - ${maxL})`
+                            ? `${displayAttr} - ${label} (${minL} - ${maxL})`
                             : `${mainAttr}: How is the ${label}? (${minL} - ${maxL})`,
                         options: [],
                         required: true,
@@ -265,7 +257,7 @@ export function generateTasteTestModuleSchema(
                     id: `${brand}_fallback_${mainAttr.replace(/\s+/g, '_')}_${Math.random().toString(36).substr(2, 4)}`,
                     type: 'scale',
                     text: isArabic
-                        ? `ما رأيك في (${mainAttr}) الخاصة بـ ${brand}؟`
+                        ? `ما رأيك في (${displayAttr}) الخاصة بـ ${brand}؟`
                         : `What do you think about (${mainAttr}) for ${brand}?`,
                     options: [],
                     required: true,
@@ -282,7 +274,7 @@ export function generateTasteTestModuleSchema(
 
             if (attrQuestions.length > 0) {
                 layer2Sections.push({
-                    title: `${brand}: ${mainAttr}`,
+                    title: `${brand}: ${displayAttr}`,
                     brand: brand,
                     module: 'taste_test',
                     attribute: mainAttr,

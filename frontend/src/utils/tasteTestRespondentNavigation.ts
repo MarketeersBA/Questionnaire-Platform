@@ -10,6 +10,7 @@ interface TasteTestLayer2Section {
     title?: string;
     brand?: string | null;
     isBrandDynamic?: boolean;
+    isInstruction?: boolean;
     questions?: Array<{ text?: string; label?: string }>;
 }
 
@@ -28,6 +29,36 @@ function isPreferenceSection(section: TasteTestLayer2Section): boolean {
             ((q.text || q.label || '').toLowerCase()).includes('prefer'),
         )
     );
+}
+
+/** Brand taste-instruction banner sections (e.g. "AnyBrand - تعليمات / Instructions"). */
+export function isTasteTestInstructionSection(
+    section: TasteTestLayer2Section & { content?: string },
+): boolean {
+    if (section.isInstruction) return true;
+
+    const title = (section.title || '').toLowerCase();
+    if (title.includes('instruction') || title.includes('تعليمات')) return true;
+
+    // Legacy banners: content-only "please taste…" blocks with no questions
+    const hasNoQuestions = !(section.questions && section.questions.length > 0);
+    const content = section.content || '';
+    if (
+        hasNoQuestions
+        && content
+        && (/please\s+taste/i.test(content) || content.includes('يرجى تذوق'))
+    ) {
+        return true;
+    }
+
+    return false;
+}
+
+/** Drop all brand instruction banners from a layer2 section list (any brand / survey). */
+export function stripTasteTestInstructionSections<T extends TasteTestLayer2Section>(
+    sections: T[] | null | undefined,
+): T[] {
+    return (sections || []).filter((section) => !isTasteTestInstructionSection(section));
 }
 
 function isExcludedBrandName(brand: string): boolean {
@@ -187,6 +218,8 @@ export function isTasteTestSectionVisible(
     position: TasteTestNavigationPosition,
     survey: TasteTestSurveyLike | null | undefined,
 ): boolean {
+    if (isTasteTestInstructionSection(section)) return false;
+
     const isPreference = isPreferenceSection(section);
 
     if (position.isOverallStep) {
