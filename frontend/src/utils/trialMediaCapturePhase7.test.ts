@@ -14,12 +14,14 @@ const mediaQuestion = {
     timing: 'after_use' as const,
     diagnostic_tag: 'PF' as const,
     questionMeta: {
+        nature: 'fixed',
+        inputType: 'media-upload',
         acceptedMedia: 'image_or_video' as const,
         maxImageMb: 5,
         maxVideoMb: 25,
         maxVideoDurationSeconds: 60,
     },
-};
+} as unknown as ProductTestRespondentQuestion;
 
 const mediaSnapshot: ProductTestSnapshot = {
     version: 1,
