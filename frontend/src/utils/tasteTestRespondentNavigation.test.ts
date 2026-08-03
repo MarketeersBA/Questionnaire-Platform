@@ -9,6 +9,7 @@ import {
     resolveTasteTestNavigationBounds,
     resolveTasteTestNavigationPosition,
     resolveTasteTestRespondentNavigation,
+    stripTasteTestInstructionSections,
 } from './tasteTestRespondentNavigation';
 
 const SURVEY_WITH_OVERALL = {
@@ -112,5 +113,46 @@ describe('tasteTestRespondentNavigation', () => {
             SURVEY_WITH_OVERALL,
         );
         expect(visible.map((section) => section.title)).toEqual(['BrandA Taste']);
+    });
+
+    it('hides brand instruction sections from respondents', () => {
+        const survey = {
+            customizations: { brands: ['مربع'] },
+            layer2_questions: {
+                sections: [
+                    {
+                        title: 'مربع - تعليمات',
+                        isInstruction: true,
+                        brand: 'مربع',
+                        content: 'يرجى تذوق مربع الآن.',
+                    },
+                    {
+                        title: 'مربع: Appearance',
+                        brand: 'مربع',
+                        questions: [{ id: 'q1', text: 'شكل؟', required: true }],
+                    },
+                ],
+            },
+        };
+        const position = resolveTasteTestNavigationPosition({ brandIndex: 0 }, survey);
+        const visible = filterTasteTestVisibleSections(
+            survey.layer2_questions.sections,
+            position,
+            survey,
+        );
+        expect(visible.map((section) => section.title)).toEqual(['مربع: Appearance']);
+    });
+
+    it('strips instruction sections for every brand, not a single name', () => {
+        const sections = [
+            { title: 'BrandA - Instructions', isInstruction: true, brand: 'BrandA' },
+            { title: 'BrandB - تعليمات', brand: 'BrandB', content: 'يرجى تذوق BrandB الآن.' },
+            { title: 'BrandA: Taste', brand: 'BrandA', questions: [{ text: 'Q?' }] },
+            { title: 'BrandB: Taste', brand: 'BrandB', questions: [{ text: 'Q?' }] },
+        ];
+        expect(stripTasteTestInstructionSections(sections).map((s) => s.title)).toEqual([
+            'BrandA: Taste',
+            'BrandB: Taste',
+        ]);
     });
 });

@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react';
-import { ChevronRight, Loader2, Quote, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader2, Quote, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import type { ConfigurableModuleId } from '../../types/surveyFlow';
 import type { ModuleAnswersMap, ModuleBrandContext } from '../../types/moduleQuestions';
@@ -60,6 +60,10 @@ export interface ConfigurableModuleStepProps {
     onAnswersChange: (answers: ModuleAnswersMap) => void;
     onStepIndexChange: (index: number) => void;
     onComplete: (answers: ModuleAnswersMap) => void;
+    /** Called when Back is pressed on the first question — return to previous survey phase. */
+    onBoundaryBack?: () => boolean;
+    /** Show Back on the first question when a previous phase exists. */
+    allowCrossPhaseBack?: boolean;
     completeLabel?: string;
     publicToken?: string;
     voiceCapture?: VoiceCaptureConfig | null;
@@ -77,6 +81,8 @@ export default function ConfigurableModuleStep({
     onAnswersChange,
     onStepIndexChange,
     onComplete,
+    onBoundaryBack,
+    allowCrossPhaseBack = false,
     completeLabel,
     publicToken,
     voiceCapture,
@@ -89,6 +95,7 @@ export default function ConfigurableModuleStep({
     const totalSteps = questions.length;
     const copy = MODULE_COPY[moduleId];
     const showVoice = isVoiceEnabledForModuleOpenQuestion(voiceCapture);
+    const canGoBack = stepIndex > 0 || allowCrossPhaseBack;
 
     const isPurchaseFunnelTopOfMindQuestion = useMemo(() => {
         if (!currentQuestion || moduleId !== 'purchase_funnel') return false;
@@ -134,6 +141,19 @@ export default function ConfigurableModuleStep({
             onAnswersChange(sanitized as ModuleAnswersMap);
         }
     }, [moduleId, stepIndex, upstreamKey, currentQuestion, masterBrands, answers, onAnswersChange]);
+
+    const handleBack = () => {
+        if (loading || !canGoBack) return;
+
+        if (stepIndex > 0) {
+            onStepIndexChange(stepIndex - 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+
+        onBoundaryBack?.();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     const handleNext = async () => {
         if (loading || !currentQuestion) return;
@@ -233,25 +253,38 @@ export default function ConfigurableModuleStep({
                 brandName={brandName}
             />
 
-            <button
-                type="button"
-                onClick={handleNext}
-                disabled={loading}
-                className="btn-premium w-full py-5 text-white flex items-center justify-center gap-3 group shadow-xl shadow-brand-accent/20 font-black tracking-widest uppercase text-xs rounded-2xl mt-8 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-                {loading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                    <>
-                        {isLast
-                            ? completeLabel || (language === 'ar' ? 'متابعة' : 'Continue')
-                            : language === 'ar'
-                                ? 'التالي'
-                                : 'Next'}
-                        <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </>
-                )}
-            </button>
+            <div className="flex flex-col-reverse md:flex-row items-stretch md:items-center gap-4 mt-8">
+                <button
+                    type="button"
+                    onClick={handleBack}
+                    disabled={loading || !canGoBack}
+                    className={`btn-secondary px-8 py-5 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 disabled:opacity-0 ${canGoBack ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                    aria-label={language === 'ar' ? 'السابق' : 'Previous'}
+                >
+                    <ChevronLeft className="w-5 h-5" />
+                    {language === 'ar' ? 'السابق' : 'Previous'}
+                </button>
+
+                <button
+                    type="button"
+                    onClick={handleNext}
+                    disabled={loading}
+                    className="btn-premium flex-1 py-5 text-white flex items-center justify-center gap-3 group shadow-xl shadow-brand-accent/20 font-black tracking-widest uppercase text-xs rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    {loading ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                        <>
+                            {isLast
+                                ? completeLabel || (language === 'ar' ? 'متابعة' : 'Continue')
+                                : language === 'ar'
+                                    ? 'التالي'
+                                    : 'Next'}
+                            <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        </>
+                    )}
+                </button>
+            </div>
         </div>
     );
 }

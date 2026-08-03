@@ -1,6 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import {
-    getScaleDragHintText,
     readScaleDragHintDismissed,
     persistScaleDragHintDismissed,
     resolveTrackPaddingForSize,
@@ -10,13 +9,13 @@ import {
 
 describe('horizontalScaleSliderConfig', () => {
     beforeEach(() => {
+        const store: Record<string, string> = {};
         vi.stubGlobal('sessionStorage', {
-            store: {} as Record<string, string>,
             getItem(key: string) {
-                return this.store[key] ?? null;
+                return store[key] ?? null;
             },
             setItem(key: string, value: string) {
-                this.store[key] = value;
+                store[key] = value;
             },
         });
     });
@@ -37,11 +36,6 @@ describe('horizontalScaleSliderConfig', () => {
         expect(resolveTrackPaddingForSize('large', false)).toEqual({ left: 16, right: 16 });
         expect(resolveTrackPaddingForSize('large', true)).toEqual({ left: 8, right: 8 });
         expect(resolveTrackPaddingForSize('default', false)).toEqual({ left: 8, right: 8 });
-    });
-
-    it('returns localized drag hint copy', () => {
-        expect(getScaleDragHintText('en')).toContain('Drag');
-        expect(getScaleDragHintText('ar')).toMatch(/[\u0600-\u06FF]/);
     });
 
     it('persists hint dismissal in sessionStorage', () => {

@@ -99,7 +99,7 @@ export default function ProductTestQuestionRenderer({
         ? heatmapFollowUpEligibility
         : openEndFollowUpEligibility;
 
-    const cardClass = `p-6 md:p-8 rounded-[2rem] bg-white dark:bg-slate-900 border overflow-visible transition-all shadow-sm ${pulseError
+    const cardClass = `p-4 md:p-5 rounded-2xl bg-white dark:bg-slate-900 border overflow-visible transition-all shadow-sm ${pulseError
         ? 'border-rose-400 ring-4 ring-rose-500/30 animate-pulse'
         : 'border-slate-100 dark:border-slate-800 hover:shadow-md'
         }`;
@@ -110,9 +110,9 @@ export default function ProductTestQuestionRenderer({
             layout
             className={cardClass}
         >
-            <div className="flex justify-between items-start gap-4 mb-6">
-                <div className="flex-1 space-y-2">
-                    <p className="text-lg md:text-xl font-bold text-slate-900 dark:text-white leading-tight">
+            <div className="flex justify-between items-start gap-3 mb-3">
+                <div className="flex-1 min-w-0 space-y-1.5">
+                    <p className="text-base md:text-lg font-bold text-slate-900 dark:text-white leading-snug">
                         {displayText}
                     </p>
                     {question.diagnostic_tag && (
@@ -122,14 +122,14 @@ export default function ProductTestQuestionRenderer({
                     )}
                 </div>
                 {question.type === 'scale' && value != null && value !== '' && (
-                    <div className="px-4 py-3 bg-brand-blue text-white rounded-2xl font-black text-xl min-w-[3rem] text-center shadow-lg">
+                    <div className="shrink-0 px-2.5 py-1 bg-brand-blue text-white rounded-lg font-black text-sm min-w-[2rem] text-center shadow-md">
                         {String(value)}
                     </div>
                 )}
             </div>
 
             {question.type === 'scale' ? (
-                <div className="py-2">
+                <div className="pt-1">
                     <HorizontalScaleSlider
                         value={Number(value) || 1}
                         max={scaleMax}

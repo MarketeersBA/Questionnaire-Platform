@@ -21,6 +21,7 @@ import {
     DEFAULT_TRIAL_MEDIA_CAPTURE,
     TRIAL_MEDIA_ACCEPTED_OPTIONS,
     TRIAL_MEDIA_CAPTURE_TIMING_OPTIONS,
+    withNormalizedTrialMediaCapture,
 } from '../utils/trialMediaCaptureConfig';
 import {
     buildFinalProductTestConfigWithTrialMedia,

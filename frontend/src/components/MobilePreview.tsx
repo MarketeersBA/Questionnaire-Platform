@@ -16,7 +16,11 @@ export default function MobilePreview({ formData, activeLayer }: MobilePreviewPr
                 ? formData.schema.layer3_structure
                 : formData.schema?.layer4_structure || { sections: [] };
 
-    const sections = activeStructure?.sections || [];
+    const sections = (activeStructure?.sections || []).filter((section: any) => {
+        if (section.isInstruction) return false;
+        const title = (section.title || '').toLowerCase();
+        return !title.includes('instruction') && !title.includes('تعليمات');
+    });
 
     return (
         <div className="w-full max-w-[320px] mx-auto xl:ml-auto">

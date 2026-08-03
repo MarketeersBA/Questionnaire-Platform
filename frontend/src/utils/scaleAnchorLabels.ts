@@ -4,7 +4,7 @@ export type ScaleAnchorNumberSeparator = 'dash' | 'dot';
 
 /** Shared respondent label typography — tested for readability regression. */
 export const SCALE_ANCHOR_RESPONDENT_LABEL_CLASSES =
-    'text-sm md:text-base font-semibold leading-snug text-slate-600 dark:text-slate-300 tracking-normal';
+    'text-xs md:text-sm font-semibold leading-snug text-slate-600 dark:text-slate-300 tracking-normal';
 
 export interface ScaleAnchorDefaults {
     minLabel: string;

@@ -6,8 +6,8 @@ import {
 } from './packagingHeatmapFeedback';
 import {
     filterTasteTestVisibleSections,
-    type TasteTestNavigationPosition,
 } from './tasteTestRespondentNavigation';
+import type { TasteTestNavigationPosition } from '../types/respondentNavigation';
 import {
     getVisibleProductTestQuestions,
     type ProductTestAnswers,

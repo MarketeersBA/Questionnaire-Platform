@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { publicApi } from '../services/api';
 import {
@@ -9,6 +9,7 @@ import TasteTestOpenEndQuestion from '../components/taste-test-respondent/TasteT
 import TasteTestRespondentNavBar from '../components/taste-test-respondent/TasteTestRespondentNavBar';
 import ScaleAnchorLabels from '../components/respondent/ScaleAnchorLabels';
 import HorizontalScaleSlider from '../components/respondent/HorizontalScaleSlider';
+import ScrollToBottomButton from '../components/respondent/ScrollToBottomButton';
 import {
   ShieldCheck,
   ChevronRight,
@@ -16,10 +17,6 @@ import {
   Sparkles,
   ShieldAlert,
   ChevronDown,
-  Quote,
-  Layout,
-  Loader2,
-  MessageSquare
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -64,24 +61,18 @@ import {
   resolveTasteTestContinueLabel,
   resolveTasteTestNavigationPosition,
   resolveTasteTestRespondentNavigation,
+  stripTasteTestInstructionSections,
 } from '../utils/tasteTestRespondentNavigation';
 import { collectTasteTestFollowUpScopeIds } from '../utils/followUpNavigationSafety';
 import { normalizePublicSurveyAiFollowup } from '../utils/aiFollowupConfig';
-
-const BRAND_QUOTES = [
-  "Quality is not an act, it's a habit.",
-  "Details create the big picture.",
-  "Innovation distinguishes between a leader and a follower.",
-  "Excellence is the gradual result of always striving to do better.",
-  "Trust starts with consistency.",
-  "Design is not just what it looks like — it's how it works."
-];
+import { localizeTasteTestSectionTitle } from '../utils/tasteTestAttributeLabels';
 
 export default function PublicSurvey() {
   const { token } = useParams<{ token: string }>();
   const [survey, setSurvey] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [alreadyCompleted, setAlreadyCompleted] = useState(false);
   const [step, setStep] = useState<SurveyStep>('loading');
   const [currentModuleId, setCurrentModuleId] = useState<ConfigurableModuleId | null>(null);
   const [answers, setAnswers] = useState<Record<string, any>>({});
@@ -240,6 +231,16 @@ export default function PublicSurvey() {
       }
       setStep('product_test');
     } else if (previous.type === 'module') {
+      const prevModule = moduleDocs[previous.moduleId];
+      const questionCount = prevModule
+        ? prevModule.sections.reduce((acc, s) => acc + (s.questions?.length || 0), 0)
+        : 0;
+      if (questionCount > 0) {
+        setModuleStepIndexes((prev) => ({
+          ...prev,
+          [previous.moduleId]: questionCount - 1,
+        }));
+      }
       setCurrentModuleId(previous.moduleId);
       setStep('module');
     }
@@ -335,7 +336,20 @@ export default function PublicSurvey() {
         setSurvey({
           ...data,
           ai_followup: normalizePublicSurveyAiFollowup(data.ai_followup),
+          layer2_questions: data.layer2_questions
+            ? {
+                ...data.layer2_questions,
+                sections: stripTasteTestInstructionSections(data.layer2_questions.sections),
+              }
+            : data.layer2_questions,
         });
+        if (token && (data.language === 'ar' || data.language === 'en')) {
+          try {
+            sessionStorage.setItem(`survey_lang_${token}`, data.language);
+          } catch {
+            /* ignore */
+          }
+        }
         const docs = await resolveEnabledModuleDocuments(data);
         setModuleDocs(docs);
 
@@ -368,16 +382,18 @@ export default function PublicSurvey() {
       })
       .catch((err) => {
         console.error("Survey Fetch Error:", err);
-        const detail = err.response?.data?.detail;
-        const status = err.response?.status;
+        const detail = err.actionable_message || err.response?.data?.detail || err.message || '';
+        const status = err.status ?? err.response?.status;
+        const detailText = String(detail).toLowerCase();
 
-        if (status === 403 && (detail?.includes('completed') || detail?.includes('submitted'))) {
+        if (status === 403 && (detailText.includes('already completed') || detailText.includes('completed for this link') || detailText.includes('submitted'))) {
+          setAlreadyCompleted(true);
           setStep('submitted');
-        } else if (status === 403 && detail?.includes('failed')) {
+        } else if (status === 403 && detailText.includes('failed')) {
           setStep('failed');
           setError(detail);
         } else {
-          setError(`Error: ${detail || err.message || 'Unknown error'}`);
+          setError(`Error: ${detail || 'Unknown error'}`);
           setStep('failed');
         }
         setLoading(false);
@@ -419,11 +435,10 @@ export default function PublicSurvey() {
     window.scrollTo(0, 0);
   }, [step]);
 
-
-  const renderCleanText = (text: string, brandName: string = '') => {
+  const renderCleanText = (text: string, brandName: string | null | undefined = '') => {
     if (!text) return '';
     const category = productTestDisplay.category || survey?.config?.category || survey?.customizations?.category || 'Product';
-    const effectiveBrand = getEffectiveBrandName(brandName);
+    const effectiveBrand = getEffectiveBrandName(brandName || '');
 
     let result = text
       .replace(/\[\s*brand\s*\]/gi, effectiveBrand)
@@ -735,7 +750,20 @@ export default function PublicSurvey() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  if (step === 'loading' || (loading && !survey)) return (
+  const cachedSurveyLang = (() => {
+    if (!token) return null;
+    try {
+      return sessionStorage.getItem(`survey_lang_${token}`);
+    } catch {
+      return null;
+    }
+  })();
+  const isArabicUi =
+    survey?.language === 'ar'
+    || cachedSurveyLang === 'ar'
+    || (!survey && !cachedSurveyLang && typeof navigator !== 'undefined' && navigator.language.toLowerCase().startsWith('ar'));
+
+  if (step === 'loading' || (loading && !survey && step !== 'submitted' && step !== 'failed')) return (
     <div className="min-h-screen bg-brand-dark dark:bg-slate-950 flex items-center justify-center p-6 text-slate-800 transition-colors duration-500">
       <div className="flex flex-col items-center gap-4">
         <div className="w-12 h-12 rounded-full border-2 border-t-brand-blue border-slate-200 dark:border-slate-800 animate-spin"></div>
@@ -751,6 +779,13 @@ export default function PublicSurvey() {
         <div className="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] bg-brand-blue/5 rounded-full blur-[120px]"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-[50rem] h-[50rem] bg-brand-glow/5 rounded-full blur-[150px]"></div>
       </div>
+
+      {step !== 'failed' && step !== 'submitted' && (
+        <ScrollToBottomButton
+          language={survey?.language === 'ar' ? 'ar' : 'en'}
+          bottomOffsetPx={step === 'layer2' || step === 'module' || step === 'product_test' ? 72 : 12}
+        />
+      )}
 
       <AnimatePresence mode="wait">
         {step === 'failed' ? (
@@ -778,16 +813,35 @@ export default function PublicSurvey() {
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             className="m-auto relative z-10 w-full max-w-lg bg-white dark:bg-slate-900 rounded-[2.5rem] p-12 border border-slate-100 dark:border-slate-800 text-center shadow-2xl transition-colors"
+            dir={isArabicUi ? 'rtl' : 'ltr'}
           >
             <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-950/20 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-emerald-100 dark:border-emerald-900/50">
               <ShieldCheck className="w-10 h-10 text-emerald-500" />
             </div>
-            <h1 className="text-3xl font-display font-bold mb-4">Participation <span className="text-brand-blue">Complete</span></h1>
+            <h1 className="text-3xl font-display font-bold mb-4">
+              {alreadyCompleted ? (
+                isArabicUi ? (
+                  <>تم إكمال <span className="text-brand-blue">الاستبيان</span> مسبقاً</>
+                ) : (
+                  <>Survey Already <span className="text-brand-blue">Completed</span></>
+                )
+              ) : isArabicUi ? (
+                <>اكتملت <span className="text-brand-blue">المشاركة</span></>
+              ) : (
+                <>Participation <span className="text-brand-blue">Complete</span></>
+              )}
+            </h1>
             <p className="text-slate-500 font-medium leading-relaxed mb-8">
-              Thank you for contributing to this research study. Your responses have been securely synchronized.
+              {alreadyCompleted
+                ? (isArabicUi
+                  ? 'تم تقديم هذا الرابط مسبقاً. شكراً لمشاركتك. لا يمكن فتح الاستبيان مرة أخرى من نفس الرابط.'
+                  : 'This survey link has already been submitted. Thank you for your participation. The survey cannot be opened again from the same link.')
+                : (isArabicUi
+                  ? 'شكراً لمساهمتك في هذه الدراسة البحثية. تم مزامنة إجاباتك بأمان.'
+                  : 'Thank you for contributing to this research study. Your responses have been securely synchronized.')}
             </p>
             <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-400">
-              Confirmation ID: {token?.slice(-8).toUpperCase()}
+              {isArabicUi ? 'رقم التأكيد:' : 'Confirmation ID:'} {token?.slice(-8).toUpperCase()}
             </div>
           </motion.div>
         ) : step === 'module' && currentModuleId && moduleDocs[currentModuleId] ? (
@@ -837,6 +891,8 @@ export default function PublicSurvey() {
                 setModuleAnswers(merged);
                 await applyNextPhase(currentModuleId, merged);
               }}
+              onBoundaryBack={applyPreviousPhase}
+              allowCrossPhaseBack={canReturnToPreviousPublicPhase(survey, step, currentModuleId)}
               completeLabel={
                 survey?.language === 'ar' ? 'متابعة' : 'Continue'
               }
@@ -945,15 +1001,6 @@ export default function PublicSurvey() {
 
                   return (
                     <div className="space-y-12">
-                      {/* Overall Evaluation Header */}
-                      {isOverallStep && (
-                        <div className="p-8 bg-brand-blue/5 rounded-[2.5rem] border-2 border-dashed border-brand-blue/20 text-center space-y-4">
-                          <Layout className="w-12 h-12 text-brand-blue/40 mx-auto" />
-                          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Overall Evaluation</h2>
-                          <p className="text-sm text-slate-500 font-medium italic">Please provide your final impressions across all products tested.</p>
-                        </div>
-                      )}
-
                       {/* Top Brand Progress (only during brand pages) */}
                       {!isOverallStep && totalBrandPages > 0 && (
                         <div className="flex items-center justify-between mb-2">
@@ -973,52 +1020,27 @@ export default function PublicSurvey() {
                       {visibleSections.map((section: any, sIdx: number) => (
                           <div key={sIdx} className="space-y-12">
                             {(() => {
-                              const sectionTitle = renderCleanText(section.title || '', currentBrand || '');
+                              const sectionTitle = localizeTasteTestSectionTitle(
+                                renderCleanText(section.title || '', currentBrand),
+                                section.attribute,
+                                survey?.language,
+                              );
                               const effectiveCurrentBrand = currentBrand ? getEffectiveBrandName(currentBrand) : '';
                               return (
                                 <>
-                            {section.title && (
+                            {section.title && !section.isInstruction && (
                               <div className="space-y-4">
-                                {section.title.toLowerCase().includes('instruction') && (
-                                  <motion.div
-                                    initial={{ opacity: 0, scale: 0.98 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    className="relative p-8 bg-slate-50 dark:bg-slate-800/80 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 overflow-hidden shadow-sm"
-                                  >
-                                    <div className="absolute top-[-20%] right-[-5%] opacity-10 pointer-events-none">
-                                      <Quote className="w-40 h-40 text-brand-blue" />
-                                    </div>
-                                    <div className="relative z-10 flex flex-col gap-4">
-                                      <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-brand-blue/60">
-                                        <Sparkles className="w-3 h-3" />
-                                        Brand Context Insight
-                                      </div>
-                                      <p className="text-lg md:text-xl font-display font-light italic text-slate-600 dark:text-slate-300 leading-relaxed border-l-4 border-brand-blue/30 pl-6">
-                                        "{BRAND_QUOTES[currentBrandIndex % BRAND_QUOTES.length]}"
-                                      </p>
-                                    </div>
-                                  </motion.div>
-                                )}
-                                <div className="sticky top-0 z-20 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md py-4 border-b border-slate-100 dark:border-slate-800 mb-6 transition-colors">
-                                  <h3 className="text-xl font-display font-bold text-brand-blue flex items-center gap-3">
-                                    <div className="w-1.5 h-6 bg-brand-blue rounded-full" />
+                                <div className="sticky top-0 z-20 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md py-2.5 border-b border-slate-100 dark:border-slate-800 mb-4 transition-colors">
+                                  <h3 className="text-lg font-display font-bold text-brand-blue flex items-center gap-2.5">
+                                    <div className="w-1 h-5 bg-brand-blue rounded-full" />
                                     {sectionTitle}
                                   </h3>
                                 </div>
                               </div>
                             )}
 
-                            <div className={`space-y-10 p-4 md:p-8 rounded-[2.5rem] bg-slate-50/30 dark:bg-slate-800/20 border border-slate-100/50 dark:border-slate-800/50 shadow-sm transition-colors`}>
-                              {currentBrand && (
-                                <div className="flex items-center gap-2 mb-6">
-                                  <span className="px-5 py-2 rounded-xl bg-brand-blue text-white text-[12px] font-black uppercase tracking-widest shadow-xl shadow-brand-blue/20 flex items-center gap-2">
-                                    <Sparkles className="w-4 h-4 text-brand-cyan shadow-icon" />
-                                    {survey?.language === 'ar' ? 'تقييم:' : 'Evaluating:'} {effectiveCurrentBrand}
-                                  </span>
-                                </div>
-                              )}
-
-                              <div className="space-y-12">
+                            <div className={`space-y-5 p-3 md:p-5 rounded-2xl bg-slate-50/30 dark:bg-slate-800/20 border border-slate-100/50 dark:border-slate-800/50 shadow-sm transition-colors`}>
+                              <div className="space-y-5">
                                 {section.questions?.filter((q: any) => {
                                   if (isOverallStep) {
                                     const text = (q.text || q.label || '').toLowerCase().trim();
@@ -1035,10 +1057,10 @@ export default function PublicSurvey() {
                                   const showVoice = isVoiceEnabledForQuestion(survey, q, section, effectiveType);
 
                                   return (
-                                    <div key={uniqueKey} id={`q-${uniqueKey}`} className={`space-y-8 p-6 md:p-8 rounded-[2rem] bg-white dark:bg-slate-900 border overflow-visible transition-all shadow-premium hover:shadow-premium-hover ${pulseErrorId === `q-${uniqueKey}` ? 'border-rose-400 ring-4 ring-rose-500/30 animate-pulse' : 'border-slate-50 dark:border-slate-800/50'}`}>
-                                      <div className="flex justify-between items-start gap-4">
-                                        <div className="flex-1 space-y-2">
-                                          <p className="text-lg md:text-xl font-bold text-slate-900 dark:text-white leading-tight transition-colors">{questionText}</p>
+                                    <div key={uniqueKey} id={`q-${uniqueKey}`} className={`space-y-3 p-4 md:p-5 rounded-2xl bg-white dark:bg-slate-900 border overflow-visible transition-all shadow-sm hover:shadow-md ${pulseErrorId === `q-${uniqueKey}` ? 'border-rose-400 ring-4 ring-rose-500/30 animate-pulse' : 'border-slate-50 dark:border-slate-800/50'}`}>
+                                      <div className="flex justify-between items-start gap-3">
+                                        <div className="flex-1 min-w-0 space-y-1.5">
+                                          <p className="text-base md:text-lg font-bold text-slate-900 dark:text-white leading-snug transition-colors">{questionText}</p>
                                           {q.type === 'mcq' && q.allow_multiple && (
                                             <div className="flex items-center gap-2 px-3 py-1 bg-brand-blue/5 border border-brand-blue/10 rounded-lg self-start w-fit">
                                               <Sparkles className="w-3 h-3 text-brand-blue" />
@@ -1051,9 +1073,9 @@ export default function PublicSurvey() {
                                         <AnimatePresence>
                                           {l2Answers[uniqueKey] && effectiveType !== 'open-ended' && effectiveType !== 'text' && (
                                             <motion.div
-                                              initial={{ opacity: 0, scale: 0.5, x: 20 }}
+                                              initial={{ opacity: 0, scale: 0.5, x: 12 }}
                                               animate={{ opacity: 1, scale: 1, x: 0 }}
-                                              className="ml-4 px-5 py-4 bg-brand-blue text-white rounded-2xl shadow-premium-blue font-black text-2xl min-w-[4rem] flex items-center justify-center border-2 border-white/20"
+                                              className="shrink-0 ms-2 px-2.5 py-1 bg-brand-blue text-white rounded-lg shadow-md font-black text-sm min-w-[2rem] flex items-center justify-center border border-white/20"
                                             >
                                               {typeof l2Answers[uniqueKey] === 'string'
                                                 ? renderCleanText(
@@ -1067,7 +1089,7 @@ export default function PublicSurvey() {
                                       </div>
 
                                       {effectiveType === 'scale' ? (
-                                        <div className="space-y-8 py-4 px-2">
+                                        <div className="pt-1 px-0.5">
                                           <HorizontalScaleSlider
                                             value={Number(l2Answers[uniqueKey]) || 1}
                                             max={scaleMax}

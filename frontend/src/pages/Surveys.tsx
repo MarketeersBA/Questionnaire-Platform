@@ -14,10 +14,14 @@ import {
     Sparkles,
     Layers,
     Tag,
-    User
+    User,
+    ChevronLeft,
+    ChevronRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+
+const PAGE_SIZE = 5;
 
 export default function SurveysPage() {
     const [surveyList, setSurveyList] = useState<any[]>([]);
@@ -25,6 +29,7 @@ export default function SurveysPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'draft' | 'closed'>('all');
+    const [page, setPage] = useState(1);
 
     const fetchSurveys = async () => {
         try {
@@ -52,7 +57,7 @@ export default function SurveysPage() {
         }
     };
 
-    const filteredSurveys = surveyList.filter(s => {
+    const filteredSurveys = surveyList.filter((s: any) => {
         const companyName = s.company_name || s.name || '';
         const matchesSearch =
             companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -61,11 +66,18 @@ export default function SurveysPage() {
         return matchesSearch && matchesStatus;
     });
 
+    const totalPages = Math.max(1, Math.ceil(filteredSurveys.length / PAGE_SIZE));
+    const currentPage = Math.min(page, totalPages);
+    const paginatedSurveys = filteredSurveys.slice(
+        (currentPage - 1) * PAGE_SIZE,
+        currentPage * PAGE_SIZE
+    );
+
     const counts = {
         all: surveyList.length,
-        active: surveyList.filter(s => s.status === 'active').length,
-        draft: surveyList.filter(s => s.status === 'draft').length,
-        closed: surveyList.filter(s => s.status === 'closed').length,
+        active: surveyList.filter((s: any) => s.status === 'active').length,
+        draft: surveyList.filter((s: any) => s.status === 'draft').length,
+        closed: surveyList.filter((s: any) => s.status === 'closed').length,
     };
 
     if (loading) return (
@@ -157,7 +169,10 @@ export default function SurveysPage() {
                             type="text"
                             placeholder="Search surveys..."
                             value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                setSearchQuery(e.target.value);
+                                setPage(1);
+                            }}
                             className="w-full sm:w-64 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-2xl pl-12 pr-6 py-4 text-slate-900 dark:text-white font-bold focus:outline-none focus:bg-white dark:focus:bg-slate-800 focus:border-brand-blue/50 focus:ring-4 focus:ring-brand-blue/30 transition-all shadow-sm"
                         />
                     </div>
@@ -176,7 +191,10 @@ export default function SurveysPage() {
                 {(['all', 'active', 'draft', 'closed'] as const).map((status) => (
                     <button
                         key={status}
-                        onClick={() => setFilterStatus(status)}
+                        onClick={() => {
+                            setFilterStatus(status);
+                            setPage(1);
+                        }}
                         className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filterStatus === status
                             ? 'bg-brand-blue text-white shadow-lg shadow-brand-blue/20'
                             : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'
@@ -205,7 +223,7 @@ export default function SurveysPage() {
                         </thead>
                         <tbody className="divide-y divide-slate-50">
                             <AnimatePresence mode="popLayout">
-                                {filteredSurveys.map((survey: any, idx) => (
+                                {paginatedSurveys.map((survey: any, idx: number) => (
                                     <motion.tr
                                         key={survey._id}
                                         layout
@@ -236,7 +254,7 @@ export default function SurveysPage() {
                                                 <span className="text-[10px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider">{survey.survey_code || 'N/A'}</span>
                                             </div>
                                         </td>
-                                        <td className="px-10 py-7 border-b border-slate-100 dark:border-slate-800/50 text-center border-x border-slate-50 shadow-inner">
+                                        <td className="px-10 py-7 border-b border-slate-100 dark:border-slate-800/50 text-center border-x shadow-inner">
                                             <div className="inline-flex flex-col items-center">
                                                 <div className="text-[11px] font-black text-slate-900 dark:text-white leading-none">
                                                     {new Date(survey.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
@@ -411,7 +429,7 @@ export default function SurveysPage() {
                             </AnimatePresence>
                             {filteredSurveys.length === 0 && (
                                 <tr>
-                                    <td colSpan={6} className="py-24 text-center">
+                                    <td colSpan={8} className="py-24 text-center">
                                         <div className="flex flex-col items-center justify-center">
                                             <div className="relative mb-6 group cursor-default text-center mx-auto">
                                                 <div className="absolute inset-0 bg-brand-blue/10 rounded-full blur-xl group-hover:blur-2xl transition-all duration-500"></div>
@@ -437,8 +455,38 @@ export default function SurveysPage() {
                             )}
                         </tbody>
                     </table>
-                </div >
-            </div >
-        </div >
+                </div>
+                {filteredSurveys.length > 0 && (
+                    <div className="flex items-center justify-between gap-4 px-10 py-6 border-t border-slate-100 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-800/20">
+                        <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">
+                            Showing {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filteredSurveys.length)} of {filteredSurveys.length}
+                        </span>
+                        <div className="flex items-center gap-4">
+                            <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-inner">
+                                Page {currentPage} <span className="text-slate-300 dark:text-slate-600">of</span> {totalPages}
+                            </span>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setPage((p: number) => Math.max(1, p - 1))}
+                                    disabled={currentPage === 1}
+                                    className="p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all disabled:opacity-30 shadow-sm text-slate-400"
+                                    aria-label="Previous page"
+                                >
+                                    <ChevronLeft className="w-4 h-4" />
+                                </button>
+                                <button
+                                    onClick={() => setPage((p: number) => Math.min(totalPages, p + 1))}
+                                    disabled={currentPage >= totalPages}
+                                    className="p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all disabled:opacity-30 shadow-sm text-slate-400"
+                                    aria-label="Next page"
+                                >
+                                    <ChevronRight className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
     );
 }

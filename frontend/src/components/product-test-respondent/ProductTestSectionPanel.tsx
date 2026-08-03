@@ -45,11 +45,7 @@ export default function ProductTestSectionPanel({
     onFollowUpReplyChange,
     onFollowUpDismiss,
 }: ProductTestSectionPanelProps) {
-    const isArabic = language === 'ar';
     const brandKey = section.brand;
-    const brandDisplay = brandKey
-        ? display.resolveBrandDisplay(brandKey)
-        : (section.displayBrand || '');
 
     const sectionTitle = resolveProductTestDisplayText(section.title, {
         brand: brandKey,
@@ -97,17 +93,6 @@ export default function ProductTestSectionPanel({
                 transition={{ duration: 0.25 }}
                 className="space-y-6"
             >
-                {brandDisplay && (
-                    <div className="flex flex-wrap items-center gap-2 px-1">
-                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">
-                            {isArabic ? 'تقييم:' : 'Evaluating:'}
-                        </span>
-                        <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
-                            {brandDisplay}
-                        </span>
-                    </div>
-                )}
-
                 {sectionTitle !== section.title && (
                     <p className="text-sm font-bold text-slate-500 dark:text-slate-400 px-1">
                         {sectionTitle}

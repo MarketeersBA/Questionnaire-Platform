@@ -71,8 +71,8 @@ describe('scaleAnchorLabels', () => {
     });
 
     it('uses readable responsive label classes without uppercase tracking', () => {
-        expect(SCALE_ANCHOR_RESPONDENT_LABEL_CLASSES).toContain('text-sm');
-        expect(SCALE_ANCHOR_RESPONDENT_LABEL_CLASSES).toContain('md:text-base');
+        expect(SCALE_ANCHOR_RESPONDENT_LABEL_CLASSES).toContain('text-xs');
+        expect(SCALE_ANCHOR_RESPONDENT_LABEL_CLASSES).toContain('md:text-sm');
         expect(SCALE_ANCHOR_RESPONDENT_LABEL_CLASSES).toContain('text-slate-600');
         expect(SCALE_ANCHOR_RESPONDENT_LABEL_CLASSES).not.toContain('text-[10px]');
         expect(SCALE_ANCHOR_RESPONDENT_LABEL_CLASSES).not.toContain('uppercase');
