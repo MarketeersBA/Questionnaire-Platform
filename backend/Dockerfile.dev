@@ -1,5 +1,5 @@
 # --- Stage 1: Builder ---
-FROM python:3.11-slim AS builder
+FROM python:3.11-slim-bullseye AS builder
 
 WORKDIR /app
 
@@ -9,10 +9,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt ./
-RUN pip install --user --no-cache-dir -r requirements.txt
+RUN pip install --default-timeout=1000 --user --no-cache-dir -r requirements.txt
 
 # --- Stage 2: Production ---
-FROM python:3.11-slim AS production
+FROM python:3.11-slim-bullseye AS production
 
 WORKDIR /app
 
@@ -21,7 +21,7 @@ COPY --from=builder /root/.local /root/.local
 ENV PATH=/root/.local/bin:$PATH
 
 # Playwright Chromium for hybrid PPTX chart capture and FFmpeg for audio processing
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update -o Acquire::Retries=3 && apt-get install -y --no-install-recommends --fix-missing \
     ffmpeg \
     libnss3 \
     libnspr4 \

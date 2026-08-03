@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import OpenEndAnswerInput from '../voice-feedback/OpenEndAnswerInput';
@@ -71,12 +71,12 @@ export default function TasteTestOpenEndQuestion({
   onFollowUpReplyChange,
 }: TasteTestOpenEndQuestionProps) {
   const isArabic = language === 'ar';
-  const followUpEligibility = buildTasteTestFollowUpEligibility({
+  const followUpEligibility = useMemo(() => buildTasteTestFollowUpEligibility({
     questionText,
     effectiveType,
     timing,
     sectionTitle,
-  });
+  }), [questionText, effectiveType, timing, sectionTitle]);
   const minAnswerLength = resolveMinAnswerLength(aiFollowup);
   const panelState = followUpStateMap?.[questionId];
   const questionCategory = classifyQuestionCategory(questionText);

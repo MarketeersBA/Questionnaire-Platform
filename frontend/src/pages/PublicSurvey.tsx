@@ -124,6 +124,8 @@ export default function PublicSurvey() {
     suspendFollowUpsForLeavingScope,
   } = useFollowUpOrchestration({ token, survey, setAiInsights });
 
+  const getFollowUpStateSnapshot = useCallback(() => followUpStateMapRef.current, [followUpStateMapRef]);
+
   // Product test wizard state (Phase 3)
   const [productTestAnswers, setProductTestAnswers] = useState<Record<string, unknown>>({});
   const [productTestPhaseIndex, setProductTestPhaseIndex] = useState(0);
@@ -1131,7 +1133,7 @@ export default function PublicSurvey() {
                                           showVoice={showVoice}
                                           aiFollowup={survey?.ai_followup}
                                           followUpStateMap={followUpStateMap}
-                                          getFollowUpStateSnapshot={() => followUpStateMapRef.current}
+                                          getFollowUpStateSnapshot={getFollowUpStateSnapshot}
                                           onFollowUpTrigger={handleFollowUpTrigger}
                                           onVoiceFollowUpTrigger={handleVoiceFollowUpTrigger}
                                           onFollowUpReplyChange={handleFollowUpReplyChange}

@@ -53,8 +53,9 @@ export default function SurveysPage() {
     };
 
     const filteredSurveys = surveyList.filter(s => {
+        const companyName = s.company_name || s.name || '';
         const matchesSearch =
-            s.company_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
             (s.survey_code && s.survey_code.toLowerCase().includes(searchQuery.toLowerCase()));
         const matchesStatus = filterStatus === 'all' || s.status === filterStatus;
         return matchesSearch && matchesStatus;
@@ -217,11 +218,11 @@ export default function SurveysPage() {
                                         <td className="px-10 py-7 border-b border-slate-50 dark:border-slate-800/50">
                                             <div className="flex items-center gap-4">
                                                 <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center border border-slate-300 dark:border-slate-700 group-hover:border-brand-blue/30 group-hover:bg-brand-blue/5 transition-all font-display font-black text-slate-600 dark:text-slate-400 group-hover:text-brand-blue text-base">
-                                                    {survey.company_name.charAt(0)}
+                                                    {(survey.company_name || survey.name || 'U').charAt(0).toUpperCase()}
                                                 </div>
                                                 <div>
                                                     <div className="font-black text-base text-slate-900 dark:text-white group-hover:text-brand-blue transition-colors">
-                                                        {survey.company_name}
+                                                        {survey.company_name || survey.name || 'Untitled Survey'}
                                                     </div>
                                                     <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-1">
                                                         ID: {survey._id.slice(-6).toUpperCase()}
