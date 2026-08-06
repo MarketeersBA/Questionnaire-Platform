@@ -12,7 +12,7 @@ COPY --chown=appuser:appuser --from=builder /root/.local /home/appuser/.local
 ENV PATH=/home/appuser/.local/bin:$PATH
 
 RUN apt-get update -o Acquire::Retries=3 && apt-get install -y --no-install-recommends --fix-missing \
-    tini ffmpeg libnss3 libnspr4 libatk1.0-0 libatk-bridge2.0-0 \
+    ca-certificates tini ffmpeg libnss3 libnspr4 libatk1.0-0 libatk-bridge2.0-0 \
     libcups2 libdrm2 libdbus-1-3 libxkbcommon0 libxcomposite1 \
     libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2 \
     libpango-1.0-0 libcairo2 \

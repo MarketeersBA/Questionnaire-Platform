@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import logging
-from enum import StrEnum
+from enum import Enum
 from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
 
-class FollowUpRejectionCode(StrEnum):
+class FollowUpRejectionCode(str, Enum):
     """Machine-readable gate outcomes for POST /s/{token}/followup."""
 
     AI_DISABLED = "ai_disabled"

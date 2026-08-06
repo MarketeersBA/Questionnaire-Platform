@@ -22,6 +22,7 @@ ENV PATH=/root/.local/bin:$PATH
 
 # Playwright Chromium for hybrid PPTX chart capture and FFmpeg for audio processing
 RUN apt-get update -o Acquire::Retries=3 && apt-get install -y --no-install-recommends --fix-missing \
+    ca-certificates \
     ffmpeg \
     libnss3 \
     libnspr4 \
