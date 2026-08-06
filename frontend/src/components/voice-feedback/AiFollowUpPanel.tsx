@@ -1,7 +1,11 @@
+import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Loader2, Sparkles } from 'lucide-react';
 import OpenEndAnswerInput from './OpenEndAnswerInput';
 import type { FollowUpPanelState } from '../../utils/aiFollowup';
+import { normalizeOpenEndAnswer } from '../../utils/voiceQuestions';
+
+export const FOLLOW_UP_REPLY_IDLE_MS = 3000;
 
 export type AiFollowUpPanelVariant = 'premium' | 'standard';
 
@@ -58,6 +62,20 @@ export default function AiFollowUpPanel({
     onReplyTextSubmit,
     onReplyVoiceUpload,
 }: AiFollowUpPanelProps) {
+    const replyText = normalizeOpenEndAnswer(state.replyValue).text || '';
+    const onReplyTextSubmitRef = useRef(onReplyTextSubmit);
+    onReplyTextSubmitRef.current = onReplyTextSubmit;
+
+    useEffect(() => {
+        if (!visible || state.loading || !replyText.trim()) return;
+
+        const timeout = setTimeout(() => {
+            onReplyTextSubmitRef.current(replyText);
+        }, FOLLOW_UP_REPLY_IDLE_MS);
+
+        return () => clearTimeout(timeout);
+    }, [visible, state.loading, replyText]);
+
     if (!visible) return null;
 
     const isAr = language === 'ar';
@@ -175,7 +193,6 @@ export default function AiFollowUpPanel({
                                     onReplyVoiceUpload(next.voice_feedback_id);
                                 }
                             }}
-                            onBlur={(text) => onReplyTextSubmit(text)}
                         />
                     </div>
                 </motion.div>
