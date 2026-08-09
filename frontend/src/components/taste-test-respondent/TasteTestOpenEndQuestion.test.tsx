@@ -190,6 +190,23 @@ describe('TasteTestOpenEndQuestion interactions (Phase 8)', () => {
     ).toBe(true);
   });
 
+  it('hides follow-up panel after AI finishes with empty leftover state', () => {
+    expect(
+      shouldShowTasteTestFollowUpPanel({
+        ...LIKE_QUESTION,
+        aiFollowup: ENABLED_CONFIG,
+        followUpStateMap: {
+          [LIKE_QUESTION.questionId]: {
+            questionId: LIKE_QUESTION.questionId,
+            round: 2,
+            followUpText: null,
+            loading: false,
+          },
+        },
+      }),
+    ).toBe(false);
+  });
+
   it('does not show panel for generic overall open-end even with state', () => {
     expect(
       shouldShowTasteTestFollowUpPanel({

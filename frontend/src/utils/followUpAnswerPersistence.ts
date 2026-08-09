@@ -88,6 +88,71 @@ export function parseFollowUpExchangeBlocks(text: string): FollowUpExchangeBlock
   return blocks;
 }
 
+/**
+ * Split stored answer text into the respondent's original answer and appended AI exchanges.
+ * Persistence format is unchanged — this is for respondent UI only.
+ */
+export function splitFollowUpAnswerText(text: string): {
+  primaryText: string;
+  exchanges: FollowUpExchangeBlock[];
+} {
+  const raw = text || '';
+  const exchanges = parseFollowUpExchangeBlocks(raw);
+  if (exchanges.length === 0) {
+    return { primaryText: raw, exchanges: [] };
+  }
+  const firstBlockIdx = raw.indexOf(FOLLOWUP_PROMPT_PREFIX);
+  if (firstBlockIdx < 0) {
+    return { primaryText: raw, exchanges: [] };
+  }
+  return {
+    primaryText: raw.slice(0, firstBlockIdx).trimEnd(),
+    exchanges,
+  };
+}
+
+/** Rebuild stored answer text from primary answer + exchange blocks. */
+export function joinFollowUpAnswerText(
+  primaryText: string,
+  exchanges: FollowUpExchangeBlock[],
+): string {
+  let result = (primaryText || '').trimEnd();
+  for (const exchange of exchanges) {
+    result = appendFollowUpExchangeToText(result, exchange.prompt, exchange.respondent);
+  }
+  return result;
+}
+
+/** Keep appended AI exchanges when the respondent edits only the original answer. */
+export function replacePrimaryAnswerText(fullText: string, newPrimary: string): string {
+  const { exchanges } = splitFollowUpAnswerText(fullText);
+  return joinFollowUpAnswerText(newPrimary, exchanges);
+}
+
+/** Project an OpenEndAnswer so the textbox shows only the original answer. */
+export function projectOpenEndPrimaryOnly(value: unknown): ReturnType<typeof normalizeOpenEndAnswer> {
+  const ans = normalizeOpenEndAnswer(value);
+  const { primaryText } = splitFollowUpAnswerText(ans.text || '');
+  return { ...ans, text: primaryText };
+}
+
+/**
+ * Commit a textbox/voice edit while preserving appended follow-up blocks on stored text.
+ * `editedValue` is what OpenEndAnswerInput emits (primary text only).
+ */
+export function commitOpenEndPrimaryEdit(
+  storedValue: unknown,
+  editedValue: unknown,
+): ReturnType<typeof updateOpenEndText> {
+  const stored = normalizeOpenEndAnswer(storedValue);
+  const edited = normalizeOpenEndAnswer(editedValue);
+  const mergedText = replacePrimaryAnswerText(stored.text || '', edited.text || '');
+  return {
+    ...edited,
+    text: mergedText,
+  };
+}
+
 /** Normalize aiInsights for session persistence and final submission. */
 export function normalizeAiInsightsMap(
   raw: Record<string, string[]> | null | undefined,

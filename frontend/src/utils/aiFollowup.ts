@@ -201,10 +201,15 @@ export function updateFollowUpReplyValue(
   questionId: string,
   replyValue: unknown,
 ): FollowUpStateMap {
+  const existing = map[questionId];
+  // Don't recreate a dismissed/empty panel just to clear a draft reply.
+  if (!existing || !isFollowUpResponsePending(existing)) {
+    return map;
+  }
   return {
     ...map,
     [questionId]: {
-      ...getOrCreateFollowUpState(map, questionId),
+      ...existing,
       replyValue,
     },
   };

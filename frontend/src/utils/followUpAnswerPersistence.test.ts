@@ -3,12 +3,17 @@ import {
   appendFollowUpExchangeToText,
   buildL2AnswerKey,
   buildStructuredAiInsightsBlock,
+  commitOpenEndPrimaryEdit,
   FOLLOWUP_PROMPT_PREFIX,
   FOLLOWUP_RESPONDENT_PREFIX,
   FOLLOWUP_VOICE_REPLY_PLACEHOLDER,
   formatFollowUpExchangeBlock,
+  joinFollowUpAnswerText,
   normalizeAiInsightsMap,
   parseFollowUpExchangeBlocks,
+  projectOpenEndPrimaryOnly,
+  replacePrimaryAnswerText,
+  splitFollowUpAnswerText,
 } from './followUpAnswerPersistence';
 
 describe('followUpAnswerPersistence', () => {
@@ -46,6 +51,47 @@ describe('followUpAnswerPersistence', () => {
     expect(FOLLOWUP_VOICE_REPLY_PLACEHOLDER).toBe('[Audio Answer]');
     const combined = appendFollowUpExchangeToText('Base', 'Probe?', FOLLOWUP_VOICE_REPLY_PLACEHOLDER);
     expect(parseFollowUpExchangeBlocks(combined)[0].respondent).toBe('[Audio Answer]');
+  });
+
+  it('splits primary answer from follow-up thread for respondent UI', () => {
+    const round1 = appendFollowUpExchangeToText('قللو السكر', 'كيف هيأثر؟', 'هيبقى احسن');
+    const round2 = appendFollowUpExchangeToText(round1, 'ممكن توضح؟', 'مبحبش المسكر');
+    expect(splitFollowUpAnswerText(round2)).toEqual({
+      primaryText: 'قللو السكر',
+      exchanges: [
+        { prompt: 'كيف هيأثر؟', respondent: 'هيبقى احسن' },
+        { prompt: 'ممكن توضح؟', respondent: 'مبحبش المسكر' },
+      ],
+    });
+  });
+
+  it('preserves follow-up blocks when primary answer is edited', () => {
+    const stored = appendFollowUpExchangeToText('Original', 'Probe?', 'Reply');
+    const updated = replacePrimaryAnswerText(stored, 'Edited original');
+    expect(splitFollowUpAnswerText(updated).primaryText).toBe('Edited original');
+    expect(parseFollowUpExchangeBlocks(updated)).toEqual([
+      { prompt: 'Probe?', respondent: 'Reply' },
+    ]);
+    expect(joinFollowUpAnswerText('Edited original', [
+      { prompt: 'Probe?', respondent: 'Reply' },
+    ])).toBe(updated);
+  });
+
+  it('projects and commits open-end edits without exposing follow-up markers in the textbox', () => {
+    const stored = {
+      text: appendFollowUpExchangeToText('Base answer', 'Why?', 'Because'),
+      input_modes_used: ['text'] as ('text' | 'voice')[],
+    };
+    expect(projectOpenEndPrimaryOnly(stored).text).toBe('Base answer');
+
+    const committed = commitOpenEndPrimaryEdit(stored, {
+      text: 'Updated base',
+      voice_feedback_id: 'vf_1',
+      input_modes_used: ['text', 'voice'],
+    });
+    expect(committed.text).toContain('Updated base');
+    expect(committed.text).toContain(`${FOLLOWUP_PROMPT_PREFIX} Why?`);
+    expect(committed.voice_feedback_id).toBe('vf_1');
   });
 
   it('normalizes aiInsights for session and submission payloads', () => {
