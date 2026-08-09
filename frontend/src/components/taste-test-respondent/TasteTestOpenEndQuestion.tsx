@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import OpenEndAnswerInput from '../voice-feedback/OpenEndAnswerInput';
+import OpenEndAnswerWithFollowUpThread from '../voice-feedback/OpenEndAnswerWithFollowUpThread';
 import AiFollowUpPanel from '../voice-feedback/AiFollowUpPanel';
 import type { AiFollowupConfig } from '../../pages/CreateSurvey/types';
 import {
@@ -28,6 +28,7 @@ import {
 } from './tasteTestOpenEndFollowUp';
 import {
   FOLLOWUP_VOICE_REPLY_PLACEHOLDER,
+  splitFollowUpAnswerText,
 } from '../../utils/followUpAnswerPersistence';
 
 export interface TasteTestOpenEndQuestionProps {
@@ -72,11 +73,12 @@ export default function TasteTestOpenEndQuestion({
 }: TasteTestOpenEndQuestionProps) {
   const isArabic = language === 'ar';
   const followUpEligibility = useMemo(() => buildTasteTestFollowUpEligibility({
+    questionId,
     questionText,
     effectiveType,
     timing,
     sectionTitle,
-  }), [questionText, effectiveType, timing, sectionTitle]);
+  }), [questionId, questionText, effectiveType, timing, sectionTitle]);
   const minAnswerLength = resolveMinAnswerLength(aiFollowup);
   const panelState = followUpStateMap?.[questionId];
   const questionCategory = classifyQuestionCategory(questionText);
@@ -90,6 +92,7 @@ export default function TasteTestOpenEndQuestion({
   };
 
   const textValue = normalizeOpenEndAnswer(value).text || '';
+  const primaryText = splitFollowUpAnswerText(textValue).primaryText;
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -100,14 +103,14 @@ export default function TasteTestOpenEndQuestion({
         timing,
         sectionTitle,
         aiFollowup,
-        text: textValue,
+        text: primaryText,
         followUpStateMap: getFollowUpStateSnapshot(),
       };
       const evaluation = evaluateTasteTestTextBlurFollowUp(debounceCtx);
       if (evaluation.shouldTrigger && onFollowUpTrigger) {
         onFollowUpTrigger(
           questionId,
-          textValue,
+          primaryText,
           questionText,
           brandName,
           'text',
@@ -118,13 +121,13 @@ export default function TasteTestOpenEndQuestion({
 
     return () => clearTimeout(timeout);
   }, [
-    textValue, questionId, questionText, effectiveType, timing, sectionTitle,
+    primaryText, questionId, questionText, effectiveType, timing, sectionTitle,
     aiFollowup, brandName, followUpEligibility, onFollowUpTrigger, getFollowUpStateSnapshot
   ]);
 
   return (
     <>
-      <OpenEndAnswerInput
+      <OpenEndAnswerWithFollowUpThread
         value={value}
         showVoice={showVoice}
         publicToken={publicToken}
@@ -154,7 +157,11 @@ export default function TasteTestOpenEndQuestion({
               questionText,
             });
           }
-          if (voiceEvaluation.shouldTrigger && onVoiceFollowUpTrigger) {
+          if (
+            voiceEvaluation.shouldTrigger
+            && onVoiceFollowUpTrigger
+            && nextNormalized.voice_feedback_id
+          ) {
             onVoiceFollowUpTrigger(
                 questionId,
                 nextNormalized.voice_feedback_id,
@@ -232,7 +239,6 @@ export default function TasteTestOpenEndQuestion({
                 'text',
                 followUpEligibility,
               );
-              onFollowUpReplyChange?.(questionId, {});
             }}
             onReplyVoiceUpload={(feedbackId) => {
               if (!aiFollowup?.apply_to_voice || !onVoiceFollowUpTrigger) return;
