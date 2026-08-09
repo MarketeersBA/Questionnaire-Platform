@@ -14,13 +14,14 @@ import {
     ExternalLink,
     ChevronLeft,
     Database,
-    Copy
+    Copy,
+    Link as LinkIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { ExportActions } from '../components/ExportActions';
 import { exportTokens } from '../utils/exportUtils';
-import { getSurveyBaseUrl, getSurveyLink } from '../utils/surveyLinks';
+import { getSurveyBaseUrl, getSurveyLink, getMasterLink } from '../utils/surveyLinks';
 
 export default function TokenManagement() {
     const { surveyId } = useParams();
@@ -75,6 +76,16 @@ export default function TokenManagement() {
             fetchData();
         } finally {
             setLoading(false);
+        }
+    };
+
+    const copyMasterLink = (id: string) => {
+        const url = getMasterLink(id);
+        const notifySuccess = () => toast.success('Master link copied to clipboard');
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(url).then(notifySuccess).catch(() => fallbackCopy(url));
+        } else {
+            fallbackCopy(url);
         }
     };
 
@@ -143,8 +154,8 @@ export default function TokenManagement() {
         }
     };
 
-    const handleBulkExport = async (format: 'csv' | 'txt' | 'json') => {
-        if (!surveyId || format === 'json') return;
+    const handleBulkExport = async (format: 'csv' | 'txt' | 'json' | 'pptx') => {
+        if (!surveyId || format === 'json' || format === 'pptx') return;
         setIsExporting(true);
         try {
             let dataToExport = [];
@@ -241,6 +252,33 @@ export default function TokenManagement() {
                     />
                 </div>
             </div>
+
+            {/* Master Link Banner */}
+            {surveyId && (
+                <div className="bg-gradient-to-r from-brand-blue/5 to-brand-blue/10 dark:from-brand-blue/10 dark:to-brand-blue/20 rounded-[2rem] border border-brand-blue/15 dark:border-brand-blue/25 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg">
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 rounded-xl bg-brand-blue/10 dark:bg-brand-blue/20 border border-brand-blue/20 text-brand-blue shrink-0">
+                            <LinkIcon className="w-5 h-5" />
+                        </div>
+                        <div className="text-left">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-brand-blue mb-1">Master Link</p>
+                            <code className="text-sm font-mono font-bold text-slate-700 dark:text-slate-300 break-all">
+                                {getMasterLink(surveyId)}
+                            </code>
+                            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 mt-1 uppercase tracking-wider">
+                                Generates a unique session for every respondent who opens this link
+                            </p>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => copyMasterLink(surveyId)}
+                        className="shrink-0 flex items-center gap-2 px-6 py-3 bg-brand-blue text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-brand-blue/90 active:scale-95 transition-all shadow-lg shadow-brand-blue/20"
+                    >
+                        <Copy className="w-4 h-4" />
+                        Copy Master Link
+                    </button>
+                </div>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 {/* Left: Controls */}

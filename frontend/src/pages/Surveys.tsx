@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { surveys } from '../services/api';
+import { getMasterLink } from '../utils/surveyLinks';
+import { toast } from 'sonner';
 import { SurveyStateToggle } from '../components/SurveyStateManagement';
 import {
     Plus,
@@ -19,7 +21,6 @@ import {
     ChevronRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { toast } from 'sonner';
 
 const PAGE_SIZE = 5;
 
@@ -54,6 +55,34 @@ export default function SurveysPage() {
             fetchSurveys();
         } catch (err) {
             toast.error('Failed to archive survey');
+        }
+    };
+
+    const copyMasterLink = (surveyId: string) => {
+        const url = getMasterLink(surveyId);
+        const notify = () => toast.success('Master link copied — share it with respondents');
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(url).then(notify).catch(() => {
+                const el = document.createElement('textarea');
+                el.value = url;
+                el.style.cssText = 'position:fixed;left:-9999px;top:-9999px;opacity:0';
+                document.body.appendChild(el);
+                el.focus();
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
+                notify();
+            });
+        } else {
+            const el = document.createElement('textarea');
+            el.value = url;
+            el.style.cssText = 'position:fixed;left:-9999px;top:-9999px;opacity:0';
+            document.body.appendChild(el);
+            el.focus();
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            notify();
         }
     };
 
@@ -400,13 +429,13 @@ export default function SurveysPage() {
                                                 >
                                                     <Eye className="w-4 h-4" />
                                                 </Link>
-                                                <Link
-                                                    to={`/surveys/${survey._id}`}
+                                                <button
+                                                    onClick={() => copyMasterLink(survey._id)}
                                                     className="p-3 rounded-xl bg-brand-blue/10 text-brand-blue hover:bg-brand-blue/20 transition-all border border-brand-blue/10 active:scale-95"
-                                                    title="Tokens"
+                                                    title="Copy Master Link"
                                                 >
                                                     <Users className="w-4 h-4" />
-                                                </Link>
+                                                </button>
                                                 <Link
                                                     to={`/analytics/${survey._id}`}
                                                     className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 transition-all border border-emerald-500/10 active:scale-95"

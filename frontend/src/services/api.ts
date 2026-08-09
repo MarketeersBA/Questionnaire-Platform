@@ -177,6 +177,11 @@ export const tokens = {
     (await api.get(`/tokens/survey/${surveyId}/summary`, options)).data,
 };
 
+export const masterLink = {
+  generateToken: async (surveyId: string, options?: RequestOptions) =>
+    (await api.post(`s/master-link/${surveyId}/generate-token`, {}, options)).data as { token: string },
+};
+
 export const analytics = {
   getFunnel: async (surveyId: string, options?: RequestOptions) =>
     (await api.get(`/analytics/funnel/${surveyId}`, options)).data,

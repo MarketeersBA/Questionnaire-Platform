@@ -22,3 +22,7 @@ export function getSurveyBaseUrl(): string {
 export function getSurveyLink(token: string): string {
     return `${getSurveyBaseUrl()}/s/${token}`;
 }
+
+export function getMasterLink(surveyId: string): string {
+    return `${getSurveyBaseUrl()}/m/${surveyId}`;
+}
