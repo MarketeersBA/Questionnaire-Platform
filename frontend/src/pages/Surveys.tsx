@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { surveys } from '../services/api';
+import { surveys, tokens } from '../services/api';
 import { getMasterLink } from '../utils/surveyLinks';
 import { toast } from 'sonner';
 import { SurveyStateToggle } from '../components/SurveyStateManagement';
@@ -24,6 +24,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const PAGE_SIZE = 5;
 
+type TokenSummary = {
+    unused: number;
+    passed: number;
+    failed: number;
+    submitted: number;
+    total: number;
+};
+
+const EMPTY_SUMMARY: TokenSummary = { unused: 0, passed: 0, failed: 0, submitted: 0, total: 0 };
+
 export default function SurveysPage() {
     const [surveyList, setSurveyList] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -31,6 +41,7 @@ export default function SurveysPage() {
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'draft' | 'closed'>('all');
     const [page, setPage] = useState(1);
+    const [tokenSummaries, setTokenSummaries] = useState<Record<string, TokenSummary>>({});
 
     const fetchSurveys = async () => {
         try {
@@ -101,6 +112,36 @@ export default function SurveysPage() {
         (currentPage - 1) * PAGE_SIZE,
         currentPage * PAGE_SIZE
     );
+    const pageSurveyIds = paginatedSurveys.map((s: any) => s._id).join(',');
+
+    useEffect(() => {
+        const ids = pageSurveyIds ? pageSurveyIds.split(',') : [];
+        if (ids.length === 0) return;
+
+        let cancelled = false;
+        (async () => {
+            const results = await Promise.all(
+                ids.map(async (id: string) => {
+                    try {
+                        const summary = await tokens.getSummary(id);
+                        return [id, summary as TokenSummary] as const;
+                    } catch {
+                        return [id, EMPTY_SUMMARY] as const;
+                    }
+                })
+            );
+            if (cancelled) return;
+            setTokenSummaries((prev) => {
+                const next = { ...prev };
+                for (const [id, summary] of results) next[id] = summary;
+                return next;
+            });
+        })();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [pageSurveyIds]);
 
     const counts = {
         all: surveyList.length,
@@ -245,7 +286,7 @@ export default function SurveysPage() {
                                 <th className="px-10 py-6 border-b border-slate-200 dark:border-slate-700 text-center">Lifecycle</th>
                                 <th className="px-10 py-6 border-b border-slate-200 dark:border-slate-700">Creator</th>
                                 <th className="px-10 py-6 border-b border-slate-200 dark:border-slate-700">Configuration Summary</th>
-                                <th className="px-10 py-6 border-b border-slate-200 dark:border-slate-700">Collection Velocity</th>
+                                <th className="px-10 py-6 border-b border-slate-200 dark:border-slate-700">Collection & Lifecycle</th>
                                 <th className="px-10 py-6 border-b border-slate-200 dark:border-slate-700">Service Status</th>
                                 <th className="px-10 py-6 border-b border-slate-200 dark:border-slate-700 text-right">Operations</th>
                             </tr>
@@ -389,15 +430,15 @@ export default function SurveysPage() {
                                             </div>
                                         </td>
                                         <td className="px-10 py-7 border-b border-slate-100 dark:border-slate-800/50">
-                                            <div className="flex flex-col gap-2 min-w-[140px]">
+                                            <div className="flex flex-col gap-3 min-w-[200px]">
                                                 <div className="flex items-center justify-between gap-4">
-                                                    <div className="flex items-baseline gap-1">
-                                                        <span className="text-lg font-black text-slate-900 dark:text-white leading-none">
+                                                    <div className="flex items-baseline gap-1.5">
+                                                        <span className="text-xl font-black text-slate-900 dark:text-white leading-none">
                                                             {survey.respondent_count || 0}
                                                         </span>
-                                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Reached</span>
+                                                        <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Reached</span>
                                                     </div>
-                                                    <span className="text-[9px] font-black text-brand-blue/60 uppercase">Target: {survey.sample_capacity || 0}</span>
+                                                    <span className="text-xs font-bold text-brand-blue uppercase tracking-wide">Target: {survey.sample_capacity || 0}</span>
                                                 </div>
                                                 <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-200/50 dark:border-slate-700/50 shadow-inner">
                                                     <motion.div
@@ -409,6 +450,40 @@ export default function SurveysPage() {
                                                             }`}
                                                     />
                                                 </div>
+                                                {(() => {
+                                                    const summary = tokenSummaries[survey._id] || EMPTY_SUMMARY;
+                                                    const items = [
+                                                        { label: 'Allocated', value: summary.total, color: 'text-slate-600 dark:text-slate-300' },
+                                                        { label: 'Pending', value: summary.unused, color: 'text-brand-blue' },
+                                                        { label: 'Qualified', value: summary.passed, color: 'text-emerald-600 dark:text-emerald-400' },
+                                                        { label: 'Restricted', value: summary.failed, color: 'text-rose-500' },
+                                                        { label: 'Finalized', value: summary.submitted, color: 'text-cyan-600 dark:text-cyan-400' },
+                                                    ];
+                                                    return (
+                                                        <div className="flex flex-col gap-2 pt-4 mt-2 border-t border-slate-100 dark:border-slate-800">
+                                                            <div className="grid grid-cols-3 gap-2">
+                                                                {items.slice(0, 3).map((item) => (
+                                                                    <div key={item.label} className="flex flex-col items-center gap-1">
+                                                                        <span className={`text-sm font-black leading-none ${item.color}`}>{item.value}</span>
+                                                                        <span className="text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 text-center">
+                                                                            {item.label}
+                                                                        </span>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                            <div className="grid grid-cols-2 gap-2">
+                                                                {items.slice(3).map((item) => (
+                                                                    <div key={item.label} className="flex flex-col items-center gap-1">
+                                                                        <span className={`text-sm font-black leading-none ${item.color}`}>{item.value}</span>
+                                                                        <span className="text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 text-center">
+                                                                            {item.label}
+                                                                        </span>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })()}
                                             </div>
                                         </td>
                                         <td className="px-10 py-7 border-b border-slate-50 dark:border-slate-800/50">
