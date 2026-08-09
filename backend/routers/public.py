@@ -3,7 +3,8 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Dict, Any, List, Optional, Literal
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, timedelta
+import uuid
 import logging
 
 logger = logging.getLogger(__name__)
@@ -124,6 +125,39 @@ def clean_doc(doc):
         return doc.isoformat()
         
     return doc
+
+class MasterLinkResponse(BaseModel):
+    token: str
+
+@router.post("/master-link/{survey_id}/generate-token", response_model=MasterLinkResponse)
+async def generate_master_link_token(survey_id: str):
+    if not ObjectId.is_valid(survey_id):
+        raise HTTPException(status_code=400, detail="Invalid survey ID")
+        
+    survey = await db.get_collection("surveys").find_one({"_id": ObjectId(survey_id)})
+    if not survey:
+        raise HTTPException(status_code=404, detail="Survey not found")
+        
+    if survey.get("status") not in ["active", "draft"]:
+        raise HTTPException(status_code=403, detail="Survey must be active or draft to generate tokens")
+
+    token_str = str(uuid.uuid4())
+    expires_at = datetime.utcnow() + timedelta(days=30)
+    
+    token_doc = {
+        "survey_id": survey_id,
+        "token": token_str,
+        "status": "unused",
+        "batch_id": "master_link",
+        "created_by": "system_master_link",
+        "created_at": datetime.utcnow(),
+        "expires_at": expires_at,
+        "last_accessed": None
+    }
+    
+    await db.get_collection("tokens").insert_one(token_doc)
+    
+    return {"token": token_str}
 
 @router.get("/{token}")
 async def get_survey_by_token(token: str):

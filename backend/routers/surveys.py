@@ -491,9 +491,9 @@ async def update_survey(
     if not existing:
         raise HTTPException(status_code=404, detail="Survey not found")
 
-    # 1. Enforcement: Only draft surveys can be edited (except for status changes)
+    # 1. Enforcement: Prevent editing closed surveys (except for status changes)
     is_status_only = survey_update.model_dump(exclude_unset=True).keys() == {"status"}
-    if existing["status"] != "draft" and not is_status_only:
+    if existing["status"] == "closed" and not is_status_only:
         raise HTTPException(
             status_code=400, 
             detail=f"Cannot edit survey in '{existing['status']}' state. Only status transitions allowed."
