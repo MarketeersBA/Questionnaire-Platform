@@ -126,11 +126,16 @@ def clean_doc(doc):
         
     return doc
 
+from fastapi import Request
+
+class MasterLinkRequest(BaseModel):
+    device_id: Optional[str] = None
+
 class MasterLinkResponse(BaseModel):
     token: str
 
 @router.post("/master-link/{survey_id}/generate-token", response_model=MasterLinkResponse)
-async def generate_master_link_token(survey_id: str):
+async def generate_master_link_token(survey_id: str, req: Request, payload: MasterLinkRequest = None):
     if not ObjectId.is_valid(survey_id):
         raise HTTPException(status_code=400, detail="Invalid survey ID")
         
@@ -140,6 +145,24 @@ async def generate_master_link_token(survey_id: str):
         
     if survey.get("status") not in ["active", "draft"]:
         raise HTTPException(status_code=403, detail="Survey must be active or draft to generate tokens")
+
+    device_id = payload.device_id if payload else None
+    ip_address = req.client.host if req.client else None
+    
+    # Check for existing token
+    query = {
+        "survey_id": survey_id,
+        "batch_id": "master_link"
+    }
+    
+    if device_id:
+        query["device_id"] = device_id
+    elif ip_address:
+        query["ip_address"] = ip_address
+        
+    existing_token = await db.get_collection("tokens").find_one(query)
+    if existing_token:
+        return {"token": existing_token["token"]}
 
     token_str = str(uuid.uuid4())
     expires_at = datetime.utcnow() + timedelta(days=30)
@@ -152,7 +175,10 @@ async def generate_master_link_token(survey_id: str):
         "created_by": "system_master_link",
         "created_at": datetime.utcnow(),
         "expires_at": expires_at,
-        "last_accessed": None
+        "last_accessed": None,
+        "device_id": device_id,
+        "ip_address": ip_address,
+        "user_agent": req.headers.get("user-agent")
     }
     
     await db.get_collection("tokens").insert_one(token_doc)

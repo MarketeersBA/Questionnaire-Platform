@@ -178,8 +178,8 @@ export const tokens = {
 };
 
 export const masterLink = {
-  generateToken: async (surveyId: string, options?: RequestOptions) =>
-    (await api.post(`s/master-link/${surveyId}/generate-token`, {}, options)).data as { token: string },
+  generateToken: async (surveyId: string, deviceId?: string, options?: RequestOptions) =>
+    (await api.post(`s/master-link/${surveyId}/generate-token`, { device_id: deviceId }, options)).data as { token: string },
 };
 
 export const analytics = {
