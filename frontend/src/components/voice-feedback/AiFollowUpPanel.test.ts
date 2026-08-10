@@ -43,6 +43,10 @@ describe('AiFollowUpPanel state machine', () => {
     expect(vm.phase).toBe('reply');
   });
 
+  it('treats finished session with no probe text as empty phase', () => {
+    expect(resolvePanelViewModel(true, baseState).phase).toBe('empty');
+  });
+
   it('tracks round indicator against maxRounds', () => {
     const vm = resolvePanelViewModel(
       true,

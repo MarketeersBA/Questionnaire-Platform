@@ -78,6 +78,9 @@ export default function AiFollowUpPanel({
 
     if (!visible) return null;
 
+    // After AI completes / rounds exhaust, map entry can linger with no content — don't show an empty shell.
+    if (!state.loading && !state.followUpText) return null;
+
     const isAr = language === 'ar';
     const copy = COPY[language];
     const isPremium = variant === 'premium';

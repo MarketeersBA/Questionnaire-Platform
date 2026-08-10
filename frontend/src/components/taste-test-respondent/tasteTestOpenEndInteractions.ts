@@ -4,6 +4,7 @@
  */
 
 import type { FollowUpEligibilityInput, FollowUpStateMap } from '../../utils/aiFollowup';
+import { isFollowUpResponsePending } from '../../utils/aiFollowup';
 import {
   buildTasteTestOpenEndFollowUpEligibility,
   isTasteTestOpenEndFollowUpEligible,
@@ -78,5 +79,5 @@ export function shouldShowTasteTestFollowUpPanel(
   if (!isTasteTestFollowUpSurfaceEligible(ctx)) {
     return false;
   }
-  return Boolean(ctx.followUpStateMap?.[ctx.questionId]);
+  return isFollowUpResponsePending(ctx.followUpStateMap?.[ctx.questionId]);
 }

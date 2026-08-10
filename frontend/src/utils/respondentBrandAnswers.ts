@@ -50,9 +50,12 @@ export function isBrandSelectedInAnswer(
     brand: string,
     isMcq: boolean
 ): boolean {
+    const normalized = brand.toLowerCase().trim();
     if (isMcq) {
-        return collectBrandNamesFromAnswer(answer).some((item) => brandsFuzzyMatch(item, brand));
+        return collectBrandNamesFromAnswer(answer).some(
+            (item) => item.toLowerCase().trim() === normalized,
+        );
     }
     const single = typeof answer === 'string' ? answer.trim() : '';
-    return single ? brandsFuzzyMatch(single, brand) : false;
+    return single ? single.toLowerCase().trim() === normalized : false;
 }

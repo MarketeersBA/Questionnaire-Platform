@@ -439,6 +439,7 @@ export default function PublicSurvey() {
     if (!text) return '';
     const category = productTestDisplay.category || survey?.config?.category || survey?.customizations?.category || 'Product';
     const effectiveBrand = getEffectiveBrandName(brandName || '');
+    const currentBrandTrimmed = brandName?.trim() || '';
 
     let result = text
       .replace(/\[\s*brand\s*\]/gi, effectiveBrand)
@@ -456,7 +457,12 @@ export default function PublicSurvey() {
       .sort((a, b) => b.length - a.length);
     literalBrandKeys.forEach((brand) => {
       const displayName = getEffectiveBrandName(brand);
-      if (!displayName || displayName === brand) return;
+      if (!displayName || displayName === brand) {
+        if (effectiveBrand && currentBrandTrimmed && brand !== currentBrandTrimmed && result.includes(brand)) {
+          result = result.replace(new RegExp(escapeRegExp(brand), 'gi'), effectiveBrand);
+        }
+        return;
+      }
       result = result.replace(new RegExp(escapeRegExp(brand), 'gi'), displayName);
     });
 

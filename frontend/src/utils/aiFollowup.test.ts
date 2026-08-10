@@ -179,16 +179,28 @@ describe('aiFollowup', () => {
     expect(next.q2).toBe(state.q2);
   });
 
-  it('creates scoped reply state when a panel initializes before a reply exists', () => {
-    const next = updateFollowUpReplyValue({}, 'q-new', { text: 'draft answer' });
-
-    expect(next['q-new']).toEqual({
-      questionId: 'q-new',
-      round: 1,
-      followUpText: null,
-      loading: false,
-      quality: null,
-      replyValue: { text: 'draft answer' },
+  it('does not recreate a dismissed empty panel when clearing a draft reply', () => {
+    expect(updateFollowUpReplyValue({}, 'q-new', { text: 'draft answer' })).toEqual({});
+    expect(
+      updateFollowUpReplyValue(
+        {
+          'q-done': {
+            questionId: 'q-done',
+            round: 2,
+            followUpText: null,
+            loading: false,
+          },
+        },
+        'q-done',
+        {},
+      ),
+    ).toEqual({
+      'q-done': {
+        questionId: 'q-done',
+        round: 2,
+        followUpText: null,
+        loading: false,
+      },
     });
   });
 

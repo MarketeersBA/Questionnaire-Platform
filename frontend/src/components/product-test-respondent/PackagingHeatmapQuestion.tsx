@@ -7,16 +7,20 @@ import { packagingHeatmap, publicApi } from '../../services/api';
 import VoiceNoteRecorder from './VoiceNoteRecorder';
 import React from 'react';
 import AiFollowUpPanel from '../voice-feedback/AiFollowUpPanel';
-import type {
-    FollowUpEligibilityInput,
-    FollowUpReplyChangeHandler,
-    FollowUpStateMap,
-    FollowUpTriggerHandler,
-    VoiceFollowUpTriggerHandler,
+import {
+    isFollowUpResponsePending,
+    type FollowUpEligibilityInput,
+    type FollowUpReplyChangeHandler,
+    type FollowUpStateMap,
+    type FollowUpTriggerHandler,
+    type VoiceFollowUpTriggerHandler,
 } from '../../utils/aiFollowup';
 import {
     appendFollowUpExchangeToText,
+    replacePrimaryAnswerText,
+    splitFollowUpAnswerText,
 } from '../../utils/followUpAnswerPersistence';
+import FollowUpConversationThread from '../voice-feedback/FollowUpConversationThread';
 import {
     buildHeatmapPinFollowUpKey,
     getHeatmapPinComment,
@@ -404,11 +408,13 @@ export default function PackagingHeatmapQuestion({
                     {clicks.map((click, index) => {
                         const key = buildHeatmapPinFollowUpKey(question.id, index);
                         const comment = getHeatmapPinComment(click);
+                        const { primaryText: primaryComment, exchanges: commentExchanges } =
+                            splitFollowUpAnswerText(comment);
                         const hasVoice = hasHeatmapPinVoice(click);
                         const hasAnswer = isHeatmapPinFeedbackAnswered(click);
                         const aiRequested = isHeatmapPinAiRequested(click);
                         const state = followUpStateMap?.[key];
-                        const canSubmitText = comment.trim().length >= 5;
+                        const canSubmitText = primaryComment.trim().length >= 5;
 
                         return (
                             <div
@@ -438,9 +444,9 @@ export default function PackagingHeatmapQuestion({
                                 </div>
 
                                 <textarea
-                                    value={comment}
+                                    value={primaryComment}
                                     onChange={(e) => {
-                                        const nextText = e.target.value;
+                                        const nextText = replacePrimaryAnswerText(comment, e.target.value);
                                         updateClick(index, (current) =>
                                             upsertHeatmapClickFeedback(current, intent, {
                                                 comment: nextText,
@@ -490,7 +496,7 @@ export default function PackagingHeatmapQuestion({
                                     disabled={!canSubmitText && !hasVoice}
                                     onClick={() => {
                                         if (canSubmitText) {
-                                            triggerPinFollowUp(index, comment, 'text');
+                                            triggerPinFollowUp(index, primaryComment, 'text');
                                         } else if (hasVoice) {
                                             triggerPinFollowUp(
                                                 index,
@@ -508,8 +514,13 @@ export default function PackagingHeatmapQuestion({
                                         : (isArabic ? 'إضافة الإجابة' : 'Add Answer')}
                                 </button>
 
+                                <FollowUpConversationThread
+                                    exchanges={commentExchanges}
+                                    language={language}
+                                />
+
                                 <AiFollowUpPanel
-                                    visible={!!state}
+                                    visible={isFollowUpResponsePending(state)}
                                     state={state ?? { questionId: key, round: 1, followUpText: null, loading: false, quality: null }}
                                     language={language}
                                     maxRounds={maxFollowUpRounds}
@@ -534,7 +545,6 @@ export default function PackagingHeatmapQuestion({
                                             }),
                                         );
                                         onFollowUpTrigger(key, text, pinPromptText(index), brandName, 'text', followUpEligibility);
-                                        onFollowUpReplyChange?.(key, {});
                                     }}
                                     onReplyVoiceUpload={(feedbackId) => {
                                         if (!aiFollowup?.apply_to_voice || !onVoiceFollowUpTrigger || !followUpEligibility) return;

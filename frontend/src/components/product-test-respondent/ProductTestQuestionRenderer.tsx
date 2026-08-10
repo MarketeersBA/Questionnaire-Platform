@@ -8,9 +8,9 @@ import type { ProductTestRespondentDisplayContext } from '../../utils/productTes
 import { resolveProductTestVoiceBrandName } from '../../utils/productTestRespondentDisplay';
 import type { VoiceCaptureConfig } from '../../utils/voiceQuestions';
 import { isVoiceEnabledForProductTestQuestion } from '../../utils/voiceQuestions';
-import OpenEndAnswerInput from '../voice-feedback/OpenEndAnswerInput';
+import OpenEndAnswerWithFollowUpThread from '../voice-feedback/OpenEndAnswerWithFollowUpThread';
 import type { FollowUpEligibilityInput, FollowUpReplyChangeHandler, FollowUpStateMap, FollowUpTriggerHandler, VoiceFollowUpTriggerHandler } from '../../utils/aiFollowup';
-import { classifyQuestionCategory, getMaxFollowUpRounds, isFollowUpAnswerEligible, isAiFollowUpEligible, shouldTriggerInitialFollowUp, canSubmitFollowUpReply } from '../../utils/aiFollowup';
+import { classifyQuestionCategory, getMaxFollowUpRounds, isFollowUpAnswerEligible, isAiFollowUpEligible, shouldTriggerInitialFollowUp, canSubmitFollowUpReply, isFollowUpResponsePending } from '../../utils/aiFollowup';
 import { resolveMinAnswerLength } from '../../utils/aiFollowupConfig';
 import {
   appendFollowUpExchangeToOpenEndValue,
@@ -222,7 +222,7 @@ export default function ProductTestQuestionRenderer({
                     />
                 </>
             ) : (
-                <OpenEndAnswerInput
+                <OpenEndAnswerWithFollowUpThread
                     value={value}
                     onChange={(next) => {
                         const prev = normalizeOpenEndAnswer(value);
@@ -255,7 +255,7 @@ export default function ProductTestQuestionRenderer({
 
             {question.type !== 'packaging-heatmap' && followUpEligible && (
             <AiFollowUpPanel
-                visible={!!followUpStateMap?.[question.id]}
+                visible={isFollowUpResponsePending(followUpStateMap?.[question.id])}
                 state={followUpStateMap?.[question.id] ?? { questionId: null, round: 1, followUpText: null, loading: false, quality: null }}
                 language={language}
                 maxRounds={getMaxFollowUpRounds(aiFollowup, classifyQuestionCategory(displayText))}
@@ -288,7 +288,6 @@ export default function ProductTestQuestionRenderer({
                         ));
                     }
                     onFollowUpTrigger(question.id, text, displayText, voiceBrandName || '', 'text', activeFollowUpEligibility);
-                    onFollowUpReplyChange?.(question.id, {});
                 }}
                 onReplyVoiceUpload={(feedbackId) => {
                     if (!aiFollowup?.apply_to_voice || !onVoiceFollowUpTrigger) return;

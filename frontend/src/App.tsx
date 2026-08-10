@@ -19,6 +19,7 @@ import SurveyResponses from './pages/SurveyResponses';
 import SurveyReport from './pages/SurveyReport';
 import ReportExportFrame from './pages/ReportExportFrame';
 import AdminAITelemetry from './pages/AdminAITelemetry';
+import MasterLinkRedirect from './pages/MasterLinkRedirect';
 import AdminNotifier from './components/notifications/AdminNotifier';
 import Layout from './components/Layout';
 import ScrollToTop from './components/ScrollToTop';
@@ -185,6 +186,7 @@ function AppContent() {
               }
             />
             <Route path="/s/:token" element={<PublicSurvey />} />
+            <Route path="/m/:surveyId" element={<MasterLinkRedirect />} />
           </Routes>
         </AnimatePresence>
       </div>

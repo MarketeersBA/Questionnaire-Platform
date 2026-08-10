@@ -1,84 +1,149 @@
-import { useState, useRef, useEffect } from 'react';
-import { Mic, Square, Trash2, RotateCcw, Play, Pause } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { Mic, Trash2, RotateCcw, Play, Pause } from 'lucide-react';
 
 interface VoiceNoteRecorderProps {
     language: 'en' | 'ar';
     onRecorded: (blob: Blob | null) => void;
 }
 
+/** Ignore accidental taps shorter than this (ms). */
+const MIN_HOLD_MS = 400;
+
 export default function VoiceNoteRecorder({ language, onRecorded }: VoiceNoteRecorderProps) {
     const isArabic = language === 'ar';
     const [state, setState] = useState<'idle' | 'recording' | 'recorded'>('idle');
     const [audioUrl, setAudioUrl] = useState<string | null>(null);
-    const [timeLeft, setTimeLeft] = useState(30);
+    const [elapsed, setElapsed] = useState(0);
     const [isPlaying, setIsPlaying] = useState(false);
 
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const streamRef = useRef<MediaStream | null>(null);
     const chunksRef = useRef<BlobPart[]>([]);
     const timerRef = useRef<number | null>(null);
     const audioRef = useRef<HTMLAudioElement | null>(null);
+    const holdActiveRef = useRef(false);
+    const recordingStartedAtRef = useRef(0);
+    const startInFlightRef = useRef(false);
+    const maxSeconds = 30;
 
-    // Stop recording automatically if unmounted
+    const clearTimer = useCallback(() => {
+        if (timerRef.current) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+        }
+    }, []);
+
+    const stopStream = useCallback(() => {
+        streamRef.current?.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+    }, []);
+
     useEffect(() => {
         return () => {
-            if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+            holdActiveRef.current = false;
+            clearTimer();
+            if (mediaRecorderRef.current?.state === 'recording') {
                 mediaRecorderRef.current.stop();
             }
-            if (timerRef.current) clearInterval(timerRef.current);
+            stopStream();
             if (audioUrl) URL.revokeObjectURL(audioUrl);
         };
-    }, [audioUrl]);
+    }, [audioUrl, clearTimer, stopStream]);
 
-    const startRecording = async () => {
+    const finalizeBlob = useCallback((blob: Blob, heldMs: number) => {
+        stopStream();
+        mediaRecorderRef.current = null;
+        chunksRef.current = [];
+
+        if (heldMs < MIN_HOLD_MS || blob.size < 100) {
+            setState('idle');
+            return;
+        }
+
+        const url = URL.createObjectURL(blob);
+        setAudioUrl((prev) => {
+            if (prev) URL.revokeObjectURL(prev);
+            return url;
+        });
+        setState('recorded');
+        onRecorded(blob);
+    }, [onRecorded, stopStream]);
+
+    const stopRecording = useCallback(() => {
+        const recorder = mediaRecorderRef.current;
+        clearTimer();
+
+        if (!recorder || recorder.state !== 'recording') {
+            setState((s) => (s === 'recording' ? 'idle' : s));
+            stopStream();
+            return;
+        }
+
+        const heldMs = Date.now() - recordingStartedAtRef.current;
+        recorder.onstop = () => {
+            const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+            finalizeBlob(blob, heldMs);
+        };
+        recorder.stop();
+    }, [clearTimer, finalizeBlob, stopStream]);
+
+    const startRecording = useCallback(async () => {
+        if (startInFlightRef.current || state === 'recording') return;
+        startInFlightRef.current = true;
+
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            if (!holdActiveRef.current) {
+                stream.getTracks().forEach((track) => track.stop());
+                return;
+            }
+
+            streamRef.current = stream;
+            chunksRef.current = [];
             const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
             mediaRecorderRef.current = mediaRecorder;
-            chunksRef.current = [];
 
             mediaRecorder.ondataavailable = (e) => {
                 if (e.data.size > 0) chunksRef.current.push(e.data);
             };
 
-            mediaRecorder.onstop = () => {
-                const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
-                const url = URL.createObjectURL(blob);
-                setAudioUrl(url);
-                setState('recorded');
-                onRecorded(blob);
-                stream.getTracks().forEach((track) => track.stop());
-            };
-
             mediaRecorder.start();
+            recordingStartedAtRef.current = Date.now();
             setState('recording');
-            setTimeLeft(30);
+            setElapsed(0);
 
+            clearTimer();
             timerRef.current = window.setInterval(() => {
-                setTimeLeft((prev) => {
-                    if (prev <= 1) {
-                        mediaRecorder.stop();
-                        if (timerRef.current) clearInterval(timerRef.current);
-                        return 0;
+                setElapsed((prev) => {
+                    const next = prev + 1;
+                    if (next >= maxSeconds) {
+                        holdActiveRef.current = false;
+                        stopRecording();
+                        return maxSeconds;
                     }
-                    return prev - 1;
+                    return next;
                 });
             }, 1000);
+
+            if (!holdActiveRef.current) {
+                stopRecording();
+            }
         } catch (err) {
             console.error('Mic access denied', err);
+            holdActiveRef.current = false;
+            setState('idle');
             alert(isArabic ? 'لم نتمكن من الوصول للميكروفون' : 'Could not access microphone');
+        } finally {
+            startInFlightRef.current = false;
         }
-    };
-
-    const stopRecording = () => {
-        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-            mediaRecorderRef.current.stop();
-        }
-        if (timerRef.current) clearInterval(timerRef.current);
-    };
+    }, [clearTimer, isArabic, maxSeconds, state, stopRecording]);
 
     const clearRecording = () => {
         setState('idle');
-        setAudioUrl(null);
+        setAudioUrl((prev) => {
+            if (prev) URL.revokeObjectURL(prev);
+            return null;
+        });
         chunksRef.current = [];
         onRecorded(null);
         setIsPlaying(false);
@@ -93,9 +158,40 @@ export default function VoiceNoteRecorder({ language, onRecorded }: VoiceNoteRec
         if (isPlaying) {
             audioRef.current.pause();
         } else {
-            audioRef.current.play();
+            void audioRef.current.play();
         }
         setIsPlaying(!isPlaying);
+    };
+
+    const onPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
+        if (state === 'recorded') {
+            togglePlayback();
+            return;
+        }
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        e.preventDefault();
+        e.currentTarget.setPointerCapture(e.pointerId);
+        holdActiveRef.current = true;
+        void startRecording();
+    };
+
+    const onPointerUpOrCancel = (e: React.PointerEvent<HTMLButtonElement>) => {
+        if (state === 'recorded') return;
+        if (!holdActiveRef.current && state !== 'recording') return;
+        holdActiveRef.current = false;
+        try {
+            if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+                e.currentTarget.releasePointerCapture(e.pointerId);
+            }
+        } catch {
+            /* already released */
+        }
+        stopRecording();
+    };
+
+    const formatTime = (seconds: number) => {
+        const remaining = Math.max(0, maxSeconds - seconds);
+        return `0:${remaining.toString().padStart(2, '0')}`;
     };
 
     return (
@@ -104,16 +200,27 @@ export default function VoiceNoteRecorder({ language, onRecorded }: VoiceNoteRec
                 <div className="flex items-center gap-3">
                     <button
                         type="button"
-                        onClick={state === 'idle' ? startRecording : state === 'recording' ? stopRecording : togglePlayback}
-                        className={`w-10 h-10 rounded-full flex items-center justify-center shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 ${state === 'idle'
+                        onPointerDown={onPointerDown}
+                        onPointerUp={onPointerUpOrCancel}
+                        onPointerCancel={onPointerUpOrCancel}
+                        onContextMenu={(e) => e.preventDefault()}
+                        className={`w-10 h-10 rounded-full flex items-center justify-center shadow-sm transition-all select-none touch-none focus:outline-none focus:ring-2 focus:ring-offset-1 ${
+                            state === 'idle'
                                 ? 'bg-brand-blue text-white hover:scale-105 active:scale-95'
                                 : state === 'recording'
-                                    ? 'bg-rose-500 text-white animate-pulse'
+                                    ? 'bg-rose-500 text-white animate-pulse scale-110'
                                     : 'bg-emerald-500 text-white hover:scale-105 active:scale-95'
-                            }`}
+                        }`}
+                        aria-label={
+                            state === 'idle'
+                                ? (isArabic ? 'اضغط مطولاً للتسجيل' : 'Hold to record')
+                                : state === 'recording'
+                                    ? (isArabic ? 'اترك للإرسال' : 'Release to send')
+                                    : (isArabic ? 'تشغيل' : 'Play')
+                        }
                     >
                         {state === 'idle' && <Mic className="w-5 h-5" />}
-                        {state === 'recording' && <Square className="w-4 h-4 fill-white" />}
+                        {state === 'recording' && <Mic className="w-5 h-5" />}
                         {state === 'recorded' && (
                             isPlaying ? <Pause className="w-5 h-5 fill-white" /> : <Play className="w-5 h-5 fill-white ml-1" />
                         )}
@@ -121,14 +228,14 @@ export default function VoiceNoteRecorder({ language, onRecorded }: VoiceNoteRec
                     <div>
                         <p className="text-xs font-black text-slate-900 dark:text-white">
                             {state === 'idle'
-                                ? (isArabic ? 'سجل ملاحظتك الصوتية' : 'Record Voice Note')
+                                ? (isArabic ? 'اضغط مطولاً للتسجيل' : 'Hold to Record')
                                 : state === 'recording'
-                                    ? (isArabic ? 'جاري التسجيل...' : 'Recording...')
+                                    ? (isArabic ? 'اترك للإرسال' : 'Release to send')
                                     : (isArabic ? 'تم التسجيل' : 'Recorded')}
                         </p>
                         {state === 'recording' && (
                             <p className="text-[10px] font-bold text-rose-500 mt-0.5">
-                                0:{timeLeft.toString().padStart(2, '0')}
+                                {formatTime(elapsed)}
                             </p>
                         )}
                     </div>
@@ -146,11 +253,17 @@ export default function VoiceNoteRecorder({ language, onRecorded }: VoiceNoteRec
                         </button>
                         <button
                             type="button"
-                            onClick={() => {
+                            onPointerDown={(e) => {
+                                e.preventDefault();
                                 clearRecording();
-                                startRecording();
+                                e.currentTarget.setPointerCapture(e.pointerId);
+                                holdActiveRef.current = true;
+                                void startRecording();
                             }}
-                            className="p-1.5 rounded-full text-slate-400 hover:text-brand-blue hover:bg-blue-50 dark:hover:bg-brand-blue/10 transition-colors"
+                            onPointerUp={onPointerUpOrCancel}
+                            onPointerCancel={onPointerUpOrCancel}
+                            onContextMenu={(e) => e.preventDefault()}
+                            className="p-1.5 rounded-full text-slate-400 hover:text-brand-blue hover:bg-blue-50 dark:hover:bg-brand-blue/10 transition-colors select-none touch-none"
                             aria-label="Re-record"
                         >
                             <RotateCcw className="w-4 h-4" />
@@ -166,9 +279,9 @@ export default function VoiceNoteRecorder({ language, onRecorded }: VoiceNoteRec
                             key={i}
                             className="w-1.5 bg-rose-400 rounded-full animate-bounce"
                             style={{
-                                height: `${Math.random() * 60 + 20}%`,
+                                height: `${20 + (i % 3) * 20}%`,
                                 animationDelay: `${i * 0.1}s`,
-                                animationDuration: '0.6s'
+                                animationDuration: '0.6s',
                             }}
                         />
                     ))}

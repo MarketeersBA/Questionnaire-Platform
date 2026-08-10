@@ -6,6 +6,7 @@ import {
     mergeRespondentBrandChoices,
 } from './respondentBrandAnswers';
 import {
+    brandsFuzzyMatch,
     resolvePurchaseFunnelBrands,
     sanitizePfAnswersForQuestion,
 } from './purchaseFunnelBrandLogic';
@@ -30,9 +31,24 @@ describe('respondentBrandAnswers', () => {
         expect(applyCustomBrandToAnswer('Nike', 'Local Shop', false)).toBe('Local Shop');
     });
 
-    it('tracks fuzzy brand selection', () => {
+    it('treats brand selection as case-insensitive exact match (not fuzzy)', () => {
         expect(isBrandSelectedInAnswer(['nike'], 'Nike', true)).toBe(true);
         expect(isBrandSelectedInAnswer('nike', 'Nike', false)).toBe(true);
+        const base = 'brand';
+        const fuzzyGroup = 'abcdefghij'
+            .split('')
+            .map((c) => c + base.slice(1))          
+            .filter((v) => v !== base && brandsFuzzyMatch(base, v))
+            .slice(0, 4);
+        const group = [base, ...fuzzyGroup];
+
+        for (const selected of group) {
+            const others = group.filter((b) => b !== selected);
+            for (const other of others) {
+                expect(isBrandSelectedInAnswer([selected], other, true)).toBe(false);
+                expect(isBrandSelectedInAnswer(selected, other, false)).toBe(false);
+            }
+        }
     });
 
     it('merges respondent-added brands into display list', () => {
