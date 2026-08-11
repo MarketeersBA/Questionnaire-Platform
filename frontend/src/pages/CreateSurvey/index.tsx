@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     templates,
     surveys,
@@ -51,7 +52,14 @@ import { flushPendingPackagingHeatmapUploads, type PackagingHeatmapPendingFiles 
 
 
 
-export default function CreateSurvey() {
+interface CreateSurveyProps {
+    editSurveyId?: string;
+    initialSurveyData?: any;
+}
+
+export default function CreateSurvey({ editSurveyId, initialSurveyData }: CreateSurveyProps = {}) {
+    const isEditMode = Boolean(editSurveyId);
+    const navigate = useNavigate();
 
     const [currentStep, setCurrentStep] = useState(1);
     const [successData, setSuccessData] = useState<any>(null);
@@ -105,15 +113,69 @@ export default function CreateSurvey() {
         }
     } as SurveyFormData);
 
-    // Progressive Save Effect
+    // Populate form from existing survey data when in edit mode
     useEffect(() => {
-        if (formData.survey_name || formData.survey_type) {
+        if (isEditMode && initialSurveyData && !hasRestored) {
+            const s = initialSurveyData;
+            const blueprint = s.blueprint || s.taste_test_config || {};
+            const normalizeBrands = (bs: any[]) => (bs || []).map((b: any) => typeof b === 'string' ? { name: b, role: 'competitor' } : b);
+            const clonedConfig = {
+                ...DEFAULT_TASTE_CONFIG,
+                ...blueprint,
+                category: blueprint.category || s.customizations?.category || '',
+                brands: normalizeBrands(blueprint.brands || []),
+                attributes: blueprint.attributes || {},
+                custom_research_attributes: blueprint.custom_research_attributes || [],
+                internal_brands_data: normalizeBrands(blueprint.internal_brands_data || s.internal_brands_data || []),
+                competitor_brands_data: normalizeBrands(blueprint.competitor_brands_data || s.competitor_brands_data || [])
+            };
+
+            setFormData(prev => ({
+                ...prev,
+                survey_name: s.company_name || s.name || '',
+                survey_code: s.survey_code || '',
+                survey_type: s.type || '',
+                survey_objective: s.survey_objective || '',
+                survey_objective_other: s.survey_objective_other || '',
+                industry: s.industry || '',
+                links_count: s.links_count || s.link_count || 1000,
+                sample_capacity: s.sample_capacity || 200,
+                sec_classes: s.sec_classes || [],
+                gate_quotas: s.gate_quotas || {},
+                layer1_screening_config: s.layer1_screening_config || prev.layer1_screening_config,
+                google_form_id: s.google_form_id || '',
+                google_form_url: s.google_form_url || '',
+                config: clonedConfig,
+                product_test_config: s.product_test_config || null,
+                blueprint: s.blueprint || prev.blueprint,
+                purchase_funnel: s.purchase_funnel || prev.purchase_funnel,
+                brand_usage: s.brand_usage || prev.brand_usage,
+                brand_pricing_behavior: s.brand_pricing_behavior || prev.brand_pricing_behavior,
+                brand_analyzer: s.brand_analyzer || prev.brand_analyzer,
+                selected_modules: s.selected_modules || prev.selected_modules,
+                module_sequence: s.module_sequence || prev.module_sequence,
+                template_snapshot_schema: s.template_snapshot_schema || null,
+                template_snapshot_questions: s.template_snapshot_questions || [],
+                template_snapshot_l2: s.template_snapshot_l2 || null,
+                internal_brands_data: normalizeBrands(s.internal_brands_data || []),
+                competitor_brands_data: normalizeBrands(s.competitor_brands_data || []),
+                voice_capture: s.voice_capture || prev.voice_capture,
+                ai_followup: s.ai_followup || prev.ai_followup,
+            }));
+            setHasRestored(true);
+        }
+    }, [isEditMode, initialSurveyData, hasRestored]);
+
+    // Progressive Save Effect (skip in edit mode to avoid overwriting the edit draft)
+    useEffect(() => {
+        if (!isEditMode && (formData.survey_name || formData.survey_type)) {
             saveDraft(formData, currentStep);
         }
-    }, [formData, currentStep, saveDraft]);
+    }, [formData, currentStep, saveDraft, isEditMode]);
 
-    // Draft Rehydration Effect
+    // Draft Rehydration Effect (skip in edit mode)
     useEffect(() => {
+        if (isEditMode) return;
         if (draft && !hasRestored) {
             setFormData(draft.formData);
             setCurrentStep(draft.currentStep);
@@ -129,7 +191,7 @@ export default function CreateSurvey() {
                 }
             });
         }
-    }, [draft, hasRestored, clearDraft]);
+    }, [draft, hasRestored, clearDraft, isEditMode]);
 
     const [attributeBanksData, setAttributeBanksData] = useState<{ category: string; display_name: string }[]>([]);
     const [selectedBank, setSelectedBank] = useState<string | null>(null);
@@ -768,49 +830,11 @@ export default function CreateSurvey() {
         try {
             const selectedModules = buildSelectedModules(formData);
             const moduleSequence = resolveModuleSequence(formData);
-
-            // 1. Create Template (as a persistent configuration record)
-            const templateData = {
-                name: formData.survey_name,
-                survey_code: formData.survey_code,
-                type: formData.survey_type || 'standard',
-                template_type: (['taste_test', 'product_test'].includes(formData.survey_type || '') ? formData.survey_type : 'standard'),
-                industry: formData.industry,
-                sec_classes: formData.sec_classes,
-                purchase_funnel: formData.purchase_funnel,
-                brand_usage: formData.brand_usage,
-                brand_pricing_behavior: formData.brand_pricing_behavior,
-                brand_analyzer: formData.brand_analyzer,
-                selected_modules: selectedModules,
-                module_sequence: moduleSequence,
-                layer1_screening_config: formData.layer1_screening_config,
-                taste_test_config: {
-                    ...formData.config,
-                    industry: formData.industry,
-                    sec_classes: formData.sec_classes,
-                    purchase_funnel: formData.purchase_funnel,
-                    brand_usage: formData.brand_usage,
-                    brand_pricing_behavior: formData.brand_pricing_behavior,
-                    brand_analyzer: formData.brand_analyzer,
-                    layer1_screening_config: formData.layer1_screening_config
-                },
-                product_test_config: formData.product_test_config || null,
-                // We no longer send pre-composed structures. 
-                // The backend OrchestrationService will rebuild them from parameters.
-                layer1_structure: { sections: [] },
-                layer2_structure: { sections: [] },
-                layer1_questions: []
-            };
-
-            const tRes = await templates.create(templateData);
-
             const blueprintSnapshots = buildBlueprintSubmitSnapshots(formData);
 
-            // 2. Prepare Survey Parameters
-            const surveyData = {
+            const surveyPayload = {
                 company_name: formData.survey_name,
                 survey_code: formData.survey_code,
-                template_id: tRes._id,
                 type: formData.survey_type,
                 industry: formData.industry,
                 survey_objective: formData.survey_objective || null,
@@ -851,10 +875,62 @@ export default function CreateSurvey() {
                 layer1_screening_config: formData.layer1_screening_config || null,
                 sample_capacity: formData.sample_capacity || 0,
                 gate_quotas: formData.gate_quotas || {},
-                respondent_count: 0,
-                gate_counts: {},
                 voice_capture: formData.voice_capture || DEFAULT_VOICE_CAPTURE,
                 ai_followup: formData.ai_followup ?? DEFAULT_AI_FOLLOWUP,
+            };
+
+            // ── EDIT MODE: PUT /surveys/{id} ──────────────────────────────────
+            if (isEditMode && editSurveyId) {
+                await surveys.update(editSurveyId, surveyPayload);
+                toast.success('Survey updated successfully', {
+                    description: 'All changes have been saved.',
+                    action: { label: 'View Surveys', onClick: () => navigate('/surveys') }
+                });
+                setLoading(false);
+                navigate('/surveys');
+                return;
+            }
+
+            // ── CREATE MODE ───────────────────────────────────────────────────
+            // 1. Create Template (as a persistent configuration record)
+            const templateData = {
+                name: formData.survey_name,
+                survey_code: formData.survey_code,
+                type: formData.survey_type || 'standard',
+                template_type: (['taste_test', 'product_test'].includes(formData.survey_type || '') ? formData.survey_type : 'standard'),
+                industry: formData.industry,
+                sec_classes: formData.sec_classes,
+                purchase_funnel: formData.purchase_funnel,
+                brand_usage: formData.brand_usage,
+                brand_pricing_behavior: formData.brand_pricing_behavior,
+                brand_analyzer: formData.brand_analyzer,
+                selected_modules: selectedModules,
+                module_sequence: moduleSequence,
+                layer1_screening_config: formData.layer1_screening_config,
+                taste_test_config: {
+                    ...formData.config,
+                    industry: formData.industry,
+                    sec_classes: formData.sec_classes,
+                    purchase_funnel: formData.purchase_funnel,
+                    brand_usage: formData.brand_usage,
+                    brand_pricing_behavior: formData.brand_pricing_behavior,
+                    brand_analyzer: formData.brand_analyzer,
+                    layer1_screening_config: formData.layer1_screening_config
+                },
+                product_test_config: formData.product_test_config || null,
+                layer1_structure: { sections: [] },
+                layer2_structure: { sections: [] },
+                layer1_questions: []
+            };
+
+            const tRes = await templates.create(templateData);
+
+            // 2. Create Survey
+            const surveyData = {
+                ...surveyPayload,
+                template_id: tRes._id,
+                respondent_count: 0,
+                gate_counts: {},
             };
 
             const res = await surveys.create(surveyData);
@@ -984,10 +1060,10 @@ export default function CreateSurvey() {
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 text-left">
                     <div className="space-y-4">
                         <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-600">
-                            Survey <span className="text-brand-blue">Setup</span>
+                            Survey <span className="text-brand-blue">{isEditMode ? 'Edit' : 'Setup'}</span>
                         </div>
                         <h1 className="text-3xl font-display font-black tracking-tight text-slate-900 dark:text-white transition-colors">
-                            Configure <span className="text-slate-500 dark:text-slate-400 font-light">Survey</span>
+                            {isEditMode ? 'Edit' : 'Configure'} <span className="text-slate-500 dark:text-slate-400 font-light">Survey</span>
                         </h1>
                     </div>
 
@@ -1077,7 +1153,7 @@ export default function CreateSurvey() {
                                         >
                                             {loading ? <Sparkles className="w-6 h-6 animate-spin" /> : (
                                                 <>
-                                                    Deploy Survey
+                                                    {isEditMode ? 'Save Changes' : 'Deploy Survey'}
                                                     <Check className="w-6 h-6 animate-in zoom-in" />
                                                 </>
                                             )}

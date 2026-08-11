@@ -20,6 +20,7 @@ import SurveyReport from './pages/SurveyReport';
 import ReportExportFrame from './pages/ReportExportFrame';
 import AdminAITelemetry from './pages/AdminAITelemetry';
 import MasterLinkRedirect from './pages/MasterLinkRedirect';
+import EditSurvey from './pages/EditSurvey';
 import AdminNotifier from './components/notifications/AdminNotifier';
 import Layout from './components/Layout';
 import ScrollToTop from './components/ScrollToTop';
@@ -142,6 +143,14 @@ function AppContent() {
               element={
                 <PrivateRoute>
                   <CreateSurvey />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/surveys/:surveyId/edit"
+              element={
+                <PrivateRoute>
+                  <EditSurvey />
                 </PrivateRoute>
               }
             />

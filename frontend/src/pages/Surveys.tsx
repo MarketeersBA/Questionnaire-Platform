@@ -18,7 +18,8 @@ import {
     Tag,
     User,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    Pencil
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -518,6 +519,15 @@ export default function SurveysPage() {
                                                 >
                                                     <TrendingUp className="w-4 h-4" />
                                                 </Link>
+                                                {survey.status !== 'closed' && (
+                                                    <Link
+                                                        to={`/surveys/${survey._id}/edit`}
+                                                        className="p-3 rounded-xl bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 transition-all border border-amber-500/10 active:scale-95"
+                                                        title="Edit Survey"
+                                                    >
+                                                        <Pencil className="w-4 h-4" />
+                                                    </Link>
+                                                )}
                                                 <div className="w-[1px] h-10 bg-slate-100 dark:bg-slate-800 mx-1"></div>
                                                 <button
                                                     onClick={() => setDeletingId(survey._id)}
