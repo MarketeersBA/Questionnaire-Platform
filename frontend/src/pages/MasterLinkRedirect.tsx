@@ -13,8 +13,14 @@ export default function MasterLinkRedirect() {
             return;
         }
 
+        let deviceId = localStorage.getItem('master_link_device_id');
+        if (!deviceId) {
+            deviceId = `dev_${Math.random().toString(36).substring(2, 15)}_${Date.now()}`;
+            localStorage.setItem('master_link_device_id', deviceId);
+        }
+
         masterLink
-            .generateToken(surveyId)
+            .generateToken(surveyId, deviceId)
             .then(({ token }) => {
                 navigate(`/s/${token}`, { replace: true });
             })

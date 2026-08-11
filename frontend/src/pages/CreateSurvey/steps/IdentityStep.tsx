@@ -337,6 +337,13 @@ export default function IdentityStep({ formData, setFormData, onOpenClone }: Ste
     const [codeAvailable, setCodeAvailable] = useState<boolean | null>(null);
     const [codeError, setCodeError] = useState<string | null>(null);
 
+    useEffect(() => {
+        if (!formData.survey_code) {
+            const autoCode = 'PJ-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+            setFormData(prev => ({ ...prev, survey_code: autoCode }));
+        }
+    }, []);
+
     // Debounced survey code check
     useEffect(() => {
         const checkCode = async () => {
@@ -475,17 +482,11 @@ export default function IdentityStep({ formData, setFormData, onOpenClone }: Ste
                         </div>
                         <div className="relative group">
                             <Tag className={`absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors pointer-events-none ${codeAvailable === false ? 'text-rose-500' : codeAvailable === true ? 'text-emerald-500' : 'text-slate-400 group-focus-within:text-brand-blue'}`} />
-                            <input
-                                id="survey-code-input"
-                                type="text"
-                                placeholder="e.g. PJ-2024-001"
-                                className={`w-full bg-white dark:bg-slate-900 border-2 rounded-[1.5rem] pl-16 pr-8 py-4 text-slate-900 dark:text-white focus:outline-none focus:ring-4 transition-all font-black placeholder:text-slate-500 text-lg shadow-sm ${codeAvailable === false ? 'border-rose-500/50 focus:border-rose-500 focus:ring-rose-500/10' : codeAvailable === true ? 'border-emerald-500/50 focus:border-emerald-500 focus:ring-emerald-500/10' : 'border-slate-400 dark:border-slate-600 focus:border-brand-blue focus:ring-brand-blue/10'}`}
-                                value={formData.survey_code || ''}
-                                onChange={e => {
-                                    const val = e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, '');
-                                    setFormData(prev => ({ ...prev, survey_code: val }));
-                                }}
-                            />
+                            <div
+                                className={`w-full bg-slate-50 dark:bg-slate-800/50 border-2 rounded-[1.5rem] pl-16 pr-8 py-4 text-slate-900 dark:text-white font-black text-lg shadow-sm flex items-center ${codeAvailable === false ? 'border-rose-500/50' : codeAvailable === true ? 'border-emerald-500/50' : 'border-slate-200 dark:border-slate-700'}`}
+                            >
+                                {formData.survey_code || 'Generating...'}
+                            </div>
                         </div>
                     </div>
                 </div>

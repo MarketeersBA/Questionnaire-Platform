@@ -33,6 +33,10 @@ class Database:
     async def ensure_indexes(self):
         """Create required indexes for all collections. Idempotent — safe to call on every startup."""
         try:
+            surveys_col = self.get_collection("surveys")
+            await surveys_col.create_index("is_deleted")
+            await surveys_col.create_index("created_at")
+
             reports = self.get_collection("survey_reports")
             await reports.create_index("survey_id", unique=True)
             await reports.create_index("status")
