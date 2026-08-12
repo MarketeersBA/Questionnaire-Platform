@@ -116,6 +116,9 @@ export function joinFollowUpAnswerText(
   primaryText: string,
   exchanges: FollowUpExchangeBlock[],
 ): string {
+  if (!exchanges || exchanges.length === 0) {
+    return primaryText || '';
+  }
   let result = (primaryText || '').trimEnd();
   for (const exchange of exchanges) {
     result = appendFollowUpExchangeToText(result, exchange.prompt, exchange.respondent);

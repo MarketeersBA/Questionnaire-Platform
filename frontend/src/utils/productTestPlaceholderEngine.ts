@@ -164,15 +164,9 @@ export function applyProductTestPlaceholders(
 
     // Arabic brand tokens
     result = result.replace(/\(البراند\)/g, brandDisplay);
-    result = result.replace(/البراند/g, brandDisplay || 'البراند');
 
     // Arabic product tokens (parenthesized first to avoid partial clobber)
     result = result.replace(/\(المنتج\)/g, brandDisplay);
-    result = result.replace(/المنتج/g, brandDisplay || 'المنتج');
-    result = result.replace(/منتج/g, brandDisplay || 'منتج');
-
-    // English generic "product" word — last to avoid breaking already-substituted tokens
-    result = result.replace(/product/gi, brandFallback);
 
     return result;
 }

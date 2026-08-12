@@ -171,15 +171,36 @@ export function drawHeatmapOverlay(
     const cellW = width / gridSize;
     const cellH = height / gridSize;
 
+    // Use a lighter blend mode for beautiful overlapping gradients
+    ctx.globalCompositeOperation = 'source-over';
+
     for (let row = 0; row < gridSize; row += 1) {
         for (let col = 0; col < gridSize; col += 1) {
             const value = values[row * gridSize + col];
             if (value <= 0) continue;
+            
+            // Adjust alpha based on value relative to peak
             const alpha = (value / peak) * maxAlpha;
-            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha.toFixed(3)})`;
-            ctx.fillRect(col * cellW, row * cellH, cellW, cellH);
+
+            // Center of the current grid cell
+            const cx = col * cellW + cellW / 2;
+            const cy = row * cellH + cellH / 2;
+            
+            // Radius extends beyond the cell to blend smoothly with neighbors
+            const radius = Math.max(cellW, cellH) * 1.5;
+
+            // Create a smooth radial gradient
+            const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+            grad.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${alpha.toFixed(3)})`);
+            grad.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+            
+            ctx.fillStyle = grad;
+            ctx.fillRect(cx - radius, cy - radius, radius * 2, radius * 2);
         }
     }
+    
+    // Reset composite operation
+    ctx.globalCompositeOperation = 'source-over';
 }
 
 export function drawClickMarkers(
