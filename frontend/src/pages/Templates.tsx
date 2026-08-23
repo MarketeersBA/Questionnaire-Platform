@@ -228,9 +228,9 @@ export default function Templates() {
 
         const layerConfigs: Record<number, any> = {
             1: {
-                accent: 'text-brand-blue dark:text-brand-blue',
-                bg: 'bg-brand-blue/10 dark:bg-brand-blue/20',
-                border: 'border-brand-blue/20 dark:border-brand-blue/30',
+                accent: 'text-primary-soft dark:text-primary-soft',
+                bg: 'bg-primary/10 dark:bg-primary/20',
+                border: 'border-primary/20 dark:border-primary/30',
                 title: 'Screening Phase',
                 sub: '(Layer 1)'
             },
@@ -280,8 +280,8 @@ export default function Templates() {
                         <div className={`w-10 h-10 rounded-xl ${config.bg} flex items-center justify-center ${config.accent} font-black border ${config.border} shadow-sm transition-all`}>
                             {layer}
                         </div>
-                        <h3 className="text-xl font-display font-black text-slate-900 dark:text-white uppercase tracking-wider transition-colors">
-                            {config.title} <span className="text-slate-400 dark:text-slate-500 text-sm ml-2 font-bold">{config.sub}</span>
+                        <h3 className="text-xl font-display font-black text-ink uppercase tracking-wider transition-colors">
+                            {config.title} <span className="text-ink-subtle text-sm ml-2 font-bold">{config.sub}</span>
                         </h3>
                     </div>
                 </div>
@@ -292,7 +292,7 @@ export default function Templates() {
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         key={sIdx}
-                        className="space-y-8 bg-white dark:bg-slate-900 rounded-[3rem] p-12 border border-slate-100 dark:border-slate-800 relative group/section shadow-xl transition-colors"
+                        className="space-y-8 bg-surface rounded-[3rem] p-12 border border-line/80 dark:border-line/10 relative group/section shadow-xl transition-colors"
                     >
                         <div className="flex justify-between items-center mb-6">
                             <div className="flex-1 flex items-center gap-6">
@@ -300,7 +300,7 @@ export default function Templates() {
                                     <Layers className="w-6 h-6" />
                                 </div>
                                 <div className="flex-1 space-y-1">
-                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 ml-1">Module Area</label>
+                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-subtle ml-1">Module Area</label>
                                     <input
                                         type="text"
                                         value={section.title}
@@ -309,7 +309,7 @@ export default function Templates() {
                                             newSections[sIdx].title = e.target.value;
                                             setCurrentTemplate({ ...currentTemplate, [structureKey]: { ...layerData, sections: newSections } });
                                         }}
-                                        className="bg-transparent text-3xl font-display font-black text-slate-900 dark:text-white border-b-2 border-transparent focus:border-brand-blue outline-none pb-2 flex-1 w-full transition-all placeholder:text-slate-100 dark:placeholder:text-slate-800"
+                                        className="bg-transparent text-3xl font-display font-black text-ink border-b-2 border-transparent focus:border-primary outline-none pb-2 flex-1 w-full transition-all placeholder:text-slate-100 dark:placeholder:text-slate-800"
                                         placeholder="Name this section..."
                                     />
                                 </div>
@@ -321,7 +321,7 @@ export default function Templates() {
                                     const newSections = sections.filter((_: any, idx: number) => idx !== sIdx);
                                     setCurrentTemplate({ ...currentTemplate, [structureKey]: { ...layerData, sections: newSections } });
                                 }}
-                                className="p-3 text-slate-500 dark:text-slate-400 hover:text-red-400 dark:hover:text-red-400 transition-colors hover:bg-red-400/5 dark:hover:bg-red-400/10 rounded-xl"
+                                className="p-3 text-ink-muted hover:text-red-400 dark:hover:text-red-400 transition-colors hover:bg-red-400/5 dark:hover:bg-red-400/10 rounded-xl"
                             >
                                 <Trash2 className="w-5 h-5" />
                             </button>
@@ -342,7 +342,7 @@ export default function Templates() {
                             >
                                 {(section.questions || []).map((q: any, qIdx: number) => (
                                     <Reorder.Item key={q.id || qIdx} value={q} className="relative group/reorder">
-                                        <div className="absolute -left-10 top-1/2 -translate-y-1/2 opacity-0 group-hover/reorder:opacity-100 cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-600 hover:text-brand-blue transition-all">
+                                        <div className="absolute -left-10 top-1/2 -translate-y-1/2 opacity-0 group-hover/reorder:opacity-100 cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-600 hover:text-primary-soft transition-all">
                                             <GripVertical className="w-5 h-5" />
                                         </div>
                                         <QuestionBlock
@@ -388,9 +388,9 @@ export default function Templates() {
                                 });
                                 setCurrentTemplate({ ...currentTemplate, [structureKey]: { ...layerData, sections: newSections } });
                             }}
-                            className={`w-full py-6 rounded-2xl border-2 border-dashed border-slate-100 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-600 transition-all text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-300 flex items-center justify-center gap-3 group/addQ`}
+                            className={`w-full py-6 rounded-2xl border-2 border-dashed border-line/80 dark:border-line/10 hover:border-slate-300 dark:hover:border-slate-600 transition-all text-[10px] font-black uppercase tracking-widest text-ink-subtle hover:text-slate-800 dark:hover:text-slate-300 flex items-center justify-center gap-3 group/addQ`}
                         >
-                            <div className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800 group-hover/addQ:bg-white dark:group-hover/addQ:bg-slate-700 transition-colors">
+                            <div className="p-2 rounded-lg bg-surface-raised group-hover/addQ:bg-white dark:group-hover/addQ:bg-slate-700 transition-colors">
                                 <Plus className="w-4 h-4" />
                             </div>
                             Append New Logic Probe
@@ -412,7 +412,7 @@ export default function Templates() {
                             }
                         });
                     }}
-                    className={`w-full py-16 rounded-[4rem] bg-slate-50 dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-600 transition-all flex flex-col items-center justify-center gap-4 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white group/newS shadow-lg`}
+                    className={`w-full py-16 rounded-[4rem] bg-surface-raised border-2 border-dashed border-line/80 dark:border-line/10 hover:border-slate-400 dark:hover:border-slate-600 transition-all flex flex-col items-center justify-center gap-4 text-ink-muted hover:text-slate-900 dark:hover:text-white group/newS shadow-lg`}
                 >
                     <div className={`p-5 rounded-[2rem] ${config.newSectionIconBg} group-hover/newS:scale-110 group-hover/newS:rotate-90 transition-all duration-500`}>
                         <Plus className="w-8 h-8" />
@@ -431,10 +431,10 @@ export default function Templates() {
             {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h1 className="text-4xl font-display font-extrabold tracking-tight text-slate-900 dark:text-white transition-colors">
+                    <h1 className="text-4xl font-display font-extrabold tracking-tight text-ink transition-colors">
                         Templates
                     </h1>
-                    <p className="mt-2 text-slate-500 dark:text-slate-400 max-w-xl font-medium">
+                    <p className="mt-2 text-ink-muted max-w-xl font-medium">
                         Design and version-control your multi-layered survey schemas.
                     </p>
                 </div>
@@ -516,13 +516,13 @@ export default function Templates() {
                         ) : templateList.length === 0 ? (
                             <div className="md:col-span-2 lg:col-span-3 py-24 text-center flex flex-col items-center justify-center">
                                 <div className="relative mb-6 group cursor-default">
-                                    <div className="absolute inset-0 bg-brand-blue/10 rounded-full blur-xl group-hover:blur-2xl transition-all duration-500"></div>
-                                    <div className="w-20 h-20 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center border border-white/80 dark:border-slate-800 shadow-xl relative z-10 group-hover:-translate-y-1 transition-transform duration-500">
+                                    <div className="absolute inset-0 bg-primary/10 rounded-full blur-xl group-hover:blur-2xl transition-all duration-500"></div>
+                                    <div className="w-20 h-20 bg-surface rounded-full flex items-center justify-center border border-white/80 dark:border-slate-800 shadow-xl relative z-10 group-hover:-translate-y-1 transition-transform duration-500">
                                         <Layers className="w-8 h-8 text-slate-300 dark:text-slate-600" strokeWidth={1.5} />
                                     </div>
                                 </div>
-                                <h3 className="text-xl font-display font-black text-slate-900 dark:text-white mb-2">No active schemas</h3>
-                                <p className="text-slate-500 dark:text-slate-400 font-medium mb-8 max-w-sm">
+                                <h3 className="text-xl font-display font-black text-ink mb-2">No active schemas</h3>
+                                <p className="text-ink-muted font-medium mb-8 max-w-sm">
                                     The template explorer is empty. Import a schema or use the standard builder to architect your first logic flow.
                                 </p>
                             </div>
@@ -546,15 +546,15 @@ export default function Templates() {
                 {/* Info panel */}
                 <div className="space-y-6">
 
-                    <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-100 dark:border-slate-800 shadow-sm relative overflow-hidden group">
+                    <div className="bg-surface rounded-3xl p-8 border border-line/80 dark:border-line/10 shadow-sm relative overflow-hidden group">
                         <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         <div className="flex items-center gap-3 mb-6 relative">
                             <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400">
                                 <Layers className="w-5 h-5" />
                             </div>
-                            <h3 className="font-bold font-display text-slate-900 dark:text-white">Schema Versioning</h3>
+                            <h3 className="font-bold font-display text-ink">Schema Versioning</h3>
                         </div>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-medium relative">
+                        <p className="text-sm text-ink-muted leading-relaxed font-medium relative">
                             Each save creates a new immutable version. You can rollback any live survey to a previous schema state instantly.
                         </p>
                     </div>
@@ -578,10 +578,10 @@ export default function Templates() {
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.98, y: 30 }}
                                 onClick={(e) => e.stopPropagation()}
-                                className="relative w-full max-w-6xl h-[92vh] bg-slate-50 dark:bg-slate-950 rounded-[3.5rem] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col transition-colors"
+                                className="relative w-full max-w-6xl h-[92vh] bg-surface-raised rounded-[3.5rem] border border-line/80 dark:border-line/10 shadow-2xl overflow-hidden flex flex-col transition-colors"
                             >
                                 {/* Editor Header */}
-                                <div className="flex flex-col border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 transition-colors">
+                                <div className="flex flex-col border-b border-line/80 dark:border-line/10 bg-surface transition-colors">
                                     <div className="flex justify-between items-center px-12 py-8">
                                         <div>
                                             <OnboardingTooltip
@@ -590,12 +590,12 @@ export default function Templates() {
                                                 description="This is where you build multi-layer research schemas. Use the tabs below to switch between qualification (L1) and evaluation (L2) modules."
                                                 position="bottom"
                                             >
-                                                <h2 className="text-3xl font-display font-black text-slate-900 dark:text-white pr-6 inline-block">
-                                                    Template <span className="text-brand-blue">Architect</span>
+                                                <h2 className="text-3xl font-display font-black text-ink pr-6 inline-block">
+                                                    Template <span className="text-primary-soft">Architect</span>
                                                 </h2>
                                             </OnboardingTooltip>
                                             <div className="flex items-center gap-2 mt-1">
-                                                <span className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-black">Design Studio</span>
+                                                <span className="text-[10px] text-ink-subtle uppercase tracking-widest font-black">Design Studio</span>
                                                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                             </div>
                                         </div>
@@ -619,7 +619,7 @@ export default function Templates() {
                                                     e.stopPropagation();
                                                     setIsEditing(false);
                                                 }}
-                                                className="p-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-white transition-colors"
+                                                className="p-3 rounded-2xl bg-surface-sunken text-ink-subtle hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-white transition-colors"
                                             >
                                                 <X className="w-6 h-6" />
                                             </button>
@@ -638,7 +638,7 @@ export default function Templates() {
                                                     key={l}
                                                     type="button"
                                                     onClick={(e) => { e.stopPropagation(); setActiveLayer(l); }}
-                                                    className={`pb-4 px-2 text-[10px] font-black uppercase tracking-widest transition-all relative flex flex-col items-center gap-1 min-w-[80px] ${isActive ? `text-${colors[l - 1]}` : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}
+                                                    className={`pb-4 px-2 text-[10px] font-black uppercase tracking-widest transition-all relative flex flex-col items-center gap-1 min-w-[80px] ${isActive ? `text-${colors[l - 1]}` : 'text-ink-subtle hover:text-slate-600 dark:hover:text-slate-300'}`}
                                                 >
                                                     <span className="opacity-50 text-[8px] leading-none">Layer {l}</span>
                                                     <span className="whitespace-nowrap">{labels[l - 1]}</span>
@@ -659,19 +659,19 @@ export default function Templates() {
                                         {/* Taste Test Config Banner */}
                                         {currentTemplate.template_type === 'taste_test' && currentTemplate.taste_test_config && (
                                             <div className="bg-slate-900 dark:bg-slate-900/80 rounded-[2rem] p-8 border border-white/5 dark:border-slate-800 shadow-2xl relative overflow-hidden group transition-colors">
-                                                <div className="absolute top-0 right-0 w-64 h-64 bg-brand-blue/5 rounded-full blur-3xl -mr-32 -mt-32 transition-all group-hover:bg-brand-blue/10" />
+                                                <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-32 -mt-32 transition-all group-hover:bg-primary/10" />
                                                 <div className="relative flex items-center justify-between">
                                                     <div className="flex items-center gap-6">
-                                                        <div className="w-16 h-16 rounded-2xl bg-brand-blue/10 dark:bg-brand-blue/20 text-brand-blue flex items-center justify-center border border-brand-blue/20 dark:border-brand-blue/40">
+                                                        <div className="w-16 h-16 rounded-2xl bg-primary/10 dark:bg-primary/20 text-primary-soft flex items-center justify-center border border-primary/20 dark:border-primary/40">
                                                             <Sparkles className="w-8 h-8" />
                                                         </div>
                                                         <div>
                                                             <h3 className="text-xl font-black text-white">Taste Test Configuration</h3>
                                                             <div className="flex flex-wrap gap-3 mt-2">
-                                                                <span className="px-3 py-1 bg-white/5 dark:bg-slate-800/40 rounded-lg text-[10px] font-black uppercase text-brand-blue border border-brand-blue/20 dark:border-brand-blue/40 transition-colors">
+                                                                <span className="px-3 py-1 bg-white/5 dark:bg-slate-800/40 rounded-lg text-[10px] font-black uppercase text-primary-soft border border-primary/20 dark:border-primary/40 transition-colors">
                                                                     Category: {currentTemplate.taste_test_config.category}
                                                                 </span>
-                                                                <span className="px-3 py-1 bg-white/5 dark:bg-slate-800/40 rounded-lg text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 border border-white/5 dark:border-slate-800/50 transition-colors">
+                                                                <span className="px-3 py-1 bg-white/5 dark:bg-slate-800/40 rounded-lg text-[10px] font-black uppercase text-ink-subtle border border-white/5 dark:border-slate-800/50 transition-colors">
                                                                     {currentTemplate.taste_test_config.brands.length} Brands
                                                                 </span>
                                                             </div>
@@ -679,7 +679,7 @@ export default function Templates() {
                                                     </div>
                                                     <button
                                                         onClick={handleRegenerate}
-                                                        className="flex items-center gap-2 bg-brand-blue text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-brand-blue/20"
+                                                        className="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-primary/20"
                                                     >
                                                         <RotateCcw className="w-4 h-4" />
                                                         Regenerate from Config
@@ -689,24 +689,24 @@ export default function Templates() {
                                         )}
 
                                         {/* Global Metadata */}
-                                        <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-10 border border-slate-100 dark:border-slate-800 space-y-8 relative overflow-hidden shadow-sm transition-colors">
-                                            <div className="absolute top-0 left-0 w-2 h-full bg-brand-blue" />
+                                        <div className="bg-surface rounded-[2.5rem] p-10 border border-line/80 dark:border-line/10 space-y-8 relative overflow-hidden shadow-sm transition-colors">
+                                            <div className="absolute top-0 left-0 w-2 h-full bg-primary" />
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                                 <div className="space-y-3">
-                                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">Template Identity</label>
+                                                    <label className="text-[10px] font-black uppercase tracking-widest text-ink-subtle ml-1">Template Identity</label>
                                                     <input
                                                         type="text"
                                                         value={currentTemplate.name}
                                                         onChange={e => setCurrentTemplate({ ...currentTemplate, name: e.target.value })}
-                                                        className="w-full bg-transparent text-4xl font-display font-black text-slate-900 dark:text-white border-b-2 border-slate-50 dark:border-slate-800 focus:border-brand-blue outline-none pb-4 transition-all placeholder:text-slate-100 dark:placeholder:text-slate-800"
+                                                        className="w-full bg-transparent text-4xl font-display font-black text-ink border-b-2 border-slate-50 dark:border-slate-800 focus:border-primary outline-none pb-4 transition-all placeholder:text-slate-100 dark:placeholder:text-slate-800"
                                                         placeholder="Untitled Schema"
                                                     />
                                                 </div>
                                                 <div className="space-y-3">
-                                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 ml-1">Industry Context</label>
+                                                    <label className="text-[10px] font-black uppercase tracking-widest text-ink-muted ml-1">Industry Context</label>
                                                     <div className="relative">
                                                         <select
-                                                            className="w-full bg-white/5 dark:bg-slate-800/50 border border-white/10 dark:border-slate-700/50 rounded-2xl px-6 py-4 text-lg font-bold outline-none focus:ring-2 focus:ring-brand-blue appearance-none mt-2 dark:text-white"
+                                                            className="w-full bg-white/5 dark:bg-slate-800/50 border border-white/10 dark:border-slate-700/50 rounded-2xl px-6 py-4 text-lg font-bold outline-none focus:ring-2 focus:ring-primary appearance-none mt-2 dark:text-white"
                                                             value={currentTemplate.type}
                                                             onChange={e => setCurrentTemplate({ ...currentTemplate, type: e.target.value })}
                                                         >
@@ -714,7 +714,7 @@ export default function Templates() {
                                                             <option value="consumer_habit">Consumer Habit</option>
                                                             <option value="b2b_qualification">B2B Qualification</option>
                                                         </select>
-                                                        <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-500 dark:text-slate-400 pointer-events-none" />
+                                                        <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 w-6 h-6 text-ink-muted pointer-events-none" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -736,13 +736,13 @@ export default function Templates() {
                                 </div>
 
                                 <div className="absolute bottom-8 right-12 z-50">
-                                    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-2xl px-6 py-4 flex items-center gap-6 text-[10px] font-black text-slate-500 dark:text-slate-400 shadow-xl transition-colors">
+                                    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-line/80 dark:border-line/10 rounded-2xl px-6 py-4 flex items-center gap-6 text-[10px] font-black text-ink-muted shadow-xl transition-colors">
                                         {[1, 2, 3, 4, 5, 6].map(l => {
-                                            const colors = ['text-brand-blue', 'text-brand-accent', 'text-emerald-500', 'text-orange-500', 'text-violet-500', 'text-rose-500'];
+                                            const colors = ['text-primary-soft', 'text-brand-accent', 'text-emerald-500', 'text-orange-500', 'text-violet-500', 'text-rose-500'];
                                             const count = (currentTemplate as any)[`layer${l}_structure`]?.sections?.length || 0;
                                             if (count === 0 && l > 2) return null;
                                             return (
-                                                <div key={l} className={`flex items-center gap-1.5 ${l < 6 ? 'pr-4 border-r border-slate-100 dark:border-slate-800/50' : ''}`}>
+                                                <div key={l} className={`flex items-center gap-1.5 ${l < 6 ? 'pr-4 border-r border-line/80 dark:border-line/10' : ''}`}>
                                                     <span className={`${colors[l - 1]}`}>L{l}:</span> {count}
                                                 </div>
                                             );
@@ -773,41 +773,41 @@ export default function Templates() {
                                 animate={{ x: 0 }}
                                 exit={{ x: '100%' }}
                                 transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                                className="relative w-full max-w-md bg-white dark:bg-slate-900 h-full border-l border-slate-200 dark:border-slate-800 shadow-2xl p-10 flex flex-col transition-colors"
+                                className="relative w-full max-w-md bg-surface h-full border-l border-line/80 dark:border-line/10 shadow-2xl p-10 flex flex-col transition-colors"
                             >
                                 <div className="flex justify-between items-center mb-10 transition-colors">
                                     <div>
-                                        <h2 className="text-2xl font-display font-black text-slate-900 dark:text-white transition-colors">{showHistoryName}</h2>
-                                        <p className="text-xs text-slate-400 dark:text-slate-500 uppercase font-black tracking-widest mt-1 transition-colors">Audit Trail & Versioning</p>
+                                        <h2 className="text-2xl font-display font-black text-ink transition-colors">{showHistoryName}</h2>
+                                        <p className="text-xs text-ink-subtle uppercase font-black tracking-widest mt-1 transition-colors">Audit Trail & Versioning</p>
                                     </div>
-                                    <button onClick={() => setShowHistoryName(null)} className="p-2 rounded-full bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                                    <button onClick={() => setShowHistoryName(null)} className="p-2 rounded-full bg-surface-raised text-ink-subtle hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
                                         <X className="w-5 h-5" />
                                     </button>
                                 </div>
 
                                 <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
                                     {history.map((h, i) => (
-                                        <div key={h._id} className={`p-6 rounded-2xl border transition-all ${i === 0 ? 'bg-brand-blue/5 dark:bg-brand-blue/10 border-brand-blue/30 dark:border-brand-blue/40' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-800'}`}>
+                                        <div key={h._id} className={`p-6 rounded-2xl border transition-all ${i === 0 ? 'bg-primary/5 dark:bg-primary/10 border-primary/30 dark:border-primary/40' : 'bg-surface-raised/50 border-line/80 dark:border-line/10'}`}>
                                             <div className="flex justify-between items-start mb-4">
                                                 <div className="flex items-center gap-2">
-                                                    <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black ${i === 0 ? 'bg-brand-blue text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'}`}>
+                                                    <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black ${i === 0 ? 'bg-primary text-white' : 'bg-slate-200 dark:bg-slate-700 text-ink-muted'}`}>
                                                         v{h.version}
                                                     </span>
-                                                    {i === 0 && <span className="text-[10px] font-black uppercase text-brand-blue bg-brand-blue/10 dark:bg-brand-blue/20 px-2 py-0.5 rounded-full">Active</span>}
+                                                    {i === 0 && <span className="text-[10px] font-black uppercase text-primary-soft bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-full">Active</span>}
                                                 </div>
-                                                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500">
+                                                <span className="text-[10px] font-bold text-ink-subtle">
                                                     {new Date(h.created_at).toLocaleDateString()}
                                                 </span>
                                             </div>
 
-                                            <div className="text-xs text-slate-500 dark:text-slate-400 mb-6 font-medium transition-colors">
-                                                Contains {h.layer1_questions.length} logical questions for the <span className="text-slate-900 dark:text-white font-bold">{h.type}</span> flow.
+                                            <div className="text-xs text-ink-muted mb-6 font-medium transition-colors">
+                                                Contains {h.layer1_questions.length} logical questions for the <span className="text-ink font-bold">{h.type}</span> flow.
                                             </div>
 
                                             <button
                                                 onClick={() => handleRollback(h._id)}
                                                 disabled={i === 0}
-                                                className="w-full py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all shadow-sm dark:text-white"
+                                                className="w-full py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-surface hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all shadow-sm dark:text-white"
                                             >
                                                 <RotateCcw className="w-3 h-3" />
                                                 Restore Point
@@ -852,8 +852,8 @@ function TemplateCard({ template, idx, onEdit, onHistory, onDelete }: any) {
             </div>
 
             <div className="relative z-10 flex-1">
-                <h3 className="text-xl font-display font-black text-slate-900 dark:text-white mb-2 group-hover:text-brand-blue transition-colors">{template.name}</h3>
-                <p className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest mb-6">{template.type.replace('_', ' ')}</p>
+                <h3 className="text-xl font-display font-black text-ink mb-2 group-hover:text-primary-soft transition-colors">{template.name}</h3>
+                <p className="text-xs text-ink-subtle font-bold uppercase tracking-widest mb-6">{template.type.replace('_', ' ')}</p>
 
                 {(() => {
                     // Advanced Question Aggregator
@@ -888,11 +888,11 @@ function TemplateCard({ template, idx, onEdit, onHistory, onDelete }: any) {
                             <div className="flex items-center gap-3">
                                 <div className={`p-1.5 rounded-lg border transition-all ${isFunNELActive
                                     ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'
-                                    : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400'}`}>
+                                    : 'bg-surface-sunken border-slate-200 dark:border-slate-700 text-slate-400'}`}>
                                     <Sparkles size={10} className={isFunNELActive ? 'animate-pulse' : ''} />
                                 </div>
                                 <div className="flex flex-col gap-0.5 text-left">
-                                    <span className="text-[7px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] leading-none">Purchase Funnel</span>
+                                    <span className="text-[7px] font-black text-ink-subtle uppercase tracking-[0.2em] leading-none">Purchase Funnel</span>
                                     <span className={`text-[9px] font-black uppercase tracking-widest ${isFunNELActive ? 'text-emerald-500' : 'text-slate-400'}`}>
                                         {isFunNELActive ? 'Active Engine' : 'N/A Status'}
                                     </span>
@@ -901,12 +901,12 @@ function TemplateCard({ template, idx, onEdit, onHistory, onDelete }: any) {
 
                             {/* 2. Scale & Complexity */}
                             <div className="flex items-center gap-3">
-                                <div className="p-1.5 rounded-lg bg-brand-blue/10 border border-brand-blue/20 text-brand-blue">
+                                <div className="p-1.5 rounded-lg bg-primary/10 border border-primary/20 text-primary-soft">
                                     <CheckCircle2 size={10} />
                                 </div>
                                 <div className="flex flex-col gap-0.5 text-left">
-                                    <span className="text-[7px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] leading-none">Research Scale</span>
-                                    <span className="text-[9px] font-black text-slate-900 dark:text-white uppercase tracking-widest">
+                                    <span className="text-[7px] font-black text-ink-subtle uppercase tracking-[0.2em] leading-none">Research Scale</span>
+                                    <span className="text-[9px] font-black text-ink uppercase tracking-widest">
                                         {qCount} Logic Probes
                                     </span>
                                 </div>
@@ -918,12 +918,12 @@ function TemplateCard({ template, idx, onEdit, onHistory, onDelete }: any) {
                                     <Layers size={10} />
                                 </div>
                                 <div className="flex flex-col gap-0.5 text-left">
-                                    <span className="text-[7px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] leading-none">Taxonomy Domain</span>
+                                    <span className="text-[7px] font-black text-ink-subtle uppercase tracking-[0.2em] leading-none">Taxonomy Domain</span>
                                     <div className="flex flex-col">
                                         <span className="text-[9px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight truncate max-w-[120px]">
                                             {template.taste_test_config?.category || 'General Product'}
                                         </span>
-                                        <span className="text-[9px] font-black text-brand-blue uppercase tracking-widest leading-none mt-0.5">
+                                        <span className="text-[9px] font-black text-primary-soft uppercase tracking-widest leading-none mt-0.5">
                                             {template.industry || template.taste_test_config?.industry || 'Cross-Sector'}
                                         </span>
                                     </div>
@@ -936,13 +936,13 @@ function TemplateCard({ template, idx, onEdit, onHistory, onDelete }: any) {
                                     <Users size={10} />
                                 </div>
                                 <div className="flex flex-col gap-1 text-left">
-                                    <span className="text-[7px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] leading-none">Social Economic Level</span>
+                                    <span className="text-[7px] font-black text-ink-subtle uppercase tracking-[0.2em] leading-none">Social Economic Level</span>
                                     <div className="flex flex-wrap gap-1">
                                         {showGlobalFocus ? (
                                             <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest italic opacity-60">Global Focus</span>
                                         ) : Array.isArray(secClasses) && secClasses.length > 0 ? (
                                             secClasses.map((sec: string) => (
-                                                <span key={sec} className="bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded text-[7px] font-black text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 shadow-sm uppercase tracking-tighter">
+                                                <span key={sec} className="bg-surface px-1.5 py-0.5 rounded text-[7px] font-black text-ink-muted border border-slate-200 dark:border-slate-700 shadow-sm uppercase tracking-tighter">
                                                     {sec}
                                                 </span>
                                             ))
@@ -958,13 +958,13 @@ function TemplateCard({ template, idx, onEdit, onHistory, onDelete }: any) {
             </div>
 
             <div className="relative z-10 mt-6 grid grid-cols-3 gap-2">
-                <button onClick={onEdit} className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-brand-blue/10 dark:hover:bg-brand-blue/20 flex items-center justify-center group/btn transition-all text-slate-400 dark:text-slate-500 hover:text-brand-blue">
+                <button onClick={onEdit} className="p-2.5 rounded-xl bg-surface-raised/50 hover:bg-primary/10 dark:hover:bg-primary/20 flex items-center justify-center group/btn transition-all text-ink-subtle hover:text-primary-soft">
                     <Edit3 className="w-4 h-4" />
                 </button>
-                <button onClick={onHistory} className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center group/btn transition-all text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300">
+                <button onClick={onHistory} className="p-2.5 rounded-xl bg-surface-raised/50 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center group/btn transition-all text-ink-subtle hover:text-slate-600 dark:hover:text-slate-300">
                     <History className="w-4 h-4" />
                 </button>
-                <button onClick={onDelete} className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-rose-50 dark:hover:bg-rose-950/30 flex items-center justify-center group/btn transition-all text-slate-400 dark:text-slate-500 hover:text-rose-500">
+                <button onClick={onDelete} className="p-2.5 rounded-xl bg-surface-raised/50 hover:bg-rose-50 dark:hover:bg-rose-950/30 flex items-center justify-center group/btn transition-all text-ink-subtle hover:text-rose-500">
                     <Trash2 className="w-4 h-4" />
                 </button>
             </div>

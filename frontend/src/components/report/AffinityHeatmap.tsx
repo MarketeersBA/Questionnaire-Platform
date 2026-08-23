@@ -66,14 +66,14 @@ const AffinityCell = memo(({ point, isDark }: { point: HeatmapDataPoint, isDark:
                 <span className={`text-xs font-black font-mono ${textColor}`}>
                     {point.aai.toFixed(0)}
                 </span>
-                <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter truncate w-full text-center mt-1">
+                <span className="text-[8px] font-bold text-ink-subtle uppercase tracking-tighter truncate w-full text-center mt-1">
                     {point.segment}
                 </span>
 
                 {/* Tooltip on Hover */}
                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-300 z-50">
                     <div className="bg-slate-900 border border-white/10 p-4 rounded-2xl shadow-2xl min-w-[200px]">
-                        <p className="text-[10px] font-black text-brand-blue uppercase tracking-widest mb-2">{point.segment}</p>
+                        <p className="text-[10px] font-black text-primary-soft uppercase tracking-widest mb-2">{point.segment}</p>
                         <div className="space-y-2">
                             <div className="flex justify-between items-center text-[11px]">
                                 <span className="text-slate-400 font-bold">Brand Pop %</span>
@@ -117,13 +117,13 @@ export function AffinityHeatmap({ data }: AffinityHeatmapProps) {
     return (
         <div className="space-y-8">
             {/* Header / Brand Selector */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-slate-50 dark:bg-white/[0.02] p-8 rounded-[40px] border border-slate-100 dark:border-white/5">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-slate-50 dark:bg-white/[0.02] p-8 rounded-[40px] border border-line/80 dark:border-line/10">
                 <div className="flex items-center gap-4">
-                    <div className="p-3 bg-brand-blue/10 rounded-2xl">
-                        <Users className="text-brand-blue w-6 h-6" />
+                    <div className="p-3 bg-primary/10 rounded-2xl">
+                        <Users className="text-primary-soft w-6 h-6" />
                     </div>
                     <div>
-                        <h4 className="text-xl font-black text-slate-900 dark:text-white uppercase italic tracking-tighter">
+                        <h4 className="text-xl font-black text-ink uppercase italic tracking-tighter">
                             Audience DNA Matrix
                         </h4>
                         <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
@@ -138,7 +138,7 @@ export function AffinityHeatmap({ data }: AffinityHeatmapProps) {
                         <select
                             value={selectedBrand}
                             onChange={(e) => setSelectedBrand(e.target.value)}
-                            className="appearance-none bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 px-8 py-3 pr-12 rounded-2xl text-xs font-black text-brand-blue uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-brand-blue/20 transition-all cursor-pointer shadow-sm"
+                            className="appearance-none bg-surface border border-line/80 dark:border-line/10 px-8 py-3 pr-12 rounded-2xl text-xs font-black text-primary-soft uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer shadow-sm"
                         >
                             {data.brands.map(b => (
                                 <option key={b} value={b}>{b}</option>
@@ -155,10 +155,10 @@ export function AffinityHeatmap({ data }: AffinityHeatmapProps) {
                     <div key={field} className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
                         {/* Field Label */}
                         <div className="lg:col-span-2 flex items-center gap-3 group">
-                            <div className="w-1.5 h-10 rounded-full bg-slate-200 dark:bg-slate-800 group-hover:bg-brand-blue transition-colors" />
+                            <div className="w-1.5 h-10 rounded-full bg-slate-200 dark:bg-slate-800 group-hover:bg-primary transition-colors" />
                             <div className="flex flex-col">
-                                <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">{field.replace('_', ' ')}</span>
-                                <span className="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-tight group-hover:text-brand-blue transition-colors">Dimension Breakdown</span>
+                                <span className="text-[10px] font-black text-ink-subtle uppercase tracking-[0.2em]">{field.replace('_', ' ')}</span>
+                                <span className="text-xs font-black text-ink-muted uppercase tracking-tight group-hover:text-primary-soft transition-colors">Dimension Breakdown</span>
                             </div>
                         </div>
 
@@ -182,7 +182,7 @@ export function AffinityHeatmap({ data }: AffinityHeatmapProps) {
                     </div>
                     <div>
                         <h5 className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1 italic">Growth Catalyst</h5>
-                        <p className="text-[11px] font-medium text-slate-600 dark:text-slate-400 leading-relaxed text-balance">
+                        <p className="text-[11px] font-medium text-ink-muted leading-relaxed text-balance">
                             AAI {'>'} 120 indicate critical "win-zones" where the brand heavily over-indexes.
                         </p>
                     </div>
@@ -194,7 +194,7 @@ export function AffinityHeatmap({ data }: AffinityHeatmapProps) {
                     </div>
                     <div>
                         <h5 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 italic">Category Norm</h5>
-                        <p className="text-[11px] font-medium text-slate-600 dark:text-slate-400 leading-relaxed text-balance">
+                        <p className="text-[11px] font-medium text-ink-muted leading-relaxed text-balance">
                             Values near 100 represent perfect alignment with the total category population.
                         </p>
                     </div>
@@ -206,7 +206,7 @@ export function AffinityHeatmap({ data }: AffinityHeatmapProps) {
                     </div>
                     <div>
                         <h5 className="text-[10px] font-black text-rose-500 uppercase tracking-widest mb-1 italic">Penetration Gap</h5>
-                        <p className="text-[11px] font-medium text-slate-600 dark:text-slate-400 leading-relaxed text-balance">
+                        <p className="text-[11px] font-medium text-ink-muted leading-relaxed text-balance">
                             AAI {'<'} 80 suggest demographic silos where brand presence is significantly diluted.
                         </p>
                     </div>

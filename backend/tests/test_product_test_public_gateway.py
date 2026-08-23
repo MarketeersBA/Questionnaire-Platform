@@ -99,7 +99,7 @@ async def test_resolve_snapshot_raises_503_on_empty_bank():
     with pytest.raises(HTTPException) as exc:
         await resolve_product_test_snapshot_for_respondent(survey, orchestration_service=orch)
     assert exc.value.status_code == 503
-    assert "DATA_LAYER.md" in exc.value.detail
+    assert "product-test-data-layer.md" in exc.value.detail
 
 
 @pytest.mark.asyncio

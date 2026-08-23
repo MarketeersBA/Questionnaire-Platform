@@ -1,4 +1,6 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { chartChrome } from '../../constants/brandPalette';
+import { useTheme } from '../../context/ThemeContext';
 
 const transformData = (raw: any) => {
     if (!raw) return [];
@@ -19,28 +21,83 @@ const transformData = (raw: any) => {
     return [];
 };
 
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
 
 export function HorizontalBarChart({ data }: { data: any }) {
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
+    const chrome = chartChrome(isDark);
+
     const chartData = transformData(data);
     const dataKeys = data?.datasets?.map((ds: any) => ds.label) || [];
 
-    if (!chartData.length) return <div className="text-slate-500 text-center py-20">No data</div>;
+    if (!chartData.length) {
+        return <div className="text-ink-subtle text-center py-10 text-sm font-bold">No data</div>;
+    }
+
+    // Tighter than the previous 60px/row + 80px pad, which left a large empty
+    // band under short comparisons.
+    const height = Math.max(220, chartData.length * 46 + 60);
 
     return (
-        <ResponsiveContainer width="100%" height={Math.max(300, chartData.length * 60 + 80)}>
-            <BarChart data={chartData} layout="vertical" margin={{ top: 20, right: 30, left: 120, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} vertical={true} stroke="#1e293b" />
-                <XAxis type="number" tickFormatter={(val) => `${Math.round(val)}%`} tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 700 }} axisLine={false} tickLine={false} />
-                <YAxis dataKey="name" type="category" tick={{ fill: '#e2e8f0', fontSize: 13, fontWeight: 700 }} axisLine={false} tickLine={false} width={110} />
+        <ResponsiveContainer width="100%" height={height}>
+            <BarChart data={chartData} layout="vertical" margin={{ top: 8, right: 28, left: 110, bottom: 0 }}>
+                <defs>
+                    {/* Brand ramp: blue into red, left to right. */}
+                    {dataKeys.map((key: string, idx: number) => (
+                        <linearGradient key={key} id={`hbar-${idx}`} x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stopColor={idx % 2 === 0 ? '#21A0FF' : '#E79D9E'} />
+                            <stop offset="100%" stopColor={idx % 2 === 0 ? '#255E91' : '#CD393B'} />
+                        </linearGradient>
+                    ))}
+                </defs>
+
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} vertical stroke={chrome.grid} />
+                <XAxis
+                    type="number"
+                    tickFormatter={(val) => `${Math.round(val)}%`}
+                    tick={{ fill: chrome.axis, fontSize: 11, fontWeight: 700 }}
+                    axisLine={false}
+                    tickLine={false}
+                />
+                <YAxis
+                    dataKey="name"
+                    type="category"
+                    /* Was #e2e8f0 — near-white, so category labels vanished on
+                       the light canvas. */
+                    tick={{ fill: chrome.label, fontSize: 12, fontWeight: 700 }}
+                    axisLine={false}
+                    tickLine={false}
+                    width={104}
+                />
                 <Tooltip
-                    cursor={{ fill: 'rgba(255,255,255,0.03)' }}
-                    contentStyle={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', backgroundColor: '#0f172a', color: '#e2e8f0' }}
+                    cursor={{ fill: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(37,94,145,0.06)' }}
+                    contentStyle={{
+                        borderRadius: '14px',
+                        border: `1px solid ${chrome.tooltipBorder}`,
+                        backgroundColor: chrome.tooltipBg,
+                        color: chrome.label,
+                        fontWeight: 700,
+                    }}
                     formatter={(val: any) => `${Math.round(val)}%`}
                 />
-                <Legend wrapperStyle={{ paddingTop: '20px', color: '#94a3b8', fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.1em' }} />
+                <Legend
+                    wrapperStyle={{
+                        paddingTop: 12,
+                        color: chrome.axis,
+                        fontWeight: 700,
+                        fontSize: 10,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.1em',
+                    }}
+                />
                 {dataKeys.map((key: string, idx: number) => (
-                    <Bar key={key} dataKey={key} fill={COLORS[idx % COLORS.length]} radius={[0, 8, 8, 0]} barSize={28} />
+                    <Bar
+                        key={key}
+                        dataKey={key}
+                        fill={`url(#hbar-${idx})`}
+                        radius={[0, 8, 8, 0]}
+                        barSize={24}
+                    />
                 ))}
             </BarChart>
         </ResponsiveContainer>

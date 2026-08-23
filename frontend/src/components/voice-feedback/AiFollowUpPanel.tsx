@@ -5,7 +5,11 @@ import OpenEndAnswerInput from './OpenEndAnswerInput';
 import type { FollowUpPanelState } from '../../utils/aiFollowup';
 import { normalizeOpenEndAnswer } from '../../utils/voiceQuestions';
 
-export const FOLLOW_UP_REPLY_IDLE_MS = 3000;
+// Idle-debounce before an AI follow-up fires off a just-typed answer. Kept
+// short because a sentence-ending punctuation mark (below) fires immediately
+// instead of waiting out the full idle window.
+export const FOLLOW_UP_REPLY_IDLE_MS = 1600;
+const SENTENCE_END_PATTERN = /[.!?؟]\s*$/;
 
 export type AiFollowUpPanelVariant = 'premium' | 'standard';
 
@@ -69,9 +73,11 @@ export default function AiFollowUpPanel({
     useEffect(() => {
         if (!visible || state.loading || !replyText.trim()) return;
 
+        // A finished sentence fires immediately — no need to wait out the idle window.
+        const idleMs = SENTENCE_END_PATTERN.test(replyText) ? 300 : FOLLOW_UP_REPLY_IDLE_MS;
         const timeout = setTimeout(() => {
             onReplyTextSubmitRef.current(replyText);
-        }, FOLLOW_UP_REPLY_IDLE_MS);
+        }, idleMs);
 
         return () => clearTimeout(timeout);
     }, [visible, state.loading, replyText]);
@@ -81,7 +87,6 @@ export default function AiFollowUpPanel({
     // After AI completes / rounds exhaust, map entry can linger with no content — don't show an empty shell.
     if (!state.loading && !state.followUpText) return null;
 
-    const isAr = language === 'ar';
     const copy = COPY[language];
     const isPremium = variant === 'premium';
     const panelTitle = title ?? (isPremium ? copy.titlePremium : copy.titleStandard);
@@ -89,8 +94,8 @@ export default function AiFollowUpPanel({
     const loadingText = isPremium ? copy.loadingPremium : copy.loadingStandard;
 
     const containerClass = isPremium
-        ? 'mt-6 p-6 bg-gradient-to-tr from-brand-blue/5 to-transparent border-2 border-brand-blue/20 rounded-[2rem] relative overflow-hidden shadow-sm'
-        : 'mt-6 p-6 bg-brand-blue/5 border-2 border-brand-blue/20 rounded-[2rem] relative overflow-hidden';
+        ? 'mt-4 p-5 bg-gradient-to-tr from-primary/5 to-transparent border-2 border-primary/20 rounded-[1.5rem] relative overflow-hidden shadow-sm'
+        : 'mt-4 p-5 bg-primary/5 border-2 border-primary/20 rounded-[1.5rem] relative overflow-hidden';
 
     return (
         <motion.div
@@ -100,13 +105,13 @@ export default function AiFollowUpPanel({
             transition={{ duration: 0.3, ease: 'easeOut' }}
             className={containerClass}
         >
-            <div className={`flex items-center gap-3 ${isPremium ? 'mb-6' : 'mb-4'}`}>
-                <div className={`w-10 h-10 rounded-full bg-brand-blue flex items-center justify-center text-white ${isPremium ? 'shadow-md' : ''}`}>
+            <div className={`flex items-center gap-3 ${isPremium ? 'mb-4' : 'mb-3'}`}>
+                <div className={`w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white ${isPremium ? 'shadow-md' : ''}`}>
                     <Sparkles className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1">
                     <div className="flex items-center justify-between">
-                        <h4 className="text-xs font-black uppercase tracking-[0.15em] text-brand-blue">
+                        <h4 className="text-xs font-black uppercase tracking-[0.15em] text-primary-soft">
                             {panelTitle}
                         </h4>
                         {maxRounds != null && maxRounds > 0 && (
@@ -115,7 +120,7 @@ export default function AiFollowUpPanel({
                                     <div
                                         key={i}
                                         className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                                            i < Math.max(0, state.round - 1) ? 'bg-brand-blue scale-110' : 'bg-brand-blue/20'
+                                            i < Math.max(0, state.round - 1) ? 'bg-primary scale-110' : 'bg-primary/20'
                                         }`}
                                     />
                                 ))}
@@ -135,19 +140,19 @@ export default function AiFollowUpPanel({
                         animate={{ opacity: 1 }}
                         className="flex flex-col items-center justify-center py-6 space-y-4"
                     >
-                        <Loader2 className="w-8 h-8 text-brand-blue animate-spin opacity-80" />
+                        <Loader2 className="w-8 h-8 text-primary-soft animate-spin opacity-80" />
                         <div className="flex gap-2">
-                            <span className="w-1.5 h-1.5 bg-brand-blue rounded-full animate-bounce [animation-delay:-0.3s]" />
-                            <span className="w-1.5 h-1.5 bg-brand-blue rounded-full animate-bounce [animation-delay:-0.15s]" />
-                            <span className="w-1.5 h-1.5 bg-brand-blue rounded-full animate-bounce" />
+                            <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]" />
+                            <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]" />
+                            <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" />
                         </div>
-                        <p className="text-xs font-bold text-brand-blue animate-pulse uppercase tracking-widest">
+                        <p className="text-xs font-bold text-primary-soft animate-pulse uppercase tracking-widest">
                             {loadingText}
                         </p>
                     </motion.div>
                 ) : (
                     <div className="flex items-center gap-3 py-4">
-                        <Loader2 className="w-5 h-5 text-brand-blue animate-spin" />
+                        <Loader2 className="w-5 h-5 text-primary-soft animate-spin" />
                         <p className="text-sm font-bold text-slate-400 animate-pulse uppercase tracking-widest">
                             {loadingText}
                         </p>
@@ -162,12 +167,12 @@ export default function AiFollowUpPanel({
                     <div
                         className={
                             isPremium
-                                ? 'p-5 bg-white dark:bg-slate-900 rounded-3xl border border-brand-blue/10 shadow-sm relative'
-                                : 'p-4 bg-white dark:bg-slate-900 rounded-2xl border-2 border-brand-blue/10'
+                                ? 'p-5 bg-surface rounded-3xl border border-primary/10 shadow-sm relative'
+                                : 'p-4 bg-surface rounded-2xl border-2 border-primary/10'
                         }
                     >
                         {isPremium && (
-                            <div className="absolute top-0 left-6 -translate-y-1/2 w-4 h-4 bg-white dark:bg-slate-900 border-l border-t border-brand-blue/10 rotate-45" />
+                            <div className="absolute top-0 left-6 -translate-y-1/2 w-4 h-4 bg-surface border-l border-t border-primary/10 rotate-45" />
                         )}
                         <p
                             className={

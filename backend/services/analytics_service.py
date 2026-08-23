@@ -31,6 +31,29 @@ from backend.analytics_module.src.ai.opportunity_synthesizer import OpportunityS
 
 logger = logging.getLogger(__name__)
 
+
+def _ai_contract_version() -> str:
+    """
+    Short fingerprint of the active god prompt.
+
+    Stored on every report so a stale worker is immediately visible: if the
+    prompt file changed but this value did not, the running process has not
+    reloaded the new prompt.
+    """
+    try:
+        import json
+        from pathlib import Path as _Path
+
+        meta_path = (
+            _Path(__file__).resolve().parents[1]
+            / "resources" / "analytics" / "prompts" / "god_prompt_meta.json"
+        )
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        return f'{meta.get("version", "?")}+{meta.get("sha256", "?")}'
+    except Exception:  # noqa: BLE001 - telemetry must never break generation
+        return "unknown"
+
+
 class AnalyticsService:
     """
     Service layer to handle analytical report generation requests.
@@ -642,6 +665,38 @@ class AnalyticsService:
                             survey_context=survey_context,
                         )
 
+                    # ── Key Finding contract enforcement ──
+                    # The prompt asks for a finding bound to the business
+                    # question and the measured attributes; this guarantees it.
+                    # A violating summary is replaced with a deterministic
+                    # sentence read straight off the computed charts, so the
+                    # most-read line in the report can never reference a
+                    # dimension the survey did not measure.
+                    try:
+                        from backend.analytics_module.src.ai.key_finding_guard import (
+                            enforce_key_finding,
+                        )
+
+                        enforced, verdict = enforce_key_finding(
+                            report_insights.executive_summary,
+                            target_brand=my_brand or (brands[0] if brands else ""),
+                            charts=charts,
+                            measured_attributes=getattr(survey_context, "measured_attributes", None),
+                            modules_used=getattr(survey_context, "modules_used", None),
+                            survey_objective=getattr(survey_context, "survey_objective", ""),
+                        )
+                        if not verdict.ok:
+                            logger.warning(
+                                "[KeyFinding] Contract violated for survey %s: %s",
+                                survey_id, " | ".join(verdict.reasons),
+                            )
+                        report_insights.executive_summary = enforced
+                    except Exception as guard_err:
+                        logger.error(
+                            "[KeyFinding] Guard failed, keeping generated summary: %s",
+                            guard_err, exc_info=True,
+                        )
+
                     # ── Step 3.8: Opportunity Intelligence Engine ──
                     # Fusing quantitative signals with qualitative proof for priority focus
                     if my_brand and df_responses is not None and not df_responses.empty:
@@ -699,8 +754,11 @@ class AnalyticsService:
                 "total_responses": survey_data.response_count,
                 "charts": charts,
                 "available_filters": available_filters,
-                "sections": [],  # Legacy — empty for new pipeline
+                "sections": [{"section_id": "legacy_compat", "section_name": "Full Analysis", "charts": charts}],  # Backward compat for production frontend
                 "insights": report_insights.model_dump(),
+                # Which prompt contract produced this narrative. If this does
+                # not change after a prompt edit, the worker is running stale code.
+                "ai_contract_version": _ai_contract_version(),
                 "telemetry": {
                     "pipeline": "v2_direct_ai",
                     "duration_s": round((datetime.utcnow() - start_time).total_seconds(), 2),
@@ -876,6 +934,29 @@ class AnalyticsService:
             survey_context=survey_context,
         )
         
+        # Batch finalisation writes insights on a different path from the
+        # synchronous generator, so the Key Finding contract has to be applied
+        # here too or batch-mode reports silently skip enforcement.
+        try:
+            from backend.analytics_module.src.ai.key_finding_guard import enforce_key_finding
+
+            enforced, verdict = enforce_key_finding(
+                insights.executive_summary,
+                target_brand=getattr(survey_context, "target_brand", "") or "",
+                charts=report.get("charts") or [],
+                measured_attributes=getattr(survey_context, "measured_attributes", None),
+                modules_used=getattr(survey_context, "modules_used", None),
+                survey_objective=getattr(survey_context, "survey_objective", ""),
+            )
+            if not verdict.ok:
+                logger.warning(
+                    "[KeyFinding] Contract violated in batch finalisation for %s: %s",
+                    report.get("survey_id"), " | ".join(verdict.reasons),
+                )
+            insights.executive_summary = enforced
+        except Exception as guard_err:
+            logger.error("[KeyFinding] Batch guard failed: %s", guard_err, exc_info=True)
+
         await self.db.survey_reports.update_one(
             {"_id": report["_id"]},
             {
@@ -883,6 +964,7 @@ class AnalyticsService:
                     "status": "ready",
                     "sections": sections,
                     "insights": insights.model_dump(),
+                    "ai_contract_version": _ai_contract_version(),
                     "generated_at": datetime.utcnow(),
                 },
                 "$unset": {"partial_context": "", "ai_batch_id": ""}

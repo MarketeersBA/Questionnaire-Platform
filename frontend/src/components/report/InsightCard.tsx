@@ -22,7 +22,7 @@ export function InsightCard({ insight }: InsightCardProps) {
                     <h4 className="text-sm font-bold text-brand-primary uppercase tracking-wider mb-1">
                         AI Analytical Insight
                     </h4>
-                    <p className="text-slate-700 dark:text-slate-300 leading-relaxed italic">
+                    <p className="text-ink-muted leading-relaxed italic">
                         "{insight}"
                     </p>
                 </div>

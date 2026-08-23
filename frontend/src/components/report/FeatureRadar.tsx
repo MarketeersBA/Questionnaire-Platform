@@ -1,5 +1,6 @@
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useTheme } from '../../context/ThemeContext';
+import { CHART_SERIES } from '../../constants/brandPalette';
 
 const transformData = (raw: any) => {
     if (!raw || !raw.labels) return [];
@@ -12,7 +13,7 @@ const transformData = (raw: any) => {
     });
 };
 
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+const COLORS = CHART_SERIES;
 
 export function FeatureRadar({ data, isFocusMode, presentationHeight }: { data: any, isFocusMode?: boolean, presentationHeight?: number }) {
     const { theme } = useTheme();

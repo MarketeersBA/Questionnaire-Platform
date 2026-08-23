@@ -3,14 +3,7 @@ import { ArrowUpRight, ArrowDownRight, Minus, Filter, Target } from 'lucide-reac
 import { motion, AnimatePresence } from 'framer-motion';
 import { calculateProportionSig } from '../../utils/statUtils';
 
-const COLORS = [
-    '#60a5fa', // Blue
-    '#34d399', // Emerald
-    '#fb7185', // Rose
-    '#fbbf24', // Amber
-    '#a78bfa', // Violet
-    '#22d3ee', // Cyan
-];
+const COLORS = CHART_SERIES;
 
 interface CriteriaTableChartProps {
     data: {
@@ -35,6 +28,7 @@ interface CriteriaTableChartProps {
 }
 
 import { useTheme } from '../../context/ThemeContext';
+import { CHART_SERIES } from '../../constants/brandPalette';
 
 export function CriteriaTableChart({ data, brands: propBrands, presentationHeight, isFocusMode }: CriteriaTableChartProps) {
     const { theme } = useTheme();
@@ -110,7 +104,7 @@ export function CriteriaTableChart({ data, brands: propBrands, presentationHeigh
                                 <button
                                     key={brand}
                                     onClick={() => toggleBrand(brand)}
-                                    className={`px-4 py-2 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${visibleBrands.includes(brand) ? (isDark ? 'bg-white/10 border-white/20 text-white' : 'bg-brand-blue text-white active:scale-95') : (isDark ? 'bg-transparent border-white/5 text-slate-500 opacity-40' : 'bg-slate-100 border-slate-200 text-slate-400 opacity-60')}`}
+                                    className={`px-4 py-2 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${visibleBrands.includes(brand) ? (isDark ? 'bg-white/10 border-white/20 text-white' : 'bg-primary text-white active:scale-95') : (isDark ? 'bg-transparent border-white/5 text-slate-500 opacity-40' : 'bg-slate-100 border-slate-200 text-slate-400 opacity-60')}`}
                                 >
                                     {brand}
                                 </button>
@@ -223,7 +217,7 @@ export function CriteriaTableChart({ data, brands: propBrands, presentationHeigh
                                 return (
                                     <motion.div layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} key={row.criteria_name} style={gridStyle} className={`group px-8 py-6 items-center transition-all ${isDark ? 'hover:bg-white/[0.04]' : 'hover:bg-slate-100'} ${index % 2 === 0 ? (isDark ? 'bg-white/[0.01]' : 'bg-slate-50') : ''} border-b ${isDark ? 'border-white/5' : 'border-slate-100'}`}>
                                         <div className="col-span-3 flex flex-col gap-1">
-                                            <div className={`font-black ${isDark ? 'text-white' : 'text-slate-900'} text-sm uppercase tracking-tight group-hover:text-brand-blue transition-colors`}>{row.criteria_name}</div>
+                                            <div className={`font-black ${isDark ? 'text-white' : 'text-slate-900'} text-sm uppercase tracking-tight group-hover:text-primary-soft transition-colors`}>{row.criteria_name}</div>
                                         </div>
 
                                         <div className={`text-center font-mono text-xs font-black ${sigColor} ${isDark ? 'bg-white/5 border-white/5' : 'bg-slate-100 border-slate-200'} py-1.5 rounded-lg border`}>{row.significance.toFixed(2)}</div>

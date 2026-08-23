@@ -33,7 +33,7 @@ export default function OrphanAuditTable({ data }: OrphanAuditProps) {
         <div className="bg-white border border-slate-100 rounded-[2.5rem] shadow-xl overflow-hidden flex flex-col h-full relative text-left">
             <div className="p-8 border-b border-slate-100 bg-slate-50/50">
                 <h3 className="text-lg font-display font-black flex items-center gap-2 text-slate-900">
-                    <ShieldAlert className="w-5 h-5 text-brand-red" />
+                    <ShieldAlert className="w-5 h-5 text-accent-soft" />
                     Security Audit Logs
                 </h3>
                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1">Failed webhooks & bot vectors</p>
@@ -48,11 +48,11 @@ export default function OrphanAuditTable({ data }: OrphanAuditProps) {
                                 onClick={() => setSelectedCategory(cat._id === selectedCategory ? null : cat._id)}
                             >
                                 <div className="flex items-center gap-3">
-                                    <ChevronRight className={`w-4 h-4 text-slate-300 transition-transform ${selectedCategory === cat._id ? 'rotate-90 text-brand-red' : ''}`} />
+                                    <ChevronRight className={`w-4 h-4 text-slate-300 transition-transform ${selectedCategory === cat._id ? 'rotate-90 text-accent-soft' : ''}`} />
                                     <span className="text-slate-600 font-bold text-sm lowercase first-letter:uppercase">{cat._id.replace('invalid_transition_', '').replace(/_/g, ' ')}</span>
                                 </div>
                                 <div className="flex items-center gap-6">
-                                    <span className="px-3 py-1 bg-brand-red/5 text-brand-red font-mono text-xs font-black rounded-lg border border-brand-red/10">{cat.count}</span>
+                                    <span className="px-3 py-1 bg-accent/5 text-accent-soft font-mono text-xs font-black rounded-lg border border-accent/10">{cat.count}</span>
                                     <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 text-right leading-tight hidden sm:block">
                                         <p>{new Date(cat.latest_attempt).toLocaleDateString()}</p>
                                         <p className="text-slate-300">{new Date(cat.latest_attempt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
@@ -67,7 +67,7 @@ export default function OrphanAuditTable({ data }: OrphanAuditProps) {
                                             <div className="py-8 text-center text-[10px] font-black uppercase tracking-widest text-slate-400 animate-pulse">Scanning incident history...</div>
                                         ) : (
                                             details.map((log) => (
-                                                <div key={log._id} className="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-100 hover:border-brand-red/20 transition-all group shadow-sm">
+                                                <div key={log._id} className="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-100 hover:border-accent/20 transition-all group shadow-sm">
                                                     <div className="flex items-center gap-3">
                                                         <Clock className="w-4 h-4 text-slate-300" />
                                                         <span className="text-xs text-slate-900 font-mono font-bold">
@@ -76,7 +76,7 @@ export default function OrphanAuditTable({ data }: OrphanAuditProps) {
                                                     </div>
                                                     <button
                                                         onClick={() => setActivePayload(log)}
-                                                        className="p-2 bg-slate-50 rounded-lg hover:bg-brand-red hover:text-white text-slate-400 opacity-0 group-hover:opacity-100 transition shadow-sm"
+                                                        className="p-2 bg-slate-50 rounded-lg hover:bg-accent hover:text-white text-slate-400 opacity-0 group-hover:opacity-100 transition shadow-sm"
                                                         title="Inspect Payload"
                                                     >
                                                         <Code className="w-4 h-4" />
@@ -99,7 +99,7 @@ export default function OrphanAuditTable({ data }: OrphanAuditProps) {
             {activePayload && (
                 <div className="absolute inset-0 z-50 bg-white/95 backdrop-blur-md p-8 overflow-auto animate-in fade-in zoom-in duration-200 shadow-2xl">
                     <div className="flex items-center justify-between mb-8 border-b border-slate-100 pb-6">
-                        <h4 className="font-display font-black flex items-center gap-3 text-brand-red text-xl uppercase tracking-wider">
+                        <h4 className="font-display font-black flex items-center gap-3 text-accent-soft text-xl uppercase tracking-wider">
                             <Code className="w-6 h-6" />
                             Incident Context
                         </h4>
@@ -123,7 +123,7 @@ export default function OrphanAuditTable({ data }: OrphanAuditProps) {
             <div className="p-6 bg-slate-50/80 border-t border-slate-100">
                 <div className="flex items-center justify-between px-6 py-4 bg-white border border-slate-100 rounded-2xl shadow-sm">
                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Global Incident Count</span>
-                    <span className="text-xl font-display font-black text-brand-red">{data.total_attempts}</span>
+                    <span className="text-xl font-display font-black text-accent-soft">{data.total_attempts}</span>
                 </div>
             </div>
         </div>

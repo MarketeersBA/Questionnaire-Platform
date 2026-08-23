@@ -125,13 +125,17 @@ describe('productTestFlowOrchestration heatmap validation', () => {
             },
         }, section)).toHaveLength(1);
 
+        // A pin needs a comment (or voice note) to count as answered — see
+        // isHeatmapPinFeedbackAnswered / the validation message itself
+        // ("Please add text or a voice note for every selected pin...").
+        // A bare {x, y} click with no feedback is still incomplete.
         expect(validateProductTestSection({
             Acme_pkg_hm_front_attraction: {
                 image_side: 'front',
                 intent: 'attraction',
                 ref_width: 100,
                 ref_height: 100,
-                clicks: [{ x: 0.5, y: 0.5 }],
+                clicks: [{ x: 0.5, y: 0.5, feedback: { comment: 'Bright color caught my eye' } }],
             },
         }, section)).toHaveLength(0);
     });

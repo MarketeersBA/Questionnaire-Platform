@@ -141,15 +141,25 @@ class AIGuard:
 
     # Concurrency governor — controls max parallel AI calls across the pipeline
     _semaphore: Optional[asyncio.Semaphore] = None
+    _semaphore_loop: Optional[asyncio.AbstractEventLoop] = None
     MAX_CONCURRENT_AI_CALLS = 8
     MAX_RETRIES = 3
     BASE_BACKOFF_S = 1.0
 
     @classmethod
     def get_semaphore(cls) -> asyncio.Semaphore:
-        """Lazy-init semaphore (must be created inside a running event loop)."""
-        if cls._semaphore is None:
+        """Lazy-init semaphore (must be created inside a running event loop).
+
+        Recreates the semaphore if the running loop has changed since it was
+        cached — a bare class-level singleton stays bound to whichever loop
+        first created it, so reusing it under a new loop (e.g. each test
+        getting its own event loop) raises "Future attached to a different
+        loop" the moment two coroutines contend for it.
+        """
+        current_loop = asyncio.get_event_loop()
+        if cls._semaphore is None or cls._semaphore_loop is not current_loop:
             cls._semaphore = asyncio.Semaphore(cls.MAX_CONCURRENT_AI_CALLS)
+            cls._semaphore_loop = current_loop
         return cls._semaphore
 
     @classmethod
@@ -170,10 +180,15 @@ class AIGuard:
             for attempt in range(max_retries + 1):
                 try:
                     async with sem:
-                        if inspect.iscoroutinefunction(func):
-                            return await func(*args, **kwargs)
-                        else:
-                            return func(*args, **kwargs)
+                        # Check the CALL RESULT for awaitability rather than
+                        # pre-judging `func` via inspect.iscoroutinefunction —
+                        # that check misses AsyncMock and other non-`async def`
+                        # awaitable-returning callables, which silently handed
+                        # back an unawaited coroutine instead of its result.
+                        call_result = func(*args, **kwargs)
+                        if inspect.isawaitable(call_result):
+                            return await call_result
+                        return call_result
                 except Exception as e:
                     if cls.is_quota_error(e) and attempt < max_retries:
                         # Exponential backoff: 1s, 2s, 4s + jitter

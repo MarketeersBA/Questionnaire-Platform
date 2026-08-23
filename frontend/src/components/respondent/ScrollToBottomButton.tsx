@@ -60,7 +60,7 @@ export default function ScrollToBottomButton({
                     transition={{ duration: 0.2 }}
                     onClick={scrollToEnd}
                     style={{ bottom: bottomOffsetPx }}
-                    className="fixed z-[60] end-2 md:end-3 w-11 h-11 rounded-xl bg-brand-blue text-white shadow-lg shadow-brand-blue/30 border border-white/20 flex items-center justify-center hover:bg-brand-blue/90 active:scale-95 transition-colors"
+                    className="fixed z-[60] end-2 md:end-3 w-11 h-11 rounded-xl bg-primary text-white shadow-lg shadow-primary/30 border border-white/20 flex items-center justify-center hover:bg-primary/90 active:scale-95 transition-colors"
                     aria-label={isArabic ? 'الانتقال إلى نهاية الصفحة' : 'Scroll to end of page'}
                     title={isArabic ? 'إلى النهاية' : 'Go to end'}
                 >

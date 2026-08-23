@@ -74,16 +74,23 @@ async def test_pptx_generation_pipeline_fidelity():
         # Load the generated file for internal inspection
         pres = Presentation(pptx_path)
         
-        # Cover + Survey Info + section divider + chart + section divider + chart + closing
+        # Cover + Survey Info + Strategic Narrative (always inserted, see
+        # PresentationPlanner.define_slide_intents) + section divider + chart
+        # + chart + closing
         actual_slides = len(pres.slides)
         assert actual_slides >= 6, f"Expected at least 6 slides, but found {actual_slides}."
-        
+
         # Title Integrity Check (Engine uses .upper())
         assert pres.slides[0].shapes.title.text == "PHOENIX INTEGRATION TEST", "Cover title hydration failed."
         assert pres.slides[1].shapes.title.text == "SURVEY OVERVIEW & METHODOLOGY", "Survey info slide title mismatch."
-        
-        assert pres.slides[2].shapes.title.text in {"PURCHASE FUNNEL", "COMPARISONS", "DASHBOARD"}
-        
+
+        # Slide 2 is the always-on Strategic Narrative slide (no title placeholder
+        # populated by that builder); the first *section* divider for these two
+        # charts (both resolve into the "Purchase Funnel" group) lands at slide 3.
+        assert pres.slides[3].shapes.title.text in {
+            "SECTION 04: PURCHASE FUNNEL", "COMPARISONS", "SECTION 07: DASHBOARD"
+        }
+
         slide_titles = [slide.shapes.title.text for slide in pres.slides if slide.shapes.title]
         assert "BRAND EQUITY AWARENESS" in slide_titles
         assert "CONVERSION THRESHOLDS" in slide_titles

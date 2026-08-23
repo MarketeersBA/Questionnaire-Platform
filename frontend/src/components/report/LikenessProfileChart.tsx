@@ -13,14 +13,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Info } from 'lucide-react';
 
-const COLORS = [
-    '#60a5fa', // Blue
-    '#34d399', // Emerald
-    '#fb7185', // Rose
-    '#fbbf24', // Amber
-    '#a78bfa', // Violet
-    '#22d3ee', // Cyan
-];
+const COLORS = CHART_SERIES;
 
 const transformData = (raw: any) => {
     if (!raw || !raw.metrics) return [];
@@ -70,6 +63,7 @@ const CustomDot = (props: any) => {
 };
 
 import { useTheme } from '../../context/ThemeContext';
+import { CHART_SERIES } from '../../constants/brandPalette';
 
 export function LikenessProfileChart({ data, isFocusMode, presentationHeight }: { data: any, isFocusMode?: boolean, presentationHeight?: number }) {
     const { theme } = useTheme();
@@ -106,13 +100,20 @@ export function LikenessProfileChart({ data, isFocusMode, presentationHeight }: 
             return {
                 ...row,
                 main_att: match?.main_att || 'General Attributes',
+                supp_att: match?.supp_att || '',
                 left: match?.min_label || row.left,
                 right: match?.max_label || row.right
             };
         });
 
+        // Filter to ONLY show Main Attributes (where main_att === supp_att, or no supp_att)
+        const mainAttributesOnly = mapped.filter((row: any) => {
+            if (!row.supp_att) return true;
+            return row.main_att.toLowerCase() === row.supp_att.toLowerCase();
+        });
+
         const groups: Record<string, any[]> = {};
-        mapped.forEach((row: any) => {
+        mainAttributesOnly.forEach((row: any) => {
             const groupName = row.main_att;
             if (!groups[groupName]) groups[groupName] = [];
             groups[groupName].push(row);
@@ -164,8 +165,8 @@ export function LikenessProfileChart({ data, isFocusMode, presentationHeight }: 
                             className={`
                                 flex items-center gap-2 px-4 py-2 rounded-2xl border transition-all duration-300
                                 ${isVisible
-                                    ? 'bg-brand-blue/10 dark:bg-white/10 border-brand-blue/20 dark:border-white/20 text-brand-blue dark:text-white shadow-[0_0_15px_rgba(59,130,246,0.1)]'
-                                    : 'bg-transparent border-slate-200 dark:border-white/5 text-slate-400 dark:text-slate-500 grayscale opacity-40'}
+                                    ? 'bg-primary/10 dark:bg-white/10 border-primary/20 dark:border-white/20 text-primary-soft dark:text-white shadow-[0_0_15px_rgba(59,130,246,0.1)]'
+                                    : 'bg-transparent border-line/80 dark:border-line/10 text-ink-subtle grayscale opacity-40'}
                             `}
                         >
                             <div
@@ -231,10 +232,10 @@ function AttributeGroup({ group, datasets, visibleBrands, isDark, isFocusMode, p
                         w-12 h-12 rounded-2xl flex items-center justify-center transition-colors
                         ${isDark ? 'bg-white/5 group-hover:bg-white/10' : 'bg-slate-50 group-hover:bg-slate-100'}
                     `}>
-                        <div className="w-2 h-2 rounded-full bg-brand-blue shadow-[0_0_10px_#3b82f6]" />
+                        <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_10px_#3b82f6]" />
                     </div>
                     <div>
-                        <h3 className="text-sm font-black uppercase tracking-[0.25em] text-brand-blue dark:text-white mb-1 group-hover:tracking-[0.3em] transition-all duration-500">
+                        <h3 className="text-sm font-black uppercase tracking-[0.25em] text-primary-soft dark:text-white mb-1 group-hover:tracking-[0.3em] transition-all duration-500">
                             {group.name}
                         </h3>
                         <div className="flex items-center gap-3">
@@ -242,7 +243,7 @@ function AttributeGroup({ group, datasets, visibleBrands, isDark, isFocusMode, p
                                 {group.metrics.length} Attributes Evaluated
                             </p>
                             <div className="w-1 h-1 rounded-full bg-slate-500 opacity-20" />
-                            <p className="text-[10px] text-brand-blue font-bold uppercase tracking-widest opacity-80">
+                            <p className="text-[10px] text-primary-soft font-bold uppercase tracking-widest opacity-80">
                                 1.0 - 5.0 Rating Scale
                             </p>
                         </div>

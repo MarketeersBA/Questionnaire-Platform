@@ -441,16 +441,16 @@ export function ParametersStep({
         };
 
         return (
-        <section className="space-y-6 border-t border-slate-100 dark:border-slate-800 pt-10" id="ai-moderator-section">
+        <section className="space-y-6 border-t border-line/80 dark:border-line/10 pt-10" id="ai-moderator-section">
             <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                    <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-slate-100 ml-1">
-                        <Sparkles className="w-3.5 h-3.5 text-brand-blue" /> Smart Follow-up Engine (AI / MI)
+                    <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-ink ml-1">
+                        <Sparkles className="w-3.5 h-3.5 text-primary-soft" /> Smart Follow-up Engine (AI / MI)
                     </label>
                     <p className="text-[10px] text-slate-800 dark:text-slate-300 font-black ml-1 uppercase tracking-tighter">
                         AI-driven qualitative probing for deeper open-ended insights.
                     </p>
-                    <p className="text-[9px] text-brand-blue font-bold ml-1 leading-relaxed max-w-xl">
+                    <p className="text-[9px] text-primary-soft font-bold ml-1 leading-relaxed max-w-xl">
                         Runs on open-ended like / dislike / recommend questions only.
                     </p>
                 </div>
@@ -462,7 +462,7 @@ export function ParametersStep({
                             is_enabled: !(prev.ai_followup?.is_enabled),
                         }),
                     }))}
-                    className={`w-12 h-6 rounded-full relative cursor-pointer transition-all ${formData.ai_followup?.is_enabled ? 'bg-brand-blue' : 'bg-slate-200 dark:bg-slate-800'}`}
+                    className={`w-12 h-6 rounded-full relative cursor-pointer transition-all ${formData.ai_followup?.is_enabled ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-800'}`}
                 >
                     <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${formData.ai_followup?.is_enabled ? 'right-1' : 'left-1'}`} />
                 </div>
@@ -472,7 +472,7 @@ export function ParametersStep({
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="grid grid-cols-1 md:grid-cols-3 gap-6 p-8 bg-brand-blue/5 dark:bg-brand-blue/10 border-2 border-brand-blue/20 rounded-[2.5rem]"
+                    className="grid grid-cols-1 md:grid-cols-3 gap-6 p-8 bg-primary/5 dark:bg-primary/10 border-2 border-primary/20 rounded-[2.5rem]"
                 >
                     <div className="space-y-3">
                         <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Moderation Depth</label>
@@ -482,7 +482,7 @@ export function ParametersStep({
                                 ...prev,
                                 ai_followup: { ...prev.ai_followup!, max_rounds: parseInt(e.target.value) }
                             }))}
-                            className="w-full bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-xs font-bold outline-none focus:border-brand-blue transition-all"
+                            className="w-full bg-surface border-2 border-line/80 dark:border-line/10 rounded-xl px-4 py-3 text-xs font-bold outline-none focus:border-primary transition-all"
                         >
                             <option value={1}>1 Round (Standard Probing)</option>
                             <option value={2}>2 Rounds (Deep Diagnostic)</option>
@@ -499,7 +499,7 @@ export function ParametersStep({
                                     ...prev,
                                     ai_followup: { ...prev.ai_followup!, apply_to_voice: !prev.ai_followup?.apply_to_voice }
                                 }))}
-                                className={`flex-1 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest border-2 transition-all ${formData.ai_followup?.apply_to_voice ? 'bg-brand-blue text-white border-brand-blue' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-400'}`}
+                                className={`flex-1 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest border-2 transition-all ${formData.ai_followup?.apply_to_voice ? 'bg-primary text-white border-primary' : 'bg-surface border-line/80 dark:border-line/10 text-slate-400'}`}
                             >
                                 Voice
                             </button>
@@ -509,12 +509,12 @@ export function ParametersStep({
                                     ...prev,
                                     ai_followup: { ...prev.ai_followup!, apply_to_text: !prev.ai_followup?.apply_to_text }
                                 }))}
-                                className={`flex-1 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest border-2 transition-all ${formData.ai_followup?.apply_to_text ? 'bg-brand-blue text-white border-brand-blue' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-400'}`}
+                                className={`flex-1 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest border-2 transition-all ${formData.ai_followup?.apply_to_text ? 'bg-primary text-white border-primary' : 'bg-surface border-line/80 dark:border-line/10 text-slate-400'}`}
                             >
                                 Text
                             </button>
                         </div>
-                        <p className="text-[9px] text-slate-500 dark:text-slate-400 font-bold leading-relaxed ml-1">
+                        <p className="text-[9px] text-ink-muted font-bold leading-relaxed ml-1">
                             Enable each channel that should trigger live AI moderation after the respondent answers.
                         </p>
                     </div>
@@ -537,7 +537,7 @@ export function ParametersStep({
                                 }));
                             }}
                             placeholder="e.g., Focus on pricing sensitivity, probe deeper on taste comparisons, ask about purchase occasions..."
-                            className="w-full bg-white dark:bg-slate-900 border-2 border-brand-blue/20 focus:border-brand-blue/50 rounded-2xl px-4 py-3 text-xs font-bold outline-none transition-all resize-none text-slate-800 dark:text-slate-200"
+                            className="w-full bg-surface border-2 border-primary/20 focus:border-primary/50 rounded-2xl px-4 py-3 text-xs font-bold outline-none transition-all resize-none text-slate-800 dark:text-slate-200"
                             rows={2}
                         />
                     </div>
@@ -553,16 +553,16 @@ export function ParametersStep({
                     </div>
 
                     {/* Advanced AI/MI Controls */}
-                    <div className="md:col-span-3 space-y-4 pt-4 border-t border-brand-blue/20">
+                    <div className="md:col-span-3 space-y-4 pt-4 border-t border-primary/20">
                         <div
                             className="flex items-center justify-between cursor-pointer group"
                             onClick={() => setShowAdvancedAiMiControls(!showAdvancedAiMiControls)}
                         >
-                            <label className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-slate-900 dark:text-slate-100 ml-1 cursor-pointer">
-                                <Settings2 className="w-3.5 h-3.5 text-brand-blue" />
+                            <label className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-ink ml-1 cursor-pointer">
+                                <Settings2 className="w-3.5 h-3.5 text-primary-soft" />
                                 Advanced AI/MI Controls
                             </label>
-                            <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 group-hover:text-brand-blue transition-colors">
+                            <div className="p-1.5 rounded-lg bg-surface-sunken text-slate-500 group-hover:text-primary-soft transition-colors">
                                 {showAdvancedAiMiControls ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                             </div>
                         </div>
@@ -579,7 +579,7 @@ export function ParametersStep({
                                         <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">
                                             Eligible Respondent Surfaces
                                         </label>
-                                        <p className="text-[9px] text-slate-500 dark:text-slate-400 font-bold ml-1 leading-relaxed">
+                                        <p className="text-[9px] text-ink-muted font-bold ml-1 leading-relaxed">
                                             Default: taste-test and product-test open ends. Add heatmap surfaces only when needed.
                                         </p>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -591,8 +591,8 @@ export function ParametersStep({
                                                         type="button"
                                                         onClick={() => toggleEligibleSurface(surface.id)}
                                                         className={`text-left p-4 rounded-2xl border-2 transition-all ${checked
-                                                            ? 'bg-brand-blue/10 border-brand-blue text-slate-900 dark:text-white'
-                                                            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-400'
+                                                            ? 'bg-primary/10 border-primary text-ink'
+                                                            : 'bg-surface border-line/80 dark:border-line/10 text-slate-400'
                                                         }`}
                                                     >
                                                         <span className="text-[9px] font-black uppercase tracking-widest block">{surface.label}</span>
@@ -620,7 +620,7 @@ export function ParametersStep({
                                                         min_answer_length: Math.min(100, Math.max(1, parseInt(e.target.value, 10) || DEFAULT_AI_FOLLOWUP_MIN_ANSWER_LENGTH)),
                                                     },
                                                 }))}
-                                                className="w-full bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-xs font-bold outline-none focus:border-brand-blue transition-all"
+                                                className="w-full bg-surface border-2 border-line/80 dark:border-line/10 rounded-xl px-4 py-3 text-xs font-bold outline-none focus:border-primary transition-all"
                                             />
                                         </div>
                                         <div className="space-y-2">
@@ -640,7 +640,7 @@ export function ParametersStep({
                                                         dedupe_window_ms: Math.min(5000, Math.max(200, parseInt(e.target.value, 10) || DEFAULT_AI_FOLLOWUP_DEDUPE_WINDOW_MS)),
                                                     },
                                                 }))}
-                                                className="w-full bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-xs font-bold outline-none focus:border-brand-blue transition-all"
+                                                className="w-full bg-surface border-2 border-line/80 dark:border-line/10 rounded-xl px-4 py-3 text-xs font-bold outline-none focus:border-primary transition-all"
                                             />
                                             <p className="text-[8px] text-slate-500 font-bold ml-1">Suppresses duplicate blur triggers per question.</p>
                                         </div>
@@ -652,11 +652,11 @@ export function ParametersStep({
                                             className="flex items-center justify-between cursor-pointer group"
                                             onClick={() => setShowCategoryConfig(!showCategoryConfig)}
                                         >
-                                            <label className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-slate-700 dark:text-slate-300 ml-1 cursor-pointer">
-                                                <Sparkles className="w-3.5 h-3.5 text-brand-blue" />
+                                            <label className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-ink-muted ml-1 cursor-pointer">
+                                                <Sparkles className="w-3.5 h-3.5 text-primary-soft" />
                                                 Per-Category Probing Overrides
                                             </label>
-                                            <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 group-hover:text-brand-blue transition-colors">
+                                            <div className="p-1.5 rounded-lg bg-surface-sunken text-slate-500 group-hover:text-primary-soft transition-colors">
                                                 {showCategoryConfig ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                                             </div>
                                         </div>
@@ -678,9 +678,9 @@ export function ParametersStep({
                                                             const isCatEnabled = catConfig.enabled !== false;
 
                                                             return (
-                                                                <div key={category} className="p-4 bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl space-y-3 shadow-sm hover:border-brand-blue/30 transition-all">
+                                                                <div key={category} className="p-4 bg-surface border-2 border-line/80 dark:border-line/10 rounded-2xl space-y-3 shadow-sm hover:border-primary/30 transition-all">
                                                                     <div className="flex items-center justify-between">
-                                                                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-700 dark:text-slate-300">
+                                                                        <span className="text-[9px] font-black uppercase tracking-widest text-ink-muted">
                                                                             {category}
                                                                         </span>
                                                                         <div
@@ -694,7 +694,7 @@ export function ParametersStep({
                                                                                     }
                                                                                 }
                                                                             }))}
-                                                                            className={`w-8 h-4 rounded-full relative cursor-pointer transition-all ${isCatEnabled ? 'bg-brand-blue' : 'bg-slate-200 dark:bg-slate-800'}`}
+                                                                            className={`w-8 h-4 rounded-full relative cursor-pointer transition-all ${isCatEnabled ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-800'}`}
                                                                         >
                                                                             <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${isCatEnabled ? 'right-0.5' : 'left-0.5'}`} />
                                                                         </div>
@@ -714,7 +714,7 @@ export function ParametersStep({
                                                                                     }
                                                                                 }
                                                                             }))}
-                                                                            className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 text-xs font-bold outline-none focus:border-brand-blue transition-all"
+                                                                            className="w-full bg-surface-raised/50 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 text-xs font-bold outline-none focus:border-primary transition-all"
                                                                         >
                                                                             <option value={1}>1 Round</option>
                                                                             <option value={2}>2 Rounds</option>
@@ -742,11 +742,11 @@ export function ParametersStep({
     const renderSharedProtocolsAndBrands = () => (
         <>
             {/* ═══ Testing Protocol ═══ */}
-            <section className="space-y-6 border-t border-slate-100 dark:border-slate-800 pt-10" id="testing-protocol-section">
+            <section className="space-y-6 border-t border-line/80 dark:border-line/10 pt-10" id="testing-protocol-section">
                 <div className="flex items-center justify-between">
                     <div className="space-y-1">
-                        <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-slate-100 ml-1">
-                            <ShieldCheck className="w-3.5 h-3.5 text-brand-blue" /> Testing Protocol / بروتوكول الاختبار
+                        <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-ink ml-1">
+                            <ShieldCheck className="w-3.5 h-3.5 text-primary-soft" /> Testing Protocol / بروتوكول الاختبار
                         </label>
                         <p className="text-[10px] text-slate-800 dark:text-slate-300 font-black ml-1 uppercase tracking-tighter">Choose between branded evaluation or blind testing with product codes.</p>
                     </div>
@@ -765,11 +765,11 @@ export function ParametersStep({
                                 config: { ...(prev.config || DEFAULT_TASTE_CONFIG), testing_protocol: p.id as any }
                             }))}
                             className={`flex-1 p-6 rounded-[2rem] border-2 transition-all flex flex-col items-center text-center gap-3 relative group ${(formData.config?.testing_protocol || 'branded') === p.id
-                                ? 'bg-brand-blue border-brand-blue text-white shadow-xl shadow-brand-blue/20'
-                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-400 hover:border-brand-blue/50'
+                                ? 'bg-primary border-primary text-white shadow-xl shadow-primary/20'
+                                : 'bg-surface border-line/80 dark:border-line/10 text-slate-400 hover:border-primary/50'
                                 }`}
                         >
-                            <div className={`p-3 rounded-2xl ${(formData.config?.testing_protocol || 'branded') === p.id ? 'bg-white/20' : 'bg-slate-50 dark:bg-slate-800 text-slate-400 group-hover:text-brand-blue'}`}>
+                            <div className={`p-3 rounded-2xl ${(formData.config?.testing_protocol || 'branded') === p.id ? 'bg-white/20' : 'bg-surface-raised text-slate-400 group-hover:text-primary-soft'}`}>
                                 <p.icon size={20} />
                             </div>
                             <div>
@@ -779,7 +779,7 @@ export function ParametersStep({
                             {(formData.config?.testing_protocol || 'branded') === p.id && (
                                 <div className="absolute top-4 right-4">
                                     <div className="w-3 h-3 bg-white rounded-full flex items-center justify-center p-0.5">
-                                        <div className="w-full h-full bg-brand-blue rounded-full" />
+                                        <div className="w-full h-full bg-primary rounded-full" />
                                     </div>
                                 </div>
                             )}
@@ -789,11 +789,11 @@ export function ParametersStep({
             </section>
 
             {/* Brands Section */}
-            <section className="space-y-10 border-t border-slate-100 dark:border-slate-800 pt-10">
+            <section className="space-y-10 border-t border-line/80 dark:border-line/10 pt-10">
                 <div className="flex items-center justify-between" id="brand-architecture-section">
                     <div className="space-y-1">
-                        <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-slate-100 ml-1">
-                            <Palette className="w-3 h-3 text-brand-blue" /> Brand Architecture
+                        <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-ink ml-1">
+                            <Palette className="w-3 h-3 text-primary-soft" /> Brand Architecture
                         </label>
                         <p className="text-[10px] text-slate-800 dark:text-slate-400 font-black ml-1 uppercase tracking-tighter">Define the study subjects for comparison.</p>
                     </div>
@@ -834,15 +834,15 @@ export function ParametersStep({
                                         }
                                     }}
                                     placeholder="Add brand name..."
-                                    className="w-full bg-white dark:bg-slate-950 border-2 border-slate-400 dark:border-slate-600 focus:border-brand-blue rounded-2xl px-6 py-4 text-sm font-bold outline-none transition-all dark:text-white shadow-sm"
+                                    className="w-full bg-surface border-2 border-slate-400 dark:border-slate-600 focus:border-primary rounded-2xl px-6 py-4 text-sm font-bold outline-none transition-all dark:text-white shadow-sm"
                                 />
                                 <div className="flex items-center gap-6 px-2">
                                     <button
                                         onClick={() => setBrandRole(brandRole === 'internal' ? 'competitor' : 'internal')}
-                                        className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all ${brandRole === 'internal' ? 'text-brand-blue' : 'text-slate-900 dark:text-slate-100'}`}
+                                        className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all ${brandRole === 'internal' ? 'text-primary-soft' : 'text-ink'}`}
                                     >
-                                        <div className={`w-10 h-5 rounded-full relative transition-all ${brandRole === 'internal' ? 'bg-brand-blue/20' : 'bg-slate-300 dark:bg-slate-700'}`}>
-                                            <div className={`absolute top-1 w-3 h-3 rounded-full transition-all ${brandRole === 'internal' ? 'right-1 bg-brand-blue' : 'left-1 bg-slate-900 dark:bg-slate-100'}`} />
+                                        <div className={`w-10 h-5 rounded-full relative transition-all ${brandRole === 'internal' ? 'bg-primary/20' : 'bg-slate-300 dark:bg-slate-700'}`}>
+                                            <div className={`absolute top-1 w-3 h-3 rounded-full transition-all ${brandRole === 'internal' ? 'right-1 bg-primary' : 'left-1 bg-slate-900 dark:bg-slate-100'}`} />
                                         </div>
                                         Internal
                                     </button>
@@ -870,7 +870,7 @@ export function ParametersStep({
                                     setBrandInput('');
                                     toast.success('Brand added');
                                 }}
-                                className="bg-brand-blue text-white px-10 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-brand-blue/30 hover:scale-[1.02] active:scale-95 transition-all"
+                                className="bg-primary text-white px-10 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all"
                             >
                                 Add Brand
                             </button>
@@ -894,8 +894,8 @@ export function ParametersStep({
                                     className={`flex items-center gap-3 px-6 py-4 rounded-[1.5rem] border-2 shadow-sm group transition-all relative ${isTarget
                                         ? 'bg-amber-50 dark:bg-amber-950/20 border-amber-400 dark:border-amber-500 shadow-amber-200/50'
                                         : brand.role === 'internal'
-                                            ? 'bg-brand-blue/10 border-brand-blue/20 text-brand-blue'
-                                            : 'bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800'}`}
+                                            ? 'bg-primary/10 border-primary/20 text-primary-soft'
+                                            : 'bg-surface border-line/80 dark:border-line/10'}`}
                                 >
                                     {isTarget && (
                                         <div className="absolute -top-2 -right-1 bg-amber-500 text-white text-[7px] font-black px-1.5 py-0.5 rounded-full shadow-sm animate-in zoom-in-50">
@@ -927,7 +927,7 @@ export function ParametersStep({
                                         {/* Blind Code Input */}
                                         {formData.config?.testing_protocol === 'blind' && (
                                             <div className="mt-1.5 flex flex-col gap-1">
-                                                <span className="text-[6px] font-black uppercase tracking-[0.2em] text-brand-blue">Blind Code</span>
+                                                <span className="text-[6px] font-black uppercase tracking-[0.2em] text-primary-soft">Blind Code</span>
                                                 <input
                                                     type="text"
                                                     value={formData.config?.blind_codes?.[brand.name] || ''}
@@ -945,7 +945,7 @@ export function ParametersStep({
                                                         }));
                                                     }}
                                                     placeholder="e.g. SAMPLE-123"
-                                                    className="bg-white/50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-md px-2 py-1 text-[9px] font-black uppercase tracking-widest outline-none focus:border-brand-blue transition-all"
+                                                    className="bg-white/50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-md px-2 py-1 text-[9px] font-black uppercase tracking-widest outline-none focus:border-primary transition-all"
                                                 />
                                             </div>
                                         )}
@@ -983,12 +983,12 @@ export function ParametersStep({
     return (
         <div className="glass-card bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] p-12 shadow-premium text-left space-y-10 animate-slide-up border-2 border-slate-200 dark:border-slate-700 transition-colors">
             <div className="flex items-center gap-4 transition-colors">
-                <div className="p-3.5 rounded-2xl bg-brand-blue/5 dark:bg-brand-blue/10 text-brand-blue border border-brand-blue/10 dark:border-brand-blue/20">
+                <div className="p-3.5 rounded-2xl bg-primary/5 dark:bg-primary/10 text-primary-soft border border-primary/10 dark:border-primary/20">
                     <Settings2 className="w-6 h-6" />
                 </div>
                 <div>
-                    <h3 className="text-2xl font-display font-black text-slate-900 dark:text-white transition-colors">Research <span className="text-brand-blue">Parameters</span></h3>
-                    <p className="text-[10px] text-slate-900 dark:text-slate-100 font-black uppercase tracking-widest leading-relaxed mt-1">Define category scope, brands, and deep research attributes.</p>
+                    <h3 className="text-2xl font-display font-black text-ink transition-colors">Research <span className="text-primary-soft">Parameters</span></h3>
+                    <p className="text-[10px] text-ink font-black uppercase tracking-widest leading-relaxed mt-1">Define category scope, brands, and deep research attributes.</p>
                 </div>
             </div>
 
@@ -1017,10 +1017,10 @@ export function ParametersStep({
                     {/* Primary Parameters: Category, Protocol, Language */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         {/* Category */}
-                        <div className="space-y-6 bg-slate-50/50 dark:bg-slate-950/50 p-8 rounded-[2.5rem] border-2 border-slate-200 dark:border-slate-800 shadow-inner">
-                            <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-4 mb-2">
-                                <Tag className="w-4 h-4 text-brand-blue" />
-                                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-slate-100">Product Category</h4>
+                        <div className="space-y-6 bg-slate-50/50 dark:bg-slate-950/50 p-8 rounded-[2.5rem] border-2 border-line/80 dark:border-line/10 shadow-inner">
+                            <div className="flex items-center gap-3 border-b border-line/80 dark:border-line/10 pb-4 mb-2">
+                                <Tag className="w-4 h-4 text-primary-soft" />
+                                <h4 className="text-[10px] font-black uppercase tracking-widest text-ink">Product Category</h4>
                             </div>
                             <div className="space-y-4">
                                 <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 ml-1">Survey Category</label>
@@ -1040,14 +1040,14 @@ export function ParametersStep({
                                         });
                                     }}
                                     placeholder="e.g. Premium Chocolate"
-                                    className="w-full bg-white dark:bg-slate-950 border-2 border-slate-300 dark:border-slate-700 focus:border-brand-blue rounded-2xl px-6 py-4 text-sm font-bold outline-none dark:text-white transition-all shadow-sm"
+                                    className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 focus:border-primary rounded-2xl px-6 py-4 text-sm font-bold outline-none dark:text-white transition-all shadow-sm"
                                 />
                             </div>
                         </div>
 
                         {/* Language */}
-                        <div className="space-y-6 bg-slate-50/50 dark:bg-slate-950/50 p-8 rounded-[2.5rem] border-2 border-slate-200 dark:border-slate-800 shadow-inner">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-slate-100 ml-1">Survey Language</label>
+                        <div className="space-y-6 bg-slate-50/50 dark:bg-slate-950/50 p-8 rounded-[2.5rem] border-2 border-line/80 dark:border-line/10 shadow-inner">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-ink ml-1">Survey Language</label>
                             <div className="flex gap-2">
                                 {['en', 'ar'].map(lang => (
                                     <button
@@ -1057,8 +1057,8 @@ export function ParametersStep({
                                             config: { ...(prev.config || DEFAULT_TASTE_CONFIG), language: lang as any }
                                         }))}
                                         className={`flex-1 py-4 rounded-2xl text-sm font-black transition-all border-2 ${formData.config?.language === lang
-                                            ? 'bg-brand-blue border-brand-blue text-white shadow-lg'
-                                            : 'bg-white dark:bg-slate-900 border-slate-400 dark:border-slate-600 text-slate-800 dark:text-slate-300 hover:border-brand-blue'}`}
+                                            ? 'bg-primary border-primary text-white shadow-lg'
+                                            : 'bg-surface border-slate-400 dark:border-slate-600 text-slate-800 dark:text-slate-300 hover:border-primary'}`}
                                     >
                                         {lang.toUpperCase() === 'EN' ? 'English' : 'Arabic'}
                                     </button>
@@ -1070,19 +1070,19 @@ export function ParametersStep({
                     {renderSharedProtocolsAndBrands()}
 
                     {/* ═══ Unified Attribute Engine ═══ */}
-                    <section className="space-y-6 border-t border-slate-100 dark:border-slate-800 pt-10" id="attribute-engine-section">
+                    <section className="space-y-6 border-t border-line/80 dark:border-line/10 pt-10" id="attribute-engine-section">
                         <div className="space-y-1">
-                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-slate-100 ml-1">
-                                <Sparkles className="w-3.5 h-3.5 text-brand-blue" /> Attribute Engine
+                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-ink ml-1">
+                                <Sparkles className="w-3.5 h-3.5 text-primary-soft" /> Attribute Engine
                             </label>
                             <p className="text-[10px] text-slate-800 dark:text-slate-300 font-black ml-1 uppercase tracking-tighter">Define main attributes and their sub-dimensions for diagnostic evaluation.</p>
                         </div>
 
                         {/* ── Add New Attribute Box ── */}
-                        <div className="p-6 rounded-[2rem] bg-slate-50/70 dark:bg-slate-950/60 border-2 border-slate-200 dark:border-slate-800 shadow-inner space-y-4">
+                        <div className="p-6 rounded-[2rem] bg-slate-50/70 dark:bg-slate-950/60 border-2 border-line/80 dark:border-line/10 shadow-inner space-y-4">
                             <div className="flex items-center gap-2 mb-1">
-                                <div className="w-1.5 h-1.5 rounded-full bg-brand-blue" />
-                                <span className="text-[9px] font-black uppercase tracking-widest text-slate-900 dark:text-slate-100">Add New Attribute</span>
+                                <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                                <span className="text-[9px] font-black uppercase tracking-widest text-ink">Add New Attribute</span>
                             </div>
                             <div className="relative group">
                                 <input
@@ -1091,7 +1091,7 @@ export function ParametersStep({
                                     value={newMainAttrInput}
                                     onChange={e => setNewMainAttrInput(e.target.value)}
                                     placeholder="Type a custom main attribute name..."
-                                    className="w-full bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 focus:border-brand-blue rounded-2xl px-6 py-4 text-sm font-bold outline-none transition-all dark:text-white shadow-sm pr-16"
+                                    className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 focus:border-primary rounded-2xl px-6 py-4 text-sm font-bold outline-none transition-all dark:text-white shadow-sm pr-16"
                                     onKeyPress={(e) => {
                                         if (e.key === 'Enter' && newMainAttrInput.trim()) {
                                             const val = newMainAttrInput.trim();
@@ -1129,7 +1129,7 @@ export function ParametersStep({
                                         setExpandedAttr((formData.config?.custom_research_attributes?.length || 0));
                                         toast.success(`Main attribute "${val}" added`);
                                     }}
-                                    className="absolute right-2 top-2 p-2.5 bg-brand-blue text-white rounded-xl shadow-lg hover:scale-105 transition-all"
+                                    className="absolute right-2 top-2 p-2.5 bg-primary text-white rounded-xl shadow-lg hover:scale-105 transition-all"
                                 >
                                     <Plus className="w-5 h-5" />
                                 </button>
@@ -1139,8 +1139,8 @@ export function ParametersStep({
                             <button
                                 onClick={() => setShowLibrary(!showLibrary)}
                                 className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border-2 ${showLibrary
-                                    ? 'bg-brand-blue text-white border-brand-blue shadow-lg shadow-brand-blue/20'
-                                    : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-brand-blue hover:text-brand-blue'
+                                    ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20'
+                                    : 'bg-surface border-slate-300 dark:border-slate-700 text-ink-muted hover:border-primary hover:text-primary-soft'
                                     }`}
                             >
                                 <Search className="w-3.5 h-3.5" />
@@ -1154,21 +1154,21 @@ export function ParametersStep({
                                 initial={{ opacity: 0, height: 0 }}
                                 animate={{ opacity: 1, height: 'auto' }}
                                 exit={{ opacity: 0, height: 0 }}
-                                className="rounded-[2rem] bg-white dark:bg-slate-900 border-2 border-brand-blue/20 shadow-lg overflow-hidden"
+                                className="rounded-[2rem] bg-surface border-2 border-primary/20 shadow-lg overflow-hidden"
                             >
-                                <div className="p-5 bg-brand-blue/5 dark:bg-brand-blue/10 border-b border-brand-blue/10 flex items-center justify-between">
+                                <div className="p-5 bg-primary/5 dark:bg-primary/10 border-b border-primary/10 flex items-center justify-between">
                                     <div className="flex items-center gap-2">
-                                        <Layers className="w-4 h-4 text-brand-blue" />
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white">Knowledge Graph Library</span>
+                                        <Layers className="w-4 h-4 text-primary-soft" />
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-ink">Knowledge Graph Library</span>
                                     </div>
-                                    {banksLoading && <Sparkles className="w-3 h-3 animate-spin text-brand-blue" />}
+                                    {banksLoading && <Sparkles className="w-3 h-3 animate-spin text-primary-soft" />}
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-12 gap-0 max-h-[420px]">
                                     {/* Domain Sidebar */}
-                                    <div className="col-span-1 md:col-span-3 flex flex-col gap-1 p-3 bg-slate-50/80 dark:bg-slate-950/80 border-r border-slate-100 dark:border-slate-800 overflow-y-auto max-h-[420px]">
+                                    <div className="col-span-1 md:col-span-3 flex flex-col gap-1 p-3 bg-slate-50/80 dark:bg-slate-950/80 border-r border-line/80 dark:border-line/10 overflow-y-auto max-h-[420px]">
                                         {banksLoading ? (
                                             <div className="py-8 flex flex-col items-center justify-center gap-2 opacity-50">
-                                                <Search className="w-5 h-5 text-brand-blue animate-pulse" />
+                                                <Search className="w-5 h-5 text-primary-soft animate-pulse" />
                                                 <span className="text-[9px] font-bold uppercase tracking-widest">Loading...</span>
                                             </div>
                                         ) : attributeBanksData.length === 0 ? (
@@ -1182,7 +1182,7 @@ export function ParametersStep({
                                                     key={bank.category}
                                                     onClick={() => setSelectedBank(selectedBank === bank.category ? null : bank.category)}
                                                     className={`flex items-center justify-between p-3 rounded-xl text-[11px] font-black transition-all ${selectedBank === bank.category
-                                                        ? 'bg-brand-blue text-white shadow-md'
+                                                        ? 'bg-primary text-white shadow-md'
                                                         : 'text-slate-700 dark:text-white hover:bg-white dark:hover:bg-slate-800'
                                                         }`}
                                                 >
@@ -1197,8 +1197,8 @@ export function ParametersStep({
                                     <div className="col-span-1 md:col-span-9 p-5 overflow-y-auto max-h-[420px]">
                                         {selectedBank ? (
                                             <div className="space-y-4">
-                                                <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-                                                    <h4 className="text-sm font-black text-slate-900 dark:text-white uppercase">{bankDetails?.display_name || selectedBank}</h4>
+                                                <div className="flex items-center justify-between pb-3 border-b border-line/80 dark:border-line/10">
+                                                    <h4 className="text-sm font-black text-ink uppercase">{bankDetails?.display_name || selectedBank}</h4>
                                                     <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Click to toggle</span>
                                                 </div>
                                                 <div className="flex flex-wrap gap-2">
@@ -1220,7 +1220,7 @@ export function ParametersStep({
                                                                     });
                                                                     if (!isSelected) toast.success(`Added ${attr.label}`);
                                                                 }}
-                                                                className={`px-3 py-1.5 rounded-lg text-[11px] font-black transition-all border ${isSelected ? 'bg-brand-blue text-white border-brand-blue shadow-sm' : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-white hover:border-brand-blue'}`}
+                                                                className={`px-3 py-1.5 rounded-lg text-[11px] font-black transition-all border ${isSelected ? 'bg-primary text-white border-primary shadow-sm' : 'bg-surface border-slate-300 dark:border-slate-600 text-slate-700 dark:text-white hover:border-primary'}`}
                                                             >
                                                                 {attr.label}
                                                             </button>
@@ -1229,10 +1229,10 @@ export function ParametersStep({
                                                 </div>
 
                                                 {/* Inline Custom Sub-Attribute Form */}
-                                                <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 space-y-4">
+                                                <div className="mt-8 pt-6 border-t border-line/80 dark:border-line/10 space-y-4">
                                                     <div className="flex items-center gap-2">
-                                                        <PlusCircle className="w-3.5 h-3.5 text-brand-blue" />
-                                                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white">Add Custom Dimension to "{selectedBank}"</span>
+                                                        <PlusCircle className="w-3.5 h-3.5 text-primary-soft" />
+                                                        <span className="text-[10px] font-black uppercase tracking-widest text-ink">Add Custom Dimension to "{selectedBank}"</span>
                                                     </div>
                                                     <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                                                         <input
@@ -1240,21 +1240,21 @@ export function ParametersStep({
                                                             placeholder="Attribute Name"
                                                             value={libCustomInput.label}
                                                             onChange={e => setLibCustomInput(prev => ({ ...prev, label: e.target.value }))}
-                                                            className="md:col-span-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:border-brand-blue dark:text-white"
+                                                            className="md:col-span-1 bg-surface-raised border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:border-primary dark:text-white"
                                                         />
                                                         <input
                                                             type="text"
                                                             placeholder="Min (e.g. Weak)"
                                                             value={libCustomInput.min}
                                                             onChange={e => setLibCustomInput(prev => ({ ...prev, min: e.target.value }))}
-                                                            className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:border-brand-blue dark:text-white"
+                                                            className="bg-surface-raised border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:border-primary dark:text-white"
                                                         />
                                                         <input
                                                             type="text"
                                                             placeholder="Max (e.g. Strong)"
                                                             value={libCustomInput.max}
                                                             onChange={e => setLibCustomInput(prev => ({ ...prev, max: e.target.value }))}
-                                                            className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:border-brand-blue dark:text-white"
+                                                            className="bg-surface-raised border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:border-primary dark:text-white"
                                                         />
                                                         <button
                                                             onClick={() => {
@@ -1299,7 +1299,7 @@ export function ParametersStep({
                                                                 toast.success(`Custom dimenson "${libCustomInput.label}" added`);
                                                                 setLibCustomInput({ label: '', min: '', max: '' });
                                                             }}
-                                                            className="bg-brand-blue text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md hover:scale-[1.02] active:scale-95 transition-all py-2.5"
+                                                            className="bg-primary text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md hover:scale-[1.02] active:scale-95 transition-all py-2.5"
                                                         >
                                                             Add Inline
                                                         </button>
@@ -1323,7 +1323,7 @@ export function ParametersStep({
                             const customEntries = formData.config?.custom_research_attributes || [];
                             const hasAny = libraryEntries.length > 0 || customEntries.length > 0;
                             if (!hasAny) return (
-                                <div className="py-8 flex flex-col items-center justify-center opacity-40 bg-slate-50/50 dark:bg-slate-950/30 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[2rem]">
+                                <div className="py-8 flex flex-col items-center justify-center opacity-40 bg-slate-50/50 dark:bg-slate-950/30 border-2 border-dashed border-line/80 dark:border-line/10 rounded-[2rem]">
                                     <Layers className="w-8 h-8 text-slate-300 mb-3" />
                                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">No attributes added yet</p>
                                     <p className="text-[9px] text-slate-400 mt-1">Add custom or use the library above</p>
@@ -1333,18 +1333,18 @@ export function ParametersStep({
                                 <div className="space-y-3">
                                     <div className="flex items-center gap-2 px-1">
                                         <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white">Active Attributes ({libraryEntries.length + customEntries.length})</span>
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-ink">Active Attributes ({libraryEntries.length + customEntries.length})</span>
                                     </div>
 
                                     {/* Library-sourced main attrs */}
                                     {libraryEntries.map(([bankName, attrs]: [string, any]) => (
-                                        <motion.div key={`lib-${bankName}`} layout className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-200 dark:border-slate-800 overflow-hidden group transition-all hover:border-slate-300 dark:hover:border-slate-700">
+                                        <motion.div key={`lib-${bankName}`} layout className="bg-surface rounded-2xl border-2 border-line/80 dark:border-line/10 overflow-hidden group transition-all hover:border-slate-300 dark:hover:border-slate-700">
                                             <div className="px-5 py-3.5 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="p-2 rounded-xl bg-brand-blue/10 text-brand-blue"><Tag className="w-3.5 h-3.5" /></div>
+                                                    <div className="p-2 rounded-xl bg-primary/10 text-primary-soft"><Tag className="w-3.5 h-3.5" /></div>
                                                     <div>
-                                                        <h5 className="font-black text-sm text-slate-900 dark:text-white uppercase tracking-tight leading-none">{bankName}</h5>
-                                                        <span className="text-[8px] font-black uppercase tracking-widest text-brand-blue/70 mt-0.5 block">Library · {attrs.length} sub-attributes</span>
+                                                        <h5 className="font-black text-sm text-ink uppercase tracking-tight leading-none">{bankName}</h5>
+                                                        <span className="text-[8px] font-black uppercase tracking-widest text-primary-soft/70 mt-0.5 block">Library · {attrs.length} sub-attributes</span>
                                                     </div>
                                                 </div>
                                                 <button
@@ -1367,7 +1367,7 @@ export function ParametersStep({
                                                     const customMeta = libraryCustoms.find(c => c.label === attr);
 
                                                     return (
-                                                        <div key={attr} className={`px-3 py-1 text-[10px] font-black rounded-lg flex items-center gap-1.5 border transition-all ${customMeta ? 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 text-amber-700 dark:text-amber-400' : 'bg-brand-blue/10 text-brand-blue border-brand-blue/20'}`}>
+                                                        <div key={attr} className={`px-3 py-1 text-[10px] font-black rounded-lg flex items-center gap-1.5 border transition-all ${customMeta ? 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 text-amber-700 dark:text-amber-400' : 'bg-primary/10 text-primary-soft border-primary/20'}`}>
                                                             {customMeta && <Sparkles className="w-2.5 h-2.5 fill-current" />}
                                                             <div className="flex flex-col">
                                                                 <span>{attr}</span>
@@ -1401,40 +1401,40 @@ export function ParametersStep({
 
                                     {/* Custom main attrs */}
                                     {customEntries.map((custom: any, cIdx: number) => (
-                                        <motion.div key={`cust-${cIdx}`} layout className={`bg-white dark:bg-slate-900 rounded-2xl border-2 overflow-hidden group transition-all duration-300 ${expandedAttr === cIdx ? 'border-brand-blue shadow-premium ring-4 ring-brand-blue/5' : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'}`}>
+                                        <motion.div key={`cust-${cIdx}`} layout className={`bg-surface rounded-2xl border-2 overflow-hidden group transition-all duration-300 ${expandedAttr === cIdx ? 'border-primary shadow-premium ring-4 ring-primary/5' : 'border-line/80 dark:border-line/10 hover:border-slate-300 dark:hover:border-slate-700'}`}>
                                             {/* Header */}
                                             <div
-                                                className={`px-5 py-3.5 flex items-center justify-between cursor-pointer transition-colors ${expandedAttr === cIdx ? 'bg-brand-blue/5' : 'bg-slate-50/50 dark:bg-slate-800/30'}`}
+                                                className={`px-5 py-3.5 flex items-center justify-between cursor-pointer transition-colors ${expandedAttr === cIdx ? 'bg-primary/5' : 'bg-slate-50/50 dark:bg-slate-800/30'}`}
                                                 onClick={() => setExpandedAttr(expandedAttr === cIdx ? null : cIdx)}
                                             >
                                                 <div className="flex items-center gap-3">
-                                                    <div className={`p-2 rounded-xl transition-all ${expandedAttr === cIdx ? 'bg-brand-blue text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}>
+                                                    <div className={`p-2 rounded-xl transition-all ${expandedAttr === cIdx ? 'bg-primary text-white' : 'bg-surface-sunken text-slate-500'}`}>
                                                         <Sparkles className="w-3.5 h-3.5" />
                                                     </div>
                                                     <div>
-                                                        <h5 className="font-black text-sm text-slate-900 dark:text-white uppercase tracking-tight leading-none">{custom.main_attribute}</h5>
+                                                        <h5 className="font-black text-sm text-ink uppercase tracking-tight leading-none">{custom.main_attribute}</h5>
                                                         <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 mt-0.5 block">Custom · {custom.sub_attributes.length} sub-attributes</span>
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-1">
                                                     <button onClick={(e) => { e.stopPropagation(); setFormData(prev => { const customs = [...(prev.config?.custom_research_attributes || [])]; customs.splice(cIdx, 1); return { ...prev, config: { ...prev.config!, custom_research_attributes: customs } }; }); setExpandedAttr(null); }} className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-all opacity-0 group-hover:opacity-100"><Trash2 className="w-3.5 h-3.5" /></button>
-                                                    <div className={`p-1.5 rounded-lg transition-transform duration-300 ${expandedAttr === cIdx ? 'rotate-180 text-brand-blue' : 'text-slate-400'}`}><ChevronDown className="w-4 h-4" /></div>
+                                                    <div className={`p-1.5 rounded-lg transition-transform duration-300 ${expandedAttr === cIdx ? 'rotate-180 text-primary-soft' : 'text-slate-400'}`}><ChevronDown className="w-4 h-4" /></div>
                                                 </div>
                                             </div>
 
                                             {/* Expanded body */}
                                             {expandedAttr === cIdx && (
-                                                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="px-5 pb-5 pt-2 space-y-4 border-t border-slate-100 dark:border-slate-800">
+                                                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="px-5 pb-5 pt-2 space-y-4 border-t border-line/80 dark:border-line/10">
                                                     {/* Add custom sub-attribute */}
-                                                    <div className="p-4 bg-slate-50 dark:bg-slate-950/50 rounded-xl space-y-3 border border-slate-200 dark:border-slate-800">
+                                                    <div className="p-4 bg-surface-raised/50 rounded-xl space-y-3 border border-line/80 dark:border-line/10">
                                                         <div className="flex items-center gap-2">
-                                                            <PlusCircle className="w-3 h-3 text-brand-blue" />
-                                                            <span className="text-[9px] font-black uppercase tracking-widest text-slate-900 dark:text-slate-100">Add Custom Sub-Attribute</span>
+                                                            <PlusCircle className="w-3 h-3 text-primary-soft" />
+                                                            <span className="text-[9px] font-black uppercase tracking-widest text-ink">Add Custom Sub-Attribute</span>
                                                         </div>
                                                         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                                                            <input type="text" placeholder="Name (e.g. Crispness)" id={`sub-name-${cIdx}`} className="md:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs font-bold outline-none focus:border-brand-blue dark:text-white" />
-                                                            <input type="text" placeholder="Min (Weak)" id={`sub-min-${cIdx}`} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs font-bold outline-none focus:border-brand-blue dark:text-white" />
-                                                            <input type="text" placeholder="Max (Strong)" id={`sub-max-${cIdx}`} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs font-bold outline-none focus:border-brand-blue dark:text-white" />
+                                                            <input type="text" placeholder="Name (e.g. Crispness)" id={`sub-name-${cIdx}`} className="md:col-span-2 bg-surface border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs font-bold outline-none focus:border-primary dark:text-white" />
+                                                            <input type="text" placeholder="Min (Weak)" id={`sub-min-${cIdx}`} className="bg-surface border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs font-bold outline-none focus:border-primary dark:text-white" />
+                                                            <input type="text" placeholder="Max (Strong)" id={`sub-max-${cIdx}`} className="bg-surface border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs font-bold outline-none focus:border-primary dark:text-white" />
                                                         </div>
                                                         <button
                                                             type="button"
@@ -1454,7 +1454,7 @@ export function ParametersStep({
                                                                     toast.success("Sub-attribute added");
                                                                 } else { toast.error("Fill all fields"); }
                                                             }}
-                                                            className="w-full py-2.5 bg-brand-blue text-white rounded-lg text-[10px] font-black uppercase tracking-widest shadow-sm hover:scale-[1.01] active:scale-95 transition-all"
+                                                            className="w-full py-2.5 bg-primary text-white rounded-lg text-[10px] font-black uppercase tracking-widest shadow-sm hover:scale-[1.01] active:scale-95 transition-all"
                                                         >
                                                             Add Sub-Attribute
                                                         </button>
@@ -1466,7 +1466,7 @@ export function ParametersStep({
                                                             setSuggestSubFor(suggestSubFor === custom.main_attribute ? null : custom.main_attribute);
                                                             setSelectedBank(custom.main_attribute);
                                                         }}
-                                                        className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border ${suggestSubFor === custom.main_attribute ? 'bg-brand-blue/10 text-brand-blue border-brand-blue/30' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-500 hover:border-brand-blue hover:text-brand-blue'}`}
+                                                        className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border ${suggestSubFor === custom.main_attribute ? 'bg-primary/10 text-primary-soft border-primary/30' : 'bg-surface border-slate-200 dark:border-slate-700 text-slate-500 hover:border-primary hover:text-primary-soft'}`}
                                                     >
                                                         <Search className="w-3 h-3" />
                                                         Suggest Sub-Attributes
@@ -1474,8 +1474,8 @@ export function ParametersStep({
 
                                                     {/* Library sub-attributes suggestions */}
                                                     {suggestSubFor === custom.main_attribute && bankDetails?.core_attributes && (
-                                                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 bg-brand-blue/5 dark:bg-brand-blue/10 rounded-xl border border-brand-blue/20">
-                                                            <div className="text-[9px] font-black uppercase tracking-widest text-brand-blue mb-2">Library Suggestions</div>
+                                                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 bg-primary/5 dark:bg-primary/10 rounded-xl border border-primary/20">
+                                                            <div className="text-[9px] font-black uppercase tracking-widest text-primary-soft mb-2">Library Suggestions</div>
                                                             <div className="flex flex-wrap gap-2">
                                                                 {bankDetails.core_attributes.map((attr: any) => {
                                                                     const alreadyHas = custom.sub_attributes.some((s: any) => s.label === attr.label);
@@ -1493,7 +1493,7 @@ export function ParametersStep({
                                                                                 });
                                                                                 toast.success(`Added "${attr.label}"`);
                                                                             }}
-                                                                            className={`px-3 py-1 rounded-lg text-[10px] font-black transition-all border ${alreadyHas ? 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-300 cursor-not-allowed' : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-white hover:border-brand-blue hover:text-brand-blue'}`}
+                                                                            className={`px-3 py-1 rounded-lg text-[10px] font-black transition-all border ${alreadyHas ? 'bg-surface-sunken border-slate-200 dark:border-slate-700 text-slate-300 cursor-not-allowed' : 'bg-surface border-slate-300 dark:border-slate-600 text-slate-700 dark:text-white hover:border-primary hover:text-primary-soft'}`}
                                                                         >
                                                                             {alreadyHas ? '✓ ' : '+ '}{attr.label}
                                                                         </button>
@@ -1509,12 +1509,12 @@ export function ParametersStep({
                                                             <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 px-1">Sub-Attributes</span>
                                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                                                 {custom.sub_attributes.map((sub: any, sIdx: number) => (
-                                                                    <div key={sIdx} className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-between group/pill hover:border-brand-blue/30 transition-all">
+                                                                    <div key={sIdx} className="p-3 rounded-xl bg-surface-raised border border-line/80 dark:border-line/10 flex items-center justify-between group/pill hover:border-primary/30 transition-all">
                                                                         <div className="space-y-1">
-                                                                            <div className="text-[11px] font-black text-slate-800 dark:text-slate-100 uppercase tracking-tight">{sub.label}</div>
+                                                                            <div className="text-[11px] font-black text-ink uppercase tracking-tight">{sub.label}</div>
                                                                             <div className="flex items-center gap-2">
                                                                                 <span className="text-[8px] font-bold text-slate-400 uppercase">{sub.minLabel}</span>
-                                                                                <div className="w-10 h-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden"><div className="w-1/2 h-full bg-brand-blue/30" /></div>
+                                                                                <div className="w-10 h-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden"><div className="w-1/2 h-full bg-primary/30" /></div>
                                                                                 <span className="text-[8px] font-bold text-slate-400 uppercase">{sub.maxLabel}</span>
                                                                             </div>
                                                                         </div>
@@ -1539,11 +1539,11 @@ export function ParametersStep({
 
                     {/* ═══ Compact Evaluation Sequence Modeler ═══ */}
                     {(formData.config?.attribute_sequence && formData.config.attribute_sequence.length > 0) && (
-                        <section className="space-y-3 border-t border-slate-100 dark:border-slate-800 pt-8" id="sequence-modeler-section">
+                        <section className="space-y-3 border-t border-line/80 dark:border-line/10 pt-8" id="sequence-modeler-section">
                             <div className="flex items-center justify-between cursor-pointer" onClick={() => setSeqCollapsed(!seqCollapsed)}>
                                 <div className="flex items-center gap-2">
-                                    <MoveVertical className="w-3.5 h-3.5 text-brand-blue" />
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-slate-100">Evaluation Sequence</span>
+                                    <MoveVertical className="w-3.5 h-3.5 text-primary-soft" />
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-ink">Evaluation Sequence</span>
                                     <span className="text-[9px] font-bold text-slate-400 ml-1">({formData.config.attribute_sequence.length} items)</span>
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -1556,7 +1556,7 @@ export function ParametersStep({
                                                 toast.success("Sequence order reset");
                                             }
                                         }}
-                                        className="px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-800 text-[8px] font-black uppercase tracking-widest text-slate-400 hover:text-rose-500 hover:border-rose-300 transition-all"
+                                        className="px-3 py-1 rounded-lg border border-line/80 dark:border-line/10 text-[8px] font-black uppercase tracking-widest text-slate-400 hover:text-rose-500 hover:border-rose-300 transition-all"
                                     >
                                         Reset
                                     </button>
@@ -1567,32 +1567,32 @@ export function ParametersStep({
                             </div>
 
                             {!seqCollapsed && (
-                                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="p-4 bg-slate-50 dark:bg-slate-950/50 rounded-2xl border border-slate-200 dark:border-slate-800">
+                                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="p-4 bg-surface-raised/50 rounded-2xl border border-line/80 dark:border-line/10">
                                     <div className="flex flex-col gap-2">
                                         {formData.config!.attribute_sequence!.map((seq, idx) => (
-                                            <div key={`${seq.source}-${seq.main_attribute}`} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                                            <div key={`${seq.source}-${seq.main_attribute}`} className="bg-surface border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
                                                 <div className="flex items-center justify-between px-4 py-2">
                                                     <div className="flex items-center gap-3">
-                                                        <span className="w-6 h-6 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue font-black text-[10px]">{idx + 1}</span>
+                                                        <span className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary-soft font-black text-[10px]">{idx + 1}</span>
                                                         <div>
                                                             <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 block">{seq.source === 'library' ? 'Library' : 'Custom'}</span>
-                                                            <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">{seq.main_attribute}</span>
+                                                            <span className="text-xs font-black text-ink uppercase tracking-tight">{seq.main_attribute}</span>
                                                         </div>
                                                     </div>
-                                                    <div className="flex items-center gap-1 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 p-0.5">
-                                                        <button disabled={idx === 0} type="button" onClick={() => { setFormData(prev => { const s = [...prev.config!.attribute_sequence!]; const temp = s[idx - 1]; s[idx - 1] = s[idx]; s[idx] = temp; return { ...prev, config: { ...prev.config!, attribute_sequence: s } }; }); }} className={`p-1 rounded transition-colors ${idx === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-brand-blue/10 text-slate-500 hover:text-brand-blue'}`}><ArrowUp className="w-3 h-3" /></button>
-                                                        <button disabled={idx === formData.config!.attribute_sequence!.length - 1} type="button" onClick={() => { setFormData(prev => { const s = [...prev.config!.attribute_sequence!]; const temp = s[idx + 1]; s[idx + 1] = s[idx]; s[idx] = temp; return { ...prev, config: { ...prev.config!, attribute_sequence: s } }; }); }} className={`p-1 rounded transition-colors ${idx === formData.config!.attribute_sequence!.length - 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-brand-blue/10 text-slate-500 hover:text-brand-blue'}`}><ArrowDown className="w-3 h-3" /></button>
+                                                    <div className="flex items-center gap-1 border border-slate-200 dark:border-slate-700 rounded-lg bg-surface p-0.5">
+                                                        <button disabled={idx === 0} type="button" onClick={() => { setFormData(prev => { const s = [...prev.config!.attribute_sequence!]; const temp = s[idx - 1]; s[idx - 1] = s[idx]; s[idx] = temp; return { ...prev, config: { ...prev.config!, attribute_sequence: s } }; }); }} className={`p-1 rounded transition-colors ${idx === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-primary/10 text-slate-500 hover:text-primary-soft'}`}><ArrowUp className="w-3 h-3" /></button>
+                                                        <button disabled={idx === formData.config!.attribute_sequence!.length - 1} type="button" onClick={() => { setFormData(prev => { const s = [...prev.config!.attribute_sequence!]; const temp = s[idx + 1]; s[idx + 1] = s[idx]; s[idx] = temp; return { ...prev, config: { ...prev.config!, attribute_sequence: s } }; }); }} className={`p-1 rounded transition-colors ${idx === formData.config!.attribute_sequence!.length - 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-primary/10 text-slate-500 hover:text-primary-soft'}`}><ArrowDown className="w-3 h-3" /></button>
                                                     </div>
                                                 </div>
                                                 {seq.sub_attributes.length > 0 && (
                                                     <div className="px-4 pb-2 flex flex-wrap gap-1.5">
                                                         {seq.sub_attributes.map((subAttr, subIdx) => (
-                                                            <div key={`${seq.source}-${seq.main_attribute}-${subAttr}`} className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 text-[9px] font-bold text-slate-600 dark:text-slate-400">
+                                                            <div key={`${seq.source}-${seq.main_attribute}-${subAttr}`} className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-raised border border-line/80 dark:border-line/10 text-[9px] font-bold text-ink-muted">
                                                                 <Layers className="w-2.5 h-2.5 text-slate-300" />
                                                                 {subAttr}
                                                                 <div className="flex gap-0.5 ml-1">
-                                                                    <button disabled={subIdx === 0} type="button" onClick={() => { setFormData(prev => { const s = [...prev.config!.attribute_sequence!]; const targetSeq = { ...s[idx] }; const subs = [...targetSeq.sub_attributes]; const temp = subs[subIdx - 1]; subs[subIdx - 1] = subs[subIdx]; subs[subIdx] = temp; targetSeq.sub_attributes = subs; s[idx] = targetSeq; return { ...prev, config: { ...prev.config!, attribute_sequence: s } }; }); }} className={`p-0.5 rounded ${subIdx === 0 ? 'opacity-20' : 'hover:text-brand-blue'}`}><ArrowUp className="w-2.5 h-2.5" /></button>
-                                                                    <button disabled={subIdx === seq.sub_attributes.length - 1} type="button" onClick={() => { setFormData(prev => { const s = [...prev.config!.attribute_sequence!]; const targetSeq = { ...s[idx] }; const subs = [...targetSeq.sub_attributes]; const temp = subs[subIdx + 1]; subs[subIdx + 1] = subs[subIdx]; subs[subIdx] = temp; targetSeq.sub_attributes = subs; s[idx] = targetSeq; return { ...prev, config: { ...prev.config!, attribute_sequence: s } }; }); }} className={`p-0.5 rounded ${subIdx === seq.sub_attributes.length - 1 ? 'opacity-20' : 'hover:text-brand-blue'}`}><ArrowDown className="w-2.5 h-2.5" /></button>
+                                                                    <button disabled={subIdx === 0} type="button" onClick={() => { setFormData(prev => { const s = [...prev.config!.attribute_sequence!]; const targetSeq = { ...s[idx] }; const subs = [...targetSeq.sub_attributes]; const temp = subs[subIdx - 1]; subs[subIdx - 1] = subs[subIdx]; subs[subIdx] = temp; targetSeq.sub_attributes = subs; s[idx] = targetSeq; return { ...prev, config: { ...prev.config!, attribute_sequence: s } }; }); }} className={`p-0.5 rounded ${subIdx === 0 ? 'opacity-20' : 'hover:text-primary-soft'}`}><ArrowUp className="w-2.5 h-2.5" /></button>
+                                                                    <button disabled={subIdx === seq.sub_attributes.length - 1} type="button" onClick={() => { setFormData(prev => { const s = [...prev.config!.attribute_sequence!]; const targetSeq = { ...s[idx] }; const subs = [...targetSeq.sub_attributes]; const temp = subs[subIdx + 1]; subs[subIdx + 1] = subs[subIdx]; subs[subIdx] = temp; targetSeq.sub_attributes = subs; s[idx] = targetSeq; return { ...prev, config: { ...prev.config!, attribute_sequence: s } }; }); }} className={`p-0.5 rounded ${subIdx === seq.sub_attributes.length - 1 ? 'opacity-20' : 'hover:text-primary-soft'}`}><ArrowDown className="w-2.5 h-2.5" /></button>
                                                                 </div>
                                                             </div>
                                                         ))}
@@ -1608,29 +1608,29 @@ export function ParametersStep({
 
 
                     {/* ─── Purchase Funnel Module ─── */}
-                    <section className="border-t border-slate-100 dark:border-slate-800 pt-10" id="purchase-funnel-section">
+                    <section className="border-t border-line/80 dark:border-line/10 pt-10" id="purchase-funnel-section">
 
                         {/* Collapsed trigger */}
                         {!pfExpanded ? (
                             <button
                                 onClick={() => setPfExpanded(true)}
-                                className="w-full flex items-center justify-between px-10 py-7 rounded-[2.5rem] border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-900/40 hover:border-brand-blue/50 hover:bg-brand-blue/5 transition-all group"
+                                className="w-full flex items-center justify-between px-10 py-7 rounded-[2.5rem] border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-900/40 hover:border-primary/50 hover:bg-primary/5 transition-all group"
                             >
                                 <div className="flex items-center gap-5">
-                                    <div className="p-3.5 rounded-2xl bg-slate-200 dark:bg-slate-800 text-slate-500 group-hover:bg-brand-blue/10 group-hover:text-brand-blue transition-all">
+                                    <div className="p-3.5 rounded-2xl bg-slate-200 dark:bg-slate-800 text-slate-500 group-hover:bg-primary/10 group-hover:text-primary-soft transition-all">
                                         <ShieldCheck className="w-5 h-5" />
                                     </div>
                                     <div className="text-left">
-                                        <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-900 dark:text-white">+ Add Purchase Funnel Module</p>
+                                        <p className="text-xs font-black uppercase tracking-[0.2em] text-ink">+ Add Purchase Funnel Module</p>
                                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Optional · Brand awareness, consideration &amp; usage tracking</p>
                                     </div>
                                 </div>
-                                <Plus className="w-5 h-5 text-slate-400 group-hover:text-brand-blue transition-colors" />
+                                <Plus className="w-5 h-5 text-slate-400 group-hover:text-primary-soft transition-colors" />
                             </button>
                         ) : (
                             /* Expanded Panel */
                             <div className={`p-10 rounded-[2.5rem] border-2 transition-all duration-300 space-y-8 ${pfConfig.is_enabled
-                                ? 'bg-brand-blue/5 dark:bg-brand-blue/10 border-brand-blue/30'
+                                ? 'bg-primary/5 dark:bg-primary/10 border-primary/30'
                                 : 'bg-slate-50/50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-700'
                                 }`}>
 
@@ -1638,13 +1638,13 @@ export function ParametersStep({
                                 <div className="flex items-start justify-between gap-6">
                                     <div className="flex items-center gap-4">
                                         <div className={`p-4 rounded-2xl transition-all ${pfConfig.is_enabled
-                                            ? 'bg-brand-blue text-white shadow-xl shadow-brand-blue/20'
+                                            ? 'bg-primary text-white shadow-xl shadow-primary/20'
                                             : 'bg-slate-200 dark:bg-slate-800 text-slate-400'
                                             }`}>
                                             <ShieldCheck className="w-6 h-6" />
                                         </div>
                                         <div>
-                                            <h4 className={`text-lg font-black uppercase tracking-tight ${pfConfig.is_enabled ? 'text-brand-blue' : 'text-slate-900 dark:text-white'
+                                            <h4 className={`text-lg font-black uppercase tracking-tight ${pfConfig.is_enabled ? 'text-primary-soft' : 'text-ink'
                                                 }`}>Purchase Funnel Module</h4>
                                             <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Track awareness, consideration &amp; usage</p>
                                         </div>
@@ -1664,8 +1664,8 @@ export function ParametersStep({
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
-                                            <Tag className="w-3 h-3 text-brand-blue" />
-                                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-slate-100">
+                                            <Tag className="w-3 h-3 text-primary-soft" />
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-ink">
                                                 Funnel Brands
                                                 <span className="ml-2 text-[9px] text-slate-400 normal-case tracking-normal font-bold">— separate from your study brands above</span>
                                             </span>
@@ -1692,7 +1692,7 @@ export function ParametersStep({
                                                     toast.info("All architecture brands already in funnel");
                                                 }
                                             }}
-                                            className="px-3 py-1.5 rounded-xl bg-brand-blue/10 text-brand-blue text-[9px] font-black uppercase tracking-widest hover:bg-brand-blue hover:text-white transition-all flex items-center gap-2"
+                                            className="px-3 py-1.5 rounded-xl bg-primary/10 text-primary-soft text-[9px] font-black uppercase tracking-widest hover:bg-primary hover:text-white transition-all flex items-center gap-2"
                                         >
                                             <Sparkles className="w-3 h-3" />
                                             Sync from Architecture
@@ -1716,7 +1716,7 @@ export function ParametersStep({
                                                 }
                                             }}
                                             placeholder="Type brand name and press Enter..."
-                                            className="flex-1 bg-white dark:bg-slate-950 border-2 border-slate-300 dark:border-slate-700 focus:border-brand-blue rounded-2xl px-5 py-4 text-sm font-bold outline-none transition-all text-slate-900 dark:text-white placeholder:text-slate-400"
+                                            className="flex-1 bg-surface border-2 border-slate-300 dark:border-slate-700 focus:border-primary rounded-2xl px-5 py-4 text-sm font-bold outline-none transition-all text-ink placeholder:text-slate-400"
                                         />
                                         <button
                                             onClick={() => {
@@ -1729,7 +1729,7 @@ export function ParametersStep({
                                                 setPfBrandInput('');
                                                 toast.success(`Brand "${name}" added to funnel`);
                                             }}
-                                            className="px-6 py-4 bg-brand-blue text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-brand-blue/20 hover:scale-[1.02] active:scale-95 transition-all"
+                                            className="px-6 py-4 bg-primary text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all"
                                         >
                                             <Plus className="w-4 h-4" />
                                         </button>
@@ -1744,9 +1744,9 @@ export function ParametersStep({
                                                     layout
                                                     initial={{ scale: 0.9, opacity: 0 }}
                                                     animate={{ scale: 1, opacity: 1 }}
-                                                    className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 shadow-sm group"
+                                                    className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-surface border-2 border-slate-200 dark:border-slate-700 shadow-sm group"
                                                 >
-                                                    <span className="text-sm font-black text-slate-900 dark:text-white">{brand.name_en}</span>
+                                                    <span className="text-sm font-black text-ink">{brand.name_en}</span>
                                                     <button
                                                         onClick={() => {
                                                             const newList = (pfConfig.brand_list || []).filter((_: any, i: number) => i !== idx);
@@ -1774,13 +1774,13 @@ export function ParametersStep({
 
                                 {/* Category field */}
                                 <div className="space-y-2">
-                                    <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-700 dark:text-slate-300 block">Target Category</label>
+                                    <label className="text-[9px] font-black uppercase tracking-[0.2em] text-ink-muted block">Target Category</label>
                                     <input
                                         type="text"
                                         value={syncedCategory}
                                         onChange={e => updatePF({ category_name: e.target.value })}
                                         placeholder={formData.config?.category || 'e.g. Carbonated Beverages...'}
-                                        className="w-full bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 focus:border-brand-blue rounded-2xl px-6 py-4 text-sm font-black text-slate-900 dark:text-white outline-none transition-all placeholder:text-slate-400"
+                                        className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 focus:border-primary rounded-2xl px-6 py-4 text-sm font-black text-ink outline-none transition-all placeholder:text-slate-400"
                                     />
                                 </div>
 
@@ -1794,8 +1794,8 @@ export function ParametersStep({
                                         <button
                                             onClick={() => updatePF({ is_enabled: !pfConfig.is_enabled, category_name: syncedCategory })}
                                             className={`w-full py-5 rounded-2xl text-xs font-black uppercase tracking-[0.2em] transition-all shadow-xl hover:scale-[1.01] active:scale-95 ${pfConfig.is_enabled
-                                                ? 'bg-brand-blue text-white shadow-brand-blue/30'
-                                                : 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white border-2 border-slate-300 dark:border-slate-700'
+                                                ? 'bg-primary text-white shadow-primary/30'
+                                                : 'bg-surface text-ink border-2 border-slate-300 dark:border-slate-700'
                                                 }`}
                                         >
                                             {pfConfig.is_enabled ? '● Module Active — Click to Disable' : '○ Enable Purchase Funnel Module'}
@@ -1808,39 +1808,39 @@ export function ParametersStep({
                     </section>
 
                     {/* ─── Brand Usage Module ─── */}
-                    <section className="border-t border-slate-100 dark:border-slate-800 pt-10" id="brand-usage-section">
+                    <section className="border-t border-line/80 dark:border-line/10 pt-10" id="brand-usage-section">
                         {!usageExpanded ? (
                             <button
                                 onClick={() => setUsageExpanded(true)}
-                                className="w-full flex items-center justify-between px-10 py-7 rounded-[2.5rem] border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-900/40 hover:border-brand-blue/50 hover:bg-brand-blue/5 transition-all group"
+                                className="w-full flex items-center justify-between px-10 py-7 rounded-[2.5rem] border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-900/40 hover:border-primary/50 hover:bg-primary/5 transition-all group"
                             >
                                 <div className="flex items-center gap-5">
-                                    <div className="p-3.5 rounded-2xl bg-slate-200 dark:bg-slate-800 text-slate-500 group-hover:bg-brand-blue/10 group-hover:text-brand-blue transition-all">
+                                    <div className="p-3.5 rounded-2xl bg-slate-200 dark:bg-slate-800 text-slate-500 group-hover:bg-primary/10 group-hover:text-primary-soft transition-all">
                                         <BarChart3 className="w-5 h-5" />
                                     </div>
                                     <div className="text-left">
-                                        <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-900 dark:text-white">+ Add Brand Usage Module</p>
+                                        <p className="text-xs font-black uppercase tracking-[0.2em] text-ink">+ Add Brand Usage Module</p>
                                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Optional · Recency, frequency, timing &amp; occasion</p>
                                     </div>
                                 </div>
-                                <Plus className="w-5 h-5 text-slate-400 group-hover:text-brand-blue transition-colors" />
+                                <Plus className="w-5 h-5 text-slate-400 group-hover:text-primary-soft transition-colors" />
                             </button>
                         ) : (
                             <div className={`p-10 rounded-[2.5rem] border-2 transition-all duration-300 space-y-8 ${usageConfig.is_enabled
-                                ? 'bg-brand-blue/5 dark:bg-brand-blue/10 border-brand-blue/30'
+                                ? 'bg-primary/5 dark:bg-primary/10 border-primary/30'
                                 : 'bg-slate-50/50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-700'
                                 }`}>
                                 {/* Header */}
                                 <div className="flex items-start justify-between gap-6">
                                     <div className="flex items-center gap-4">
                                         <div className={`p-4 rounded-2xl transition-all ${usageConfig.is_enabled
-                                            ? 'bg-brand-blue text-white shadow-xl shadow-brand-blue/20'
+                                            ? 'bg-primary text-white shadow-xl shadow-primary/20'
                                             : 'bg-slate-200 dark:bg-slate-800 text-slate-400'
                                             }`}>
                                             <BarChart3 className="w-6 h-6" />
                                         </div>
                                         <div>
-                                            <h4 className={`text-lg font-black uppercase tracking-tight ${usageConfig.is_enabled ? 'text-brand-blue' : 'text-slate-900 dark:text-white'
+                                            <h4 className={`text-lg font-black uppercase tracking-tight ${usageConfig.is_enabled ? 'text-primary-soft' : 'text-ink'
                                                 }`}>Brand Usage Module</h4>
                                             <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Layer 5 · us_q1–us_q4 from question bank</p>
                                         </div>
@@ -1864,7 +1864,7 @@ export function ParametersStep({
                                         </p>
                                         <div className="flex items-center gap-2">
                                             <span className="text-[8px] font-black text-slate-400 uppercase">Selected:</span>
-                                            <span className="text-[8px] font-black text-brand-blue bg-brand-blue/10 px-2 py-0.5 rounded-full">
+                                            <span className="text-[8px] font-black text-primary-soft bg-primary/10 px-2 py-0.5 rounded-full">
                                                 {(usageConfig.selected_questions || ['us_q1', 'us_q2', 'us_q3', 'us_q4']).length}/4
                                             </span>
                                         </div>
@@ -1888,22 +1888,22 @@ export function ParametersStep({
                                                         updateUsage({ selected_questions: next });
                                                     }}
                                                     className={`group/q p-5 rounded-[2rem] border-2 text-left transition-all relative overflow-hidden ${isSelected
-                                                        ? 'bg-white dark:bg-slate-900 border-brand-blue shadow-lg shadow-brand-blue/5'
-                                                        : 'bg-slate-50/50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 hover:border-slate-300'
+                                                        ? 'bg-surface border-primary shadow-lg shadow-primary/5'
+                                                        : 'bg-slate-50/50 dark:bg-slate-950 border-line/80 dark:border-line/10 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 hover:border-slate-300'
                                                         }`}
                                                 >
                                                     <div className="relative z-10 flex flex-col h-full justify-between gap-4">
                                                         <div className="flex items-center justify-between">
                                                             <div className="flex items-center gap-2">
-                                                                <span className={`text-[8px] font-black transition-colors px-2 py-0.5 rounded-full uppercase ${isSelected ? 'text-brand-blue bg-brand-blue/10' : 'text-slate-400 bg-slate-100 dark:bg-slate-800'}`}>{q.id}</span>
-                                                                <span className="text-[8px] font-black text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full uppercase">{q.type}</span>
+                                                                <span className={`text-[8px] font-black transition-colors px-2 py-0.5 rounded-full uppercase ${isSelected ? 'text-primary-soft bg-primary/10' : 'text-slate-400 bg-surface-sunken'}`}>{q.id}</span>
+                                                                <span className="text-[8px] font-black text-slate-400 bg-surface-sunken px-2 py-0.5 rounded-full uppercase">{q.type}</span>
                                                             </div>
-                                                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'border-brand-blue bg-brand-blue text-white' : 'border-slate-200'}`}>
+                                                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'border-primary bg-primary text-white' : 'border-slate-200'}`}>
                                                                 {isSelected && <Check className="w-3 h-3" />}
                                                             </div>
                                                         </div>
                                                         <div>
-                                                            <p className={`text-[10px] font-black transition-colors ${isSelected ? 'text-slate-900 dark:text-white' : 'text-slate-500'}`}>{q.label}</p>
+                                                            <p className={`text-[10px] font-black transition-colors ${isSelected ? 'text-ink' : 'text-slate-500'}`}>{q.label}</p>
                                                             <p className="text-[9px] text-slate-400 leading-snug mt-1">{q.desc.replace('[product]', usageConfig.target_brand || formData.config?.category || '[product]')}</p>
                                                         </div>
                                                     </div>
@@ -1922,7 +1922,7 @@ export function ParametersStep({
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="space-y-2">
                                             <label className="text-[9px] font-black uppercase tracking-widest text-slate-500">Auto-Fill Intelligence</label>
-                                            <div className="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                                            <div className="flex p-1 bg-surface-sunken rounded-xl">
                                                 <button
                                                     onClick={() => {
                                                         const pfBrands = formData.purchase_funnel?.brand_list || [];
@@ -1933,7 +1933,7 @@ export function ParametersStep({
                                                             toast.error("No brands found in Purchase Funnel to sync");
                                                         }
                                                     }}
-                                                    className="flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm"
+                                                    className="flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all bg-white dark:bg-slate-700 text-ink shadow-sm"
                                                 >
                                                     Sync First Funnel Brand
                                                 </button>
@@ -1948,9 +1948,9 @@ export function ParametersStep({
 
                                 {/* Target Brand Selection */}
                                 <div className="space-y-2">
-                                    <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-700 dark:text-slate-300 block italic">Focus Brand</label>
+                                    <label className="text-[9px] font-black uppercase tracking-[0.2em] text-ink-muted block italic">Focus Brand</label>
                                     <div className="relative group">
-                                        <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-blue transition-colors">
+                                        <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary-soft transition-colors">
                                             <Palette className="w-4 h-4" />
                                         </div>
                                         <input
@@ -1958,7 +1958,7 @@ export function ParametersStep({
                                             value={usageConfig.target_brand || ''}
                                             onChange={e => updateUsage({ target_brand: e.target.value })}
                                             placeholder="e.g. Wonder Ville Ice Cream"
-                                            className="w-full bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 focus:border-brand-blue rounded-2xl pl-12 pr-6 py-4 text-sm font-black text-slate-900 dark:text-white outline-none transition-all placeholder:text-slate-400/50"
+                                            className="w-full bg-surface border-2 border-line/80 dark:border-line/10 focus:border-primary rounded-2xl pl-12 pr-6 py-4 text-sm font-black text-ink outline-none transition-all placeholder:text-slate-400/50"
                                         />
                                     </div>
                                 </div>
@@ -1973,8 +1973,8 @@ export function ParametersStep({
                                         <button
                                             onClick={() => updateUsage({ is_enabled: !usageConfig.is_enabled, selected_questions: usageConfig.selected_questions || ['us_q1', 'us_q2', 'us_q3', 'us_q4'] })}
                                             className={`w-full py-5 rounded-2xl text-xs font-black uppercase tracking-[0.2em] transition-all shadow-xl hover:scale-[1.01] active:scale-95 ${usageConfig.is_enabled
-                                                ? 'bg-brand-blue text-white shadow-brand-blue/30'
-                                                : 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white border-2 border-slate-300 dark:border-slate-700'
+                                                ? 'bg-primary text-white shadow-primary/30'
+                                                : 'bg-surface text-ink border-2 border-slate-300 dark:border-slate-700'
                                                 }`}
                                         >
                                             {usageConfig.is_enabled ? '● Brand Usage Active' : '○ Deploy Brand Usage Module'}
@@ -1986,39 +1986,39 @@ export function ParametersStep({
                     </section>
 
                     {/* ─── Brand Pricing Behavior Module ─── */}
-                    <section className="border-t border-slate-100 dark:border-slate-800 pt-10" id="brand-pricing-section">
+                    <section className="border-t border-line/80 dark:border-line/10 pt-10" id="brand-pricing-section">
                         {!pricingExpanded ? (
                             <button
                                 onClick={() => setPricingExpanded(true)}
-                                className="w-full flex items-center justify-between px-10 py-7 rounded-[2.5rem] border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-900/40 hover:border-brand-blue/50 hover:bg-brand-blue/5 transition-all group"
+                                className="w-full flex items-center justify-between px-10 py-7 rounded-[2.5rem] border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-900/40 hover:border-primary/50 hover:bg-primary/5 transition-all group"
                             >
                                 <div className="flex items-center gap-5">
-                                    <div className="p-3.5 rounded-2xl bg-slate-200 dark:bg-slate-800 text-slate-500 group-hover:bg-brand-blue/10 group-hover:text-brand-blue transition-all">
+                                    <div className="p-3.5 rounded-2xl bg-slate-200 dark:bg-slate-800 text-slate-500 group-hover:bg-primary/10 group-hover:text-primary-soft transition-all">
                                         <Wallet className="w-5 h-5" />
                                     </div>
                                     <div className="text-left">
-                                        <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-900 dark:text-white">+ Add Purchase Behaviour Module</p>
+                                        <p className="text-xs font-black uppercase tracking-[0.2em] text-ink">+ Add Purchase Behaviour Module</p>
                                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Optional · Budget, stocking, channels &amp; pack sizes</p>
                                     </div>
                                 </div>
-                                <Plus className="w-5 h-5 text-slate-400 group-hover:text-brand-blue transition-colors" />
+                                <Plus className="w-5 h-5 text-slate-400 group-hover:text-primary-soft transition-colors" />
                             </button>
                         ) : (
                             <div className={`p-10 rounded-[2.5rem] border-2 transition-all duration-300 space-y-8 ${pricingConfig.is_enabled
-                                ? 'bg-brand-blue/5 dark:bg-brand-blue/10 border-brand-blue/30'
+                                ? 'bg-primary/5 dark:bg-primary/10 border-primary/30'
                                 : 'bg-slate-50/50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-700'
                                 }`}>
                                 {/* Header */}
                                 <div className="flex items-start justify-between gap-6">
                                     <div className="flex items-center gap-4">
                                         <div className={`p-4 rounded-2xl transition-all ${pricingConfig.is_enabled
-                                            ? 'bg-brand-blue text-white shadow-xl shadow-brand-blue/20'
+                                            ? 'bg-primary text-white shadow-xl shadow-primary/20'
                                             : 'bg-slate-200 dark:bg-slate-800 text-slate-400'
                                             }`}>
                                             <Wallet className="w-6 h-6" />
                                         </div>
                                         <div>
-                                            <h4 className={`text-lg font-black uppercase tracking-tight ${pricingConfig.is_enabled ? 'text-brand-blue' : 'text-slate-900 dark:text-white'
+                                            <h4 className={`text-lg font-black uppercase tracking-tight ${pricingConfig.is_enabled ? 'text-primary-soft' : 'text-ink'
                                                 }`}>Purchase Behaviour Module</h4>
                                             <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Layer 6 · cb_q1–cb_q4 from question bank</p>
                                         </div>
@@ -2066,22 +2066,22 @@ export function ParametersStep({
                                                         updatePricing({ selected_questions: next });
                                                     }}
                                                     className={`group/q p-5 rounded-[2rem] border-2 text-left transition-all relative overflow-hidden ${isSelected
-                                                        ? 'bg-white dark:bg-slate-900 border-indigo-500 shadow-lg shadow-indigo-500/5'
-                                                        : 'bg-slate-50/50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 hover:border-slate-300'
+                                                        ? 'bg-surface border-indigo-500 shadow-lg shadow-indigo-500/5'
+                                                        : 'bg-slate-50/50 dark:bg-slate-950 border-line/80 dark:border-line/10 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 hover:border-slate-300'
                                                         }`}
                                                 >
                                                     <div className="relative z-10 flex flex-col h-full justify-between gap-4">
                                                         <div className="flex items-center justify-between">
                                                             <div className="flex items-center gap-2">
-                                                                <span className={`text-[8px] font-black transition-colors px-2 py-0.5 rounded-full uppercase ${isSelected ? 'text-indigo-600 bg-indigo-500/10' : 'text-slate-400 bg-slate-100 dark:bg-slate-800'}`}>{q.id}</span>
-                                                                <span className="text-[8px] font-black text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full uppercase">{q.type}</span>
+                                                                <span className={`text-[8px] font-black transition-colors px-2 py-0.5 rounded-full uppercase ${isSelected ? 'text-indigo-600 bg-indigo-500/10' : 'text-slate-400 bg-surface-sunken'}`}>{q.id}</span>
+                                                                <span className="text-[8px] font-black text-slate-400 bg-surface-sunken px-2 py-0.5 rounded-full uppercase">{q.type}</span>
                                                             </div>
                                                             <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'border-indigo-500 bg-indigo-500 text-white' : 'border-slate-200'}`}>
                                                                 {isSelected && <Check className="w-3 h-3" />}
                                                             </div>
                                                         </div>
                                                         <div>
-                                                            <p className={`text-[10px] font-black transition-colors ${isSelected ? 'text-slate-900 dark:text-white' : 'text-slate-500'}`}>{q.label}</p>
+                                                            <p className={`text-[10px] font-black transition-colors ${isSelected ? 'text-ink' : 'text-slate-500'}`}>{q.label}</p>
                                                             <p className="text-[9px] text-slate-400 leading-snug mt-1">{q.desc.replace('[product]', pricingConfig.target_brand || formData.config?.category || '[product]')}</p>
                                                         </div>
                                                     </div>
@@ -2100,7 +2100,7 @@ export function ParametersStep({
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="space-y-2">
                                             <label className="text-[9px] font-black uppercase tracking-widest text-slate-500">Auto-Fill Intelligence</label>
-                                            <div className="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                                            <div className="flex p-1 bg-surface-sunken rounded-xl">
                                                 <button
                                                     onClick={() => {
                                                         const pfBrands = formData.purchase_funnel?.brand_list || [];
@@ -2111,7 +2111,7 @@ export function ParametersStep({
                                                             toast.error("No brands found in Purchase Funnel to sync");
                                                         }
                                                     }}
-                                                    className="flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm"
+                                                    className="flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all bg-white dark:bg-slate-700 text-ink shadow-sm"
                                                 >
                                                     Sync First Funnel Brand
                                                 </button>
@@ -2126,9 +2126,9 @@ export function ParametersStep({
 
                                 {/* Target Brand Selection */}
                                 <div className="space-y-2">
-                                    <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-700 dark:text-slate-300 block italic">Target Brand</label>
+                                    <label className="text-[9px] font-black uppercase tracking-[0.2em] text-ink-muted block italic">Target Brand</label>
                                     <div className="relative group">
-                                        <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-blue transition-colors">
+                                        <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary-soft transition-colors">
                                             <Palette className="w-4 h-4" />
                                         </div>
                                         <input
@@ -2136,7 +2136,7 @@ export function ParametersStep({
                                             value={pricingConfig.target_brand || ''}
                                             onChange={e => updatePricing({ target_brand: e.target.value })}
                                             placeholder="e.g. Wonder Ville Ice Cream"
-                                            className="w-full bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 focus:border-brand-blue rounded-2xl pl-12 pr-6 py-4 text-sm font-black text-slate-900 dark:text-white outline-none transition-all placeholder:text-slate-400/50"
+                                            className="w-full bg-surface border-2 border-line/80 dark:border-line/10 focus:border-primary rounded-2xl pl-12 pr-6 py-4 text-sm font-black text-ink outline-none transition-all placeholder:text-slate-400/50"
                                         />
                                     </div>
                                 </div>
@@ -2151,8 +2151,8 @@ export function ParametersStep({
                                         <button
                                             onClick={() => updatePricing({ is_enabled: !pricingConfig.is_enabled, selected_questions: pricingConfig.selected_questions || ['cb_q1', 'cb_q2', 'cb_q3', 'cb_q4'] })}
                                             className={`w-full py-5 rounded-2xl text-xs font-black uppercase tracking-[0.2em] transition-all shadow-xl hover:scale-[1.01] active:scale-95 ${pricingConfig.is_enabled
-                                                ? 'bg-brand-blue text-white shadow-brand-blue/30'
-                                                : 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white border-2 border-slate-300 dark:border-slate-700'
+                                                ? 'bg-primary text-white shadow-primary/30'
+                                                : 'bg-surface text-ink border-2 border-slate-300 dark:border-slate-700'
                                                 }`}
                                         >
                                             {pricingConfig.is_enabled ? '● Purchase Behaviour Active' : '○ Deploy Purchase Behaviour Module'}
@@ -2164,26 +2164,26 @@ export function ParametersStep({
                     </section>
 
                     {/* ─── Brand Analyzer Module (L7) ─── */}
-                    <section className="border-t border-slate-100 dark:border-slate-800 pt-10" id="brand-analyzer-section">
+                    <section className="border-t border-line/80 dark:border-line/10 pt-10" id="brand-analyzer-section">
                         {!baExpanded ? (
                             <button
                                 onClick={() => setBaExpanded(true)}
-                                className="w-full flex items-center justify-between px-10 py-7 rounded-[2.5rem] border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-900/40 hover:border-brand-blue/50 hover:bg-brand-blue/5 transition-all group"
+                                className="w-full flex items-center justify-between px-10 py-7 rounded-[2.5rem] border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-900/40 hover:border-primary/50 hover:bg-primary/5 transition-all group"
                             >
                                 <div className="flex items-center gap-5">
-                                    <div className="p-3.5 rounded-2xl bg-slate-200 dark:bg-slate-800 text-slate-500 group-hover:bg-brand-blue/10 group-hover:text-brand-blue transition-all">
+                                    <div className="p-3.5 rounded-2xl bg-slate-200 dark:bg-slate-800 text-slate-500 group-hover:bg-primary/10 group-hover:text-primary-soft transition-all">
                                         <Zap className="w-5 h-5" />
                                     </div>
                                     <div className="text-left">
-                                        <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-900 dark:text-white">+ Add Brand Analyzer Module</p>
+                                        <p className="text-xs font-black uppercase tracking-[0.2em] text-ink">+ Add Brand Analyzer Module</p>
                                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Advanced Analytics · CBI, POP/POD & Performance Matrix</p>
                                     </div>
                                 </div>
-                                <Plus className="w-5 h-5 text-slate-400 group-hover:text-brand-blue transition-colors" />
+                                <Plus className="w-5 h-5 text-slate-400 group-hover:text-primary-soft transition-colors" />
                             </button>
                         ) : (
                             <div className={`p-10 rounded-[2.5rem] border-2 transition-all duration-300 space-y-8 ${baConfig.is_enabled
-                                ? 'bg-brand-blue/5 dark:bg-brand-blue/10 border-brand-blue/30'
+                                ? 'bg-primary/5 dark:bg-primary/10 border-primary/30'
                                 : 'bg-slate-50/50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-700'
                                 }`}>
 
@@ -2191,13 +2191,13 @@ export function ParametersStep({
                                 <div className="flex items-start justify-between gap-6">
                                     <div className="flex items-center gap-4">
                                         <div className={`p-4 rounded-2xl transition-all ${baConfig.is_enabled
-                                            ? 'bg-brand-blue text-white shadow-xl shadow-brand-blue/20'
+                                            ? 'bg-primary text-white shadow-xl shadow-primary/20'
                                             : 'bg-slate-200 dark:bg-slate-800 text-slate-400'
                                             }`}>
                                             <Zap className="w-6 h-6" />
                                         </div>
                                         <div>
-                                            <h4 className={`text-lg font-black uppercase tracking-tight ${baConfig.is_enabled ? 'text-brand-blue' : 'text-slate-900 dark:text-white'
+                                            <h4 className={`text-lg font-black uppercase tracking-tight ${baConfig.is_enabled ? 'text-primary-soft' : 'text-ink'
                                                 }`}>Brand Analyzer module</h4>
                                             <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Strategic Equity & Attribute Perception Analysis</p>
                                         </div>
@@ -2214,19 +2214,19 @@ export function ParametersStep({
                                 </div>
 
                                 {/* Smart Sync Switch */}
-                                <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 flex items-center justify-between group shadow-sm hover:shadow-md transition-all">
+                                <div className="bg-surface p-6 rounded-3xl border border-line/80 dark:border-line/10 flex items-center justify-between group shadow-sm hover:shadow-md transition-all">
                                     <div className="flex items-center gap-4">
-                                        <div className="p-3.5 rounded-2xl bg-brand-blue/10 text-brand-blue group-hover:bg-brand-blue group-hover:text-white transition-all">
+                                        <div className="p-3.5 rounded-2xl bg-primary/10 text-primary-soft group-hover:bg-primary group-hover:text-white transition-all">
                                             <ShieldCheck className="w-5 h-5" />
                                         </div>
                                         <div>
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white">Sync with Purchase Funnel</p>
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-ink">Sync with Purchase Funnel</p>
                                             <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter mt-0.5">Automatically link brand awareness (L4) to perception grids (L7)</p>
                                         </div>
                                     </div>
                                     <div
                                         onClick={() => updateBA({ sync_with_purchase_funnel: !baConfig.sync_with_purchase_funnel })}
-                                        className={`w-12 h-6 rounded-full relative cursor-pointer transition-all ${baConfig.sync_with_purchase_funnel ? 'bg-brand-blue' : 'bg-slate-200 dark:bg-slate-800'}`}
+                                        className={`w-12 h-6 rounded-full relative cursor-pointer transition-all ${baConfig.sync_with_purchase_funnel ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-800'}`}
                                     >
                                         <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${baConfig.sync_with_purchase_funnel ? 'right-1' : 'left-1'}`} />
                                     </div>
@@ -2234,20 +2234,20 @@ export function ParametersStep({
 
                                 {/* Attribute Bank Interaction */}
                                 <div className="space-y-4">
-                                    <div className="flex items-center justify-between bg-white dark:bg-slate-900 shadow-sm border border-slate-200 dark:border-slate-800 p-4 rounded-2xl">
+                                    <div className="flex items-center justify-between bg-surface shadow-sm border border-line/80 dark:border-line/10 p-4 rounded-2xl">
                                         <div className="flex items-center gap-3">
-                                            <div className="p-2 rounded-xl bg-brand-blue/10 text-brand-blue">
+                                            <div className="p-2 rounded-xl bg-primary/10 text-primary-soft">
                                                 <Layers className="w-4 h-4" />
                                             </div>
                                             <div>
-                                                <span className="text-[10px] font-black uppercase tracking-[0.1em] text-slate-900 dark:text-slate-100">Attribute Selection Bank</span>
+                                                <span className="text-[10px] font-black uppercase tracking-[0.1em] text-ink">Attribute Selection Bank</span>
                                                 <p className="text-[9px] text-slate-400 font-bold uppercase mt-0.5">Select high-impact image attributes for analysis</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3">
                                             <button
                                                 onClick={fetchBrandBank}
-                                                className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-brand-blue transition-all"
+                                                className="p-2 rounded-xl bg-surface-raised text-slate-400 hover:text-primary-soft transition-all"
                                                 title="Refresh Bank"
                                             >
                                                 <motion.div whileHover={{ rotate: 180 }} transition={{ duration: 0.5 }}>
@@ -2255,7 +2255,7 @@ export function ParametersStep({
                                                 </motion.div>
                                             </button>
                                             <div className="w-px h-6 bg-slate-200 dark:bg-slate-800" />
-                                            <span className="text-[9px] font-black text-brand-blue bg-brand-blue/10 px-4 py-1.5 rounded-full uppercase tracking-widest border border-brand-blue/20">
+                                            <span className="text-[9px] font-black text-primary-soft bg-primary/10 px-4 py-1.5 rounded-full uppercase tracking-widest border border-primary/20">
                                                 {baConfig.selected_attributes.length} ACTIVE
                                             </span>
                                         </div>
@@ -2273,12 +2273,12 @@ export function ParametersStep({
                                                         updateBA({ selected_attributes: nextAttrs });
                                                     }}
                                                     className={`p-4 rounded-2xl border-2 text-left transition-all group flex flex-col justify-between h-28 ${isSelected
-                                                        ? 'bg-brand-blue border-brand-blue text-white shadow-lg shadow-brand-blue/20'
-                                                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white hover:border-brand-blue/30'
+                                                        ? 'bg-primary border-primary text-white shadow-lg shadow-primary/20'
+                                                        : 'bg-surface border-line/80 dark:border-line/10 text-ink hover:border-primary/30'
                                                         }`}
                                                 >
                                                     <div className="flex items-center justify-between w-full">
-                                                        <div className={`p-1.5 rounded-lg ${isSelected ? 'bg-white/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}`}>
+                                                        <div className={`p-1.5 rounded-lg ${isSelected ? 'bg-white/20' : 'bg-surface-sunken text-slate-400'}`}>
                                                             {attr.category === 'innovation' ? <Zap className="w-3 h-3" /> :
                                                                 attr.category === 'value' ? <Wallet className="w-3 h-3" /> :
                                                                     attr.category === 'quality' ? <ShieldCheck className="w-3 h-3" /> :
@@ -2309,7 +2309,7 @@ export function ParametersStep({
                                                     value={baCustomAttrInput}
                                                     onChange={e => setBaCustomAttrInput(e.target.value)}
                                                     placeholder="Type attribute..."
-                                                    className="flex-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-1.5 text-[10px] font-bold outline-none focus:border-brand-blue transition-all"
+                                                    className="flex-1 bg-surface border border-line/80 dark:border-line/10 rounded-xl px-3 py-1.5 text-[10px] font-bold outline-none focus:border-primary transition-all"
                                                     onKeyPress={e => {
                                                         if (e.key === 'Enter' && baCustomAttrInput.trim()) {
                                                             const newAttr = {
@@ -2345,7 +2345,7 @@ export function ParametersStep({
                                                         setBaCustomAttrInput('');
                                                         toast.success(`Custom attribute "${newAttr.label_en}" added`);
                                                     }}
-                                                    className="p-1.5 bg-brand-blue text-white rounded-lg shadow-md hover:scale-105 active:scale-95 transition-all"
+                                                    className="p-1.5 bg-primary text-white rounded-lg shadow-md hover:scale-105 active:scale-95 transition-all"
                                                 >
                                                     <Plus className="w-4 h-4" />
                                                 </button>
@@ -2366,7 +2366,7 @@ export function ParametersStep({
                                                     }}
                                                     className={`p-4 rounded-2xl border-2 text-left transition-all group flex flex-col justify-between h-28 relative ${isSelected
                                                         ? 'bg-amber-100/50 border-amber-400 text-amber-900 dark:bg-amber-900/20 dark:border-amber-700 dark:text-amber-100 shadow-lg shadow-amber-200/20'
-                                                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white hover:border-amber-300'
+                                                        : 'bg-surface border-line/80 dark:border-line/10 text-ink hover:border-amber-300'
                                                         }`}
                                                 >
                                                     <button
@@ -2377,12 +2377,12 @@ export function ParametersStep({
                                                                 selected_attributes: baConfig.selected_attributes.filter((a: string) => a !== attr.id)
                                                             });
                                                         }}
-                                                        className="absolute top-2 right-2 p-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-all z-20"
+                                                        className="absolute top-2 right-2 p-1 rounded-lg bg-surface-sunken text-slate-400 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-all z-20"
                                                     >
                                                         <Trash2 className="w-3 h-3" />
                                                     </button>
                                                     <div className="flex items-center justify-between w-full">
-                                                        <div className={`p-1.5 rounded-lg ${isSelected ? 'bg-amber-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}`}>
+                                                        <div className={`p-1.5 rounded-lg ${isSelected ? 'bg-amber-500 text-white' : 'bg-surface-sunken text-slate-400'}`}>
                                                             <Sparkles className="w-3 h-3" />
                                                         </div>
                                                         <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-amber-500' : 'border-slate-200'}`}>
@@ -2405,10 +2405,10 @@ export function ParametersStep({
 
                                 {/* Custom Brand Context (Visible if Sync is off) */}
                                 {!baConfig.sync_with_purchase_funnel && (
-                                    <div className="space-y-4 p-8 bg-slate-100 dark:bg-slate-900/50 rounded-[2rem] border-2 border-slate-200 dark:border-slate-800">
+                                    <div className="space-y-4 p-8 bg-surface-sunken/50 rounded-[2rem] border-2 border-line/80 dark:border-line/10">
                                         <div className="flex items-center justify-between mb-4">
                                             <div>
-                                                <h5 className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white">Manual Brand Context</h5>
+                                                <h5 className="text-[10px] font-black uppercase tracking-widest text-ink">Manual Brand Context</h5>
                                                 <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter mt-0.5">Define brands specifically for equity analysis</p>
                                             </div>
                                             <button
@@ -2424,16 +2424,16 @@ export function ParametersStep({
                                                     updateBA({ brand_list: nextList });
                                                     toast.success("Synchronized with study brands");
                                                 }}
-                                                className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[9px] font-black uppercase tracking-widest hover:border-brand-blue hover:text-brand-blue transition-all"
+                                                className="px-4 py-2 bg-surface border border-slate-200 dark:border-slate-700 rounded-xl text-[9px] font-black uppercase tracking-widest hover:border-primary hover:text-primary-soft transition-all"
                                             >
                                                 Clone Study Brands
                                             </button>
                                         </div>
                                         <div className="flex flex-wrap gap-2">
                                             {baConfig.brand_list.map((b, idx) => (
-                                                <div key={idx} className="px-4 py-2 bg-white dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center gap-3">
+                                                <div key={idx} className="px-4 py-2 bg-surface rounded-xl border border-line/80 dark:border-line/10 flex items-center gap-3">
                                                     <div className={`w-1.5 h-1.5 rounded-full ${b.role === 'internal' ? 'bg-emerald-500' : 'bg-slate-400'}`} />
-                                                    <span className="text-[10px] font-black uppercase tracking-tight text-slate-900 dark:text-white">{b.name}</span>
+                                                    <span className="text-[10px] font-black uppercase tracking-tight text-ink">{b.name}</span>
                                                     <button onClick={() => updateBA({ brand_list: baConfig.brand_list.filter((_, i) => i !== idx) })} className="text-slate-300 hover:text-rose-500"><X size={12} /></button>
                                                 </div>
                                             ))}
@@ -2451,8 +2451,8 @@ export function ParametersStep({
                                         <button
                                             onClick={() => updateBA({ is_enabled: !baConfig.is_enabled })}
                                             className={`w-full py-5 rounded-2xl text-xs font-black uppercase tracking-[0.2em] transition-all shadow-xl hover:scale-[1.01] active:scale-95 ${baConfig.is_enabled
-                                                ? 'bg-brand-blue text-white shadow-brand-blue/30'
-                                                : 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white border-2 border-slate-300 dark:border-slate-700'
+                                                ? 'bg-primary text-white shadow-primary/30'
+                                                : 'bg-surface text-ink border-2 border-slate-300 dark:border-slate-700'
                                                 }`}
                                         >
                                             {baConfig.is_enabled ? '● Brand Analyzer Active' : '○ Deploy Brand Analyzer Module'}
@@ -2469,10 +2469,10 @@ export function ParametersStep({
                 <div className="space-y-12 animate-slide-up">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         {/* Category */}
-                        <div className="space-y-6 bg-slate-50/50 dark:bg-slate-950/50 p-8 rounded-[2.5rem] border-2 border-slate-200 dark:border-slate-800 shadow-inner">
-                            <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-4 mb-2">
-                                <Tag className="w-4 h-4 text-brand-blue" />
-                                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-slate-100">Product Category</h4>
+                        <div className="space-y-6 bg-slate-50/50 dark:bg-slate-950/50 p-8 rounded-[2.5rem] border-2 border-line/80 dark:border-line/10 shadow-inner">
+                            <div className="flex items-center gap-3 border-b border-line/80 dark:border-line/10 pb-4 mb-2">
+                                <Tag className="w-4 h-4 text-primary-soft" />
+                                <h4 className="text-[10px] font-black uppercase tracking-widest text-ink">Product Category</h4>
                             </div>
                             <div className="space-y-4">
                                 <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 ml-1">Survey Category</label>
@@ -2491,16 +2491,16 @@ export function ParametersStep({
                                         });
                                     }}
                                     placeholder="e.g. Cleansing Foam"
-                                    className="w-full bg-white dark:bg-slate-950 border-2 border-slate-300 dark:border-slate-700 focus:border-brand-blue rounded-2xl px-6 py-4 text-sm font-bold outline-none dark:text-white transition-all shadow-sm"
+                                    className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 focus:border-primary rounded-2xl px-6 py-4 text-sm font-bold outline-none dark:text-white transition-all shadow-sm"
                                 />
                             </div>
                         </div>
 
                         {/* Language */}
-                        <div className="space-y-6 bg-slate-50/50 dark:bg-slate-950/50 p-8 rounded-[2.5rem] border-2 border-slate-200 dark:border-slate-800 shadow-inner">
-                            <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-4 mb-2">
-                                <Layers className="w-4 h-4 text-brand-blue" />
-                                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-slate-100">Survey Language</h4>
+                        <div className="space-y-6 bg-slate-50/50 dark:bg-slate-950/50 p-8 rounded-[2.5rem] border-2 border-line/80 dark:border-line/10 shadow-inner">
+                            <div className="flex items-center gap-3 border-b border-line/80 dark:border-line/10 pb-4 mb-2">
+                                <Layers className="w-4 h-4 text-primary-soft" />
+                                <h4 className="text-[10px] font-black uppercase tracking-widest text-ink">Survey Language</h4>
                             </div>
                             <div className="space-y-4">
                                 <label className="text-[9.5px] font-black uppercase tracking-widest text-slate-500 ml-1">Translation Locale</label>
@@ -2520,8 +2520,8 @@ export function ParametersStep({
                                                 });
                                             }}
                                             className={`flex-1 py-4 rounded-2xl text-sm font-black transition-all border-2 ${(formData.product_test_config?.language || formData.config?.language || 'en') === lang
-                                                ? 'bg-brand-blue border-brand-blue text-white shadow-lg'
-                                                : 'bg-white dark:bg-slate-900 border-slate-400 dark:border-slate-600 text-slate-800 dark:text-slate-350 hover:border-brand-blue'}`}
+                                                ? 'bg-primary border-primary text-white shadow-lg'
+                                                : 'bg-surface border-slate-400 dark:border-slate-600 text-slate-800 dark:text-slate-350 hover:border-primary'}`}
                                         >
                                             {lang.toUpperCase() === 'EN' ? 'English' : 'Arabic / العربية'}
                                         </button>
@@ -2538,7 +2538,7 @@ export function ParametersStep({
                     {renderSmartFollowupSection()}
 
                     {/* Product Test Integration Core Component */}
-                    <div className="border-t border-slate-200 dark:border-slate-800 pt-10">
+                    <div className="border-t border-line/80 dark:border-line/10 pt-10">
                         <div className="p-10 rounded-[2.5rem] border-4 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/10 space-y-8">
                             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                                 <div className="flex items-center gap-5 text-left">
@@ -2546,8 +2546,8 @@ export function ParametersStep({
                                         <Box className="w-8 h-8" />
                                     </div>
                                     <div>
-                                        <h4 className="text-xl font-display font-black text-slate-900 dark:text-white tracking-tight">Product Test Configuration</h4>
-                                        <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mt-1">In-home Use sensory mapping and packaging attachment options</p>
+                                        <h4 className="text-xl font-display font-black text-ink tracking-tight">Product Test Configuration</h4>
+                                        <p className="text-xs text-ink-muted font-bold uppercase tracking-wider mt-1">In-home Use sensory mapping and packaging attachment options</p>
                                     </div>
                                 </div>
                                 <button
@@ -2561,7 +2561,7 @@ export function ParametersStep({
 
                             {/* Status of Configuration Details */}
                             {formData.product_test_config?.selected_attributes?.length ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left bg-white dark:bg-slate-950 p-8 rounded-3xl border-2 border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left bg-surface p-8 rounded-3xl border-2 border-line/80 dark:border-line/10 shadow-sm transition-colors">
                                     <div className="space-y-4">
                                         <div className="flex items-center gap-3">
                                             <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Active Sensory Attributes</span>
@@ -2569,7 +2569,7 @@ export function ParametersStep({
                                         </div>
                                         <div className="flex flex-wrap gap-2">
                                             {formData.product_test_config.selected_attributes.map(attr => (
-                                                <span key={attr} className="text-[10px] font-black tracking-tight bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">{attr}</span>
+                                                <span key={attr} className="text-[10px] font-black tracking-tight bg-surface-sunken text-ink-muted px-3.5 py-2 rounded-xl border border-line/80 dark:border-line/10 shadow-xs">{attr}</span>
                                             ))}
                                         </div>
                                     </div>
@@ -2611,7 +2611,7 @@ export function ParametersStep({
                                 return (
                                     <div
                                         id="trial-media-capture-status"
-                                        className="text-left bg-white dark:bg-slate-950 p-6 md:p-8 rounded-3xl border-2 border-slate-200 dark:border-slate-800 shadow-sm transition-colors"
+                                        className="text-left bg-surface p-6 md:p-8 rounded-3xl border-2 border-line/80 dark:border-line/10 shadow-sm transition-colors"
                                     >
                                         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                                             <div className="flex items-center gap-3">
@@ -2627,7 +2627,7 @@ export function ParametersStep({
                                             <button
                                                 type="button"
                                                 onClick={() => setIsPtModalOpen(true)}
-                                                className="text-[10px] font-black uppercase tracking-widest text-brand-blue hover:underline"
+                                                className="text-[10px] font-black uppercase tracking-widest text-primary-soft hover:underline"
                                             >
                                                 {isArabic ? 'تعديل' : 'Configure'}
                                             </button>
@@ -2671,7 +2671,7 @@ export function ParametersStep({
                                                 </div>
                                             </div>
                                         ) : (
-                                            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                                            <p className="text-xs text-ink-muted font-medium">
                                                 {isArabic
                                                     ? 'لم يتم تفعيل سؤال رفع الصور/الفيديو. افتح إعدادات اختبار المنتج لتفعيله.'
                                                     : 'Respondents will not be asked to upload trial media. Open Product Test Configuration to enable it.'}
@@ -2708,13 +2708,13 @@ export function ParametersStep({
             )}
 
             {formData.survey_type !== 'taste_test' && formData.survey_type !== 'product_test' && formData.survey_type !== '' && (
-                <div className="p-20 flex flex-col items-center justify-center text-center space-y-6 bg-slate-50 dark:bg-slate-950/40 rounded-[3rem] border border-dashed border-slate-200 dark:border-slate-800 transition-colors">
+                <div className="p-20 flex flex-col items-center justify-center text-center space-y-6 bg-surface-raised/40 rounded-[3rem] border border-dashed border-line/80 dark:border-line/10 transition-colors">
                     <div className="w-16 h-16 rounded-full bg-slate-200 dark:bg-slate-900 flex items-center justify-center text-slate-400 dark:text-slate-700 transition-colors">
                         <Settings2 className="w-8 h-8" />
                     </div>
                     <div className="space-y-2 transition-colors">
-                        <h4 className="text-xl font-display font-black text-slate-900 dark:text-white transition-colors">Module Under Construction</h4>
-                        <p className="text-sm text-slate-400 dark:text-slate-500 font-medium max-w-sm mx-auto transition-colors">The automated generator for <span className="text-slate-900 dark:text-white font-bold">{(formData.survey_type as string)?.replace('_', ' ')}</span> is being finalized.</p>
+                        <h4 className="text-xl font-display font-black text-ink transition-colors">Module Under Construction</h4>
+                        <p className="text-sm text-ink-subtle font-medium max-w-sm mx-auto transition-colors">The automated generator for <span className="text-ink font-bold">{(formData.survey_type as string)?.replace('_', ' ')}</span> is being finalized.</p>
                     </div>
                     <button
                         onClick={() => {
@@ -2728,7 +2728,7 @@ export function ParametersStep({
                             }));
                             if (nextStep) nextStep();
                         }}
-                        className="px-6 py-3 bg-white dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-sm"
+                        className="px-6 py-3 bg-surface text-ink border border-line/80 dark:border-line/10 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-sm"
                     >
                         Use Standard Template
                     </button>

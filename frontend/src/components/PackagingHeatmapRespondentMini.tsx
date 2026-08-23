@@ -78,15 +78,15 @@ export default function PackagingHeatmapRespondentMini({
     return (
         <div className="space-y-2">
             <div className="flex flex-wrap gap-2 text-[9px] font-black uppercase tracking-widest text-slate-500">
-                <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800">{answer.image_side}</span>
-                <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800">
+                <span className="px-2 py-1 rounded-lg bg-surface-sunken">{answer.image_side}</span>
+                <span className="px-2 py-1 rounded-lg bg-surface-sunken">
                     {INTENT_LABELS[answer.intent]}
                 </span>
-                <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800">
+                <span className="px-2 py-1 rounded-lg bg-surface-sunken">
                     {answer.clicks.length} click{answer.clicks.length === 1 ? '' : 's'}
                 </span>
             </div>
-            <div className="relative rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden bg-slate-50 dark:bg-slate-900/50">
+            <div className="relative rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden bg-surface-raised/50">
                 {loading && (
                     <div className="absolute inset-0 flex items-center justify-center z-10 bg-white/70 dark:bg-slate-900/70">
                         <Loader2 className="animate-spin text-slate-400" size={18} />

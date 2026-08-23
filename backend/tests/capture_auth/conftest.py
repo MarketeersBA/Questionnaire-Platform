@@ -7,15 +7,30 @@ from unittest.mock import MagicMock
 
 
 def _ensure_slowapi_stub() -> None:
-    """Allow importing analytics router when slowapi is not installed locally."""
-    if "slowapi" in sys.modules:
+    """Allow importing analytics router when slowapi is not installed locally.
+
+    Only installs the stub when the real package is genuinely unavailable —
+    previously this checked `"slowapi" in sys.modules` (i.e. "has anything
+    already imported it"), so if THIS conftest happened to load before any
+    other test imported the real slowapi package, it clobbered
+    `sys.modules["slowapi"]` with a MagicMock for the rest of the pytest
+    process. That silently broke unrelated tests elsewhere in the same run
+    (e.g. backend/tests/voice_feedback/conftest.py's `from slowapi.middleware
+    import SlowAPIMiddleware`, which fails against a MagicMock stub that
+    never stubbed out a `.middleware` submodule).
+    """
+    try:
+        import slowapi  # noqa: F401
         return
+    except ImportError:
+        pass
     stub = MagicMock()
     stub.Limiter = MagicMock(return_value=MagicMock())
     stub._rate_limit_exceeded_handler = MagicMock()
     sys.modules["slowapi"] = stub
     sys.modules["slowapi.util"] = MagicMock()
     sys.modules["slowapi.errors"] = MagicMock()
+    sys.modules["slowapi.middleware"] = MagicMock()
 
 
 _ensure_slowapi_stub()

@@ -139,4 +139,4 @@ def test_public_get_503_when_bank_empty(mock_compose, mock_get_collection, clien
 
     res = client.get(f"/s/{TOKEN}")
     assert res.status_code == 503
-    assert "DATA_LAYER.md" in res.json()["detail"]
+    assert "product-test-data-layer.md" in res.json()["detail"]

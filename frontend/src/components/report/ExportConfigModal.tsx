@@ -88,7 +88,7 @@ function ProgressStatsRow({ snapshot }: { snapshot: PptxProgressSnapshot }) {
     }
 
     return (
-        <div className="w-full max-w-md space-y-2 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white/80 dark:bg-slate-900/60 px-4 py-3">
+        <div className="w-full max-w-md space-y-2 rounded-2xl border border-line/80 dark:border-line/10 bg-white/80 dark:bg-slate-900/60 px-4 py-3">
             {snapshot.elapsedLabel ? (
                 <p className="text-[11px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
                     <Clock size={12} />
@@ -104,7 +104,7 @@ function ProgressStatsRow({ snapshot }: { snapshot: PptxProgressSnapshot }) {
                 <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{snapshot.chartLine}</p>
             ) : null}
             {snapshot.stageDetail ? (
-                <p className="text-xs font-bold text-slate-500 dark:text-slate-400">{snapshot.stageDetail}</p>
+                <p className="text-xs font-bold text-ink-muted">{snapshot.stageDetail}</p>
             ) : null}
         </div>
     );
@@ -397,15 +397,15 @@ export default function ExportConfigModal({
                         initial={{ opacity: 0, scale: 0.95, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-white/20 overflow-hidden"
+                        className="relative w-full max-w-2xl bg-surface rounded-[2.5rem] shadow-2xl border border-white/20 overflow-hidden"
                     >
                         <motion.div
                             layout
-                            className="p-8 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50"
+                            className="p-8 border-b border-line/80 dark:border-line/10 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50"
                         >
                             <div>
-                                <h3 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-3">
-                                    <Layout className="text-brand-blue" />
+                                <h3 className="text-2xl font-black text-ink flex items-center gap-3">
+                                    <Layout className="text-primary-soft" />
                                     {headerTitle}
                                 </h3>
                                 <p className="text-slate-500 text-sm font-bold mt-1">
@@ -453,18 +453,18 @@ export default function ExportConfigModal({
                                                         PROGRESS_RING_CIRCUMFERENCE
                                                         - (PROGRESS_RING_CIRCUMFERENCE * progress) / 100,
                                                 }}
-                                                className="text-brand-blue"
+                                                className="text-primary-soft"
                                             />
                                         </svg>
                                         <motion.div layout className="absolute inset-0 flex items-center justify-center">
-                                            <span className="text-2xl font-black text-slate-900 dark:text-white">
+                                            <span className="text-2xl font-black text-ink">
                                                 {progress}%
                                             </span>
                                         </motion.div>
                                     </motion.div>
 
                                     <motion.div layout className="text-center space-y-2">
-                                        <p className="font-black text-slate-900 dark:text-white">
+                                        <p className="font-black text-ink">
                                             {stagePresentation.title}
                                         </p>
                                         <p className="text-sm text-slate-500 font-bold max-w-md">
@@ -490,7 +490,7 @@ export default function ExportConfigModal({
                                         <CheckCircle2 size={48} />
                                     </div>
                                     <div>
-                                        <p className="text-xl font-black text-slate-900 dark:text-white">
+                                        <p className="text-xl font-black text-ink">
                                             Presentation ready
                                         </p>
                                         <p className="text-slate-500 font-bold mt-2">
@@ -510,14 +510,14 @@ export default function ExportConfigModal({
                                         <AlertCircle size={32} />
                                     </div>
                                     <div className="space-y-2 max-w-lg">
-                                        <p className="font-black text-slate-900 dark:text-white">
+                                        <p className="font-black text-ink">
                                             {failurePresentation?.headline || 'Export failed'}
                                         </p>
                                         <p className="text-sm text-slate-500 font-bold">
                                             {failurePresentation?.summary}
                                         </p>
                                         {failurePresentation?.retryGuidance ? (
-                                            <p className="text-xs font-bold text-brand-blue">
+                                            <p className="text-xs font-bold text-primary-soft">
                                                 {failurePresentation.retryGuidance}
                                             </p>
                                         ) : null}
@@ -545,13 +545,13 @@ export default function ExportConfigModal({
                                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block">
                                         Export profile
                                     </label>
-                                    <div className="rounded-3xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 p-6 space-y-4">
+                                    <div className="rounded-3xl border border-line/80 dark:border-line/10 bg-surface-raised/50 p-6 space-y-4">
                                         <motion.div layout className="flex items-start gap-4">
-                                            <motion.div layout className="p-3 rounded-2xl bg-brand-blue/10 text-brand-blue">
+                                            <motion.div layout className="p-3 rounded-2xl bg-primary/10 text-primary-soft">
                                                 <Monitor size={20} />
                                             </motion.div>
                                             <div>
-                                                <p className="font-black text-sm text-slate-900 dark:text-white">
+                                                <p className="font-black text-sm text-ink">
                                                     {EXPORT_PROFILE.templateLabel}
                                                 </p>
                                                 <p className="text-[11px] text-slate-500 font-bold mt-1">
@@ -564,7 +564,7 @@ export default function ExportConfigModal({
                                                 <CheckCircle2 size={20} />
                                             </motion.div>
                                             <motion.div layout>
-                                                <p className="font-black text-sm text-slate-900 dark:text-white">
+                                                <p className="font-black text-sm text-ink">
                                                     {EXPORT_PROFILE.themeLabel}
                                                 </p>
                                                 <p className="text-[11px] text-slate-500 font-bold mt-1">
@@ -572,7 +572,7 @@ export default function ExportConfigModal({
                                                 </p>
                                             </motion.div>
                                         </motion.div>
-                                        <motion.div layout className="flex items-start gap-3 rounded-2xl bg-white/70 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 p-4">
+                                        <motion.div layout className="flex items-start gap-3 rounded-2xl bg-white/70 dark:bg-slate-900/50 border border-line/80 dark:border-line/10 p-4">
                                             <Info size={18} className="text-slate-400 mt-0.5 shrink-0" />
                                             <p className="text-[11px] text-slate-500 font-bold">
                                                 {EXPORT_PROFILE.note} {EXPORT_PROFILE.rolloutNote}
@@ -585,14 +585,14 @@ export default function ExportConfigModal({
 
                         <motion.div
                             layout
-                            className="p-8 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-slate-50/50 dark:bg-slate-800/50"
+                            className="p-8 border-t border-line/80 dark:border-line/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-slate-50/50 dark:bg-slate-800/50"
                         >
                             <div className="flex items-center gap-4 min-w-0">
-                                <div className="p-3 rounded-2xl bg-brand-blue/10 text-brand-blue shrink-0">
+                                <div className="p-3 rounded-2xl bg-primary/10 text-primary-soft shrink-0">
                                     <Monitor size={20} />
                                 </div>
                                 <div className="min-w-0">
-                                    <p className="text-xs font-black text-slate-900 dark:text-white truncate">
+                                    <p className="text-xs font-black text-ink truncate">
                                         {exportStatus === 'ready'
                                             ? 'Artifact status: ready'
                                             : exportStatus === 'processing'
@@ -644,7 +644,7 @@ export default function ExportConfigModal({
                                             void handleStartExport(true).finally(() => setRetryPending(false));
                                         }}
                                         disabled={retryPending || isDownloading}
-                                        className="px-5 py-3 rounded-2xl font-black text-sm bg-brand-blue text-white shadow-lg shadow-brand-blue/20 hover:scale-105 transition-all flex items-center gap-2 disabled:opacity-50"
+                                        className="px-5 py-3 rounded-2xl font-black text-sm bg-primary text-white shadow-lg shadow-primary/20 hover:scale-105 transition-all flex items-center gap-2 disabled:opacity-50"
                                     >
                                         {retryPending ? (
                                             <Loader2 size={16} className="animate-spin" />
@@ -678,7 +678,7 @@ export default function ExportConfigModal({
                                     <button
                                         type="button"
                                         onClick={() => void handleStartExport(false)}
-                                        className="px-8 py-4 bg-brand-blue text-white rounded-3xl font-black shadow-lg shadow-brand-blue/20 hover:scale-105 transition-all flex items-center gap-3 active:scale-95"
+                                        className="px-8 py-4 bg-primary text-white rounded-3xl font-black shadow-lg shadow-primary/20 hover:scale-105 transition-all flex items-center gap-3 active:scale-95"
                                     >
                                         <Download size={20} className="animate-bounce" />
                                         Start export

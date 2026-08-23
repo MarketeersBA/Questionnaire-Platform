@@ -112,29 +112,29 @@ export default function PurchaseFunnelStep({
         <div className="space-y-8">
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                    <Sparkles className="w-5 h-5 text-brand-blue" />
+                    <Sparkles className="w-5 h-5 text-primary-soft" />
                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
                         {sectionTitle} • {stepIndex + 1}/{totalSteps}
                     </span>
                 </div>
-                <div className="w-24 h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div className="w-24 h-1 bg-surface-sunken rounded-full overflow-hidden">
                     <div
-                        className="h-full bg-brand-blue transition-all duration-500"
+                        className="h-full bg-primary transition-all duration-500"
                         style={{ width: `${((stepIndex + 1) / totalSteps) * 100}%` }}
                     />
                 </div>
             </div>
 
-            <div className="relative p-8 bg-slate-50 dark:bg-slate-800/80 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 overflow-hidden shadow-sm">
+            <div className="relative p-8 bg-surface-raised/80 rounded-[2.5rem] border border-line/80 dark:border-line/10 overflow-hidden shadow-sm">
                 <div className="absolute top-[-20%] right-[-5%] opacity-10 pointer-events-none">
-                    <Quote className="w-40 h-40 text-brand-blue" />
+                    <Quote className="w-40 h-40 text-primary-soft" />
                 </div>
                 <div className="relative z-10 flex flex-col gap-4">
-                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-brand-blue/60">
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary-soft/60">
                         <Sparkles className="w-3 h-3" />
                         {language === 'ar' ? 'رحلة الشراء' : 'Purchase Journey'}
                     </div>
-                    <p className="text-lg md:text-xl font-display font-light italic text-slate-600 dark:text-slate-300 leading-relaxed border-l-4 border-brand-blue/30 pl-6">
+                    <p className="text-lg md:text-xl font-display font-light italic text-ink-muted leading-relaxed border-l-4 border-primary/30 pl-6">
                         {language === 'ar'
                             ? `يرجى الإجابة بناءً على تجربتك مع ${category}.`
                             : `Please answer based on your awareness and experience with ${category}.`}

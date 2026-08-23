@@ -60,41 +60,41 @@ export default function ProductTestPhaseHeader({
                 <motion.div
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="relative overflow-hidden p-8 md:p-10 rounded-[2.5rem] bg-gradient-to-br from-brand-blue/8 via-brand-blue/4 to-transparent border-2 border-brand-blue/15"
+                    className="relative overflow-hidden p-8 md:p-10 rounded-[2.5rem] bg-gradient-to-br from-primary/8 via-brand-blue/4 to-transparent border-2 border-primary/15"
                 >
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-brand-blue/5 rounded-full blur-3xl pointer-events-none" />
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
                     <div className="relative z-10 space-y-5">
-                        <div className="w-14 h-14 rounded-2xl bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center">
-                            <Icon className="w-7 h-7 text-brand-blue" />
+                        <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+                            <Icon className="w-7 h-7 text-primary-soft" />
                         </div>
                         <div>
-                            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-brand-blue/70 mb-2">
+                            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary-soft/70 mb-2">
                                 {isArabic ? 'مرحلة التقييم' : 'Evaluation Phase'}
                             </p>
-                            <h2 className="text-2xl md:text-3xl font-display font-bold text-slate-900 dark:text-white">
+                            <h2 className="text-2xl md:text-3xl font-display font-bold text-ink">
                                 {intro.title}
                             </h2>
                         </div>
-                        <p className="text-base text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                        <p className="text-base text-ink-muted leading-relaxed font-medium">
                             {intro.body}
                         </p>
-                        <div className="flex items-start gap-3 p-4 rounded-2xl bg-white/70 dark:bg-slate-900/60 border border-brand-blue/10">
+                        <div className="flex items-start gap-3 p-4 rounded-2xl bg-white/70 dark:bg-slate-900/60 border border-primary/10">
                             <Sparkles className="w-4 h-4 text-brand-cyan shrink-0 mt-0.5" />
-                            <p className="text-sm text-slate-500 dark:text-slate-400 italic">{intro.hint}</p>
+                            <p className="text-sm text-ink-muted italic">{intro.hint}</p>
                         </div>
                     </div>
                 </motion.div>
             ) : (
                 <div className="space-y-2">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-brand-blue/10 flex items-center justify-center">
-                            <Icon className="w-5 h-5 text-brand-blue" />
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                            <Icon className="w-5 h-5 text-primary-soft" />
                         </div>
                         <div>
                             <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
                                 {phaseLabel}
                             </p>
-                            <h2 className="text-xl font-display font-bold text-slate-900 dark:text-white">
+                            <h2 className="text-xl font-display font-bold text-ink">
                                 {sectionTitle}
                             </h2>
                         </div>

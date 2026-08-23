@@ -10,7 +10,7 @@ export default function TimeSeriesChart({ data }: TimeSeriesChartProps) {
         <div className="bg-white border border-slate-100 rounded-[2.5rem] p-8 shadow-xl h-full flex flex-col text-left">
             <div className="flex items-center justify-between mb-8">
                 <h3 className="text-lg font-display font-black flex items-center gap-2 text-slate-900">
-                    <TrendingUp className="w-5 h-5 text-brand-blue" />
+                    <TrendingUp className="w-5 h-5 text-primary-soft" />
                     Participation Trends
                 </h3>
                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100 shadow-inner">Last 30 Days</span>

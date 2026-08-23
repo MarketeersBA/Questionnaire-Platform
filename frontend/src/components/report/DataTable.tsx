@@ -11,10 +11,10 @@ export function DataTable({ data }: { data: any }) {
         <div className="overflow-hidden rounded-3xl border border-white/10 shadow-2xl bg-slate-950/20 backdrop-blur-md">
             <div className="overflow-x-auto">
                 <table className="min-w-full border-collapse">
-                    <thead className="bg-brand-blue/5 border-b border-white/10">
+                    <thead className="bg-primary/5 border-b border-white/10">
                         <tr>
                             {data.columns.map((col: string, i: number) => (
-                                <th key={i} className="px-8 py-5 text-left text-[10px] font-black text-brand-blue uppercase tracking-[0.3em] whitespace-nowrap">
+                                <th key={i} className="px-8 py-5 text-left text-[10px] font-black text-primary-soft uppercase tracking-[0.3em] whitespace-nowrap">
                                     {col}
                                 </th>
                             ))}
@@ -22,7 +22,7 @@ export function DataTable({ data }: { data: any }) {
                     </thead>
                     <tbody className="divide-y divide-white/5">
                         {data.rows.map((row: any[], i: number) => (
-                            <tr key={i} className="hover:bg-brand-blue/5 transition-all group">
+                            <tr key={i} className="hover:bg-primary/5 transition-all group">
                                 {row.map((cell: any, j: number) => (
                                     <td key={j} className="px-8 py-5 whitespace-nowrap text-sm font-bold text-slate-300 group-hover:text-white transition-colors">
                                         <span className="tabular-nums">

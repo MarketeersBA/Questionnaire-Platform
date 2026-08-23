@@ -13,17 +13,9 @@ import {
 } from 'recharts';
 import { motion } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
+import { CHART_SERIES } from '../../constants/brandPalette';
 
-const BRAND_COLORS = [
-    '#6366f1', // Indigo
-    '#ec4899', // Pink
-    '#10b981', // Emerald
-    '#f59e0b', // Amber
-    '#3b82f6', // Blue
-    '#8b5cf6', // Violet
-    '#06b6d4', // Cyan
-    '#f43f5e', // Rose
-];
+const BRAND_COLORS = CHART_SERIES;
 
 // Custom Tooltip component
 const CustomTooltip = memo(({ active, payload }: any) => {
@@ -32,25 +24,25 @@ const CustomTooltip = memo(({ active, payload }: any) => {
 
     return (
         <div className="bg-white/95 dark:bg-slate-900/98 backdrop-blur-3xl border border-slate-200 dark:border-white/20 p-5 rounded-[24px] shadow-2xl min-w-[220px]">
-            <div className="flex items-center gap-3 mb-4 border-b border-slate-100 dark:border-white/10 pb-3">
+            <div className="flex items-center gap-3 mb-4 border-b border-line/80 dark:border-line/10 pb-3">
                 <div className="w-3 h-3 rounded-full shadow-[0_0_8px_rgba(0,0,0,0.2)]" style={{ backgroundColor: data.color }} />
-                <p className="font-black text-slate-800 dark:text-white uppercase tracking-[0.15em] text-[10px]">{data.brand}</p>
+                <p className="font-black text-ink uppercase tracking-[0.15em] text-[10px]">{data.brand}</p>
             </div>
             <div className="space-y-3">
                 <div className="flex justify-between items-center bg-slate-50 dark:bg-white/5 px-3 py-2 rounded-xl">
-                    <span className="text-slate-500 dark:text-slate-400 text-[9px] font-black uppercase tracking-widest">Classification</span>
-                    <span className="text-brand-blue font-black text-[10px] uppercase italic tracking-tighter">{data.quadrant}</span>
+                    <span className="text-ink-muted text-[9px] font-black uppercase tracking-widest">Classification</span>
+                    <span className="text-primary-soft font-black text-[10px] uppercase italic tracking-tighter">{data.quadrant}</span>
                 </div>
                 <div className="grid grid-cols-1 gap-2 mt-2">
                     <div className="flex justify-between items-center">
-                        <span className="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-tight">Market Momentum</span>
+                        <span className="text-ink-muted text-[10px] font-bold uppercase tracking-tight">Market Momentum</span>
                         <span className="font-mono text-xs font-black text-slate-700 dark:text-slate-200">{data.x > 0 ? '+' : ''}{data.x.toFixed(2)} σ</span>
                     </div>
                     <div className="flex justify-between items-center">
-                        <span className="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-tight">Quality Index</span>
+                        <span className="text-ink-muted text-[10px] font-bold uppercase tracking-tight">Quality Index</span>
                         <span className="font-mono text-xs font-black text-slate-700 dark:text-slate-200">{data.y > 0 ? '+' : ''}{data.y.toFixed(2)} σ</span>
                     </div>
-                    <div className="flex justify-between items-center pt-2 border-t border-slate-100 dark:border-white/5">
+                    <div className="flex justify-between items-center pt-2 border-t border-line/80 dark:border-line/10">
                         <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest italic">Sample Reach</span>
                         <span className="font-mono text-xs font-black text-emerald-500">N={data.n}</span>
                     </div>
@@ -93,15 +85,15 @@ export function PositioningMatrixChart({ data, isFocusMode, presentationHeight }
         >
             {/* Modern Quadrant Labels - Architectural Overlay */}
             <div className="absolute inset-x-0 inset-y-0 pointer-events-none grid grid-cols-2 grid-rows-2 p-12 opacity-60 dark:opacity-30">
-                <div className="border-r border-b border-dashed border-slate-200 dark:border-white/10 flex flex-col items-center justify-center p-8 text-center group">
+                <div className="border-r border-b border-dashed border-line/80 dark:border-line/10 flex flex-col items-center justify-center p-8 text-center group">
                     <span className="text-[9px] font-black uppercase tracking-[0.4em] text-amber-500 mb-2">Exclusive</span>
                     <span className="text-[18px] font-black uppercase tracking-tighter text-slate-300 dark:text-slate-700 italic">Premium Niche</span>
                 </div>
-                <div className="border-b border-dashed border-slate-200 dark:border-white/10 flex flex-col items-center justify-center p-8 text-center bg-emerald-500/[0.02]">
+                <div className="border-b border-dashed border-line/80 dark:border-line/10 flex flex-col items-center justify-center p-8 text-center bg-emerald-500/[0.02]">
                     <span className="text-[9px] font-black uppercase tracking-[0.4em] text-emerald-500 mb-2">Dominant</span>
                     <span className="text-[18px] font-black uppercase tracking-tighter text-slate-300 dark:text-slate-700 italic">Market Leaders</span>
                 </div>
-                <div className="border-r border-dashed border-slate-200 dark:border-white/10 flex flex-col items-center justify-center p-8 text-center bg-slate-500/[0.02]">
+                <div className="border-r border-dashed border-line/80 dark:border-line/10 flex flex-col items-center justify-center p-8 text-center bg-slate-500/[0.02]">
                     <span className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-400 mb-2">Emergent</span>
                     <span className="text-[18px] font-black uppercase tracking-tighter text-slate-300 dark:text-slate-700 italic">Followers</span>
                 </div>
@@ -193,7 +185,7 @@ export function PositioningMatrixChart({ data, isFocusMode, presentationHeight }
             </div>
 
             {/* Strategic Axis Legend */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-12 text-[8px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-slate-600 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md px-8 py-2 rounded-full border border-slate-200 dark:border-white/5">
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-12 text-[8px] font-black uppercase tracking-[0.3em] text-ink-subtle bg-white/50 dark:bg-slate-900/50 backdrop-blur-md px-8 py-2 rounded-full border border-line/80 dark:border-line/10">
                 <div className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                     <span>Positive Quality Delta</span>

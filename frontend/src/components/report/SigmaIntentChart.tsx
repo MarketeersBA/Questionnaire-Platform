@@ -16,6 +16,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { Filter, Zap, AlertTriangle } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { CHART_SERIES } from '../../constants/brandPalette';
 
 interface DataPoint {
     brand: string;
@@ -40,15 +41,7 @@ interface SigmaIntentChartProps {
     presentationHeight?: number;
 }
 
-const BRAND_COLORS: string[] = [
-    '#6366f1', // Indigo
-    '#10b981', // Emerald
-    '#f43f5e', // Rose
-    '#f59e0b', // Amber
-    '#8b5cf6', // Violet
-    '#06b6d4', // Cyan
-    '#ec4899', // Pink
-];
+const BRAND_COLORS: string[] = CHART_SERIES;
 
 export function SigmaIntentChart({ data, isFocusMode, presentationHeight }: SigmaIntentChartProps) {
     const { theme } = useTheme();
@@ -81,10 +74,10 @@ export function SigmaIntentChart({ data, isFocusMode, presentationHeight }: Sigm
         if (active && payload && payload.length) {
             const d: DataPoint = payload[0].payload;
             return (
-                <div className="glass-panel bg-white/95 dark:bg-slate-900/95 p-6 rounded-[32px] border border-slate-200 dark:border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.2)] backdrop-blur-2xl min-w-[280px]">
-                    <div className="flex items-center gap-4 mb-5 pb-4 border-b border-slate-100 dark:border-white/5">
+                <div className="glass-panel bg-white/95 dark:bg-slate-900/95 p-6 rounded-[32px] border border-line/80 dark:border-line/10 shadow-[0_20px_50px_rgba(0,0,0,0.2)] backdrop-blur-2xl min-w-[280px]">
+                    <div className="flex items-center gap-4 mb-5 pb-4 border-b border-line/80 dark:border-line/10">
                         <div className="w-4 h-4 rounded-full shadow-[0_0_15px_rgba(0,0,0,0.1)]" style={{ backgroundColor: d.color, boxShadow: `0 0 20px ${d.color}44` }} />
-                        <span className="font-black uppercase tracking-[0.2em] text-[12px] text-slate-900 dark:text-white">
+                        <span className="font-black uppercase tracking-[0.2em] text-[12px] text-ink">
                             {d.brand}
                         </span>
                     </div>
@@ -107,20 +100,20 @@ export function SigmaIntentChart({ data, isFocusMode, presentationHeight }: Sigm
                                 <span className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">T2B Baseline</span>
                             </div>
                         </div>
-                        <div className="pt-4 mt-2 border-t border-slate-100 dark:border-white/5 grid grid-cols-2 gap-4">
+                        <div className="pt-4 mt-2 border-t border-line/80 dark:border-line/10 grid grid-cols-2 gap-4">
                             <div className="flex flex-col">
                                 <span className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">Mean</span>
-                                <span className="text-xs text-slate-600 dark:text-slate-300 font-black">{d.raw_mean}</span>
+                                <span className="text-xs text-ink-muted font-black">{d.raw_mean}</span>
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">Category Avg</span>
-                                <span className="text-xs text-slate-600 dark:text-slate-300 font-black">{d.category_mean}</span>
+                                <span className="text-xs text-ink-muted font-black">{d.category_mean}</span>
                             </div>
                         </div>
                         <div className="px-3 py-2 bg-slate-100/50 dark:bg-white/5 rounded-xl border border-slate-200/50 dark:border-white/5">
                             <div className="flex justify-between items-center">
                                 <span className="text-[9px] text-slate-400 font-black uppercase">Sample Confidence</span>
-                                <span className="text-xs text-slate-600 dark:text-slate-300 font-mono font-black">N={d.n}</span>
+                                <span className="text-xs text-ink-muted font-mono font-black">N={d.n}</span>
                             </div>
                         </div>
                     </div>
@@ -136,12 +129,12 @@ export function SigmaIntentChart({ data, isFocusMode, presentationHeight }: Sigm
             <div className="flex flex-col gap-5">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4 px-1">
-                        <div className="w-10 h-10 rounded-2xl bg-brand-blue/10 flex items-center justify-center shadow-inner">
-                            <Filter size={16} className="text-brand-blue" />
+                        <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center shadow-inner">
+                            <Filter size={16} className="text-primary-soft" />
                         </div>
                         <div className="flex flex-col">
                             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 leading-none mb-1">Analytical Engine</span>
-                            <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight">Dimension Mapping</h3>
+                            <h3 className="text-sm font-black text-ink uppercase tracking-tight">Dimension Mapping</h3>
                         </div>
                     </div>
 
@@ -171,13 +164,13 @@ export function SigmaIntentChart({ data, isFocusMode, presentationHeight }: Sigm
                             onClick={() => setSelectedAttribute(attr)}
                             className={`px-6 py-3 rounded-[20px] text-[11px] font-black uppercase tracking-widest transition-all relative overflow-hidden group/btn ${selectedAttribute === attr
                                 ? 'text-white shadow-[0_10px_25px_rgba(59,130,246,0.3)]'
-                                : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10'
+                                : 'bg-slate-100 dark:bg-white/5 text-ink-muted hover:bg-slate-200 dark:hover:bg-white/10'
                                 }`}
                         >
                             {selectedAttribute === attr && (
                                 <motion.div
                                     layoutId="activeAttr"
-                                    className="absolute inset-0 bg-gradient-to-br from-brand-blue to-blue-600 backdrop-blur-md -z-10"
+                                    className="absolute inset-0 bg-gradient-to-br from-primary to-blue-600 backdrop-blur-md -z-10"
                                 />
                             )}
                             <span className="relative z-10 flex items-center gap-2">
@@ -201,7 +194,7 @@ export function SigmaIntentChart({ data, isFocusMode, presentationHeight }: Sigm
                         <span className="text-6xl font-black uppercase -rotate-12 select-none text-center leading-none">Leveraged<br />Gap</span>
                     </div>
                     <div className="w-1/2 h-1/2 border-b border-slate-900 dark:border-white flex items-center justify-center p-12">
-                        <span className="text-6xl font-black uppercase -rotate-12 select-none text-center leading-none text-brand-blue">Growth<br />Driver</span>
+                        <span className="text-6xl font-black uppercase -rotate-12 select-none text-center leading-none text-primary-soft">Growth<br />Driver</span>
                     </div>
                     <div className="w-1/2 h-1/2 border-r border-slate-900 dark:border-white flex items-center justify-center p-12">
                         <span className="text-6xl font-black uppercase -rotate-12 select-none text-center leading-none text-rose-500">High<br />Risk</span>
@@ -351,26 +344,26 @@ export function SigmaIntentChart({ data, isFocusMode, presentationHeight }: Sigm
             {/* 3. AI-POWERED CATEGORY SYNTHESIS FOOTER */}
             <motion.div
                 layout
-                className="flex flex-col gap-6 p-10 bg-gradient-to-br from-brand-blue/10 via-brand-blue/5 to-transparent dark:from-white/5 dark:via-white/[0.02] dark:to-transparent rounded-[48px] border border-brand-blue/20 dark:border-white/10 relative overflow-hidden group shadow-2xl"
+                className="flex flex-col gap-6 p-10 bg-gradient-to-br from-primary/10 via-brand-blue/5 to-transparent dark:from-white/5 dark:via-white/[0.02] dark:to-transparent rounded-[48px] border border-primary/20 dark:border-white/10 relative overflow-hidden group shadow-2xl"
             >
-                <div className="absolute top-0 right-0 w-80 h-80 bg-brand-blue/10 rounded-full blur-[100px] -mr-40 -mt-40 transition-all duration-1000 group-hover:bg-brand-blue/20" />
+                <div className="absolute top-0 right-0 w-80 h-80 bg-primary/10 rounded-full blur-[100px] -mr-40 -mt-40 transition-all duration-1000 group-hover:bg-primary/20" />
 
                 <div className="flex items-center justify-between relative z-10">
                     <div className="flex items-center gap-5">
-                        <div className="w-16 h-16 rounded-[24px] bg-brand-blue/20 dark:bg-brand-blue/30 flex items-center justify-center text-brand-blue shadow-[0_10px_30px_rgba(59,130,246,0.2)]">
+                        <div className="w-16 h-16 rounded-[24px] bg-primary/20 dark:bg-primary/30 flex items-center justify-center text-primary-soft shadow-[0_10px_30px_rgba(59,130,246,0.2)]">
                             <Zap size={28} className="drop-shadow-lg" />
                         </div>
                         <div className="flex flex-col">
-                            <h4 className="text-[12px] font-black uppercase tracking-[0.5em] text-brand-blue mb-1">Sigma Strategic Synthesis</h4>
+                            <h4 className="text-[12px] font-black uppercase tracking-[0.5em] text-primary-soft mb-1">Sigma Strategic Synthesis</h4>
                             <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none opacity-60">Category Driver Identification Engine</span>
                         </div>
                     </div>
 
                     {data.correlations?.[selectedAttribute] !== undefined && (
-                        <div className="flex flex-col items-end px-10 border-l border-slate-200 dark:border-white/10">
+                        <div className="flex flex-col items-end px-10 border-l border-line/80 dark:border-line/10">
                             <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Correlation Strength</span>
                             <div className="flex items-baseline gap-1">
-                                <span className="text-3xl font-black text-brand-blue font-mono tabular-nums leading-none">
+                                <span className="text-3xl font-black text-primary-soft font-mono tabular-nums leading-none">
                                     {data.correlations[selectedAttribute].toFixed(2)}
                                 </span>
                                 <span className="text-[10px] font-bold text-slate-400 uppercase">/ 1.0</span>
@@ -386,13 +379,13 @@ export function SigmaIntentChart({ data, isFocusMode, presentationHeight }: Sigm
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: 20 }}
-                            className="text-2xl font-black text-slate-900 dark:text-white leading-tight tracking-tight max-w-4xl"
+                            className="text-2xl font-black text-ink leading-tight tracking-tight max-w-4xl"
                         >
                             {data.headlines?.[selectedAttribute] || `Synthesizing market behavior for ${selectedAttribute}...`}
                         </motion.p>
                     </AnimatePresence>
 
-                    <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-4xl opacity-80 font-medium">
+                    <p className="text-sm text-ink-muted leading-relaxed max-w-4xl opacity-80 font-medium">
                         This automated analysis isolates how <strong>{selectedAttribute}</strong> standard deviations (Sigma) predict shifts in consumer <strong>Purchase Intent</strong>.
                         Attributes with correlation coefficients exceeding 0.6 are identified as "Core Intent Pillars," while those below 0.3 represent "Brand Flavor" metrics with less conversion velocity.
                     </p>

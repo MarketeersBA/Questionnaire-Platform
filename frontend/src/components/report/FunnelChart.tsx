@@ -1,4 +1,7 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { CHART_SERIES } from '../../constants/brandPalette';
+import { chartChrome } from '../../constants/brandPalette';
+import { useTheme } from '../../context/ThemeContext';
 
 const transformData = (raw: any) => {
     if (!raw || !raw.labels) return [];
@@ -12,9 +15,11 @@ const transformData = (raw: any) => {
     });
 };
 
-const COLORS = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444'];
+const COLORS = CHART_SERIES;
 
 export function FunnelChart({ data }: { data: any }) {
+    const { theme } = useTheme();
+    const chrome = chartChrome(theme === 'dark');
     const chartData = transformData(data);
     const dataKeys = data?.datasets?.map((ds: any) => ds.label) || [];
 
@@ -23,12 +28,12 @@ export function FunnelChart({ data }: { data: any }) {
     return (
         <ResponsiveContainer width="100%" height={Math.max(350, chartData.length * 60 + 80)}>
             <BarChart data={chartData} layout="vertical" margin={{ top: 20, right: 30, left: 140, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} vertical={true} stroke="#1e293b" />
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} vertical={true} stroke={chrome.grid} />
                 <XAxis type="number" tickFormatter={(val) => `${Math.round(val)}%`} tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 700 }} axisLine={false} tickLine={false} />
-                <YAxis dataKey="name" type="category" tick={{ fill: '#e2e8f0', fontSize: 13, fontWeight: 700 }} axisLine={false} tickLine={false} width={130} />
+                <YAxis dataKey="name" type="category" tick={{ fill: chrome.label, fontSize: 12, fontWeight: 700 }} axisLine={false} tickLine={false} width={130} />
                 <Tooltip
                     cursor={{ fill: 'rgba(255,255,255,0.03)' }}
-                    contentStyle={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', backgroundColor: '#0f172a', color: '#e2e8f0' }}
+                    contentStyle={{ borderRadius: '14px', border: `1px solid ${chrome.tooltipBorder}`, backgroundColor: chrome.tooltipBg, color: chrome.label, fontWeight: 700 }}
                     formatter={(val: any) => `${Math.round(val)}%`}
                 />
                 <Legend wrapperStyle={{ paddingTop: '20px', color: '#94a3b8', fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.1em' }} />

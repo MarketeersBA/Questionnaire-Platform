@@ -10,15 +10,10 @@ import {
     ReferenceLine
 } from 'recharts';
 import { motion } from 'framer-motion';
+import { CHART_SERIES } from '../../constants/brandPalette';
+import { useTheme } from '../../context/ThemeContext';
 
-const COLORS = [
-    '#60a5fa', // Blue
-    '#34d399', // Emerald
-    '#fb7185', // Rose
-    '#fbbf24', // Amber
-    '#a78bfa', // Violet
-    '#22d3ee', // Cyan
-];
+const COLORS = CHART_SERIES;
 
 const transformData = (raw: any) => {
     if (!raw || !raw.labels) return [];
@@ -40,15 +35,15 @@ const CustomDot = (props: any) => {
     if (value === 0 || value === null) return null;
 
     return (
-        <svg x={cx - 6} y={cy - 6} width={12} height={12} fill="white">
+        <svg x={cx - 6} y={cy - 6} width={12} height={12}>
             <circle
                 cx="6"
                 cy="6"
                 r="4"
                 fill={stroke}
-                stroke="white"
+                stroke="rgb(var(--c-surface))"
                 strokeWidth="2"
-                className="drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]"
+                className="drop-shadow-[0_1px_3px_rgba(15,23,42,0.35)]"
             />
         </svg>
     );
@@ -63,6 +58,8 @@ export function AttributeProfileChart({ data }: { data: any }) {
     const datasets = Array.isArray(actualData.datasets) ? actualData.datasets : [];
 
     // Defensive State Init
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
     const [visibleBrands, setVisibleBrands] = useState<string[]>(() =>
         datasets.map((ds: any) => ds.brand || ds.label).filter(Boolean)
     );
@@ -110,8 +107,8 @@ export function AttributeProfileChart({ data }: { data: any }) {
                             className={`
                                 flex items-center gap-2 px-4 py-2 rounded-2xl border transition-all duration-300
                                 ${isVisible
-                                    ? 'bg-white/10 border-white/20 text-white shadow-[0_0_15px_rgba(255,255,255,0.05)]'
-                                    : 'bg-transparent border-white/5 text-slate-500 grayscale opacity-40'}
+                                    ? 'bg-primary/10 dark:bg-white/10 border-primary/25 dark:border-white/20 text-ink shadow-sm'
+                                    : 'bg-transparent border-line/60 dark:border-white/5 text-ink-subtle grayscale opacity-45'}
                             `}
                         >
                             <div
@@ -130,22 +127,22 @@ export function AttributeProfileChart({ data }: { data: any }) {
             <div className="w-full h-[700px] relative">
                 {/* Visual Gradient Background for Context */}
                 <div className="absolute inset-0 flex pointer-events-none opacity-[0.03]">
-                    <div className="flex-1 bg-gradient-to-r from-red-500 to-transparent" />
-                    <div className="flex-1 bg-gradient-to-r from-transparent to-emerald-500" />
+                    <div className="flex-1 bg-gradient-to-r from-accent to-transparent" />
+                    <div className="flex-1 bg-gradient-to-r from-transparent to-primary" />
                 </div>
 
                 {/* Semantic Scale Labels */}
-                <div className="flex justify-between items-center max-w-[calc(100%-160px)] ml-[140px] mb-8 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+                <div className="flex justify-between items-center max-w-[calc(100%-160px)] ml-[140px] mb-8 text-[10px] font-black uppercase tracking-[0.2em] text-ink-subtle">
                     <span className="flex items-center gap-3">
-                        <span className="text-red-400/50">Dislike</span>
-                        <div className="w-16 h-px bg-slate-800" />
+                        <span className="text-accent-soft">Dislike</span>
+                        <div className="w-16 h-px bg-accent/30" />
                     </span>
-                    <span className="text-slate-400 bg-slate-800/80 px-4 py-1.5 rounded-full border border-white/5 backdrop-blur-sm">
+                    <span className="text-ink-muted bg-surface-sunken px-4 py-1.5 rounded-full border border-primary/15 dark:border-line/10">
                         Neutral ({(domain[0] + domain[1]) / 2})
                     </span>
                     <span className="flex items-center gap-3">
-                        <div className="w-16 h-px bg-slate-800" />
-                        <span className="text-emerald-400/50">Like</span>
+                        <div className="w-16 h-px bg-primary/30" />
+                        <span className="text-primary-soft">Like</span>
                     </span>
                 </div>
 
@@ -169,8 +166,8 @@ export function AttributeProfileChart({ data }: { data: any }) {
                         <CartesianGrid
                             horizontal={true}
                             vertical={true}
-                            stroke="white"
-                            strokeOpacity={0.03}
+                            stroke={isDark ? '#FFFFFF' : '#0F172A'}
+                            strokeOpacity={isDark ? 0.05 : 0.08}
                             strokeDasharray="4 4"
                         />
 
@@ -179,7 +176,7 @@ export function AttributeProfileChart({ data }: { data: any }) {
                             domain={domain}
                             orientation="top"
                             ticks={domain[1] === 10 ? [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] : [1, 2, 3, 4, 5]}
-                            tick={{ fill: '#475569', fontSize: 10, fontWeight: 900 }}
+                            tick={{ fill: isDark ? '#94A3B8' : '#475569', fontSize: 10, fontWeight: 900 }}
                             axisLine={false}
                             tickLine={false}
                         />
@@ -196,10 +193,13 @@ export function AttributeProfileChart({ data }: { data: any }) {
                                             x={-10}
                                             y={0}
                                             dy={4}
+                                            /* Was hardcoded #f8fafc — near-white,
+                                               so every attribute name vanished
+                                               against the light-mode canvas. */
                                             textAnchor="end"
-                                            fill="#f8fafc"
-                                            fontSize={10}
-                                            fontWeight={900}
+                                            fill={isDark ? '#E2E8F0' : '#1E293B'}
+                                            fontSize={11}
+                                            fontWeight={800}
                                             className="uppercase tracking-wider"
                                         >
                                             {payload.value}
@@ -208,12 +208,12 @@ export function AttributeProfileChart({ data }: { data: any }) {
                                 );
                             }}
                             width={130}
-                            axisLine={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1 }}
+                            axisLine={{ stroke: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(15,23,42,0.15)', strokeWidth: 1 }}
                             tickLine={false}
                         />
 
                         <Tooltip
-                            cursor={{ stroke: 'rgba(255,255,255,0.05)', strokeWidth: 40 }}
+                            cursor={{ stroke: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(37,94,145,0.07)', strokeWidth: 40 }}
                             content={({ active, payload }) => {
                                 if (active && payload && payload.length) {
                                     return (
@@ -248,7 +248,7 @@ export function AttributeProfileChart({ data }: { data: any }) {
 
                         <ReferenceLine
                             x={(domain[0] + domain[1]) / 2}
-                            stroke="rgba(255,255,255,0.15)"
+                            stroke={isDark ? 'rgba(255,255,255,0.18)' : 'rgba(15,23,42,0.18)'}
                             strokeDasharray="5 5"
                             label={{
                                 position: 'insideBottomRight',

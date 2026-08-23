@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import logging
 import math
+import re
 from functools import cached_property
 from collections import Counter
 from typing import Any, Dict, List, Optional, Set, TypedDict
@@ -114,8 +115,8 @@ class ReportAggregator:
             ("criteria_table", self.criteria_table),
             ("brand_profile_analytics", self.brand_profile_analytics),
             ("likeness_profile_chart", self.likeness_profile_chart), # NEW: 3rd Chart in Criteria Analysis
-            ("sub_attribute_scatter", self.sub_attribute_scatter),
-            ("overall_scatter", self.overall_scatter),
+            ("key_preference_drivers", self.key_preference_drivers),
+            ("driver_ranking", self.driver_ranking_chart),
             ("importance_combined", self.importance_combined),
             ("product_preference", self.product_preference),
             ("overall_averages", self.overall_averages),
@@ -165,7 +166,7 @@ class ReportAggregator:
                         charts.append(comp)
                         
             except Exception as e:
-                logger.warning("Chart computation '%s' failed: %s", chart_id, e)
+                logger.warning("Chart computation '%s' failed: %s", chart_id, e, exc_info=True)
 
         # Multi-output charts
         try:
@@ -289,11 +290,29 @@ class ReportAggregator:
         # We target records where the 'metric' is the primary descriptor of the 'attribute'
         # Or where the value scale indicates the primary 10-point question.
         main_df = df[df["metric"].str.lower() == df["attribute"].str.lower()]
-        
-        # Fallback: if no rows match brand==metric, just take the ones with max scale values
+
+        # Fallback A: some submission shapes leave `metric` blank for the
+        # primary/overall question instead of mirroring the attribute name —
+        # treat a blank metric as "this is the main question" too.
         if main_df.empty:
-            main_df = df.copy() # Should not happen with current schema, but safe
-            
+            main_df = df[df["metric"].astype(str).str.strip() == ""]
+
+        # Fallback B: still nothing matched. Averaging every sub-metric
+        # together here would silently mix different scales/questions into
+        # one meaningless number (e.g. a 1-5 sub-attribute blended with a
+        # 1-10 overall score) — exactly what this filter exists to prevent.
+        # Instead, deterministically pick ONE representative metric per
+        # attribute (the first one recorded) so the chart still renders
+        # with a single coherent scale per attribute rather than staying
+        # empty or silently corrupting the averages.
+        if main_df.empty:
+            first_metric_per_attr = df.groupby("attribute")["metric"].transform("first")
+            main_df = df[df["metric"] == first_metric_per_attr]
+            logger.info(
+                "Profile Chart: no exact metric==attribute or blank-metric match; "
+                "falling back to first metric per attribute."
+            )
+
         df = main_df.copy()
 
 
@@ -538,12 +557,12 @@ class ReportAggregator:
 
         # 1. Selection & Sorting: Identify Top 10 Drivers (X-axis labels)
         sig_map = self._compute_significance(df)
-        overall_markers = {"general", "overall", "likeness", "total", "global"}
+        overall_markers = {"general", "overall", "likeness", "total", "global", "essence"}
         
         # Filter markers and sort by correlation (significance)
         # We take the TOP 10 descending, then reverse so "Most Important" is on the right.
         sorted_attrs = sorted(
-            [a for a in sig_map.keys() if str(a).lower() not in overall_markers],
+            [a for a in sig_map.keys() if not any(m in str(a).lower() for m in overall_markers)],
             key=lambda a: sig_map.get(a, 0),
             reverse=True
         )[:10]
@@ -551,7 +570,7 @@ class ReportAggregator:
 
         if not sorted_attrs:
             # Fallback to alpha-sorted attributes if no significance found
-            sorted_attrs = sorted([a for a in df["attribute"].unique() if str(a).lower() not in overall_markers])[:10]
+            sorted_attrs = sorted([a for a in df["attribute"].unique() if not any(m in str(a).lower() for m in overall_markers)])[:10]
             sorted_attrs.reverse() # Most important (alphabetically or otherwise) to the right
 
         # 2. Vectorized Mean Calculation
@@ -1843,19 +1862,15 @@ class ReportAggregator:
         
         # 2. Identify Top 10 Attributes (Drivers of Likeness)
         # Avoid overall markers in the breakdown
-        overall_markers = {"general", "overall", "likeness", "total", "global"}
+        overall_markers = {"general", "overall", "likeness", "total", "global", "essence"}
         sorted_attrs = sorted(
-            [a for a in sig_map.keys() if a.lower() not in overall_markers],
+            [a for a in sig_map.keys() if not any(m in str(a).lower() for m in overall_markers)],
             key=lambda a: sig_map.get(a, 0),
             reverse=True
         )[:10]
 
         if not sorted_attrs:
             return {}
-
-        # Scale Detection (Top-2 Threshold)
-        max_val = df["value"].max()
-        t2b_threshold = 9 if max_val > 5 else 4
 
         datasets = []
         available_brands = sorted(self.brands)
@@ -1866,6 +1881,14 @@ class ReportAggregator:
                 
             brand_points = []
             for attr in sorted_attrs:
+                # Find global max for this attribute across ALL brands to determine scale
+                global_attr_df = df[df['attribute'] == attr]
+                global_numeric = pd.to_numeric(global_attr_df["value"], errors='coerce').dropna()
+                if global_numeric.empty:
+                    continue
+                global_max = global_numeric.max()
+                t2b_threshold = global_max - 1
+                
                 attr_df = brand_df[brand_df['attribute'] == attr]
                 if attr_df.empty:
                     continue
@@ -1878,6 +1901,9 @@ class ReportAggregator:
                 t2b_pct = (numeric_vals >= t2b_threshold).mean() * 100
                 brand_points.append({
                     "attribute": attr,
+                    # Join key for the Key Preference Drivers drill-down: must
+                    # match `main_key` on sub_attribute_scatter points.
+                    "main_key": self._norm_attr_key(attr),
                     "x": round(sig_map.get(attr, 0) * 100, 1),
                     "y": round(float(t2b_pct), 1),
                     "brand": brand
@@ -1957,11 +1983,20 @@ class ReportAggregator:
                             break
 
             if matched_metric:
-                target_map[matched_metric] = {
-                    "display": f"({main_label} - {supp_label})",
-                    "main_attribute": main_label,
-                    "sub_attribute": supp_label
-                }
+                # Prefer the dataframe's own `attribute` value as the main
+                # attribute. `overall_scatter` labels its points from that same
+                # column, so sourcing it here guarantees both panels of the
+                # drill-down speak one vocabulary. The registry label is only a
+                # fallback for metrics with no attribute recorded.
+                data_main = ""
+                matched_rows = df[df["metric"] == matched_metric]
+                if not matched_rows.empty:
+                    data_main = str(matched_rows["attribute"].iloc[0] or "").strip()
+
+                target_map[matched_metric] = self._build_attribute_label(
+                    data_main or main_label,
+                    supp_label,
+                )
 
         if not target_map:
             return {}
@@ -2009,6 +2044,9 @@ class ReportAggregator:
                     "attribute": meta["display"],
                     "main_attribute": meta["main_attribute"],
                     "sub_attribute": meta["sub_attribute"],
+                    "main_key": meta["main_key"],
+                    "sub_key": meta["sub_key"],
+                    "is_distinct": meta["is_distinct"],
                     "x": round(sig_map.get(metric, 0) * 100, 1),
                     "y": round(float(t2b_pct), 1),
                     "brand": brand,
@@ -2041,9 +2079,144 @@ class ReportAggregator:
             "section": "Criteria Analysis"
         }
 
+    def driver_ranking_chart(self) -> Dict[str, Any]:
+        """
+        Tornado-style ranked bar view of the same sub-attribute impact/
+        correlation data used by the Sub-Attribute Importance Matrix
+        (`sub_attribute_scatter`), reformatted for the frontend's
+        TornadoChart (CHART_MAP['driver_ranking']) so respondents get a
+        single ranked "what matters most" view alongside the scatter matrix.
+        """
+        scatter = self.sub_attribute_scatter()
+        if not scatter or not scatter.get("data", {}).get("datasets"):
+            return {}
+
+        # Main Insights shows MAIN attributes only. Sub-attribute points are
+        # rolled up into their parent so the ranking reads as "which attribute
+        # matters most", not "which of 40 descriptors matters most".
+        datasets = []
+        for ds in scatter["data"]["datasets"]:
+            rolled: Dict[str, Dict[str, Any]] = {}
+            for pt in ds.get("data", []):
+                key = pt.get("main_key") or self._norm_attr_key(pt.get("main_attribute", ""))
+                if not key:
+                    continue
+                bucket = rolled.setdefault(key, {
+                    "attribute": pt.get("main_attribute") or pt.get("attribute"),
+                    "main_attribute": pt.get("main_attribute") or pt.get("attribute"),
+                    "main_key": key,
+                    "brand": ds.get("brand"),
+                    "color": pt.get("color"),
+                    "_x": [],
+                    "_y": [],
+                    "sub_count": 0,
+                })
+                bucket["_x"].append(pt.get("x", 0))
+                bucket["_y"].append(pt.get("y", 0))
+                if pt.get("is_distinct"):
+                    bucket["sub_count"] += 1
+
+            points = []
+            for bucket in rolled.values():
+                xs, ys = bucket.pop("_x"), bucket.pop("_y")
+                if not xs:
+                    continue
+                bucket["x"] = round(sum(xs) / len(xs), 1)
+                bucket["y"] = round(sum(ys) / len(ys), 1)
+                points.append(bucket)
+
+            if points:
+                points.sort(key=lambda p: p["x"], reverse=True)
+                datasets.append({**ds, "data": points})
+
+        if not datasets:
+            return {}
+
+        return {
+            "chart_id": "driver_ranking",
+            "chart_type": "driver_ranking",
+            "title": "Top Attribute Drivers",
+            "subtitle": "Ranked impact of each attribute on overall brand likeness",
+            "data": {
+                "datasets": datasets,
+                "top_attributes": [p["attribute"] for p in datasets[0]["data"]],
+                "level": "main",
+            },
+            "brands": scatter.get("brands"),
+            "base_n": scatter.get("base_n"),
+        }
+
     # ──────────────────────────────────────────────────────────────────────
     #  15. Combined Importance (Unified Matrix)
     # ──────────────────────────────────────────────────────────────────────
+
+    def key_preference_drivers(self) -> Dict[str, Any]:
+        """
+        Unified view of Main Attributes (overall_scatter) and Sub-Attributes
+        (sub_attribute_scatter) for the interactive Key Preference Drivers chart.
+        """
+        overall = self.overall_scatter()
+        sub_all = self.sub_attribute_scatter()
+        
+        if not overall or not overall.get("data"):
+            return {}
+            
+        return {
+            "chart_id": "key_preference_drivers",
+            "chart_type": "key_preference_drivers",
+            "title": "Key Preference Drivers",
+            "subtitle": "Interactive attribute impact analysis",
+            "data": {
+                "main_scatter": overall.get("data", {}),
+                "sub_scatter": sub_all.get("data", {}) if sub_all else {},
+                # Main -> sub map derived from the survey's attribute config,
+                # so the drill-down knows which attributes are expandable even
+                # before a point is clicked.
+                "attribute_hierarchy": self.attribute_hierarchy(
+                    (sub_all or {}).get("data", {}).get("attribute_metadata") or []
+                ),
+            },
+            "brands": overall.get("brands", []),
+            "base_n": overall.get("base_n", 0),
+        }
+
+    def attribute_hierarchy(
+        self,
+        metadata: Optional[List[Dict[str, Any]]] = None,
+    ) -> List[Dict[str, Any]]:
+        """
+        Main-attribute -> sub-attribute map for the drill-down.
+
+        Built from the resolved sub-scatter metadata when available, since that
+        has already been reconciled against the response data and therefore
+        shares a key space with the main scatter. Falls back to the raw survey
+        attribute registry when no scatter was produced.
+
+        Flat attributes (sub == main, or no sub defined) report an empty
+        `sub_attributes` list rather than echoing their own name.
+        """
+        if metadata:
+            entries = metadata
+        else:
+            entries = [
+                self._build_attribute_label(e.get("main_att", ""), e.get("supp_att", ""))
+                for e in self.attribute_registry
+            ]
+
+        hierarchy: Dict[str, Dict[str, Any]] = {}
+        for meta in entries:
+            main_key = meta.get("main_key")
+            if not main_key:
+                continue
+            node = hierarchy.setdefault(main_key, {
+                "main_attribute": meta.get("main_attribute", ""),
+                "main_key": main_key,
+                "sub_attributes": [],
+            })
+            sub = meta.get("sub_attribute")
+            if meta.get("is_distinct") and sub and sub not in node["sub_attributes"]:
+                node["sub_attributes"].append(sub)
+        return list(hierarchy.values())
 
     def importance_combined(self) -> List[Dict[str, Any]]:
         """
@@ -2245,6 +2418,9 @@ class ReportAggregator:
                 mou_flat.append({"response_id": row["response_id"], "brand": val})
         
         mou_flat_df = pd.DataFrame(mou_flat)
+        if mou_flat_df.empty:
+            return {}
+            
         mou_counts = mou_flat_df["brand"].value_counts()
         total_mou_n = len(mou_flat_df)
         
@@ -2369,6 +2545,9 @@ class ReportAggregator:
                 mou_flat.append({"response_id": row["response_id"], "brand": val})
         
         mou_flat_df = pd.DataFrame(mou_flat)
+        if mou_flat_df.empty:
+            return {}
+        
         mou_counts = mou_flat_df["brand"].value_counts()
         total_mou_n = len(mou_flat_df)
 
@@ -2482,6 +2661,8 @@ class ReportAggregator:
         mou_series = pd.Series(mou_counts)
         brand_mou_counts = mou_series.value_counts()
         total_mou_n = len(mou_counts)
+        if total_mou_n == 0:
+            return {}
         
         shares = {b: (brand_mou_counts.get(b, 0) / total_mou_n) * 100 for b in self.brands}
         share_vals = list(shares.values())
@@ -2938,7 +3119,7 @@ class ReportAggregator:
 
         # 1. Identify "Overall" Rating Column (Best-Effort Search)
         # Overall/General likeness is always the baseline for importance
-        overall_markers = ["general", "overall", "global", "likeness", "total"]
+        overall_markers = ["general", "overall", "global", "likeness", "total", "essence"]
         general_df = pd.DataFrame()
         found_overall = None
 
@@ -3253,6 +3434,56 @@ class ReportAggregator:
             views.append(img)
 
         return views
+
+    @staticmethod
+    def _norm_attr_key(label: str) -> str:
+        """
+        Canonical join key for attribute names.
+
+        The main scatter labels its points from the dataframe's `attribute`
+        column while the sub scatter labels `main_attribute` from the registry's
+        `main_att`. Those two travel through different pipelines and drift in
+        case, spacing and punctuation, which silently breaks the drill-down
+        join. Normalizing both sides through here keeps them linkable.
+        """
+        if not label:
+            return ""
+        s = str(label).lower().strip()
+        s = re.sub(r"[\s_\-/]+", " ", s)
+        s = re.sub(r"[^\w\s]", "", s)
+        return s.strip()
+
+    @classmethod
+    def _build_attribute_label(cls, main_label: str, supp_label: str) -> Dict[str, Any]:
+        """
+        Build the display metadata for one registry attribute.
+
+        A registry entry whose sub-attribute equals (or is missing) its main
+        attribute is a *flat* attribute — the survey never defined a real
+        breakdown for it. Rendering those as "(Outershape - Outershape)" is
+        noise, so they collapse to the single name and are flagged
+        `is_distinct=False` so consumers can drop them from drill-downs.
+        """
+        main_label = (main_label or "").strip()
+        supp_label = (supp_label or "").strip()
+
+        main_key = cls._norm_attr_key(main_label)
+        supp_key = cls._norm_attr_key(supp_label)
+
+        is_distinct = bool(main_key and supp_key and main_key != supp_key)
+        if is_distinct:
+            display = f"({main_label} - {supp_label})"
+        else:
+            display = main_label or supp_label
+
+        return {
+            "display": display,
+            "main_attribute": main_label or supp_label,
+            "sub_attribute": supp_label or main_label,
+            "main_key": main_key or supp_key,
+            "sub_key": supp_key or main_key,
+            "is_distinct": is_distinct,
+        }
 
     def _norm_text(self, t: str) -> str:
         """

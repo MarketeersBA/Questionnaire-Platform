@@ -143,7 +143,7 @@ export function AICostDashboard({ isOpen, onClose, costData }: AICostDashboardPr
                                             <h3 className="text-xs font-black uppercase tracking-[0.3em] opacity-40">Cost Distribution</h3>
                                             <div className="h-[1px] flex-1 bg-slate-200 dark:bg-slate-800 opacity-50" />
                                         </div>
-                                        <div className="flex w-full h-12 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-inner">
+                                        <div className="flex w-full h-12 rounded-2xl overflow-hidden border border-line/80 dark:border-line/10 shadow-inner">
                                             {Object.entries(costData.by_component).map(([comp, metrics], idx) => {
                                                 const share = (metrics.cost_usd / costData.total_cost_usd) * 100;
                                                 const colors = ['bg-indigo-500', 'bg-cyan-500', 'bg-emerald-500', 'bg-rose-500', 'bg-amber-500', 'bg-violet-500'];

@@ -8,6 +8,46 @@ export default {
   theme: {
     extend: {
       colors: {
+        /* ── Semantic tokens (see :root / .dark in index.css) ──────────────
+         * Named by ROLE, not by literal value, and re-pointed under `.dark`.
+         * Prefer these over `x dark:y` pairs so both themes stay in sync:
+         *   bg-surface  text-ink  border-line  bg-primary  text-accent
+         * The <alpha-value> placeholder keeps opacity modifiers working,
+         * e.g. `bg-primary/10`.
+         * ---------------------------------------------------------------- */
+        canvas: 'rgb(var(--c-canvas) / <alpha-value>)',
+        surface: {
+          DEFAULT: 'rgb(var(--c-surface) / <alpha-value>)',
+          raised: 'rgb(var(--c-surface-raised) / <alpha-value>)',
+          sunken: 'rgb(var(--c-surface-sunken) / <alpha-value>)',
+        },
+        chrome: {
+          DEFAULT: 'rgb(var(--c-chrome) / <alpha-value>)',
+          deep: 'rgb(var(--c-chrome-deep) / <alpha-value>)',
+          ink: 'rgb(var(--c-chrome-ink) / <alpha-value>)',
+        },
+        ink: {
+          DEFAULT: 'rgb(var(--c-ink) / <alpha-value>)',
+          muted: 'rgb(var(--c-ink-muted) / <alpha-value>)',
+          subtle: 'rgb(var(--c-ink-subtle) / <alpha-value>)',
+          inverse: 'rgb(var(--c-ink-inverse) / <alpha-value>)',
+        },
+        line: {
+          DEFAULT: 'rgb(var(--c-line) / <alpha-value>)',
+          strong: 'rgb(var(--c-line-strong) / <alpha-value>)',
+        },
+        primary: {
+          DEFAULT: 'rgb(var(--c-primary) / <alpha-value>)',
+          soft: 'rgb(var(--c-primary-soft) / <alpha-value>)',
+        },
+        accent: {
+          DEFAULT: 'rgb(var(--c-accent) / <alpha-value>)',
+          soft: 'rgb(var(--c-accent-soft) / <alpha-value>)',
+        },
+        safe: 'rgb(var(--c-safe) / <alpha-value>)',
+        warning: 'rgb(var(--c-warning) / <alpha-value>)',
+        danger: 'rgb(var(--c-danger) / <alpha-value>)',
+
         brand: {
           // ── Dark backgrounds (UI base — unchanged) ─────────────────────
           // WARNING: 'brand.dark' is actually a LIGHT theme background color (#F8FAFC).
@@ -20,6 +60,11 @@ export default {
           blue: '#255E91',  // Lapis Blue  — Primary branding
           red: '#CD393B',  // Brand Red   — Alerts/CTAs (from logo)
           accent: '#CD393B',  // alias of red
+
+          // ── Navy (sidebar / brand chrome — theme-invariant) ─────────────
+          navy: '#0B1E3D',      // Deep navy sidebar base
+          navyLight: '#12294D', // Hover / border / raised-surface variant
+          navyDeep: '#071527',  // Darkest shade for gradient depth
 
           // ── Secondary blues (charts & interactive) ──────────────────────
           chartBlue: '#21A0FF',  // primary.light / primary.charts
@@ -51,9 +96,10 @@ export default {
         }
       },
       fontFamily: {
-        // Full brand font stack: Pangram → Segoe UI Black → Open Sans → system
-        sans: ['"Pangram Sans"', '"Segoe UI Black"', '"Open Sans"', 'ui-sans-serif', 'system-ui'],
-        display: ['"Pangram Sans"', '"Segoe UI Black"', '"Open Sans"', 'ui-sans-serif', 'system-ui'],
+        // Full brand font stack: Lora → Pangram → system
+        sans: ['"Lora"', '"Pangram Sans"', '"Segoe UI Black"', '"Open Sans"', 'ui-sans-serif', 'system-ui'],
+        display: ['"Lora"', '"Pangram Sans"', '"Segoe UI Black"', '"Open Sans"', 'ui-sans-serif', 'system-ui'],
+        pangram: ['"Pangram Sans"', '"Segoe UI Black"', 'system-ui'],
       },
       animation: {
         'pulse-slow': 'pulse 6s cubic-bezier(0.4, 0, 0.6, 1) infinite',
@@ -81,6 +127,7 @@ export default {
         }
       },
       boxShadow: {
+        'panel': 'var(--shadow-panel)',
         'glass': '0 20px 50px -12px rgba(0, 0, 0, 0.05), 0 0 1px 0 rgba(0, 0, 0, 0.05)',
         'premium': '0 10px 30px -5px rgba(0, 0, 0, 0.03), 0 4px 6px -2px rgba(0, 0, 0, 0.01)',
         'accent-glow': '0 15px 35px -5px rgba(37, 94, 145, 0.12)',

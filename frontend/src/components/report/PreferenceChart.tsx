@@ -1,5 +1,6 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useTheme } from '../../context/ThemeContext';
+import { CHART_SERIES } from '../../constants/brandPalette';
 
 // grouped_bar format: { labels: ['Attr1', 'Attr2'], datasets: [{label: 'Brand', data: [4.2, 3.8]}] }
 // Recharts expects: [{ name: 'Attr1', 'Brand A': 4.2, 'Brand B': 3.5 }]
@@ -16,7 +17,7 @@ const transformData = (raw: any) => {
     });
 };
 
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
+const COLORS = CHART_SERIES;
 
 export function PreferenceChart({ data, isFocusMode, presentationHeight }: { data: any, isFocusMode?: boolean, presentationHeight?: number }) {
     const { theme } = useTheme();

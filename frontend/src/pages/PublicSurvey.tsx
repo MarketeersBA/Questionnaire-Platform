@@ -66,6 +66,8 @@ import {
 import { collectTasteTestFollowUpScopeIds } from '../utils/followUpNavigationSafety';
 import { normalizePublicSurveyAiFollowup } from '../utils/aiFollowupConfig';
 import { localizeTasteTestSectionTitle } from '../utils/tasteTestAttributeLabels';
+import { useSurveyDirection } from '../hooks/useSurveyDirection';
+import WelcomeScreen from './PublicSurvey/WelcomeScreen';
 
 export default function PublicSurvey() {
   const { token } = useParams<{ token: string }>();
@@ -113,6 +115,7 @@ export default function PublicSurvey() {
     handleFollowUpReplyChange,
     handleFollowUpDismiss,
     suspendFollowUpsForLeavingScope,
+    setRespondentRoundCap,
   } = useFollowUpOrchestration({ token, survey, setAiInsights });
 
   const getFollowUpStateSnapshot = useCallback(() => followUpStateMapRef.current, [followUpStateMapRef]);
@@ -375,7 +378,7 @@ export default function PublicSurvey() {
           setCurrentModuleId(normalized.currentModuleId);
           setStep(normalized.step as SurveyStep);
         } else {
-          setStep('layer1');
+          setStep('welcome');
         }
 
         setLoading(false);
@@ -756,37 +759,29 @@ export default function PublicSurvey() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const cachedSurveyLang = (() => {
-    if (!token) return null;
-    try {
-      return sessionStorage.getItem(`survey_lang_${token}`);
-    } catch {
-      return null;
-    }
-  })();
-  const isArabicUi =
-    survey?.language === 'ar'
-    || cachedSurveyLang === 'ar'
-    || (!survey && !cachedSurveyLang && typeof navigator !== 'undefined' && navigator.language.toLowerCase().startsWith('ar'));
+  const { dir: surveyDir, isRtl: isArabicUi } = useSurveyDirection(survey?.language, token);
 
   if (step === 'loading' || (loading && !survey && step !== 'submitted' && step !== 'failed')) return (
     <div className="min-h-screen bg-brand-dark dark:bg-slate-950 flex items-center justify-center p-6 text-slate-800 transition-colors duration-500">
       <div className="flex flex-col items-center gap-4">
-        <div className="w-12 h-12 rounded-full border-2 border-t-brand-blue border-slate-200 dark:border-slate-800 animate-spin"></div>
-        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">Synchronizing Session</p>
+        <div className="w-12 h-12 rounded-full border-2 border-t-brand-blue border-line/80 dark:border-line/10 animate-spin"></div>
+        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-ink-subtle">Synchronizing Session</p>
       </div>
     </div>
   );
 
   return (
-    <div className="relative min-h-[100dvh] bg-brand-dark dark:bg-slate-950 flex flex-col items-center justify-center p-0 md:p-6 text-slate-900 dark:text-white font-sans transition-colors duration-500">
+    <div
+      dir={surveyDir}
+      className="relative min-h-[100dvh] bg-brand-dark dark:bg-slate-950 flex flex-col items-center justify-center p-0 md:p-6 text-ink font-sans transition-colors duration-500"
+    >
       {/* Soft Background Orbs */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] bg-brand-blue/5 rounded-full blur-[120px]"></div>
+        <div className="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] bg-primary/5 rounded-full blur-[120px]"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-[50rem] h-[50rem] bg-brand-glow/5 rounded-full blur-[150px]"></div>
       </div>
 
-      {step !== 'failed' && step !== 'submitted' && (
+      {step !== 'failed' && step !== 'submitted' && step !== 'welcome' && (
         <ScrollToBottomButton
           language={survey?.language === 'ar' ? 'ar' : 'en'}
           bottomOffsetPx={step === 'layer2' || step === 'module' || step === 'product_test' ? 72 : 12}
@@ -794,13 +789,19 @@ export default function PublicSurvey() {
       )}
 
       <AnimatePresence mode="wait">
-        {step === 'failed' ? (
+        {step === 'welcome' ? (
+          <WelcomeScreen
+            key="welcome"
+            language={isArabicUi ? 'ar' : 'en'}
+            onStart={() => setStep('layer1')}
+          />
+        ) : step === 'failed' ? (
           <motion.div
             key="failed"
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -20 }}
-            className="m-auto relative z-10 w-full max-w-lg bg-white dark:bg-slate-900 rounded-[2.5rem] p-12 border border-slate-100 dark:border-slate-800 text-center shadow-2xl transition-colors"
+            className="m-auto relative z-10 w-full max-w-lg bg-surface rounded-[2.5rem] p-12 border border-line/80 dark:border-line/10 text-center shadow-2xl transition-colors"
           >
             <div className="w-20 h-20 bg-rose-50 dark:bg-rose-950/20 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-rose-100 dark:border-rose-900/50">
               <ShieldAlert className="w-10 h-10 text-rose-500" />
@@ -818,8 +819,7 @@ export default function PublicSurvey() {
             key="submitted"
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="m-auto relative z-10 w-full max-w-lg bg-white dark:bg-slate-900 rounded-[2.5rem] p-12 border border-slate-100 dark:border-slate-800 text-center shadow-2xl transition-colors"
-            dir={isArabicUi ? 'rtl' : 'ltr'}
+            className="m-auto relative z-10 w-full max-w-lg bg-surface rounded-[2.5rem] p-12 border border-line/80 dark:border-line/10 text-center shadow-2xl transition-colors"
           >
             <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-950/20 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-emerald-100 dark:border-emerald-900/50">
               <ShieldCheck className="w-10 h-10 text-emerald-500" />
@@ -827,14 +827,14 @@ export default function PublicSurvey() {
             <h1 className="text-3xl font-display font-bold mb-4">
               {alreadyCompleted ? (
                 isArabicUi ? (
-                  <>تم إكمال <span className="text-brand-blue">الاستبيان</span> مسبقاً</>
+                  <>تم إكمال <span className="text-primary-soft">الاستبيان</span> مسبقاً</>
                 ) : (
-                  <>Survey Already <span className="text-brand-blue">Completed</span></>
+                  <>Survey Already <span className="text-primary-soft">Completed</span></>
                 )
               ) : isArabicUi ? (
-                <>اكتملت <span className="text-brand-blue">المشاركة</span></>
+                <>اكتملت <span className="text-primary-soft">المشاركة</span></>
               ) : (
-                <>Participation <span className="text-brand-blue">Complete</span></>
+                <>Participation <span className="text-primary-soft">Complete</span></>
               )}
             </h1>
             <p className="text-slate-500 font-medium leading-relaxed mb-8">
@@ -856,7 +856,7 @@ export default function PublicSurvey() {
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -20 }}
-            className="m-auto relative z-10 w-full max-w-3xl bg-white dark:bg-slate-900 rounded-none md:rounded-[3rem] p-6 md:p-12 border-0 md:border border-slate-100 dark:border-slate-800 shadow-none md:shadow-2xl transition-colors"
+            className="m-auto relative z-10 w-full max-w-3xl bg-surface rounded-none md:rounded-[3rem] p-6 md:p-12 border-0 md:border border-line/80 dark:border-line/10 shadow-none md:shadow-2xl transition-colors"
           >
             <ConfigurableModuleStep
               moduleId={currentModuleId}
@@ -912,7 +912,7 @@ export default function PublicSurvey() {
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -20 }}
-            className="m-auto relative z-10 w-full max-w-3xl bg-white dark:bg-slate-900 rounded-none md:rounded-[3rem] p-6 md:p-12 border-0 md:border border-slate-100 dark:border-slate-800 shadow-none md:shadow-2xl transition-colors"
+            className="m-auto relative z-10 w-full max-w-3xl bg-surface rounded-none md:rounded-[3rem] p-6 md:p-12 border-0 md:border border-line/80 dark:border-line/10 shadow-none md:shadow-2xl transition-colors"
           >
             <ProductTestRespondentStep
               snapshot={productTestSnapshot}
@@ -949,12 +949,12 @@ export default function PublicSurvey() {
             key="passed"
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="m-auto relative z-10 w-full max-w-lg bg-white dark:bg-slate-900 rounded-[2.5rem] p-12 border border-slate-100 dark:border-slate-800 text-center shadow-2xl transition-colors"
+            className="m-auto relative z-10 w-full max-w-lg bg-surface rounded-[2.5rem] p-12 border border-line/80 dark:border-line/10 text-center shadow-2xl transition-colors"
           >
             <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-950/20 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-emerald-100 dark:border-emerald-900/50 animate-pulse">
               <ShieldCheck className="w-10 h-10 text-emerald-500" />
             </div>
-            <h1 className="text-3xl font-display font-bold mb-4">Credentials <span className="text-brand-blue">Verified</span></h1>
+            <h1 className="text-3xl font-display font-bold mb-4">Credentials <span className="text-primary-soft">Verified</span></h1>
             <p className="text-slate-500 font-medium leading-relaxed mb-8">
               Optimization successful. Transitioning to the research instrument...
             </p>
@@ -964,7 +964,7 @@ export default function PublicSurvey() {
                   initial={{ x: "-100%" }}
                   animate={{ x: "100%" }}
                   transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-                  className="w-full h-full bg-brand-blue shadow-[0_0_10px_rgba(37,94,145,0.2)]"
+                  className="w-full h-full bg-primary shadow-[0_0_10px_rgba(37,94,145,0.2)]"
                 />
               </div>
             </div>
@@ -974,12 +974,12 @@ export default function PublicSurvey() {
             key="layer2"
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="m-auto relative z-10 w-full max-w-3xl bg-white dark:bg-slate-900 rounded-none md:rounded-[3rem] p-6 md:p-12 border-0 md:border border-slate-100 dark:border-slate-800 shadow-none md:shadow-2xl transition-colors"
+            className="m-auto relative z-10 w-full max-w-3xl bg-surface rounded-none md:rounded-[3rem] p-6 md:p-12 border-0 md:border border-line/80 dark:border-line/10 shadow-none md:shadow-2xl transition-colors"
           >
             <div className="flex items-center gap-3 mb-8">
-              <Sparkles className="w-5 h-5 text-brand-blue" />
+              <Sparkles className="w-5 h-5 text-primary-soft" />
               <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-                {survey?.language === 'ar' ? 'مرحلة' : 'Evaluation'} <span className="text-brand-blue">{survey?.language === 'ar' ? 'التقييم' : 'Phase'}</span>
+                {survey?.language === 'ar' ? 'مرحلة' : 'Evaluation'} <span className="text-primary-soft">{survey?.language === 'ar' ? 'التقييم' : 'Phase'}</span>
               </div>
             </div>
             <h1 className="text-3xl font-display font-bold tracking-tight mb-8">
@@ -1010,13 +1010,13 @@ export default function PublicSurvey() {
                       {/* Top Brand Progress (only during brand pages) */}
                       {!isOverallStep && totalBrandPages > 0 && (
                         <div className="flex items-center justify-between mb-2">
-                          <div className="px-5 py-2 rounded-2xl bg-brand-blue/5 border border-brand-blue/20 text-brand-blue text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                          <div className="px-5 py-2 rounded-2xl bg-primary/5 border border-primary/20 text-primary-soft text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
                             <Sparkles className="w-3 h-3 text-brand-cyan" />
                             {survey?.language === 'ar' ? 'التقدم:' : 'Study Progress:'} {brandIndex + 1} / {totalBrandPages} {survey?.language === 'ar' ? 'ماركة' : 'Brands'}
                           </div>
-                          <div className="flex-1 max-w-[200px] h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden ml-4">
+                          <div className="flex-1 max-w-[200px] h-1.5 bg-surface-sunken rounded-full overflow-hidden ml-4">
                             <div
-                              className="h-full bg-brand-blue transition-all duration-700"
+                              className="h-full bg-primary transition-all duration-700"
                               style={{ width: `${tasteTestNavigationPosition.progressPercent}%` }}
                             />
                           </div>
@@ -1036,9 +1036,9 @@ export default function PublicSurvey() {
                                 <>
                             {section.title && !section.isInstruction && (
                               <div className="space-y-4">
-                                <div className="sticky top-0 z-20 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md py-2.5 border-b border-slate-100 dark:border-slate-800 mb-4 transition-colors">
-                                  <h3 className="text-lg font-display font-bold text-brand-blue flex items-center gap-2.5">
-                                    <div className="w-1 h-5 bg-brand-blue rounded-full" />
+                                <div className="sticky top-0 z-20 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md py-2.5 border-b border-line/80 dark:border-line/10 mb-4 transition-colors">
+                                  <h3 className="text-lg font-display font-bold text-primary-soft flex items-center gap-2.5">
+                                    <div className="w-1 h-5 bg-primary rounded-full" />
                                     {sectionTitle}
                                   </h3>
                                 </div>
@@ -1063,14 +1063,14 @@ export default function PublicSurvey() {
                                   const showVoice = isVoiceEnabledForQuestion(survey, q, section, effectiveType);
 
                                   return (
-                                    <div key={uniqueKey} id={`q-${uniqueKey}`} className={`space-y-3 p-4 md:p-5 rounded-2xl bg-white dark:bg-slate-900 border overflow-visible transition-all shadow-sm hover:shadow-md ${pulseErrorId === `q-${uniqueKey}` ? 'border-rose-400 ring-4 ring-rose-500/30 animate-pulse' : 'border-slate-50 dark:border-slate-800/50'}`}>
+                                    <div key={uniqueKey} id={`q-${uniqueKey}`} className={`space-y-3 p-4 md:p-5 rounded-2xl bg-surface border overflow-visible transition-all shadow-sm hover:shadow-md ${pulseErrorId === `q-${uniqueKey}` ? 'border-rose-400 ring-4 ring-rose-500/30 animate-pulse' : 'border-slate-50 dark:border-slate-800/50'}`}>
                                       <div className="flex justify-between items-start gap-3">
                                         <div className="flex-1 min-w-0 space-y-1.5">
-                                          <p className="text-base md:text-lg font-bold text-slate-900 dark:text-white leading-snug transition-colors">{questionText}</p>
+                                          <p className="text-base md:text-lg font-bold text-ink leading-snug transition-colors">{questionText}</p>
                                           {q.type === 'mcq' && q.allow_multiple && (
-                                            <div className="flex items-center gap-2 px-3 py-1 bg-brand-blue/5 border border-brand-blue/10 rounded-lg self-start w-fit">
-                                              <Sparkles className="w-3 h-3 text-brand-blue" />
-                                              <span className="text-[10px] font-black uppercase tracking-widest text-brand-blue">
+                                            <div className="flex items-center gap-2 px-3 py-1 bg-primary/5 border border-primary/10 rounded-lg self-start w-fit">
+                                              <Sparkles className="w-3 h-3 text-primary-soft" />
+                                              <span className="text-[10px] font-black uppercase tracking-widest text-primary-soft">
                                                 {survey?.language === 'ar' ? 'يمكنك اختيار أكثر من إجابة' : 'Select all that apply'}
                                               </span>
                                             </div>
@@ -1081,7 +1081,7 @@ export default function PublicSurvey() {
                                             <motion.div
                                               initial={{ opacity: 0, scale: 0.5, x: 12 }}
                                               animate={{ opacity: 1, scale: 1, x: 0 }}
-                                              className="shrink-0 ms-2 px-2.5 py-1 bg-brand-blue text-white rounded-lg shadow-md font-black text-sm min-w-[2rem] flex items-center justify-center border border-white/20"
+                                              className="shrink-0 ms-2 px-2.5 py-1 bg-primary text-white rounded-lg shadow-md font-black text-sm min-w-[2rem] flex items-center justify-center border border-white/20"
                                             >
                                               {typeof l2Answers[uniqueKey] === 'string'
                                                 ? renderCleanText(
@@ -1129,8 +1129,8 @@ export default function PublicSurvey() {
                                                   setL2Answers({ ...l2Answers, [uniqueKey]: index + 1 });
                                                 }}
                                                 className={`w-11 h-11 rounded-xl border font-black transition-all ${l2Answers[uniqueKey] === index + 1
-                                                  ? 'bg-brand-blue text-white border-brand-blue scale-110'
-                                                  : 'bg-slate-50 dark:bg-slate-800 border-slate-200 text-slate-500'
+                                                  ? 'bg-primary text-white border-primary scale-110'
+                                                  : 'bg-surface-raised border-slate-200 text-slate-500'
                                                   }`}
                                               >
                                                 {index + 1}
@@ -1141,7 +1141,7 @@ export default function PublicSurvey() {
                                       ) : effectiveType === 'number' || effectiveType === 'numeric' ? (
                                         <input
                                           type="number"
-                                          className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-800 rounded-2xl px-6 py-5 text-xl font-bold"
+                                          className="w-full bg-surface-raised border-2 border-line/80 dark:border-line/10 rounded-2xl px-6 py-5 text-xl font-bold"
                                           placeholder="Enter number..."
                                           value={l2Answers[uniqueKey] || ''}
                                           onChange={(e) => setL2Answers({ ...l2Answers, [uniqueKey]: e.target.value })}
@@ -1165,6 +1165,7 @@ export default function PublicSurvey() {
                                           onFollowUpTrigger={handleFollowUpTrigger}
                                           onVoiceFollowUpTrigger={handleVoiceFollowUpTrigger}
                                           onFollowUpReplyChange={handleFollowUpReplyChange}
+                                          onMaxRoundsChange={setRespondentRoundCap}
                                         />
                                       ) : (
                                         <div className="grid grid-cols-1 gap-3">
@@ -1179,7 +1180,7 @@ export default function PublicSurvey() {
                                                 const allQs = section.questions;
                                                 scrollToNextQuestion(q.id, allQs);
                                               }}
-                                              className={`w-full p-5 rounded-2xl border-2 text-left font-bold transition-all ${l2Answers[uniqueKey] === opt ? 'bg-brand-blue/10 border-brand-blue text-brand-blue shadow-lg' : 'bg-slate-50 border-slate-100/50 text-slate-500 hover:border-slate-300'} `}
+                                              className={`w-full p-5 rounded-2xl border-2 text-left font-bold transition-all ${l2Answers[uniqueKey] === opt ? 'bg-primary/10 border-primary text-primary-soft shadow-lg' : 'bg-slate-50 border-slate-100/50 text-slate-500 hover:border-slate-300'} `}
                                             >
                                               {optionLabel}
                                             </button>
@@ -1223,31 +1224,31 @@ export default function PublicSurvey() {
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -20 }}
-            className="m-auto relative z-10 w-full max-w-2xl bg-white dark:bg-slate-900 rounded-none md:rounded-[3rem] p-6 md:p-12 border-0 md:border border-slate-100 dark:border-slate-800 shadow-none md:shadow-2xl transition-colors min-h-screen md:min-h-0"
+            className="m-auto relative z-10 w-full max-w-2xl bg-surface rounded-none md:rounded-[3rem] p-6 md:p-12 border-0 md:border border-line/80 dark:border-line/10 shadow-none md:shadow-2xl transition-colors min-h-screen md:min-h-0"
           >
             {(() => {
-              const isAr = survey?.language === 'ar';
+              const isAr = isArabicUi;
               return (
             <div dir={isAr ? 'rtl' : 'ltr'}>
             <div className="flex flex-col items-center mb-10">
               <img src="/brand/logo-icon.png" alt="Logo" className="w-20 h-20 mb-4 object-contain brightness-100 dark:brightness-125" />
-              <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+              <div className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-subtle">
                 {isAr ? (
-                  <>البنية التحتية <span className="text-brand-blue">الآمنة</span></>
+                  <>البنية التحتية <span className="text-primary-soft">الآمنة</span></>
                 ) : (
-                  <>Secure <span className="text-brand-blue">Infrastructure</span></>
+                  <>Secure <span className="text-primary-soft">Infrastructure</span></>
                 )}
               </div>
             </div>
 
-            <h1 className="text-3xl md:text-4xl font-display font-semibold tracking-tight mb-2 text-center text-slate-900 dark:text-white transition-colors">
+            <h1 className="text-3xl md:text-4xl font-display font-semibold tracking-tight mb-2 text-center text-ink transition-colors">
               {survey?.company_name} <br />{' '}
-              <span className="text-slate-400 dark:text-slate-600 font-light font-sans">
+              <span className="text-ink-subtle font-light font-sans">
                 {isAr ? 'بروتوكول المشاركة' : 'Participation Protocol'}
               </span>
             </h1>
             <div className="flex items-center gap-2 mb-8 justify-center flex-wrap">
-              <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-brand-blue/10 text-brand-blue border border-brand-blue/10">
+              <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-primary/10 text-primary-soft border border-primary/10">
                 {isAr ? 'المخطط:' : 'Blueprint:'} {survey?.template_name || (isAr ? 'قياسي' : 'Standard')}
               </span>
               <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 border border-emerald-100">
@@ -1255,7 +1256,7 @@ export default function PublicSurvey() {
               </span>
             </div>
 
-            <p className="text-slate-500 dark:text-slate-400 font-medium leading-relaxed mb-10 pb-8 border-b border-slate-50 dark:border-slate-800 transition-colors text-center">
+            <p className="text-ink-muted font-medium leading-relaxed mb-10 pb-8 border-b border-slate-50 dark:border-slate-800 transition-colors text-center">
               {isAr
                 ? 'يرجى إكمال أسئلة التأهل التالية. بعد التحقق سيتم توجيهك إلى أداة البحث.'
                 : 'Please complete the following qualification probe. Upon synchronization, you will be redirected to the research instrument.'}
@@ -1273,7 +1274,7 @@ export default function PublicSurvey() {
                       <button
                         type="button"
                         onClick={() => setShowCountrySelector(!showCountrySelector)}
-                        className="h-full bg-slate-50 border border-slate-200 rounded-2xl px-4 text-slate-900 flex items-center gap-2 hover:border-brand-blue/50 transition-all font-bold"
+                        className="h-full bg-slate-50 border border-slate-200 rounded-2xl px-4 text-slate-900 flex items-center gap-2 hover:border-primary/50 transition-all font-bold"
                       >
                         <span>{countries.find(c => c.code === countryCode)?.flag}</span>
                         <span className="text-sm">{countryCode}</span>
@@ -1286,7 +1287,7 @@ export default function PublicSurvey() {
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: 10 }}
-                            className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-2 shadow-2xl z-50 max-h-60 overflow-y-auto custom-scrollbar transition-colors"
+                            className="absolute top-full left-0 mt-2 w-48 bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-2 shadow-2xl z-50 max-h-60 overflow-y-auto custom-scrollbar transition-colors"
                           >
                             {countries.map(c => (
                               <button
@@ -1300,8 +1301,8 @@ export default function PublicSurvey() {
                               >
                                 <span className="text-xl">{c.flag}</span>
                                 <div className="flex flex-col">
-                                  <span className="text-xs font-black text-slate-900 dark:text-white transition-colors">{c.code}</span>
-                                  <span className="text-[10px] text-slate-400 dark:text-slate-500 uppercase font-bold transition-colors">{c.name}</span>
+                                  <span className="text-xs font-black text-ink transition-colors">{c.code}</span>
+                                  <span className="text-[10px] text-ink-subtle uppercase font-bold transition-colors">{c.name}</span>
                                 </div>
                               </button>
                             ))}
@@ -1311,13 +1312,13 @@ export default function PublicSurvey() {
                     </div>
 
                     <div className="relative flex-1 group">
-                      <Phone className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-brand-blue transition-colors" />
+                      <Phone className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-primary-soft transition-colors" />
                       <input
                         id="phone-input"
                         type="tel"
                         required
                         placeholder="123 456 7890"
-                        className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl pl-12 pr-6 py-4 text-slate-900 dark:text-white focus:outline-none focus:border-brand-blue/50 focus:ring-4 focus:ring-brand-blue/5 transition-all font-bold placeholder:text-slate-300 dark:placeholder:text-slate-600"
+                        className="w-full bg-surface-raised border border-slate-200 dark:border-slate-700 rounded-2xl pl-12 pr-6 py-4 text-ink focus:outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all font-bold placeholder:text-slate-300 dark:placeholder:text-slate-600"
                         value={phone}
                         onChange={e => setPhone(e.target.value)}
                       />
@@ -1330,17 +1331,17 @@ export default function PublicSurvey() {
                   const qId = q.id || idx.toString();
                   return (
                     <div key={qId} id={`q-${qId}`} className="space-y-3">
-                      <label className="text-lg md:text-xl font-semibold text-slate-900 dark:text-white ml-1 leading-tight flex flex-col gap-2">
+                      <label className="text-lg md:text-xl font-semibold text-ink ml-1 leading-tight flex flex-col gap-2">
                         <span>{renderCleanText(q.label || q.text)}</span>
                         {/* Multi-answer tip */}
                         {q.type === 'mcq' && q.allow_multiple && (
-                          <span className="text-[11px] font-bold text-brand-blue/70 italic lowercase">
+                          <span className="text-[11px] font-bold text-primary-soft/70 italic lowercase">
                             {survey?.language === 'ar' ? '* يمكنك اختيار أكثر من إجابة' : '* You can select multiple answers'}
                           </span>
                         )}
                         {/* Income / EGP tip */}
                         {(qId === 'family_income' || q.label?.toLowerCase().includes('income')) && (
-                          <span className="text-sm font-black text-brand-blue uppercase bg-brand-blue/5 self-start px-3 py-1 rounded-lg border border-brand-blue/10">
+                          <span className="text-sm font-black text-primary-soft uppercase bg-primary/5 self-start px-3 py-1 rounded-lg border border-primary/10">
                             {survey?.language === 'ar' ? '(بالجنيه المصري - EGP)' : '(In Egyptian Pounds - EGP)'}
                           </span>
                         )}
@@ -1367,7 +1368,7 @@ export default function PublicSurvey() {
                                   }
                                 }}
                                 className={`w-full p-3 md:p-4 rounded-xl md:rounded-2xl border text-left font-semibold text-xs md:text-sm transition-all ${(q.allow_multiple ? (Array.isArray(answers[qId]) && answers[qId].includes(opt)) : answers[qId] === opt)
-                                  ? 'bg-brand-blue/10 border-brand-blue text-brand-blue shadow-sm'
+                                  ? 'bg-primary/10 border-primary text-primary-soft shadow-sm'
                                   : 'bg-slate-50 border-slate-100 text-slate-500 hover:border-slate-300'
                                   }`}
                               >
@@ -1382,7 +1383,7 @@ export default function PublicSurvey() {
                                 key={i}
                                 type="button"
                                 onClick={() => setAnswers({ ...answers, [qId]: i + 1 })}
-                                className={`flex-1 h-12 rounded-xl border font-black transition-all ${answers[qId] === i + 1 ? 'bg-brand-blue text-white border-brand-blue' : 'bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400'}`}
+                                className={`flex-1 h-12 rounded-xl border font-black transition-all ${answers[qId] === i + 1 ? 'bg-primary text-white border-primary' : 'bg-surface-raised border-slate-100 dark:border-slate-700 text-ink-muted'}`}
                               >
                                 {i + 1}
                               </button>
@@ -1395,7 +1396,7 @@ export default function PublicSurvey() {
                               required={q.required}
                               maxLength={500}
                               placeholder={q.label}
-                              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-6 py-4 text-slate-900 dark:text-white focus:outline-none focus:border-brand-blue/50 transition-all font-bold placeholder:text-slate-300 dark:placeholder:text-slate-600 resize-none"
+                              className="w-full bg-surface-raised border border-slate-200 dark:border-slate-700 rounded-2xl px-6 py-4 text-ink focus:outline-none focus:border-primary/50 transition-all font-bold placeholder:text-slate-300 dark:placeholder:text-slate-600 resize-none"
                               value={answers[qId] || ''}
                               onChange={e => {
                                 const val = e.target.value;
@@ -1425,7 +1426,7 @@ export default function PublicSurvey() {
                                   initial={{ opacity: 0, scale: 0.95 }}
                                   animate={{ opacity: 1, scale: 1 }}
                                   exit={{ opacity: 0, scale: 0.95 }}
-                                  className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-2 shadow-2xl z-50 overflow-hidden transition-colors"
+                                  className="absolute top-full left-0 right-0 mt-2 bg-surface border border-slate-200 dark:border-slate-700 rounded-2xl p-2 shadow-2xl z-50 overflow-hidden transition-colors"
                                 >
                                   {areaSuggestions.map(suggestion => (
                                     <button
@@ -1435,7 +1436,7 @@ export default function PublicSurvey() {
                                         setAnswers({ ...answers, [qId]: suggestion });
                                         setAreaSuggestions([]);
                                       }}
-                                      className="w-full p-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-brand-blue transition-all text-left font-bold text-sm border border-transparent hover:border-slate-100 dark:hover:border-slate-700"
+                                      className="w-full p-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary-soft transition-all text-left font-bold text-sm border border-transparent hover:border-slate-100 dark:hover:border-slate-700"
                                     >
                                       {suggestion}
                                     </button>
@@ -1452,7 +1453,7 @@ export default function PublicSurvey() {
                                     key={suggestion}
                                     type="button"
                                     onClick={() => setAnswers({ ...answers, [qId]: suggestion })}
-                                    className="text-[10px] font-bold px-3 py-1.5 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-brand-blue/5 dark:hover:bg-brand-blue/10 hover:border-brand-blue/20 dark:hover:border-brand-blue/40 hover:text-brand-blue transition-all"
+                                    className="text-[10px] font-bold px-3 py-1.5 rounded-full bg-surface-raised border border-slate-200 dark:border-slate-700 text-ink-muted hover:bg-primary/5 dark:hover:bg-primary/10 hover:border-primary/20 dark:hover:border-primary/40 hover:text-primary-soft transition-all"
                                   >
                                     {suggestion}
                                   </button>
@@ -1482,7 +1483,7 @@ export default function PublicSurvey() {
             </form>
 
             <div className="mt-10 pt-8 border-t border-slate-50 dark:border-slate-800 flex items-center justify-between transition-colors">
-              <div className="flex items-center gap-2 text-slate-400 dark:text-slate-500">
+              <div className="flex items-center gap-2 text-ink-subtle">
                 <ShieldCheck className="w-4 h-4 text-emerald-500" />
                 <span className="text-[10px] font-black uppercase tracking-tighter">
                   {isAr ? 'بروتوكول موثّق' : 'Verified Protocol'}

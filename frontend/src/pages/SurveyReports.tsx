@@ -72,14 +72,14 @@ export default function SurveyReports() {
             <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8">
                 <div>
                     <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 rounded-xl bg-orange-500/10 dark:bg-orange-500/20 text-orange-500 border border-orange-500/10 dark:border-orange-500/30">
+                        <div className="p-2 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary-soft border border-primary/10 dark:border-primary/30">
                             <BarChart3 className="w-5 h-5" />
                         </div>
-                        <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-700 dark:text-slate-300 font-display">
-                            Output <span className="text-orange-500">Center</span>
+                        <div className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-muted font-display">
+                            Output <span className="text-primary-soft">Center</span>
                         </div>
                     </div>
-                    <h1 className="text-5xl font-display font-black tracking-tight leading-none text-slate-900 dark:text-white">
+                    <h1 className="text-5xl font-display font-black tracking-tight leading-none text-ink">
                         Survey Reports
                     </h1>
                     <p className="mt-4 text-slate-800 dark:text-slate-300 max-w-xl font-bold leading-relaxed">
@@ -88,13 +88,13 @@ export default function SurveyReports() {
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4">
                     <div className="relative group">
-                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-500 transition-colors" />
+                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-primary-soft transition-colors" />
                         <input
                             type="text"
                             placeholder="Search reports..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full sm:w-64 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-2xl pl-12 pr-6 py-4 text-slate-900 dark:text-white font-bold focus:outline-none focus:bg-white dark:focus:bg-slate-800 focus:border-orange-500/50 focus:ring-4 focus:ring-orange-500/30 transition-all shadow-sm"
+                            className="w-full sm:w-64 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md border border-line/80 dark:border-line/10 rounded-2xl pl-12 pr-6 py-4 text-ink font-bold focus:outline-none focus:bg-white dark:focus:bg-slate-800 focus:border-primary/50 focus:ring-4 focus:ring-primary/30 transition-all shadow-sm"
                         />
                     </div>
                 </div>
@@ -111,21 +111,21 @@ export default function SurveyReports() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95 }}
                             transition={{ delay: idx * 0.04 }}
-                            className="bg-white dark:bg-slate-900/50 rounded-[2rem] border border-slate-100 dark:border-slate-800/50 p-7 flex flex-col shadow-premium group hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+                            className="bg-blue-50/50 dark:bg-blue-900/20 rounded-[2rem] border border-blue-500/20 dark:border-blue-500/20 p-7 flex flex-col shadow-premium group hover:-translate-y-1 hover:bg-red-50/50 dark:hover:bg-red-900/20 hover:border-red-500/30 dark:hover:border-red-500/30 transition-all duration-300 overflow-hidden"
                         >
                             <div className="flex justify-between items-start gap-3 mb-6">
                                 <div className="flex items-center gap-4 min-w-0 flex-1">
-                                    <div className="w-12 h-12 shrink-0 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center border border-slate-300 dark:border-slate-700 group-hover:border-orange-500/30 group-hover:bg-orange-500/5 transition-all font-display font-black text-slate-600 dark:text-slate-400 group-hover:text-orange-500 text-base">
+                                    <div className="w-12 h-12 shrink-0 bg-surface-sunken rounded-2xl flex items-center justify-center border border-slate-300 dark:border-slate-700 group-hover:border-primary/30 group-hover:bg-primary/5 transition-all font-display font-black text-ink-muted group-hover:text-primary-soft text-base">
                                         {survey.company_name.charAt(0)}
                                     </div>
                                     <div className="min-w-0 flex-1 overflow-hidden">
                                         <div
-                                            className="font-black text-lg text-slate-900 dark:text-white truncate group-hover:text-orange-500 transition-colors"
+                                            className="font-black text-lg text-ink truncate group-hover:text-primary-soft transition-colors"
                                             title={survey.company_name}
                                         >
                                             {survey.company_name}
                                         </div>
-                                        <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-2 mt-1">
+                                        <div className="text-[10px] font-bold text-ink-subtle uppercase tracking-widest flex items-center gap-2 mt-1">
                                             <Calendar className="w-3 h-3" />
                                             {new Date(survey.created_at).toLocaleDateString()}
                                         </div>
@@ -136,11 +136,11 @@ export default function SurveyReports() {
                                 </div>
                             </div>
 
-                            <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-4 mb-6 border border-slate-100 dark:border-slate-800">
+                            <div className="bg-surface-raised/50 rounded-2xl p-4 mb-6 border border-line/80 dark:border-line/10">
                                 <div className="flex justify-between items-end mb-2">
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Response Quota</span>
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-ink-muted">Response Quota</span>
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-xl font-black text-slate-900 dark:text-white leading-none">{survey.respondent_count}</span>
+                                        <span className="text-xl font-black text-ink leading-none">{survey.respondent_count}</span>
                                         <span className="text-sm font-bold text-slate-400">/ {survey.sample_capacity || survey.respondent_target}</span>
                                     </div>
                                 </div>
@@ -152,13 +152,13 @@ export default function SurveyReports() {
                             <div className="flex gap-3 mt-auto">
                                 <button
                                     onClick={() => navigate(`/surveys/${survey._id}/report`)}
-                                    className="flex-1 bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 hover:bg-orange-500 hover:text-white py-3.5 rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 transition-all border border-orange-200 dark:border-orange-500/30"
+                                    className="flex-1 bg-primary/10 dark:bg-primary/10 text-primary-soft dark:text-brand-cyan hover:bg-primary hover:text-white py-3.5 rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 transition-all border border-primary/20 dark:border-primary/30"
                                 >
                                     <Eye size={16} /> Screen Report
                                 </button>
                                 <button
                                     onClick={() => handleDownload(survey._id, survey.company_name)}
-                                    className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all border border-slate-200 dark:border-slate-700 hover:text-brand-blue"
+                                    className="p-3.5 rounded-xl bg-surface-raised text-ink-muted hover:bg-slate-100 dark:hover:bg-slate-700 transition-all border border-slate-200 dark:border-slate-700 hover:text-primary-soft"
                                     title="Export PPTX"
                                 >
                                     <Download size={18} />
@@ -169,12 +169,12 @@ export default function SurveyReports() {
                 </AnimatePresence>
 
                 {eligibleSurveys.length === 0 && (
-                    <div className="col-span-full py-24 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[3rem]">
-                        <div className="w-20 h-20 mx-auto bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6">
+                    <div className="col-span-full py-24 text-center border-2 border-dashed border-line/80 dark:border-line/10 rounded-[3rem]">
+                        <div className="w-20 h-20 mx-auto bg-surface-raised rounded-full flex items-center justify-center mb-6">
                             <FileText className="w-8 h-8 text-slate-300 dark:text-slate-600" />
                         </div>
-                        <h3 className="text-xl font-display font-black text-slate-900 dark:text-white mb-2">No Reports Available</h3>
-                        <p className="text-slate-500 dark:text-slate-400 font-medium max-w-md mx-auto">
+                        <h3 className="text-xl font-display font-black text-ink mb-2">No Reports Available</h3>
+                        <p className="text-ink-muted font-medium max-w-md mx-auto">
                             {searchQuery ? 'Try adjusting your search filters.' : 'There are no surveys that have successfully met their required response targets yet.'}
                         </p>
                     </div>

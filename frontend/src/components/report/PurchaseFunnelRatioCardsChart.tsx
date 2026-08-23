@@ -120,19 +120,19 @@ export function PurchaseFunnelRatioCardsChart({ data, metadata, isFocusMode, pre
                         <button
                             onClick={() => setShowMarketAverage(!showMarketAverage)}
                             className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all ${showMarketAverage
-                                ? 'bg-brand-blue/10 border-brand-blue text-brand-blue shadow-[0_0_15px_rgba(56,189,248,0.1)]'
+                                ? 'bg-primary/10 border-primary text-primary-soft shadow-[0_0_15px_rgba(56,189,248,0.1)]'
                                 : isDark
                                     ? 'bg-slate-800/50 border-white/5 text-slate-500 hover:text-slate-300'
                                     : 'bg-white border-slate-200 text-slate-400 hover:text-slate-600'
                                 }`}
                         >
-                            <div className={`w-1.5 h-1.5 rounded-full ${showMarketAverage ? 'bg-brand-blue shadow-[0_0_8px_rgba(56,189,248,0.6)] animate-pulse' : 'bg-slate-500'}`} />
+                            <div className={`w-1.5 h-1.5 rounded-full ${showMarketAverage ? 'bg-primary shadow-[0_0_8px_rgba(56,189,248,0.6)] animate-pulse' : 'bg-slate-500'}`} />
                             <span className="text-[10px] font-black uppercase tracking-widest">Market Avg</span>
                         </button>
                         <div className={`w-[1px] h-3 ${isDark ? 'bg-white/10' : 'bg-slate-200'}`} />
                         <button
                             onClick={() => setSelectedBrands(cards.map((c) => c.brand))}
-                            className={`text-[9px] font-black uppercase tracking-widest transition-colors ${isDark ? 'text-slate-400 hover:text-brand-blue' : 'text-slate-500 hover:text-brand-blue'
+                            className={`text-[9px] font-black uppercase tracking-widest transition-colors ${isDark ? 'text-slate-400 hover:text-primary-soft' : 'text-slate-500 hover:text-primary-soft'
                                 }`}
                         >
                             Select All
@@ -156,13 +156,13 @@ export function PurchaseFunnelRatioCardsChart({ data, metadata, isFocusMode, pre
                                 key={`pf-brand-toggle-${card.brand}`}
                                 onClick={() => toggleBrand(card.brand)}
                                 className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border whitespace-nowrap flex-shrink-0 ${active
-                                    ? 'bg-brand-blue/10 text-brand-blue border-brand-blue'
+                                    ? 'bg-primary/10 text-primary-soft border-primary'
                                     : isDark
                                         ? 'bg-slate-900/40 text-slate-500 border-white/5 hover:border-white/20'
                                         : 'bg-white text-slate-400 border-slate-200 hover:border-slate-300'
                                     }`}
                             >
-                                <span className={`mr-2 inline-block w-1.5 h-1.5 rounded-full ${active ? 'bg-brand-blue animate-pulse' : 'bg-slate-600'}`} />
+                                <span className={`mr-2 inline-block w-1.5 h-1.5 rounded-full ${active ? 'bg-primary animate-pulse' : 'bg-slate-600'}`} />
                                 {card.brand}
                             </button>
                         );
@@ -199,7 +199,7 @@ export function PurchaseFunnelRatioCardsChart({ data, metadata, isFocusMode, pre
                                             {card.brand}
                                         </h4>
                                         {baselineBrand === card.brand && (
-                                            <span className="px-2 py-0.5 rounded-full bg-brand-blue text-[8px] font-black text-white uppercase tracking-widest animate-pulse">
+                                            <span className="px-2 py-0.5 rounded-full bg-primary text-[8px] font-black text-white uppercase tracking-widest animate-pulse">
                                                 Baseline
                                             </span>
                                         )}
@@ -209,8 +209,8 @@ export function PurchaseFunnelRatioCardsChart({ data, metadata, isFocusMode, pre
                                         className={`px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border ${baselineBrand === card.brand
                                             ? 'bg-rose-500/10 text-rose-500 border-rose-500/50 hover:bg-rose-500 hover:text-white'
                                             : isDark
-                                                ? 'bg-slate-800/50 text-slate-500 border-white/5 hover:border-brand-blue/50 hover:text-brand-blue'
-                                                : 'bg-white text-slate-400 border-slate-200 hover:border-brand-blue/50 hover:text-brand-blue'
+                                                ? 'bg-slate-800/50 text-slate-500 border-white/5 hover:border-primary/50 hover:text-primary-soft'
+                                                : 'bg-white text-slate-400 border-slate-200 hover:border-primary/50 hover:text-primary-soft'
                                             }`}
                                     >
                                         {baselineBrand === card.brand ? 'Clear Baseline' : 'Set as Baseline'}
@@ -248,7 +248,7 @@ export function PurchaseFunnelRatioCardsChart({ data, metadata, isFocusMode, pre
                                                             {stage.label}
                                                         </span>
                                                         <div className="flex items-center gap-1.5">
-                                                            <span className={`text-xs font-black ${isDark ? 'text-brand-blue' : 'text-brand-blue'}`}>
+                                                            <span className={`text-xs font-black ${isDark ? 'text-primary-soft' : 'text-primary-soft'}`}>
                                                                 {Math.round(pct)}%
                                                             </span>
                                                             {delta !== null && (
@@ -293,7 +293,7 @@ export function PurchaseFunnelRatioCardsChart({ data, metadata, isFocusMode, pre
                                             <div key={`ratio-group-${card.brand}-${row.key}-${idx}`} className="flex flex-col items-center w-full">
                                                 {/* Connector Top */}
                                                 <div
-                                                    className={`w-[1px] h-3 border-l border-dashed transition-colors duration-300 ${isHighlighted ? 'border-brand-blue scale-y-110' : isDark ? 'border-white/10' : 'border-slate-300'}`}
+                                                    className={`w-[1px] h-3 border-l border-dashed transition-colors duration-300 ${isHighlighted ? 'border-primary scale-y-110' : isDark ? 'border-white/10' : 'border-slate-300'}`}
                                                 />
 
                                                 <div
@@ -360,7 +360,7 @@ export function PurchaseFunnelRatioCardsChart({ data, metadata, isFocusMode, pre
 
                                                 {/* Connector Bottom */}
                                                 <div
-                                                    className={`w-[1px] h-3 border-l border-dashed transition-colors duration-300 ${isHighlighted ? 'border-brand-blue scale-y-110' : isDark ? 'border-white/10' : 'border-slate-300'}`}
+                                                    className={`w-[1px] h-3 border-l border-dashed transition-colors duration-300 ${isHighlighted ? 'border-primary scale-y-110' : isDark ? 'border-white/10' : 'border-slate-300'}`}
                                                 />
                                             </div>
                                         );

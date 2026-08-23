@@ -56,12 +56,17 @@ export function FilterPanel({ availableFilters, brands, activeFilters, onChange,
             {/* Filter Toggle Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className={`flex items-center gap-2 px-4 py-2 bg-slate-800/50 hover:bg-slate-800 border transition-all rounded-xl text-sm font-bold ${activeCount > 0 ? 'border-brand-blue text-white shadow-[0_0_15px_rgba(59,130,246,0.3)]' : 'border-white/10 text-slate-300'}`}
+                className={`flex items-center gap-2 h-11 px-4 border transition-all rounded-2xl text-[13px] font-black uppercase tracking-wider ${activeCount > 0
+                    ? 'text-white border-transparent shadow-lg shadow-primary/25'
+                    : 'bg-surface text-ink-muted border-primary/20 hover:border-primary/50 hover:text-primary-soft hover:bg-primary/[0.06]'}`}
+                style={activeCount > 0
+                    ? { background: 'linear-gradient(135deg, rgb(var(--c-primary)), rgb(var(--c-accent)))' }
+                    : undefined}
             >
                 <Filter className="w-4 h-4" />
                 Filter Matrix
                 {activeCount > 0 && (
-                    <span className="bg-brand-blue text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-black">
+                    <span className="bg-white/25 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-black">
                         {activeCount}
                     </span>
                 )}
@@ -91,7 +96,7 @@ export function FilterPanel({ availableFilters, brands, activeFilters, onChange,
                                             const isActive = !(activeFilters.brands) || activeFilters.brands.includes(brand);
                                             return (
                                                 <div key={brand} onClick={() => handleBrandChange(brand)} className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-lg cursor-pointer">
-                                                    <div className={`w-4 h-4 rounded border flex items-center justify-center ${isActive ? 'bg-brand-blue border-brand-blue text-white' : 'border-slate-600'}`}>
+                                                    <div className={`w-4 h-4 rounded border flex items-center justify-center ${isActive ? 'bg-primary border-primary text-white' : 'border-slate-600'}`}>
                                                         {isActive && <Check className="w-3 h-3" />}
                                                     </div>
                                                     <span className="text-sm text-slate-300">{brand}</span>
@@ -105,7 +110,7 @@ export function FilterPanel({ availableFilters, brands, activeFilters, onChange,
 
                         {/* Cross-Tab (Group By) Selector */}
                         <div className="space-y-2 pt-2 border-t border-white/5">
-                            <button className="flex w-full justify-between items-center text-xs font-bold text-brand-blue uppercase" onClick={() => toggleGroup('groupByAxis')}>
+                            <button className="flex w-full justify-between items-center text-xs font-bold text-primary-soft uppercase" onClick={() => toggleGroup('groupByAxis')}>
                                 Cross-Tab By
                                 <ChevronDown className={`w-4 h-4 transition-transform ${expandedGroups['groupByAxis'] ? 'rotate-180' : ''}`} />
                             </button>
@@ -115,8 +120,8 @@ export function FilterPanel({ availableFilters, brands, activeFilters, onChange,
                                         onClick={() => onChange({ ...activeFilters, group_by: undefined })}
                                         className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-lg cursor-pointer"
                                     >
-                                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${!activeFilters.group_by ? 'border-brand-blue' : 'border-slate-600'}`}>
-                                            {!activeFilters.group_by && <div className="w-2 h-2 rounded-full bg-brand-blue" />}
+                                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${!activeFilters.group_by ? 'border-primary' : 'border-slate-600'}`}>
+                                            {!activeFilters.group_by && <div className="w-2 h-2 rounded-full bg-primary" />}
                                         </div>
                                         <span className="text-sm text-slate-300">None</span>
                                     </div>
@@ -124,8 +129,8 @@ export function FilterPanel({ availableFilters, brands, activeFilters, onChange,
                                         const isActive = activeFilters.group_by === field;
                                         return (
                                             <div key={`group-${field}`} onClick={() => onChange({ ...activeFilters, group_by: field })} className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-lg cursor-pointer">
-                                                <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${isActive ? 'border-brand-blue' : 'border-slate-600'}`}>
-                                                    {isActive && <div className="w-2 h-2 rounded-full bg-brand-blue" />}
+                                                <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${isActive ? 'border-primary' : 'border-slate-600'}`}>
+                                                    {isActive && <div className="w-2 h-2 rounded-full bg-primary" />}
                                                 </div>
                                                 <span className="text-sm text-slate-300 break-words">{field.replace(/_auto|calculated_/g, '').replace(/_/g, ' ')}</span>
                                             </div>
@@ -181,7 +186,7 @@ export function FilterPanel({ availableFilters, brands, activeFilters, onChange,
                                 setIsOpen(false);
                             }}
                             disabled={isApplying}
-                            className="flex-1 py-2 bg-brand-blue hover:bg-blue-500 text-white font-black text-xs uppercase tracking-wider rounded-lg transition-all"
+                            className="flex-1 py-2 bg-primary hover:bg-blue-500 text-white font-black text-xs uppercase tracking-wider rounded-lg transition-all"
                         >
                             {isApplying ? 'Slicing...' : 'Apply Slice'}
                         </button>

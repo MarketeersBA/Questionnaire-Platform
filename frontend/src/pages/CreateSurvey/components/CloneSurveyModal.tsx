@@ -55,15 +55,15 @@ export function CloneSurveyModal({ isOpen, onClose, onSelect }: CloneSurveyModal
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: 20 }}
                     onClick={(e) => e.stopPropagation()}
-                    className="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/20 dark:border-slate-800"
+                    className="w-full max-w-2xl bg-surface rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/20 dark:border-slate-800"
                 >
-                    <div className="p-8 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-950/50">
+                    <div className="p-8 border-b border-line/80 dark:border-line/10 flex items-center justify-between bg-slate-50/50 dark:bg-slate-950/50">
                         <div className="flex items-center gap-4">
-                            <div className="p-3 rounded-2xl bg-brand-blue/10 text-brand-blue">
+                            <div className="p-3 rounded-2xl bg-primary/10 text-primary-soft">
                                 <History size={24} />
                             </div>
                             <div>
-                                <h3 className="text-xl font-display font-black text-slate-900 dark:text-white">Clone from Archive</h3>
+                                <h3 className="text-xl font-display font-black text-ink">Clone from Archive</h3>
                                 <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-0.5">Select a historical template to reuse</p>
                             </div>
                         </div>
@@ -77,20 +77,20 @@ export function CloneSurveyModal({ isOpen, onClose, onSelect }: CloneSurveyModal
 
                     <div className="p-8 space-y-6">
                         <div className="relative group">
-                            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-blue transition-colors" size={18} />
+                            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary-soft transition-colors" size={18} />
                             <input
                                 type="text"
                                 placeholder="Search by project name or owner..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full bg-slate-50 dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 rounded-2xl pl-12 pr-6 py-4 text-slate-900 dark:text-white focus:outline-none focus:border-brand-blue transition-all font-bold"
+                                className="w-full bg-surface-raised border-2 border-line/80 dark:border-line/10 rounded-2xl pl-12 pr-6 py-4 text-ink focus:outline-none focus:border-primary transition-all font-bold"
                             />
                         </div>
 
                         <div className="max-h-[400px] overflow-y-auto space-y-3 pr-2 custom-scrollbar">
                             {loading ? (
                                 <div className="flex flex-col items-center justify-center py-20 text-slate-400 gap-4">
-                                    <Loader2 size={32} className="animate-spin text-brand-blue" />
+                                    <Loader2 size={32} className="animate-spin text-primary-soft" />
                                     <span className="text-xs font-black uppercase tracking-widest">Scanning Archive...</span>
                                 </div>
                             ) : filteredSurveys.length === 0 ? (
@@ -102,18 +102,18 @@ export function CloneSurveyModal({ isOpen, onClose, onSelect }: CloneSurveyModal
                                     <button
                                         key={survey._id}
                                         onClick={() => onSelect(survey)}
-                                        className="w-full p-5 rounded-3xl border-2 border-slate-100 dark:border-slate-800 hover:border-brand-blue dark:hover:border-brand-blue bg-white dark:bg-slate-900 hover:shadow-xl hover:shadow-brand-blue/5 transition-all text-left flex items-center justify-between group"
+                                        className="w-full p-5 rounded-3xl border-2 border-line/80 dark:border-line/10 hover:border-primary dark:hover:border-primary bg-surface hover:shadow-xl hover:shadow-primary/5 transition-all text-left flex items-center justify-between group"
                                     >
                                         <div className="space-y-2 flex-1">
                                             <div className="flex items-center gap-2">
-                                                <span className="text-sm font-black text-slate-900 dark:text-white group-hover:text-brand-blue transition-colors">
+                                                <span className="text-sm font-black text-ink group-hover:text-primary-soft transition-colors">
                                                     {survey.company_name}
                                                 </span>
-                                                <span className="px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-[10px] font-black uppercase text-slate-500 border border-slate-200 dark:border-slate-700">
+                                                <span className="px-2 py-0.5 rounded-lg bg-surface-sunken text-[10px] font-black uppercase text-slate-500 border border-slate-200 dark:border-slate-700">
                                                     {survey.type || 'Standard'}
                                                 </span>
                                                 {survey.survey_code && (
-                                                    <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-brand-blue/10 text-[10px] font-black text-brand-blue border border-brand-blue/20">
+                                                    <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-primary/10 text-[10px] font-black text-primary-soft border border-primary/20">
                                                         <Tag size={10} />
                                                         {survey.survey_code}
                                                     </span>
@@ -134,7 +134,7 @@ export function CloneSurveyModal({ isOpen, onClose, onSelect }: CloneSurveyModal
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="w-10 h-10 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center group-hover:bg-brand-blue group-hover:text-white transition-all">
+                                        <div className="w-10 h-10 rounded-2xl bg-surface-raised flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all">
                                             <ArrowRight size={18} />
                                         </div>
                                     </button>
@@ -143,7 +143,7 @@ export function CloneSurveyModal({ isOpen, onClose, onSelect }: CloneSurveyModal
                         </div>
                     </div>
 
-                    <div className="p-6 bg-slate-50 dark:bg-slate-950 border-t border-slate-100 dark:border-slate-800 text-center">
+                    <div className="p-6 bg-surface-raised border-t border-line/80 dark:border-line/10 text-center">
                         <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
                             Research Ecosystems are cloned with full architectural snapshots
                         </p>

@@ -50,6 +50,13 @@ def resolve_respondent_target(survey: Dict[str, Any]) -> int:
         return 0
 
 
+def compute_target_reached(quota_target: int, quota_current: int) -> bool:
+    """A survey's respondent quota is reached once current meets/exceeds a
+    positive target. A target of 0 (unset) never reaches — there is no
+    finish line to cross."""
+    return quota_target > 0 and quota_current >= quota_target
+
+
 def resolve_quota_buckets(
     answers: Dict[str, Any],
     gate_quotas: Optional[Dict[str, Any]],

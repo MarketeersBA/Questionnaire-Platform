@@ -293,7 +293,7 @@ export default function PackagingHeatmapQuestion({
 
     const cardClass = `rounded-[1.75rem] border overflow-hidden bg-slate-950/5 dark:bg-slate-900 ${pulseError
         ? 'border-rose-400 ring-4 ring-rose-500/30'
-        : 'border-slate-200 dark:border-slate-800'
+        : 'border-line/80 dark:border-line/10'
         }`;
 
     const clicks = answer.clicks || [];
@@ -377,7 +377,7 @@ export default function PackagingHeatmapQuestion({
                 ))}
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
+            <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-surface border-t border-line/80 dark:border-line/10">
                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">
                     {isArabic ? 'النقاط' : 'Pins'}: {clicks.length}/{maxPins}
                 </p>
@@ -386,7 +386,7 @@ export default function PackagingHeatmapQuestion({
                     type="button"
                     onClick={undoLast}
                     disabled={!clicks.length}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 disabled:opacity-40 hover:border-brand-blue/40 transition-colors ml-auto"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider border border-slate-200 dark:border-slate-700 text-ink-muted disabled:opacity-40 hover:border-primary/40 transition-colors ml-auto"
                 >
                     <RotateCcw className="w-3.5 h-3.5" />
                     {isArabic ? 'تراجع' : 'Undo'}
@@ -394,9 +394,9 @@ export default function PackagingHeatmapQuestion({
             </div>
 
             {/* Required per-pin feedback */}
-            <div className={`overflow-hidden transition-all duration-300 bg-slate-50 dark:bg-slate-950/50 border-t border-slate-200 dark:border-slate-800 ${clicks.length > 0 ? 'max-h-[1400px] opacity-100' : 'max-h-0 opacity-0 border-t-0'}`}>
+            <div className={`overflow-hidden transition-all duration-300 bg-surface-raised/50 border-t border-line/80 dark:border-line/10 ${clicks.length > 0 ? 'max-h-[1400px] opacity-100' : 'max-h-0 opacity-0 border-t-0'}`}>
                 <div className="p-4 space-y-4">
-                    <div className="flex gap-3 text-slate-500 dark:text-slate-400">
+                    <div className="flex gap-3 text-ink-muted">
                         <MessageSquare className="w-5 h-5 shrink-0 mt-0.5" />
                         <p className="text-xs font-bold leading-relaxed">
                             {isArabic
@@ -419,17 +419,17 @@ export default function PackagingHeatmapQuestion({
                         return (
                             <div
                                 key={key}
-                                className={`rounded-2xl border p-4 bg-white dark:bg-slate-900 space-y-3 ${hasAnswer && (!aiFollowup?.is_enabled || aiRequested)
+                                className={`rounded-2xl border p-4 bg-surface space-y-3 ${hasAnswer && (!aiFollowup?.is_enabled || aiRequested)
                                     ? 'border-emerald-200 dark:border-emerald-900/60'
                                     : 'border-amber-200 dark:border-amber-900/60'
                                     }`}
                             >
                                 <div className="flex items-center justify-between gap-3">
                                     <div>
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-brand-blue">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-primary-soft">
                                             {isArabic ? `النقطة ${index + 1}` : `Pin ${index + 1}`}
                                         </p>
-                                        <p className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                                        <p className="text-xs font-bold text-ink-muted">
                                             {pinPromptText(index)}
                                         </p>
                                     </div>
@@ -455,7 +455,7 @@ export default function PackagingHeatmapQuestion({
                                         );
                                     }}
                                     placeholder={isArabic ? 'اكتب إجابتك لهذه النقطة...' : 'Write your answer for this pin...'}
-                                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue min-h-[76px] resize-none"
+                                    className="w-full bg-surface-raised border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary min-h-[76px] resize-none"
                                     dir={isArabic ? 'rtl' : 'ltr'}
                                 />
 
@@ -507,7 +507,7 @@ export default function PackagingHeatmapQuestion({
                                             );
                                         }
                                     }}
-                                    className="w-full py-3 rounded-xl bg-brand-blue text-white text-[10px] font-black uppercase tracking-widest disabled:opacity-40 disabled:cursor-not-allowed"
+                                    className="w-full py-3 rounded-xl bg-primary text-white text-[10px] font-black uppercase tracking-widest disabled:opacity-40 disabled:cursor-not-allowed"
                                 >
                                     {aiFollowup?.is_enabled
                                         ? (isArabic ? 'إضافة وتشغيل المتابعة الذكية' : 'Add & Start AI Follow-Up')

@@ -17,16 +17,16 @@ export function BlueprintLayerEmptyState({
         <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="p-32 flex flex-col items-center justify-center text-center space-y-6 bg-slate-50/50 dark:bg-slate-950/20 rounded-[4rem] border-2 border-dashed border-slate-200 dark:border-slate-800"
+            className="p-32 flex flex-col items-center justify-center text-center space-y-6 bg-slate-50/50 dark:bg-slate-950/20 rounded-[4rem] border-2 border-dashed border-line/80 dark:border-line/10"
         >
             <div className="relative">
                 <div className="absolute inset-0 bg-slate-200 blur-2xl rounded-full opacity-30" />
-                <div className="relative w-20 h-20 rounded-[2rem] bg-white dark:bg-slate-900 flex items-center justify-center text-slate-400 shadow-sm">
+                <div className="relative w-20 h-20 rounded-[2rem] bg-surface flex items-center justify-center text-slate-400 shadow-sm">
                     <Layers className="w-10 h-10" />
                 </div>
             </div>
             <div className="max-w-md">
-                <h4 className="text-xl font-display font-black text-slate-900 dark:text-slate-100 uppercase tracking-tight">
+                <h4 className="text-xl font-display font-black text-ink uppercase tracking-tight">
                     {diagnostic.title}
                 </h4>
                 <p className="text-xs text-slate-500 font-bold uppercase tracking-widest leading-relaxed mt-2">
@@ -42,7 +42,7 @@ export function BlueprintLayerEmptyState({
                         type="button"
                         onClick={onRefresh}
                         disabled={isRefreshing}
-                        className="mt-8 px-8 py-4 bg-brand-blue text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-brand-blue/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 inline-flex items-center gap-2"
+                        className="mt-8 px-8 py-4 bg-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 inline-flex items-center gap-2"
                     >
                         {isRefreshing ? (
                             <>

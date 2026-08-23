@@ -35,8 +35,8 @@ export default function EditSurvey() {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
                 <div className="flex flex-col items-center gap-4">
-                    <Loader2 className="w-10 h-10 text-brand-blue animate-spin" />
-                    <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                    <Loader2 className="w-10 h-10 text-primary-soft animate-spin" />
+                    <p className="text-sm font-bold text-ink-muted uppercase tracking-widest">
                         Loading survey…
                     </p>
                 </div>

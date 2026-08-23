@@ -142,18 +142,18 @@ export default function AttributeBankManager() {
             {/* Header Area */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-4 transition-colors">
-                        <div className="w-12 h-12 rounded-2xl bg-brand-blue/10 text-brand-blue flex items-center justify-center">
+                    <h1 className="text-3xl font-black text-ink tracking-tight flex items-center gap-4 transition-colors">
+                        <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary-soft flex items-center justify-center">
                             <Database className="w-6 h-6" />
                         </div>
                         Attribute Bank Management
                     </h1>
-                    <p className="text-slate-500 dark:text-slate-400 font-medium mt-2">Manage category-specific research attributes and scales.</p>
+                    <p className="text-ink-muted font-medium mt-2">Manage category-specific research attributes and scales.</p>
                 </div>
 
                 <button
                     onClick={handleCreateNew}
-                    className="flex items-center gap-2 bg-brand-blue text-white px-6 py-3 rounded-2xl font-bold shadow-xl shadow-brand-blue/20 hover:scale-105 transition-all text-sm"
+                    className="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-2xl font-bold shadow-xl shadow-primary/20 hover:scale-105 transition-all text-sm"
                 >
                     <Plus className="w-5 h-5" />
                     New Category
@@ -163,7 +163,7 @@ export default function AttributeBankManager() {
             <div className="grid grid-cols-12 gap-8 items-start">
                 {/* Sidebar: Categories List */}
                 <div className="col-span-12 lg:col-span-3 space-y-4">
-                    <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200 dark:border-slate-800 p-6 shadow-sm transition-colors">
+                    <div className="bg-surface rounded-[2rem] border border-line/80 dark:border-line/10 p-6 shadow-sm transition-colors">
                         <div className="relative mb-6">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                             <input
@@ -171,7 +171,7 @@ export default function AttributeBankManager() {
                                 placeholder="Search types..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl pl-11 pr-4 py-3 text-sm font-medium dark:text-white focus:ring-2 focus:ring-brand-blue/20 transition-all shadow-inner-soft"
+                                className="w-full bg-surface-raised border-none rounded-xl pl-11 pr-4 py-3 text-sm font-medium dark:text-white focus:ring-2 focus:ring-primary/20 transition-all shadow-inner-soft"
                             />
                         </div>
 
@@ -185,8 +185,8 @@ export default function AttributeBankManager() {
                                         className={`
                                         w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-left transition-all group
                                         ${selectedCategory === cat.category
-                                                ? 'bg-brand-blue/5 dark:bg-brand-blue/10 text-brand-blue ring-1 ring-brand-blue/20'
-                                                : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}
+                                                ? 'bg-primary/5 dark:bg-primary/10 text-primary-soft ring-1 ring-primary/20'
+                                                : 'text-ink-muted hover:bg-slate-50 dark:hover:bg-slate-800'}
                                     `}
                                     >
                                         <span className="text-sm font-bold tracking-tight">{cat.display_name}</span>
@@ -206,30 +206,30 @@ export default function AttributeBankManager() {
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -20 }}
-                                className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden transition-colors"
+                                className="bg-surface rounded-[2.5rem] border border-line/80 dark:border-line/10 shadow-sm overflow-hidden transition-colors"
                             >
                                 {/* Editor Header */}
-                                <div className="p-8 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex items-center justify-between transition-colors">
+                                <div className="p-8 border-b border-line/80 dark:border-line/10 bg-slate-50/50 dark:bg-slate-800/50 flex items-center justify-between transition-colors">
                                     <div className="flex gap-8">
                                         <div className="space-y-1.5">
-                                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 px-1">Display Name</label>
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-ink-subtle px-1">Display Name</label>
                                             <input
                                                 type="text"
                                                 value={currentBank.display_name}
                                                 onChange={(e) => setCurrentBank({ ...currentBank, display_name: e.target.value })}
                                                 placeholder="e.g. Dairy & Cheese"
-                                                className="block w-64 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold dark:text-white focus:ring-4 focus:ring-brand-blue/5 focus:border-brand-blue transition-all"
+                                                className="block w-64 bg-surface border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold dark:text-white focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all"
                                             />
                                         </div>
                                         <div className="space-y-1.5">
-                                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 px-1">Category Slug</label>
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-ink-subtle px-1">Category Slug</label>
                                             <input
                                                 type="text"
                                                 value={currentBank.category}
                                                 onChange={(e) => setCurrentBank({ ...currentBank, category: e.target.value.toLowerCase().replace(/\s+/g, '_') })}
                                                 placeholder="e.g. cheese"
                                                 disabled={selectedCategory !== 'new'}
-                                                className="block w-48 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold dark:text-white focus:ring-4 focus:ring-brand-blue/5 focus:border-brand-blue transition-all disabled:opacity-50"
+                                                className="block w-48 bg-surface border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold dark:text-white focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all disabled:opacity-50"
                                             />
                                         </div>
                                     </div>
@@ -257,13 +257,13 @@ export default function AttributeBankManager() {
                                                     <Tag className="w-5 h-5" />
                                                 </div>
                                                 <div>
-                                                    <h3 className="text-lg font-black text-slate-900 dark:text-white">Core Attributes</h3>
-                                                    <p className="text-sm text-slate-400 dark:text-slate-500 font-medium">Measurement metrics required for all products.</p>
+                                                    <h3 className="text-lg font-black text-ink">Core Attributes</h3>
+                                                    <p className="text-sm text-ink-subtle font-medium">Measurement metrics required for all products.</p>
                                                 </div>
                                             </div>
                                             <button
                                                 onClick={() => addAttribute('core')}
-                                                className="text-brand-blue hover:bg-brand-blue/5 p-2 rounded-xl transition-all"
+                                                className="text-primary-soft hover:bg-primary/5 p-2 rounded-xl transition-all"
                                             >
                                                 <Plus className="w-6 h-6" />
                                             </button>
@@ -292,13 +292,13 @@ export default function AttributeBankManager() {
                                                     <Layers className="w-5 h-5" />
                                                 </div>
                                                 <div>
-                                                    <h3 className="text-lg font-black text-slate-900 dark:text-white">Sub-Attributes</h3>
-                                                    <p className="text-sm text-slate-400 dark:text-slate-500 font-medium">Diagnostic metrics specific to sensory notes.</p>
+                                                    <h3 className="text-lg font-black text-ink">Sub-Attributes</h3>
+                                                    <p className="text-sm text-ink-subtle font-medium">Diagnostic metrics specific to sensory notes.</p>
                                                 </div>
                                             </div>
                                             <button
                                                 onClick={() => addAttribute('sub')}
-                                                className="text-brand-blue hover:bg-brand-blue/5 p-2 rounded-xl transition-all"
+                                                className="text-primary-soft hover:bg-primary/5 p-2 rounded-xl transition-all"
                                             >
                                                 <Plus className="w-6 h-6" />
                                             </button>
@@ -321,15 +321,15 @@ export default function AttributeBankManager() {
                                 </div>
                             </motion.div>
                         ) : (
-                            <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 border-dashed p-20 flex flex-col items-center justify-center text-center transition-colors">
-                                <div className="w-20 h-20 rounded-[2rem] bg-slate-50 dark:bg-slate-800 text-slate-300 dark:text-slate-600 flex items-center justify-center mb-6 border border-slate-100 dark:border-slate-800 shadow-inner-soft">
+                            <div className="bg-surface rounded-[2.5rem] border border-line/80 dark:border-line/10 border-dashed p-20 flex flex-col items-center justify-center text-center transition-colors">
+                                <div className="w-20 h-20 rounded-[2rem] bg-surface-raised text-slate-300 dark:text-slate-600 flex items-center justify-center mb-6 border border-line/80 dark:border-line/10 shadow-inner-soft">
                                     <Database className="w-10 h-10" />
                                 </div>
-                                <h2 className="text-xl font-black text-slate-900 dark:text-white mb-2">Initialize Knowledge Bank</h2>
-                                <p className="text-slate-400 dark:text-slate-500 max-w-sm mb-8 font-medium">Select a category from the sidebar or create a new one to begin defining attributes.</p>
+                                <h2 className="text-xl font-black text-ink mb-2">Initialize Knowledge Bank</h2>
+                                <p className="text-ink-subtle max-w-sm mb-8 font-medium">Select a category from the sidebar or create a new one to begin defining attributes.</p>
                                 <button
                                     onClick={handleCreateNew}
-                                    className="bg-brand-blue text-white px-8 py-3 rounded-2xl font-bold shadow-lg shadow-brand-blue/20 hover:scale-105 transition-all text-sm"
+                                    className="bg-primary text-white px-8 py-3 rounded-2xl font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-all text-sm"
                                 >
                                     Initialize New Category
                                 </button>
@@ -347,41 +347,41 @@ function AttributeCard({ attr, onUpdate, onDelete }: { attr: Attribute; onUpdate
         <div className="bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 hover:bg-white dark:hover:bg-slate-800 hover:shadow-premium dark:hover:shadow-none transition-all group/card">
             <div className="grid grid-cols-12 gap-6 items-end">
                 <div className="col-span-3 space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 px-1">Attribute ID</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-ink-subtle px-1">Attribute ID</label>
                     <input
                         type="text"
                         value={attr.attribute_id}
                         onChange={(e) => onUpdate('attribute_id', e.target.value.toLowerCase().replace(/\s+/g, '_'))}
                         placeholder="e.g. saltiness"
-                        className="w-full bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs font-bold dark:text-white focus:ring-4 focus:ring-brand-blue/5 transition-all shadow-sm"
+                        className="w-full bg-surface border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs font-bold dark:text-white focus:ring-4 focus:ring-primary/5 transition-all shadow-sm"
                     />
                 </div>
                 <div className="col-span-3 space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 px-1">Label (Visual)</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-ink-subtle px-1">Label (Visual)</label>
                     <input
                         type="text"
                         value={attr.label}
                         onChange={(e) => onUpdate('label', e.target.value)}
                         placeholder="e.g. Saltiness"
-                        className="w-full bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs font-bold dark:text-white focus:ring-4 focus:ring-brand-blue/5 transition-all shadow-sm"
+                        className="w-full bg-surface border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs font-bold dark:text-white focus:ring-4 focus:ring-primary/5 transition-all shadow-sm"
                     />
                 </div>
                 <div className="col-span-3 space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 px-1">Scale Type</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-ink-subtle px-1">Scale Type</label>
                     <select
                         value={attr.scale_type}
                         onChange={(e) => onUpdate('scale_type', e.target.value)}
-                        className="w-full bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs font-bold dark:text-white focus:ring-4 focus:ring-brand-blue/5 transition-all appearance-none shadow-sm"
+                        className="w-full bg-surface border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs font-bold dark:text-white focus:ring-4 focus:ring-primary/5 transition-all appearance-none shadow-sm"
                     >
                         {SCALE_OPTIONS.map(opt => <option key={opt.value} value={opt.value} className="dark:bg-slate-900">{opt.label}</option>)}
                     </select>
                 </div>
                 <div className="col-span-2 space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 px-1">Group</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-ink-subtle px-1">Group</label>
                     <select
                         value={attr.diagnostic_group}
                         onChange={(e) => onUpdate('diagnostic_group', e.target.value)}
-                        className="w-full bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs font-bold dark:text-white focus:ring-4 focus:ring-brand-blue/5 transition-all appearance-none shadow-sm"
+                        className="w-full bg-surface border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs font-bold dark:text-white focus:ring-4 focus:ring-primary/5 transition-all appearance-none shadow-sm"
                     >
                         {DIAGNOSTIC_GROUPS.map(opt => <option key={opt.value} value={opt.value} className="dark:bg-slate-900">{opt.label}</option>)}
                     </select>
@@ -389,7 +389,7 @@ function AttributeCard({ attr, onUpdate, onDelete }: { attr: Attribute; onUpdate
                 <div className="col-span-1 flex items-center justify-end">
                     <button
                         onClick={onDelete}
-                        className="w-10 h-10 rounded-xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-300 hover:text-brand-red hover:bg-brand-red/5 transition-all shadow-sm"
+                        className="w-10 h-10 rounded-xl bg-surface border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-300 hover:text-accent-soft hover:bg-accent/5 transition-all shadow-sm"
                     >
                         <Trash2 className="w-4 h-4" />
                     </button>
@@ -401,7 +401,7 @@ function AttributeCard({ attr, onUpdate, onDelete }: { attr: Attribute; onUpdate
 
 function EmptyState({ message }: { message: string }) {
     return (
-        <div className="py-12 border border-slate-100 dark:border-slate-800 border-dashed rounded-[2rem] flex flex-col items-center justify-center text-slate-400 dark:text-slate-600 italic font-medium text-sm transition-colors">
+        <div className="py-12 border border-line/80 dark:border-line/10 border-dashed rounded-[2rem] flex flex-col items-center justify-center text-ink-subtle italic font-medium text-sm transition-colors">
             <AlertCircle className="w-6 h-6 mb-2 opacity-30" />
             {message}
         </div>

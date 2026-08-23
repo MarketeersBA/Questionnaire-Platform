@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import os
 import logging
+import re
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
 from typing import Annotated, Dict, Any, List, Optional
@@ -48,6 +49,30 @@ from backend.workers.pptx_queue import LEASE_KEY_PREFIX, SyncPptxJobQueue
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
+
+
+# Characters Windows/macOS refuse in filenames, plus control chars.
+_ILLEGAL_FILENAME_CHARS = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
+
+
+def build_export_filename(project_name: Optional[str], suffix: str, extension: str) -> str:
+    """
+    Readable, filesystem-safe download name for an exported report.
+
+    Downloads used to be named after the raw survey ObjectId, which reaches the
+    user as 24 characters of hex. Naming the file after the project keeps the
+    deck identifiable once it is sitting in a downloads folder. Non-ASCII names
+    (Arabic project titles) are preserved -- Starlette encodes them via the
+    RFC 5987 `filename*` parameter.
+    """
+    name = (project_name or "Survey Report").strip()
+    name = _ILLEGAL_FILENAME_CHARS.sub(" ", name)
+    name = re.sub(r"\s+", " ", name).strip(" .")
+    if not name:
+        name = "Survey Report"
+    # Leave headroom for the suffix and extension within common path limits.
+    name = name[:120]
+    return f"{name} - {suffix}.{extension}"
 
 
 # ---------------------------------------------------------------------------
@@ -447,8 +472,7 @@ async def download_report(
         raise HTTPException(410, "The report file has expired or is inaccessible. Please regenerate.")
 
     from fastapi.responses import FileResponse
-    project_name = (report.get("project_name") or "Survey").replace("/", "_").replace("\\", "_")
-    filename = f"{project_name}_MarketInsights.pptx"
+    filename = build_export_filename(report.get("project_name"), "Marketeers Report", "pptx")
 
     headers: Dict[str, str] = {}
     export_manifest = report.get("pptx_export_manifest") or {}
@@ -504,8 +528,7 @@ async def download_brand_analyzer_excel(
             raise HTTPException(410, "The Excel file has expired or is inaccessible.")
 
     from fastapi.responses import FileResponse
-    project_name = (report.get("project_name") or "Survey").replace("/", "_").replace("\\", "_")
-    download_name = f"{project_name}_BrandAnalyzer_Full.xlsx"
+    download_name = build_export_filename(report.get("project_name"), "Brand Analyzer", "xlsx")
 
     return FileResponse(
         path=str(file_path),

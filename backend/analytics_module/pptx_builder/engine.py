@@ -165,6 +165,7 @@ class PPTXEngine:
         self.render_journal = []
         self.narrative_render_journal = []
         self.automation_notes = []
+        self.validation_result = None
 
         # 2. Template Audit (Phase 7 - Hardening)
         audit_report = self.template_adapter.audit(prs)
@@ -195,10 +196,52 @@ class PPTXEngine:
         stream = io.BytesIO()
         prs.save(stream)
         stream.seek(0)
-        
+
         slide_count = len(prs.slides)
         logger.info(f"[PPTXEngine] Generation complete. Total slides: {slide_count}")
-        
+
+        # 4. Validate the finished package.
+        # PowerPoint reports corruption only as a repair prompt on the user's
+        # machine, with no indication of what was wrong or which slides it
+        # dropped. Validating here turns that into a specific server-side log
+        # line at the moment the defect is introduced.
+        try:
+            from backend.analytics_module.pptx_builder.package_validator import (
+                validate_pptx_package,
+            )
+            import tempfile, os as _os
+
+            with tempfile.NamedTemporaryFile(suffix=".pptx", delete=False) as tmp:
+                tmp.write(stream.getvalue())
+                tmp_path = tmp.name
+            try:
+                report = validate_pptx_package(tmp_path)
+                self.validation_result = report.as_dict()
+                if not report.ok:
+                    logger.error(
+                        "[PPTXEngine] Package validation found %d defect(s) — "
+                        "PowerPoint will prompt to repair this deck:",
+                        len(report.errors),
+                    )
+                    for err in report.errors[:25]:
+                        logger.error("[PPTXEngine]   - %s", err)
+                    self.automation_notes.append({
+                        "type": "package_validation_failed",
+                        "severity": "error",
+                        "message": f"{len(report.errors)} OPC defect(s) detected",
+                        "errors": report.errors[:25],
+                    })
+                else:
+                    logger.info("[PPTXEngine] Package validation passed (%d slides).", report.slide_count)
+            finally:
+                try:
+                    _os.unlink(tmp_path)
+                except OSError:
+                    pass
+        except Exception as exc:  # noqa: BLE001 - diagnostics must never break export
+            logger.warning("[PPTXEngine] Package validation skipped: %s", exc)
+
+        stream.seek(0)
         return stream, slide_count
 
     def _dispatch_intent(self, prs: Presentation, intent: SlideIntent):

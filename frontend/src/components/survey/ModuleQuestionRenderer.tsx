@@ -59,13 +59,13 @@ function SpecifyCommitField({
     };
 
     return (
-        <div className="space-y-2 p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
+        <div className="space-y-2 p-3 bg-surface rounded-xl border border-slate-200 dark:border-slate-700">
             <input
                 type="text"
                 required
                 aria-label={language === 'ar' ? 'تحديد الإجابة' : 'Specify answer'}
                 autoFocus
-                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-bold"
+                className="w-full bg-surface-raised border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-bold"
                 placeholder={
                     language === 'ar'
                         ? 'يرجى التحديد...'
@@ -94,7 +94,7 @@ function SpecifyCommitField({
                     type="button"
                     onClick={commit}
                     disabled={!draft.trim()}
-                    className="text-[10px] font-black uppercase text-brand-blue px-3 py-1 disabled:opacity-40"
+                    className="text-[10px] font-black uppercase text-primary-soft px-3 py-1 disabled:opacity-40"
                 >
                     {language === 'ar' ? 'إضافة' : 'Add'}
                 </button>
@@ -136,8 +136,8 @@ function OptionChoiceList({
                             type="button"
                             onClick={() => handleSelect(option)}
                             className={`w-full p-5 rounded-2xl border-2 text-left font-bold transition-all ${selected
-                                ? 'bg-brand-blue border-brand-blue text-white shadow-lg'
-                                : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400'
+                                ? 'bg-primary border-primary text-white shadow-lg'
+                                : 'bg-surface-raised/50 border-line/80 dark:border-line/10 text-ink-muted'
                                 }`}
                         >
                             {label}
@@ -253,8 +253,8 @@ function BrandChoiceList({
                         type="button"
                         onClick={() => toggleBrand(brand)}
                         className={`w-full p-5 rounded-2xl border-2 text-left font-bold transition-all ${isSelected
-                            ? 'bg-brand-blue border-brand-blue text-white shadow-lg'
-                            : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400'
+                            ? 'bg-primary border-primary text-white shadow-lg'
+                            : 'bg-surface-raised/50 border-line/80 dark:border-line/10 text-ink-muted'
                             }`}
                     >
                         {brand}
@@ -266,7 +266,7 @@ function BrandChoiceList({
                 <button
                     type="button"
                     onClick={() => setShowOtherInput(true)}
-                    className="w-full p-5 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 text-slate-400 font-bold hover:border-brand-blue hover:text-brand-blue transition-all flex items-center justify-center gap-2"
+                    className="w-full p-5 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 text-slate-400 font-bold hover:border-primary hover:text-primary-soft transition-all flex items-center justify-center gap-2"
                 >
                     <Plus className="w-5 h-5" />
                     {language === 'ar' ? 'أضف ماركة أخرى' : 'Add another brand'}
@@ -274,11 +274,11 @@ function BrandChoiceList({
             )}
 
             {question.has_other && showOtherInput && (
-                <div className="space-y-2 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+                <div className="space-y-2 p-2 bg-surface-raised/50 rounded-2xl border border-line/80 dark:border-line/10">
                     <input
                         type="text"
                         autoFocus
-                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-bold"
+                        className="w-full bg-surface border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-bold"
                         placeholder={language === 'ar' ? 'اسم الماركة...' : 'Brand name...'}
                         value={otherBrandInput}
                         onChange={(e) => setOtherBrandInput(e.target.value)}
@@ -303,7 +303,7 @@ function BrandChoiceList({
                         <button
                             type="button"
                             onClick={addCustomBrand}
-                            className="text-[10px] font-black uppercase text-brand-blue px-3 py-1"
+                            className="text-[10px] font-black uppercase text-primary-soft px-3 py-1"
                         >
                             {language === 'ar' ? 'إضافة' : 'Add'}
                         </button>
@@ -351,7 +351,7 @@ function OpenSingleInput(props: ModuleQuestionRendererProps) {
         <input
             type="text"
             disabled={disabled}
-            className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-6 py-4 text-lg font-bold"
+            className="w-full bg-surface-raised border border-slate-200 dark:border-slate-700 rounded-2xl px-6 py-4 text-lg font-bold"
             placeholder={
                 language === 'ar' ? 'اكتب اسم الماركة هنا...' : 'Type brand name here...'
             }
@@ -375,7 +375,7 @@ function OpenLoopInput(props: ModuleQuestionRendererProps) {
                     key={i}
                     type="text"
                     disabled={disabled}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-6 py-4 font-bold"
+                    className="w-full bg-surface-raised border border-slate-200 dark:border-slate-700 rounded-2xl px-6 py-4 font-bold"
                     placeholder={language === 'ar' ? `ماركة ${i + 1}...` : `Brand ${i + 1}...`}
                     value={val}
                     onChange={(e) => {
@@ -390,7 +390,7 @@ function OpenLoopInput(props: ModuleQuestionRendererProps) {
                 type="button"
                 disabled={disabled}
                 onClick={() => onChange([...rows, ''])}
-                className="text-[10px] font-black uppercase tracking-widest text-brand-blue flex items-center gap-2"
+                className="text-[10px] font-black uppercase tracking-widest text-primary-soft flex items-center gap-2"
             >
                 <Plus className="w-4 h-4" />
                 {language === 'ar' ? 'إضافة ماركة أخرى' : 'Add another brand'}
@@ -427,14 +427,14 @@ export default function ModuleQuestionRenderer(props: ModuleQuestionRendererProp
 
     return (
         <div className="space-y-4">
-            <h2 className="text-xl md:text-2xl font-display font-bold leading-tight text-slate-900 dark:text-white">
+            <h2 className="text-xl md:text-2xl font-display font-bold leading-tight text-ink">
                 {questionText}
             </h2>
 
             {question.type === 'mcq' && usesOptions && (
-                <div className="flex items-center gap-2 px-3 py-1 bg-brand-blue/5 border border-brand-blue/10 rounded-lg w-fit">
-                    <Sparkles className="w-3 h-3 text-brand-blue" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-brand-blue">
+                <div className="flex items-center gap-2 px-3 py-1 bg-primary/5 border border-primary/10 rounded-lg w-fit">
+                    <Sparkles className="w-3 h-3 text-primary-soft" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-primary-soft">
                         {language === 'ar' ? 'يمكنك اختيار أكثر من إجابة' : 'Select all that apply'}
                     </span>
                 </div>

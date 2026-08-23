@@ -52,14 +52,14 @@ export default function FollowUpConversationThread({
             className="space-y-2"
           >
             <div className="flex gap-2.5 items-start">
-              <div className="mt-0.5 w-7 h-7 rounded-full bg-brand-blue/10 text-brand-blue flex items-center justify-center shrink-0">
+              <div className="mt-0.5 w-7 h-7 rounded-full bg-primary/10 text-primary-soft flex items-center justify-center shrink-0">
                 <Sparkles className="w-3.5 h-3.5" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-black uppercase tracking-widest text-brand-blue mb-1">
+                <p className="text-[10px] font-black uppercase tracking-widest text-primary-soft mb-1">
                   {copy.ai}
                 </p>
-                <p className="text-sm font-semibold text-slate-600 dark:text-slate-300 leading-relaxed">
+                <p className="text-sm font-semibold text-ink-muted leading-relaxed">
                   {exchange.prompt}
                 </p>
               </div>
@@ -72,7 +72,7 @@ export default function FollowUpConversationThread({
                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
                   {copy.you}
                 </p>
-                <p className="text-sm font-bold text-slate-800 dark:text-slate-100 leading-relaxed">
+                <p className="text-sm font-bold text-ink leading-relaxed">
                   {formatRespondentDisplay(exchange.respondent, copy.voiceReply)}
                 </p>
               </div>

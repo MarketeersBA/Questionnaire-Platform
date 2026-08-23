@@ -94,7 +94,7 @@ export default function ProductTestSectionPanel({
                 className="space-y-6"
             >
                 {sectionTitle !== section.title && (
-                    <p className="text-sm font-bold text-slate-500 dark:text-slate-400 px-1">
+                    <p className="text-sm font-bold text-ink-muted px-1">
                         {sectionTitle}
                     </p>
                 )}

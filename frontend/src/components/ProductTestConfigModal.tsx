@@ -206,40 +206,40 @@ export default function ProductTestConfigModal({
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="relative w-full max-w-4xl bg-white dark:bg-slate-950 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[92vh] transition-colors"
+                className="relative w-full max-w-4xl bg-surface rounded-[2.5rem] border border-line/80 dark:border-line/10 shadow-2xl overflow-hidden flex flex-col max-h-[92vh] transition-colors"
             >
                 {/* Header */}
-                <div className="p-8 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between transition-colors">
+                <div className="p-8 border-b border-line/80 dark:border-line/10 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between transition-colors">
                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-brand-blue/10 dark:bg-brand-blue/20 text-brand-blue flex items-center justify-center shadow-inner">
+                        <div className="w-12 h-12 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary-soft flex items-center justify-center shadow-inner">
                             <Sparkles className="w-6 h-6" />
                         </div>
                         <div>
-                            <h2 className="text-2xl font-display font-black text-slate-900 dark:text-white tracking-tight">
-                                Product Test <span className="text-brand-blue">Architect</span>
+                            <h2 className="text-2xl font-display font-black text-ink tracking-tight">
+                                Product Test <span className="text-primary-soft">Architect</span>
                             </h2>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Configure taste test / performance attributes and package attachment.</p>
+                            <p className="text-xs text-ink-muted font-medium">Configure taste test / performance attributes and package attachment.</p>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-4">
                         {/* Language Selection */}
-                        <div className="flex bg-slate-100 dark:bg-slate-800 rounded-lg p-0.5 border border-slate-200 dark:border-slate-700">
+                        <div className="flex bg-surface-sunken rounded-lg p-0.5 border border-slate-200 dark:border-slate-700">
                             <button
                                 onClick={() => setConfig(prev => ({ ...prev, language: 'en' }))}
-                                className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${config.language === 'en' ? 'bg-white dark:bg-slate-950 text-brand-blue shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                                className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${config.language === 'en' ? 'bg-surface text-primary-soft shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
                             >
                                 English
                             </button>
                             <button
                                 onClick={() => setConfig(prev => ({ ...prev, language: 'ar' }))}
-                                className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${config.language === 'ar' ? 'bg-white dark:bg-slate-950 text-brand-blue shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                                className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${config.language === 'ar' ? 'bg-surface text-primary-soft shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
                             >
                                 العربية
                             </button>
                         </div>
 
-                        <button onClick={onClose} className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-all shadow-sm">
+                        <button onClick={onClose} className="p-2 rounded-xl bg-surface border border-line/80 dark:border-line/10 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-all shadow-sm">
                             <X className="w-5 h-5" />
                         </button>
                     </div>
@@ -249,14 +249,14 @@ export default function ProductTestConfigModal({
                 <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar transition-colors">
                     {loading ? (
                         <div className="py-20 flex flex-col items-center justify-center gap-4">
-                            <div className="w-8 h-8 rounded-full border-4 border-brand-blue border-r-transparent animate-spin" />
+                            <div className="w-8 h-8 rounded-full border-4 border-primary border-r-transparent animate-spin" />
                             <p className="text-sm font-semibold text-slate-500">Loading Question Banks...</p>
                         </div>
                     ) : (
                         <>
                             {/* Intro info alert */}
-                            <div className="bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-4 rounded-2xl flex gap-3 text-xs text-slate-500 dark:text-slate-400 shadow-sm leading-relaxed">
-                                <Info className="w-4 h-4 text-brand-blue shrink-0 mt-0.5" />
+                            <div className="bg-surface-raised border border-line/80 dark:border-line/10 p-4 rounded-2xl flex gap-3 text-xs text-ink-muted shadow-sm leading-relaxed">
+                                <Info className="w-4 h-4 text-primary-soft shrink-0 mt-0.5" />
                                 <div>
                                     <span className="font-bold text-slate-800 dark:text-slate-200">Instruction:</span> Select optional attributes to customize the product feedback loops. Fixed attributes are always included. Badges point out evaluated dimensions: <span className="font-black text-sky-500 dark:text-sky-400">PF</span> for product performance capabilities and <span className="font-black text-rose-500 dark:text-rose-400">EM</span> for deeper emotional feedback.
                                 </div>
@@ -271,7 +271,7 @@ export default function ProductTestConfigModal({
                                     return (
                                         <div
                                             key={groupName}
-                                            className="bg-white dark:bg-slate-900/40 rounded-2xl border border-slate-100 dark:border-slate-800/80 shadow-sm overflow-hidden"
+                                            className="bg-surface/40 rounded-2xl border border-line/80 dark:border-line/10 shadow-sm overflow-hidden"
                                         >
                                             <button
                                                 onClick={() => toggleGroup(groupName)}
@@ -280,7 +280,7 @@ export default function ProductTestConfigModal({
                                                 <div className="flex items-center gap-3">
                                                     <Layers className="w-5 h-5 text-slate-400" />
                                                     <span className="font-bold tracking-tight text-slate-800 dark:text-slate-200">{groupName}</span>
-                                                    <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 px-2 py-0.5 rounded-full font-bold">
+                                                    <span className="text-[10px] bg-surface-sunken text-slate-500 px-2 py-0.5 rounded-full font-bold">
                                                         {questions.length} question{questions.length !== 1 && 's'}
                                                     </span>
                                                 </div>
@@ -306,17 +306,17 @@ export default function ProductTestConfigModal({
                                                                         key={q.question_id}
                                                                         onClick={() => handleSelectAttribute(q.attribute, isFixed)}
                                                                         className={`relative p-4 rounded-xl border flex items-start gap-4 transition-all select-none ${isFixed
-                                                                            ? 'bg-slate-50 dark:bg-slate-900/60 border-slate-200 dark:border-slate-850 opacity-80 cursor-default'
+                                                                            ? 'bg-surface-raised/60 border-slate-200 dark:border-slate-850 opacity-80 cursor-default'
                                                                             : isSelected
-                                                                                ? 'bg-white dark:bg-slate-900 border-brand-blue/30 shadow-md shadow-brand-blue/5 dark:shadow-none cursor-pointer'
-                                                                                : 'bg-white dark:bg-slate-900/20 border-slate-150 dark:border-slate-800 opacity-60 hover:opacity-100 cursor-pointer'
+                                                                                ? 'bg-surface border-primary/30 shadow-md shadow-primary/5 dark:shadow-none cursor-pointer'
+                                                                                : 'bg-surface/20 border-slate-150 dark:border-slate-800 opacity-60 hover:opacity-100 cursor-pointer'
                                                                             }`}
                                                                     >
                                                                         <div className="mt-1 shadow-sm shrink-0">
                                                                             {isFixed ? (
-                                                                                <CheckSquare className="w-4 h-4 text-slate-400 dark:text-slate-500 fill-slate-100 dark:fill-slate-800" />
+                                                                                <CheckSquare className="w-4 h-4 text-ink-subtle fill-slate-100 dark:fill-slate-800" />
                                                                             ) : isSelected ? (
-                                                                                <CheckSquare className="w-4 h-4 text-brand-blue fill-brand-blue/10" />
+                                                                                <CheckSquare className="w-4 h-4 text-primary-soft fill-brand-blue/10" />
                                                                             ) : (
                                                                                 <Square className="w-4 h-4 text-slate-300 dark:text-slate-600" />
                                                                             )}
@@ -326,7 +326,7 @@ export default function ProductTestConfigModal({
                                                                             <h4 className="text-xs font-black text-slate-850 dark:text-slate-100 tracking-tight">
                                                                                 {q.attribute}
                                                                             </h4>
-                                                                            <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium leading-normal line-clamp-2">
+                                                                            <p className="text-[10px] text-ink-subtle font-medium leading-normal line-clamp-2">
                                                                                 {config.language === 'ar' ? q.ar_text : q.en_text}
                                                                             </p>
                                                                         </div>
@@ -357,16 +357,16 @@ export default function ProductTestConfigModal({
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <div className="p-3 bg-white dark:bg-slate-850 border border-slate-150 dark:border-slate-800 rounded-xl text-slate-500">
-                                            <Box className="w-5 h-5 text-brand-blue" />
+                                            <Box className="w-5 h-5 text-primary-soft" />
                                         </div>
                                         <div>
-                                            <h4 className="font-bold text-slate-800 dark:text-white tracking-tight">Attach Package Test Module</h4>
+                                            <h4 className="font-bold text-ink tracking-tight">Attach Package Test Module</h4>
                                             <p className="text-[11px] text-slate-450 dark:text-slate-400 font-medium">Include detailed ergonomics and visual box/container feedback.</p>
                                         </div>
                                     </div>
                                     <button
                                         onClick={togglePackageTest}
-                                        className={`w-12 h-6 rounded-full relative transition-all ${config.package_test_enabled ? 'bg-brand-blue' : 'bg-slate-200 dark:bg-slate-800'}`}
+                                        className={`w-12 h-6 rounded-full relative transition-all ${config.package_test_enabled ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-800'}`}
                                     >
                                         <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${config.package_test_enabled ? 'right-1' : 'left-1'}`} />
                                     </button>
@@ -380,7 +380,7 @@ export default function ProductTestConfigModal({
                                             exit={{ height: 0, opacity: 0, marginTop: 0 }}
                                             className="overflow-hidden"
                                         >
-                                            <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-4">
+                                            <div className="pt-4 border-t border-line/80 dark:border-line/10 space-y-4">
                                                 <h5 className="text-[10px] font-black uppercase tracking-wider text-slate-450">Package Attributes Selection</h5>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                     {pkgBank.map(q => {
@@ -392,17 +392,17 @@ export default function ProductTestConfigModal({
                                                                 key={q.question_id}
                                                                 onClick={() => handleSelectPkgAttribute(q.attribute, isFixed)}
                                                                 className={`relative p-4 rounded-xl border flex items-start gap-4 transition-all select-none ${isFixed
-                                                                    ? 'bg-slate-50 dark:bg-slate-900/60 border-slate-200 dark:border-slate-850 opacity-80 cursor-default'
+                                                                    ? 'bg-surface-raised/60 border-slate-200 dark:border-slate-850 opacity-80 cursor-default'
                                                                     : isSelected
-                                                                        ? 'bg-white dark:bg-slate-900 border-brand-blue/30 shadow-md shadow-brand-blue/5 dark:shadow-none cursor-pointer'
-                                                                        : 'bg-white dark:bg-slate-900/20 border-slate-150 dark:border-slate-800 opacity-60 hover:opacity-100 cursor-pointer'
+                                                                        ? 'bg-surface border-primary/30 shadow-md shadow-primary/5 dark:shadow-none cursor-pointer'
+                                                                        : 'bg-surface/20 border-slate-150 dark:border-slate-800 opacity-60 hover:opacity-100 cursor-pointer'
                                                                     }`}
                                                             >
                                                                 <div className="mt-1 shadow-sm shrink-0">
                                                                     {isFixed ? (
-                                                                        <CheckSquare className="w-4 h-4 text-slate-400 dark:text-slate-500 fill-slate-100 dark:fill-slate-800" />
+                                                                        <CheckSquare className="w-4 h-4 text-ink-subtle fill-slate-100 dark:fill-slate-800" />
                                                                     ) : isSelected ? (
-                                                                        <CheckSquare className="w-4 h-4 text-brand-blue fill-brand-blue/10" />
+                                                                        <CheckSquare className="w-4 h-4 text-primary-soft fill-brand-blue/10" />
                                                                     ) : (
                                                                         <Square className="w-4 h-4 text-slate-300 dark:text-slate-600" />
                                                                     )}
@@ -412,7 +412,7 @@ export default function ProductTestConfigModal({
                                                                     <h4 className="text-xs font-black text-slate-850 dark:text-slate-100 tracking-tight">
                                                                         {q.attribute}
                                                                     </h4>
-                                                                    <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium leading-normal line-clamp-2">
+                                                                    <p className="text-[10px] text-ink-subtle font-medium leading-normal line-clamp-2">
                                                                         {config.language === 'ar' ? q.ar_text : q.en_text}
                                                                     </p>
                                                                 </div>
@@ -431,10 +431,10 @@ export default function ProductTestConfigModal({
                                 <div className="flex items-center justify-between gap-4">
                                     <div className="flex items-center gap-3">
                                         <div className="p-3 bg-white dark:bg-slate-850 border border-slate-150 dark:border-slate-800 rounded-xl text-slate-500">
-                                            <Camera className="w-5 h-5 text-brand-blue" />
+                                            <Camera className="w-5 h-5 text-primary-soft" />
                                         </div>
                                         <div>
-                                            <h4 className="font-bold text-slate-800 dark:text-white tracking-tight">
+                                            <h4 className="font-bold text-ink tracking-tight">
                                                 Trial Media Upload
                                             </h4>
                                             <p className="text-[11px] text-slate-450 dark:text-slate-400 font-medium">
@@ -445,7 +445,7 @@ export default function ProductTestConfigModal({
                                     <button
                                         type="button"
                                         onClick={toggleTrialMediaCapture}
-                                        className={`w-12 h-6 rounded-full relative transition-all shrink-0 ${trialMedia.enabled ? 'bg-brand-blue' : 'bg-slate-200 dark:bg-slate-800'}`}
+                                        className={`w-12 h-6 rounded-full relative transition-all shrink-0 ${trialMedia.enabled ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-800'}`}
                                         aria-pressed={trialMedia.enabled}
                                     >
                                         <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${trialMedia.enabled ? 'right-1' : 'left-1'}`} />
@@ -460,7 +460,7 @@ export default function ProductTestConfigModal({
                                             exit={{ height: 0, opacity: 0, marginTop: 0 }}
                                             className="overflow-hidden"
                                         >
-                                            <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-5">
+                                            <div className="pt-4 border-t border-line/80 dark:border-line/10 space-y-5">
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                     <div className="space-y-2">
                                                         <label className="text-[10px] font-black uppercase tracking-wider text-slate-450">
@@ -471,7 +471,7 @@ export default function ProductTestConfigModal({
                                                             onChange={(e) => patchTrialMediaCapture({
                                                                 accepted_media: e.target.value as typeof trialMedia.accepted_media,
                                                             })}
-                                                            className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-xs font-bold text-slate-700 dark:text-slate-200"
+                                                            className="w-full bg-surface border border-line/80 dark:border-line/10 rounded-xl px-4 py-3 text-xs font-bold text-slate-700 dark:text-slate-200"
                                                         >
                                                             {TRIAL_MEDIA_ACCEPTED_OPTIONS.map((opt) => (
                                                                 <option key={opt.value} value={opt.value}>
@@ -490,7 +490,7 @@ export default function ProductTestConfigModal({
                                                             onChange={(e) => patchTrialMediaCapture({
                                                                 timing: e.target.value as typeof trialMedia.timing,
                                                             })}
-                                                            className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-xs font-bold text-slate-700 dark:text-slate-200"
+                                                            className="w-full bg-surface border border-line/80 dark:border-line/10 rounded-xl px-4 py-3 text-xs font-bold text-slate-700 dark:text-slate-200"
                                                         >
                                                             {TRIAL_MEDIA_CAPTURE_TIMING_OPTIONS.map((opt) => (
                                                                 <option key={opt.value} value={opt.value}>
@@ -507,7 +507,7 @@ export default function ProductTestConfigModal({
                                                             type="checkbox"
                                                             checked={trialMedia.required}
                                                             onChange={(e) => patchTrialMediaCapture({ required: e.target.checked })}
-                                                            className="w-4 h-4 rounded border-slate-300 text-brand-blue focus:ring-brand-blue"
+                                                            className="w-4 h-4 rounded border-slate-300 text-primary-soft focus:ring-primary"
                                                         />
                                                         <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
                                                             Required question
@@ -523,7 +523,7 @@ export default function ProductTestConfigModal({
                                                             onChange={(e) => patchTrialMediaCapture({
                                                                 max_video_duration_seconds: Number(e.target.value) || 60,
                                                             })}
-                                                            className="w-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-2 py-1 text-center font-black text-slate-800 dark:text-white"
+                                                            className="w-16 bg-surface border border-line/80 dark:border-line/10 rounded-lg px-2 py-1 text-center font-black text-ink"
                                                         />
                                                         <span>seconds</span>
                                                     </div>
@@ -541,7 +541,7 @@ export default function ProductTestConfigModal({
                                                                 : { prompt_en: e.target.value },
                                                         )}
                                                         rows={3}
-                                                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-xs font-medium text-slate-700 dark:text-slate-200 resize-none"
+                                                        className="w-full bg-surface border border-line/80 dark:border-line/10 rounded-xl px-4 py-3 text-xs font-medium text-slate-700 dark:text-slate-200 resize-none"
                                                     />
                                                 </div>
                                             </div>
@@ -554,7 +554,7 @@ export default function ProductTestConfigModal({
                 </div>
 
                 {/* Footer */}
-                <div className="p-8 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 flex justify-end gap-4 transition-colors">
+                <div className="p-8 border-t border-line/80 dark:border-line/10 bg-surface flex justify-end gap-4 transition-colors">
                     <button
                         onClick={onClose}
                         className="px-6 py-3 text-xs font-bold text-slate-450 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-all"
@@ -564,7 +564,7 @@ export default function ProductTestConfigModal({
                     <button
                         onClick={handleSave}
                         disabled={loading}
-                        className="flex items-center gap-2 bg-slate-900 dark:bg-brand-blue hover:bg-black dark:hover:bg-brand-blue/80 text-white px-8 py-4 rounded-2xl shadow-xl shadow-slate-900/10 dark:shadow-brand-blue/20 transition-all font-black text-xs border-none disabled:opacity-50"
+                        className="flex items-center gap-2 bg-slate-900 dark:bg-primary hover:bg-black dark:hover:bg-primary/80 text-white px-8 py-4 rounded-2xl shadow-xl shadow-slate-900/10 dark:shadow-primary/20 transition-all font-black text-xs border-none disabled:opacity-50"
                     >
                         <Check className="w-4 h-4" />
                         Apply Configurations

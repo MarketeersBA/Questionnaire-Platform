@@ -1,8 +1,9 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import OpenEndAnswerWithFollowUpThread from '../voice-feedback/OpenEndAnswerWithFollowUpThread';
 import AiFollowUpPanel from '../voice-feedback/AiFollowUpPanel';
+import FollowUpRoundsSlider from '../voice-feedback/FollowUpRoundsSlider';
 import type { AiFollowupConfig } from '../../pages/CreateSurvey/types';
 import {
   canSubmitFollowUpReply,
@@ -50,6 +51,8 @@ export interface TasteTestOpenEndQuestionProps {
   onFollowUpTrigger?: FollowUpTriggerHandler;
   onVoiceFollowUpTrigger?: VoiceFollowUpTriggerHandler;
   onFollowUpReplyChange?: FollowUpReplyChangeHandler;
+  /** Respondent-facing 1-3 follow-up rounds slider — omit to keep prior behavior. */
+  onMaxRoundsChange?: (questionId: string, rounds: number) => void;
 }
 
 export default function TasteTestOpenEndQuestion({
@@ -70,6 +73,7 @@ export default function TasteTestOpenEndQuestion({
   onFollowUpTrigger,
   onVoiceFollowUpTrigger,
   onFollowUpReplyChange,
+  onMaxRoundsChange,
 }: TasteTestOpenEndQuestionProps) {
   const isArabic = language === 'ar';
   const followUpEligibility = useMemo(() => buildTasteTestFollowUpEligibility({
@@ -82,6 +86,9 @@ export default function TasteTestOpenEndQuestion({
   const minAnswerLength = resolveMinAnswerLength(aiFollowup);
   const panelState = followUpStateMap?.[questionId];
   const questionCategory = classifyQuestionCategory(questionText);
+  const adminMaxRounds = getMaxFollowUpRounds(aiFollowup, questionCategory);
+  const showRoundsPicker = Boolean(aiFollowup?.is_enabled && aiFollowup?.apply_to_text && adminMaxRounds > 1);
+  const [respondentRounds, setRespondentRounds] = useState(adminMaxRounds);
 
   const appendFollowUpExchange = (respondentPart: string) => {
     onChange(appendTasteTestFollowUpToOpenEndValue(
@@ -95,6 +102,10 @@ export default function TasteTestOpenEndQuestion({
   const primaryText = splitFollowUpAnswerText(textValue).primaryText;
 
   useEffect(() => {
+    // A finished sentence (ends in . ! ? or Arabic ؟) means the respondent is
+    // done typing right now — fire almost immediately instead of waiting out
+    // the full idle window, so the AI feels responsive rather than laggy.
+    const idleMs = /[.!?؟]\s*$/.test(primaryText) ? 300 : 1600;
     const timeout = setTimeout(() => {
       const debounceCtx = {
         questionId,
@@ -117,7 +128,7 @@ export default function TasteTestOpenEndQuestion({
           followUpEligibility
         );
       }
-    }, 3000);
+    }, idleMs);
 
     return () => clearTimeout(timeout);
   }, [
@@ -127,6 +138,20 @@ export default function TasteTestOpenEndQuestion({
 
   return (
     <>
+      {showRoundsPicker && (
+        <div className="mb-3">
+          <FollowUpRoundsSlider
+            maxAllowed={adminMaxRounds}
+            value={respondentRounds}
+            language={language}
+            onChange={(n) => {
+              setRespondentRounds(n);
+              onMaxRoundsChange?.(questionId, n);
+            }}
+          />
+        </div>
+      )}
+
       <OpenEndAnswerWithFollowUpThread
         value={value}
         showVoice={showVoice}

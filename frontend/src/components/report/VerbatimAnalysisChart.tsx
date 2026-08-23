@@ -79,8 +79,8 @@ export const VerbatimAnalysisChart: React.FC<VerbatimAnalysisProps> = ({ data })
                             key={brand}
                             onClick={() => setActiveBrand(brand)}
                             className={`w-full text-left p-4 rounded-2xl border transition-all relative group overflow-hidden ${activeBrand === brand
-                                ? 'bg-brand-blue/10 border-brand-blue/30 text-brand-blue ring-1 ring-brand-blue/20'
-                                : 'bg-transparent border-slate-200 dark:border-white/5 text-slate-500 hover:border-slate-300 dark:hover:border-white/10'
+                                ? 'bg-primary/10 border-primary/30 text-primary-soft ring-1 ring-primary/20'
+                                : 'bg-transparent border-line/80 dark:border-line/10 text-slate-500 hover:border-slate-300 dark:hover:border-white/10'
                                 }`}
                         >
                             <div className="flex items-center justify-between relative z-10">
@@ -92,7 +92,7 @@ export const VerbatimAnalysisChart: React.FC<VerbatimAnalysisProps> = ({ data })
                             {activeBrand === brand && (
                                 <motion.div
                                     layoutId="activeTabGlow"
-                                    className="absolute inset-0 bg-brand-blue/5 blur-xl group-hover:bg-brand-blue/10 transition-all"
+                                    className="absolute inset-0 bg-primary/5 blur-xl group-hover:bg-primary/10 transition-all"
                                 />
                             )}
                         </button>
@@ -113,7 +113,7 @@ export const VerbatimAnalysisChart: React.FC<VerbatimAnalysisProps> = ({ data })
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div className={`md:col-span-2 p-6 rounded-[32px] border ${isDark ? 'bg-slate-900/50 border-white/5' : 'bg-slate-50 border-slate-200'} flex flex-col justify-center`}>
                                     <div className="flex items-center gap-2 mb-2">
-                                        <Target className="w-4 h-4 text-brand-blue" />
+                                        <Target className="w-4 h-4 text-primary-soft" />
                                         <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Core Takeaway</span>
                                     </div>
                                     <h4 className={`text-2xl font-black italic tracking-tighter uppercase ${isDark ? 'text-white' : 'text-slate-900'}`}>
@@ -142,11 +142,11 @@ export const VerbatimAnalysisChart: React.FC<VerbatimAnalysisProps> = ({ data })
                                 {currentAnalysis.themes.map((theme, idx) => (
                                     <div
                                         key={idx}
-                                        className={`p-6 rounded-[32px] border ${isDark ? 'bg-white/5 border-white/5' : 'bg-white border-slate-200'} hover:border-brand-blue/30 transition-all group`}
+                                        className={`p-6 rounded-[32px] border ${isDark ? 'bg-white/5 border-white/5' : 'bg-white border-slate-200'} hover:border-primary/30 transition-all group`}
                                     >
                                         <div className="flex justify-between items-start mb-4">
                                             <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 rounded-2xl bg-brand-blue/10 flex items-center justify-center border border-brand-blue/20 text-brand-blue font-black shadow-sm group-hover:scale-110 transition-transform">
+                                                <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 text-primary-soft font-black shadow-sm group-hover:scale-110 transition-transform">
                                                     {theme.percentage}%
                                                 </div>
                                                 <div>
@@ -157,8 +157,8 @@ export const VerbatimAnalysisChart: React.FC<VerbatimAnalysisProps> = ({ data })
                                             <Search className="w-4 h-4 text-slate-500 opacity-20 group-hover:opacity-100 transition-all" />
                                         </div>
 
-                                        <div className={`p-4 rounded-2xl ${isDark ? 'bg-black/20' : 'bg-slate-50'} border border-dashed border-slate-200 dark:border-white/10 relative`}>
-                                            <Quote className="w-4 h-4 text-brand-blue/30 absolute -top-2 -left-2" />
+                                        <div className={`p-4 rounded-2xl ${isDark ? 'bg-black/20' : 'bg-slate-50'} border border-dashed border-line/80 dark:border-line/10 relative`}>
+                                            <Quote className="w-4 h-4 text-primary-soft/30 absolute -top-2 -left-2" />
                                             <p className={`text-xs italic font-semibold leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                                                 "{theme.quote}"
                                             </p>

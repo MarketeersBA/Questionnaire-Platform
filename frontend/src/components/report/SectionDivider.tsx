@@ -8,7 +8,7 @@ export function SectionDivider({ title, comparator }: { title: string, comparato
                         {comparator} Comparative
                     </span>
                 )}
-                <span className="text-xl font-bold text-slate-400 dark:text-slate-600 uppercase tracking-widest whitespace-nowrap">
+                <span className="text-xl font-bold text-ink-subtle uppercase tracking-widest whitespace-nowrap">
                     {title}
                 </span>
             </div>

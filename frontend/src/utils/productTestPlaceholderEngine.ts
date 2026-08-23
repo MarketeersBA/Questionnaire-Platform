@@ -162,11 +162,19 @@ export function applyProductTestPlaceholders(
     result = result.replace(/\[\s*category\s*\]/gi, category);
     result = result.replace(/\[\s*Attribute\s*\]/gi, attribute);
 
+    // Bare word "Product" (no brackets) — legacy question-bank convention
+    // that predates the [Product]/[Brand] bracket tokens above. Word
+    // boundaries keep this from matching inside "Production"/"Products".
+    result = result.replace(/\bProduct\b/gi, brandDisplay);
+
     // Arabic brand tokens
     result = result.replace(/\(البراند\)/g, brandDisplay);
 
     // Arabic product tokens (parenthesized first to avoid partial clobber)
     result = result.replace(/\(المنتج\)/g, brandDisplay);
+    // Bare Arabic "المنتج" (no parens) — same legacy convention as the bare
+    // "Product" rule above.
+    result = result.replace(/المنتج/g, brandDisplay);
 
     return result;
 }

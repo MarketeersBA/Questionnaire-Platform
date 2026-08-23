@@ -53,7 +53,7 @@ export default function ProductTestAnalyticsStrip({ surveyId }: ProductTestAnaly
                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400">
                         Product Test Data Layer
                     </p>
-                    <p className="text-xs font-bold text-slate-600 dark:text-slate-400 mt-0.5">
+                    <p className="text-xs font-bold text-ink-muted mt-0.5">
                         Structured evaluations available for filtering and export (Phase 5 registry)
                     </p>
                 </div>
@@ -64,7 +64,7 @@ export default function ProductTestAnalyticsStrip({ surveyId }: ProductTestAnaly
                     <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1">
                         <Layers size={12} /> Registry
                     </div>
-                    <div className="text-xl font-display font-black text-slate-900 dark:text-white">
+                    <div className="text-xl font-display font-black text-ink">
                         {meta.registry_count ?? 0}
                     </div>
                     <div className="text-[9px] font-bold text-slate-500">questions indexed</div>
@@ -73,7 +73,7 @@ export default function ProductTestAnalyticsStrip({ surveyId }: ProductTestAnaly
                     <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1">
                         <Tag size={12} /> Answers
                     </div>
-                    <div className="text-xl font-display font-black text-slate-900 dark:text-white">
+                    <div className="text-xl font-display font-black text-ink">
                         {summary?.total_answers ?? 0}
                     </div>
                     <div className="text-[9px] font-bold text-slate-500">flat evaluations</div>
@@ -82,7 +82,7 @@ export default function ProductTestAnalyticsStrip({ surveyId }: ProductTestAnaly
                     <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1">
                         <Timer size={12} /> Phases
                     </div>
-                    <div className="text-xl font-display font-black text-slate-900 dark:text-white">
+                    <div className="text-xl font-display font-black text-ink">
                         {timingKeys.length}
                     </div>
                     <div className="text-[9px] font-bold text-slate-500 truncate" title={timingKeys.join(', ')}>
@@ -93,7 +93,7 @@ export default function ProductTestAnalyticsStrip({ surveyId }: ProductTestAnaly
                     <div className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1">
                         Responses
                     </div>
-                    <div className="text-xl font-display font-black text-slate-900 dark:text-white">
+                    <div className="text-xl font-display font-black text-ink">
                         {summary?.response_count ?? 0}
                     </div>
                     <div className="text-[9px] font-bold text-slate-500">with product_test block</div>

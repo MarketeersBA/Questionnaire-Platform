@@ -172,8 +172,8 @@ export default function PackagingHeatmapAggregateViewer({ surveyId }: PackagingH
                         onClick={() => setSide(s)}
                         className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${
                             side === s
-                                ? 'bg-brand-blue text-white border-brand-blue shadow-lg shadow-brand-blue/20'
-                                : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                                ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20'
+                                : 'bg-surface text-ink-muted border-slate-200 dark:border-slate-700'
                         }`}
                     >
                         {s === 'front' ? 'Front' : 'Back'}
@@ -192,7 +192,7 @@ export default function PackagingHeatmapAggregateViewer({ surveyId }: PackagingH
                             className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${
                                 intent === key
                                     ? 'text-white border-transparent shadow-md'
-                                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                                    : 'bg-surface text-ink-muted border-slate-200 dark:border-slate-700'
                             }`}
                             style={
                                 intent === key
@@ -207,15 +207,15 @@ export default function PackagingHeatmapAggregateViewer({ surveyId }: PackagingH
             </div>
 
             <div className="flex flex-wrap gap-3 text-[10px] font-black uppercase tracking-widest">
-                <div className="px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
-                    Responses: <span className="text-slate-900 dark:text-white">{totalResponses}</span>
+                <div className="px-4 py-2 rounded-xl bg-surface-raised border border-slate-200 dark:border-slate-700 text-ink-muted">
+                    Responses: <span className="text-ink">{totalResponses}</span>
                 </div>
-                <div className="px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
-                    Total clicks: <span className="text-slate-900 dark:text-white">{totalClicks}</span>
+                <div className="px-4 py-2 rounded-xl bg-surface-raised border border-slate-200 dark:border-slate-700 text-ink-muted">
+                    Total clicks: <span className="text-ink">{totalClicks}</span>
                 </div>
-                <div className="px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
+                <div className="px-4 py-2 rounded-xl bg-surface-raised border border-slate-200 dark:border-slate-700 text-ink-muted">
                     Top hotspot:{' '}
-                    <span className="text-slate-900 dark:text-white">
+                    <span className="text-ink">
                         {hotspot?.label ?? '—'}
                     </span>
                 </div>
@@ -231,7 +231,7 @@ export default function PackagingHeatmapAggregateViewer({ surveyId }: PackagingH
                         className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest border ${
                             overlayMode === mode
                                 ? 'bg-slate-900 text-white border-slate-900 dark:bg-white dark:text-slate-900'
-                                : 'bg-white dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700'
+                                : 'bg-surface text-slate-500 border-slate-200 dark:border-slate-700'
                         }`}
                     >
                         {mode === 'density' ? 'Click density' : '% respondents'}
@@ -240,7 +240,7 @@ export default function PackagingHeatmapAggregateViewer({ surveyId }: PackagingH
                 <button
                     type="button"
                     onClick={loadSummary}
-                    className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest border border-slate-200 dark:border-slate-700 text-slate-500 hover:border-brand-blue/40"
+                    className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest border border-slate-200 dark:border-slate-700 text-slate-500 hover:border-primary/40"
                 >
                     <RefreshCw size={12} />
                     Refresh

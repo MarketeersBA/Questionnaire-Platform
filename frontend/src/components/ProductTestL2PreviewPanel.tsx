@@ -45,16 +45,16 @@ export function ProductTestPhasePreviewPanel({
     if (!config || !preview) return null;
 
     return (
-        <div className="rounded-3xl border-2 border-brand-blue/15 bg-brand-blue/[0.03] dark:bg-brand-blue/[0.06] overflow-hidden">
+        <div className="rounded-3xl border-2 border-primary/15 bg-primary/[0.03] dark:bg-primary/[0.06] overflow-hidden">
             <button
                 type="button"
                 onClick={() => setExpanded(v => !v)}
-                className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-brand-blue/5 transition-colors"
+                className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-primary/5 transition-colors"
             >
                 <div className="flex items-center gap-3">
-                    <Layers className="w-4 h-4 text-brand-blue" />
+                    <Layers className="w-4 h-4 text-primary-soft" />
                     <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-brand-blue">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-primary-soft">
                             Expected Timing-Phase Preview
                         </p>
                         <p className="text-[10px] text-slate-500 font-bold mt-0.5">
@@ -74,7 +74,7 @@ export function ProductTestPhasePreviewPanel({
                         exit={{ height: 0, opacity: 0 }}
                         className="overflow-hidden"
                     >
-                        <div className="px-6 pb-5 space-y-4 border-t border-brand-blue/10">
+                        <div className="px-6 pb-5 space-y-4 border-t border-primary/10">
                             {preview.sections.length === 0 ? (
                                 <p className="text-xs text-slate-500 font-medium py-3">
                                     No sections would be generated with the current selection.
@@ -82,13 +82,13 @@ export function ProductTestPhasePreviewPanel({
                             ) : (
                                 Array.from(sectionsByTiming.entries()).map(([timing, sections]) => (
                                     <div key={timing} className="space-y-2">
-                                        <p className="text-[9px] font-black uppercase tracking-[0.25em] text-brand-blue/80 pt-2">
+                                        <p className="text-[9px] font-black uppercase tracking-[0.25em] text-primary-soft/80 pt-2">
                                             {timing.replace(/_/g, ' ')}
                                         </p>
                                         {sections.map(section => (
                                             <div
                                                 key={`${timing}-${section.brand || ''}-${section.title}`}
-                                                className="flex items-center justify-between py-2.5 px-4 rounded-xl bg-white/80 dark:bg-slate-950/50 border border-slate-100 dark:border-slate-800"
+                                                className="flex items-center justify-between py-2.5 px-4 rounded-xl bg-white/80 dark:bg-slate-950/50 border border-line/80 dark:border-line/10"
                                             >
                                                 <div className="min-w-0">
                                                     <p className="text-xs font-black text-slate-800 dark:text-slate-200 truncate">{section.title}</p>

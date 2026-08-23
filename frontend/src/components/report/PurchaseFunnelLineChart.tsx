@@ -1,15 +1,9 @@
 import { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useTheme } from '../../context/ThemeContext';
+import { CHART_SERIES } from '../../constants/brandPalette';
 
-const COLORS = [
-    '#3b82f6', // Brand Blue
-    '#10b981', // Emerald Green
-    '#f59e0b', // Amber
-    '#ef4444', // Red
-    '#8b5cf6', // Violet
-    '#06b6d4', // Cyan
-];
+const COLORS = CHART_SERIES;
 
 // Recharts LineChart expects Data in the format:
 // [ { name: "Total Awareness", "Brand A": 80.5, "Brand B": 60.0 }, ... ]

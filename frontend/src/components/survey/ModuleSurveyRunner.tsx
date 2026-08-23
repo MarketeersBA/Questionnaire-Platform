@@ -60,14 +60,14 @@ export default function ModuleSurveyRunner({
         <div className="space-y-8 max-w-3xl mx-auto p-6">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <Sparkles className="w-5 h-5 text-brand-blue" />
+                    <Sparkles className="w-5 h-5 text-primary-soft" />
                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
                         {moduleName} • {stepIndex + 1}/{totalSteps}
                     </span>
                 </div>
                 <div className="w-24 h-1 bg-slate-100 rounded-full overflow-hidden">
                     <div
-                        className="h-full bg-brand-blue transition-all duration-500"
+                        className="h-full bg-primary transition-all duration-500"
                         style={{ width: `${((stepIndex + 1) / totalSteps) * 100}%` }}
                     />
                 </div>

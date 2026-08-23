@@ -16,8 +16,8 @@ export function RecommendationsPanel({ recommendations }: { recommendations?: Re
     }));
 
     return (
-        <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-8">Strategic Recommendations (4Ps)</h2>
+        <div className="bg-surface p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
+            <h2 className="text-2xl font-bold text-ink mb-8">Strategic Recommendations (4Ps)</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 {recArray.map((rec, i) => {
                     const Icon = ICON_MAP[rec.category] || Palette;
@@ -30,8 +30,8 @@ export function RecommendationsPanel({ recommendations }: { recommendations?: Re
                                 }`}>
                                 <Icon className="h-6 w-6" />
                             </div>
-                            <h4 className="text-lg font-bold text-slate-800 dark:text-white capitalize">{rec.category}</h4>
-                            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                            <h4 className="text-lg font-bold text-ink capitalize">{rec.category}</h4>
+                            <p className="text-sm text-ink-muted leading-relaxed">
                                 {rec.advice}
                             </p>
                         </div>

@@ -3,6 +3,48 @@ import { isExportFrameRoute } from '../export/exportFrameContext';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
+/**
+ * Pull the server-supplied filename out of a Content-Disposition header.
+ *
+ * Prefers the RFC 5987 `filename*=UTF-8''…` form, which is what Starlette emits
+ * whenever the name contains non-ASCII characters — Arabic project names, for
+ * instance — and falls back to the plain quoted `filename=` form.
+ */
+export function filenameFromResponse(
+  contentDisposition: unknown,
+  fallback: string,
+): string {
+  const header = typeof contentDisposition === 'string' ? contentDisposition : '';
+  if (!header) return fallback;
+
+  // RFC 5987 extended form wins: it carries the real, percent-encoded name.
+  const extended = header.match(/filename\*\s*=\s*UTF-8''([^;]+)/i);
+  if (extended?.[1]) {
+    try {
+      const decoded = decodeURIComponent(extended[1].trim());
+      if (decoded) return decoded;
+    } catch {
+      /* Malformed encoding — fall through to the plain form. */
+    }
+  }
+
+  const plain = header.match(/filename\s*=\s*"?([^";]+)"?/i);
+  const name = plain?.[1]?.trim();
+  return name || fallback;
+}
+
+/** Hand a blob to the browser as a download under an explicit filename. */
+function triggerBrowserDownload(data: BlobPart, filename: string, mimeType: string) {
+  const url = window.URL.createObjectURL(new Blob([data], { type: mimeType }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', filename);
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
+}
+
 /** Standardized API Error structure for the platform. */
 export interface ApiError {
   message: string;
@@ -159,7 +201,11 @@ export const templates = {
 export const surveys = {
   list: (options?: RequestOptions) => api.get('/surveys/', options).then((res) => res.data),
   create: (data: any, options?: RequestOptions) => api.post('/surveys/', data, options).then((res) => res.data),
-  checkCode: (code: string, options?: RequestOptions) => api.get(`/surveys/check-code/${code}`, options).then((res) => res.data),
+  checkCode: (code: string, excludeId?: string | null, options?: RequestOptions) => {
+    let url = `/surveys/check-code/${code}`;
+    if (excludeId) url += `?exclude_id=${excludeId}`;
+    return api.get(url, options).then((res) => res.data);
+  },
   get: (id: string, options?: RequestOptions) => api.get(`/surveys/${id}`, options).then((res) => res.data),
   update: (id: string, data: any, options?: RequestOptions) => api.put(`/surveys/${id}`, data, options).then((res) => res.data),
   delete: (id: string, options?: RequestOptions) => api.delete(`/surveys/${id}`, options).then((res) => res.data),
@@ -243,14 +289,16 @@ export const analytics = {
     (await api.post(`/analytics/report/${surveyId}/slice`, filters, options)).data,
   downloadReport: async (surveyId: string, options?: RequestOptions) => {
     const response = await api.get(`/analytics/report/${surveyId}/download`, { ...options, responseType: 'blob' });
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `report_${surveyId}.pptx`);
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.URL.revokeObjectURL(url);
+    triggerBrowserDownload(
+      response.data,
+      filenameFromResponse(
+        response.headers?.['content-disposition'],
+        // Only reached if the header is missing; the survey id alone is an
+        // opaque ObjectId, so pair it with a readable prefix.
+        `Marketeers_Report_${surveyId}.pptx`,
+      ),
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    );
   },
   invalidateReport: async (surveyId: string, options?: RequestOptions) =>
     (await api.delete(`/analytics/report/${surveyId}`, options)).data,

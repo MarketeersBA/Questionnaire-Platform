@@ -43,15 +43,15 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="flex flex-col items-center justify-center p-12 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-xl"
+                    className="flex flex-col items-center justify-center p-12 text-center bg-surface rounded-3xl border border-line/80 dark:border-line/10 shadow-xl"
                 >
                     <div className="p-4 bg-red-50 dark:bg-red-400/10 rounded-full mb-6">
                         <AlertCircle className="w-10 h-10 text-red-500" />
                     </div>
-                    <h3 className="text-lg font-black uppercase tracking-widest text-slate-900 dark:text-white mb-2">
+                    <h3 className="text-lg font-black uppercase tracking-widest text-ink mb-2">
                         Module Failed to Load
                     </h3>
-                    <p className="text-slate-400 dark:text-slate-500 text-xs font-bold max-w-xs mb-8 leading-relaxed">
+                    <p className="text-ink-subtle text-xs font-bold max-w-xs mb-8 leading-relaxed">
                         {this.props.errorMessage || this.state.error?.message || "An unexpected error occurred while rendering this component."}
                     </p>
 
@@ -96,7 +96,7 @@ export const AsyncBoundary: React.FC<AsyncBoundaryProps> = ({
 };
 
 const DefaultSkeleton = () => (
-    <div className="w-full h-48 bg-slate-50 dark:bg-slate-800/50 rounded-3xl animate-pulse flex items-center justify-center">
+    <div className="w-full h-48 bg-surface-raised/50 rounded-3xl animate-pulse flex items-center justify-center">
         <div className="w-12 h-12 bg-slate-100 dark:bg-slate-700/50 rounded-full" />
     </div>
 );

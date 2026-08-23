@@ -32,7 +32,7 @@ export default function MobilePreview({ formData, activeLayer }: MobilePreviewPr
                 </div>
 
                 {/* Screen Content */}
-                <div className="w-full h-full bg-slate-50 dark:bg-slate-950 rounded-[2.2rem] overflow-hidden flex flex-col relative">
+                <div className="w-full h-full bg-surface-raised rounded-[2.2rem] overflow-hidden flex flex-col relative">
                     {/* Status Bar */}
                     <div className="h-10 px-6 flex items-center justify-between opacity-40">
                         <span className="text-[10px] font-black">9:41</span>
@@ -54,12 +54,12 @@ export default function MobilePreview({ formData, activeLayer }: MobilePreviewPr
                                 {/* Header Simulation */}
                                 <div className="space-y-2 mb-8 text-left">
                                     <div className="flex items-center gap-2">
-                                        <div className="px-2 py-0.5 rounded bg-brand-blue/10 text-brand-blue text-[8px] font-black uppercase tracking-widest">
+                                        <div className="px-2 py-0.5 rounded bg-primary/10 text-primary-soft text-[8px] font-black uppercase tracking-widest">
                                             Layer {activeLayer}
                                         </div>
-                                        {activeLayer === 4 && <Sparkles className="w-2.5 h-2.5 text-brand-blue" />}
+                                        {activeLayer === 4 && <Sparkles className="w-2.5 h-2.5 text-primary-soft" />}
                                     </div>
-                                    <h4 className="text-sm font-black text-slate-900 dark:text-white leading-tight">
+                                    <h4 className="text-sm font-black text-ink leading-tight">
                                         {formData.survey_name || 'Project Blueprint'}
                                     </h4>
                                     {/* Progress Bar Mockup */}
@@ -67,7 +67,7 @@ export default function MobilePreview({ formData, activeLayer }: MobilePreviewPr
                                         <motion.div
                                             initial={{ width: 0 }}
                                             animate={{ width: activeLayer === 4 ? '100%' : '40%' }}
-                                            className="h-full bg-brand-blue"
+                                            className="h-full bg-primary"
                                         />
                                     </div>
                                 </div>
@@ -82,7 +82,7 @@ export default function MobilePreview({ formData, activeLayer }: MobilePreviewPr
                                             transition={{ delay: idx * 0.05 }}
                                             className="space-y-4"
                                         >
-                                            <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
+                                            <div className="flex items-center gap-2 border-b border-line/80 dark:border-line/10 pb-2">
                                                 <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest truncate">
                                                     {section.title}
                                                 </span>
@@ -90,27 +90,27 @@ export default function MobilePreview({ formData, activeLayer }: MobilePreviewPr
                                             </div>
 
                                             {section.isInstruction ? (
-                                                <div className="p-4 bg-brand-blue/5 rounded-2xl border border-brand-blue/10 text-left">
-                                                    <p className="text-[10px] font-bold text-slate-600 dark:text-slate-400 leading-relaxed italic">
+                                                <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10 text-left">
+                                                    <p className="text-[10px] font-bold text-ink-muted leading-relaxed italic">
                                                         {section.content?.length > 100 ? section.content.slice(0, 100) + '...' : section.content}
                                                     </p>
                                                 </div>
                                             ) : (
                                                 <div className="space-y-3">
                                                     {(section.questions || []).slice(0, 3).map((q: any, qIdx: number) => (
-                                                        <div key={q.id || qIdx} className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-2 text-left">
-                                                            <p className="text-[10px] font-bold text-slate-900 dark:text-white leading-tight">
+                                                        <div key={q.id || qIdx} className="p-4 bg-surface rounded-2xl border border-line/80 dark:border-line/10 shadow-sm space-y-2 text-left">
+                                                            <p className="text-[10px] font-bold text-ink leading-tight">
                                                                 {(q.text || q.label || '').length > 60 ? (q.text || q.label || '').slice(0, 60) + '...' : (q.text || q.label || '')}
                                                             </p>
                                                             {/* Input Mockups */}
                                                             {q.type === 'mcq' || q.type === 'scale' ? (
                                                                 <div className="flex gap-1.5 flex-wrap">
                                                                     {[1, 2, 3].map(opt => (
-                                                                        <div key={opt} className="h-4 w-12 rounded bg-slate-100 dark:bg-slate-800/50" />
+                                                                        <div key={opt} className="h-4 w-12 rounded bg-surface-sunken/50" />
                                                                     ))}
                                                                 </div>
                                                             ) : (
-                                                                <div className="h-3 w-full rounded bg-slate-50 dark:bg-slate-800/30" />
+                                                                <div className="h-3 w-full rounded bg-surface-raised/30" />
                                                             )}
                                                         </div>
                                                     ))}
@@ -137,7 +137,7 @@ export default function MobilePreview({ formData, activeLayer }: MobilePreviewPr
 
                     {/* Nav Mockup */}
                     <div className="h-16 px-8 border-t border-slate-100 dark:border-slate-900 bg-white/50 dark:bg-slate-950/50 backdrop-blur-md flex items-center justify-center">
-                        <div className="w-full h-10 bg-brand-blue rounded-xl flex items-center justify-center">
+                        <div className="w-full h-10 bg-primary rounded-xl flex items-center justify-center">
                             <span className="text-[10px] font-black text-white uppercase tracking-widest">{activeLayer === 4 ? 'Complete Survey' : 'Next Phase'}</span>
                         </div>
                     </div>

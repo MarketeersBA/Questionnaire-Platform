@@ -65,7 +65,7 @@ async def get_responses_overview(
 
     # ── Target Gating: compute quota totals and readiness ──────────
     quota_tracking = survey.get("quota_tracking") or {}
-    from backend.services.quota_enforcement import resolve_respondent_target
+    from backend.services.quota_enforcement import compute_target_reached, resolve_respondent_target
     respondent_target = resolve_respondent_target(survey)
 
     if quota_tracking:
@@ -77,7 +77,7 @@ async def get_responses_overview(
         quota_target = respondent_target
         quota_current = submitted - submitted_excluded # Only count valid completions
 
-    target_reached = quota_target > 0 and quota_current >= quota_target
+    target_reached = compute_target_reached(quota_target, quota_current)
 
     # Check if a report already exists for this survey
     report_doc = await db.get_collection("survey_reports").find_one(

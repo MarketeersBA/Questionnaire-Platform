@@ -1,10 +1,11 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Download, AlertCircle, RefreshCw, Activity, Database, Sparkles, LayoutPanelLeft, BarChart3, Maximize, ChevronLeft, ChevronRight, X, Sun, Moon, Layers } from 'lucide-react';
+import { Download, AlertCircle, RefreshCw, Activity, Database, Sparkles, LayoutPanelLeft, BarChart3, Maximize, ChevronLeft, ChevronRight, X, Sun, Moon, LayoutDashboard, ClipboardList, FileText, PanelLeftClose, PanelLeftOpen, ArrowUp, ChevronDown } from 'lucide-react';
 import { analytics } from '../services/api';
 import { toast } from 'sonner';
 import { useTheme } from '../context/ThemeContext';
 import { ExecutiveSummary } from '../components/report/ExecutiveSummary';
+import { ReportKpiRow } from '../components/report/ReportKpiRow';
 import { MarketPositionSection } from '../components/report/MarketPositionSection';
 import { ChartRenderer } from '../components/report/ChartRenderer';
 import { SwotCard } from '../components/report/SwotCard';
@@ -18,6 +19,7 @@ import { AICostDashboard, CostData } from '../components/report/AICostDashboard'
 import ProductTestAnalyticsStrip from '../components/report/ProductTestAnalyticsStrip';
 import ExportConfigModal from '../components/report/ExportConfigModal';
 import { useReportStatusPoll } from '../hooks/useReportStatusPoll';
+import { useScrollSpy } from '../hooks/useScrollSpy';
 
 // ---------------------------------------------------------------------------
 // 2026 Analytical Journey Messages
@@ -33,6 +35,7 @@ const PROGRESS_MESSAGES = [
 const CHART_GROUP_ORDER: Record<string, number> = {
     'Brand Profiles': 10,
     'Criteria Analysis': 20,
+    'Appraisal': 25,
     'Comparisons': 30,
     'Performance': 40,
     'Purchase Funnel': 50,
@@ -47,8 +50,6 @@ const CHART_PRIORITY_BY_ID: Record<string, number> = {
     criteria_table: 100,
     brand_profile_snake: 110,
     likeness_profile_chart: 120,
-    sub_attribute_scatter: 130,
-    overall_scatter: 140,
     product_preference: 200,
     overall_averages: 210,
     demographic_sub_averages: 220,
@@ -59,6 +60,7 @@ const CHART_PRIORITY_BY_ID: Record<string, number> = {
     sigma_intent: 810,
     overall_scatter: 820,
     sub_attribute_scatter: 830,
+    driver_ranking: 835,
     purchase_intent: 500,
     brand_comparison_pi_ol: 505,
     brand_awareness: 510, // Fallback weight if anchor chart is missing
@@ -73,6 +75,7 @@ const DASHBOARD_CHART_IDS = new Set([
     'sigma_intent',
     'overall_scatter',
     'sub_attribute_scatter',
+    'driver_ranking',
 ]);
 
 const isWebVisibleChart = (chart: any): boolean => {
@@ -92,7 +95,11 @@ const resolveChartGroupName = (chart: any): string => {
     // Narrative continuity override: this profile chart is funnel-specific.
     if (id === 'purchase_funnel_headline_line' || id === 'brand_awareness' || id === 'purchase_intent') return 'Purchase Funnel';
     if (t === 'funnel_ratio_cards' || t === 'snake_line' || t === 'reference_table' || id === 'purchase_funnel') return 'Purchase Funnel';
-    if (t === 'criteria_table' || t === 'profile_chart' || t === 'likeness_profile') return 'Criteria Analysis';
+    if (t === 'criteria_table') return 'Criteria Analysis';
+    // "Main Insights" is the recognizable business term for the attribute-by-attribute
+    // profile/likeness charts — surfaced as its own labeled section rather than
+    // buried under the generic "Criteria Analysis" heading.
+    if (t === 'profile_chart' || t === 'likeness_profile' || t === 'key_preference_drivers') return 'Main Insights';
     if (t === 'horizontal_bar' || t === 'stacked_bar' || t === 'brand_comparison') return 'Comparisons';
     if (t === 'grouped_bar') return 'Performance';
     if (t === 'funnel') return 'Purchase Funnel';
@@ -107,7 +114,7 @@ const buildOrderedCharts = (rawCharts: any[]): any[] => {
     const prepared = rawCharts.map((chart, idx) => {
         const group = resolveChartGroupName(chart);
         return {
-            chart,
+            chart: { ...chart, group },
             idx,
             group,
             groupOrder: CHART_GROUP_ORDER[group] ?? 999,
@@ -305,31 +312,31 @@ export default function SurveyReport() {
         }
     };
 
-    if (loading) return <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-12"><ReportSkeleton /></div>;
+    if (loading) return <div className="min-h-screen bg-surface-raised py-12"><ReportSkeleton /></div>;
 
     if (isGenerating) {
         const step = PROGRESS_MESSAGES[progressIdx];
         return (
-            <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white dark:bg-slate-950 px-6 overflow-hidden">
+            <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-surface px-6 overflow-hidden">
                 <div className="absolute inset-0 bg-mesh overflow-hidden -z-10 opacity-30">
-                    <div className="mesh-orb w-96 h-96 bg-indigo-100 dark:bg-brand-blue/30 top-1/4 left-1/4 animate-pulse-soft"></div>
+                    <div className="mesh-orb w-96 h-96 bg-indigo-100 dark:bg-primary/30 top-1/4 left-1/4 animate-pulse-soft"></div>
                     <div className="mesh-orb w-[500px] h-[500px] bg-rose-50 dark:bg-brand-accent/20 bottom-1/4 right-1/4 animate-pulse-soft" style={{ animationDelay: '1s' }}></div>
                 </div>
                 <div className="relative mb-12">
-                    <div className="absolute inset-0 bg-brand-blue/20 rounded-full blur-3xl animate-pulse"></div>
-                    <div className="w-32 h-32 border-c-4 border-brand-blue/20 border-t-brand-blue rounded-full animate-spin flex items-center justify-center">
-                        <RefreshCw className="h-12 w-12 text-brand-blue animate-pulse" />
+                    <div className="absolute inset-0 bg-primary/20 rounded-full blur-3xl animate-pulse"></div>
+                    <div className="w-32 h-32 border-c-4 border-primary/20 border-t-brand-blue rounded-full animate-spin flex items-center justify-center">
+                        <RefreshCw className="h-12 w-12 text-primary-soft animate-pulse" />
                     </div>
                 </div>
-                <h2 className="text-5xl font-black text-slate-900 dark:text-white mb-6 uppercase tracking-tight italic">
-                    Architecting <span className="text-brand-blue">Strategy</span>
+                <h2 className="text-5xl font-black text-ink mb-6 uppercase tracking-tight italic">
+                    Architecting <span className="text-primary-soft">Strategy</span>
                 </h2>
                 <div className="flex items-center gap-4 text-slate-400 font-bold text-xl h-10 transition-all">
-                    <span className="text-brand-blue">{step.icon}</span>
+                    <span className="text-primary-soft">{step.icon}</span>
                     <span className="animate-fade-in tracking-wide">{step.text}</span>
                 </div>
                 <div className="w-64 bg-slate-200 dark:bg-slate-800 rounded-full h-1 mt-12 overflow-hidden">
-                    <div className="bg-gradient-to-r from-brand-blue to-cyan-400 h-full animate-[progress_2s_infinite]" />
+                    <div className="bg-gradient-to-r from-primary to-cyan-400 h-full animate-[progress_2s_infinite]" />
                 </div>
             </div>
         );
@@ -337,10 +344,10 @@ export default function SurveyReport() {
 
     if (error || (report && report.status === 'failed')) {
         return (
-            <div className="min-h-screen bg-white dark:bg-slate-950 flex flex-col items-center justify-center p-8 text-center">
-                <div className="glass-panel p-16 rounded-[40px] max-w-2xl border border-slate-100 dark:border-white/10 shadow-[0_32px_64px_rgba(0,0,0,0.06)] dark:shadow-2xl bg-white dark:bg-transparent">
+            <div className="min-h-screen bg-surface flex flex-col items-center justify-center p-8 text-center">
+                <div className="glass-panel p-16 rounded-[40px] max-w-2xl border border-line/80 dark:border-line/10 shadow-[0_32px_64px_rgba(0,0,0,0.06)] dark:shadow-2xl bg-white dark:bg-transparent">
                     <AlertCircle className="h-24 w-24 text-brand-accent mx-auto mb-8 animate-bounce" />
-                    <h2 className="text-5xl font-black text-slate-900 dark:text-white mb-6 uppercase tracking-tighter italic">Interrupted</h2>
+                    <h2 className="text-5xl font-black text-ink mb-6 uppercase tracking-tighter italic">Interrupted</h2>
                     <p className="text-slate-400 text-xl font-medium mb-12 leading-relaxed">{error || report?.error_message}</p>
                     <button onClick={() => handleGenerate(true)} className="btn-premium px-12 py-5 text-xl tracking-widest uppercase">
                         Force Restart
@@ -474,45 +481,87 @@ function ReportContent({
             });
         }
     }, [chartGroups, groupNames, hasNewPipeline, registerChartLocation]);
+
+    // Ids of every scrollable section, in document order, for the sidebar's
+    // active-state tracking.
+    const sectionIds = useMemo(() => {
+        const ids = ['summary'];
+        if (report?.insights?.market_position_report) ids.push('strategic-positioning');
+        if (hasNewPipeline) {
+            groupNames.forEach((_: string, i: number) => ids.push(`group-${i}`));
+        } else {
+            (report?.sections || []).forEach((_: any, i: number) => ids.push(`section-${i}`));
+        }
+        return ids;
+    }, [report, groupNames, hasNewPipeline]);
+
+    const activeSectionId = useScrollSpy(sectionIds, 140);
+
+    // Rail visibility is user-controlled; focus mode hides it regardless.
+    const [railOpen, setRailOpen] = useState(true);
+    const [goToOpen, setGoToOpen] = useState(false);
+    const railVisible = railOpen && !isFocusMode;
+
+    // Back-to-top only earns its place once the reader is well down the page.
+    const [showToTop, setShowToTop] = useState(false);
+    useEffect(() => {
+        const onScroll = () => setShowToTop(window.scrollY > 600);
+        onScroll();
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
+    }, []);
+
+    const scrollToTop = () =>
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
     return (
-        <div className="min-h-screen bg-white dark:bg-[#020617] text-slate-900 dark:text-slate-100 selection:bg-brand-blue/20">
+        <div className={`min-h-screen bg-canvas text-ink selection:bg-primary/20 transition-[padding] duration-500 ${railVisible ? "xl:pl-[17.5rem]" : ""}`}>
             {/* Global Mesh Gradient Background */}
             <div className="bg-mesh">
-                <div className="mesh-orb w-[600px] h-[600px] bg-indigo-50/50 dark:bg-brand-blue/10 top-0 left-[-10%]"></div>
-                <div className="mesh-orb w-[800px] h-[800px] bg-brand-accent/5 bottom-0 right-[-10%]"></div>
+                <div className="mesh-orb w-[600px] h-[600px] bg-primary/[0.07] top-0 left-[-10%]"></div>
+                <div className="mesh-orb w-[800px] h-[800px] bg-accent/[0.05] bottom-0 right-[-10%]"></div>
             </div>
 
             {/* Premium Sticky Header */}
-            <header className={`sticky top-0 z-40 bg-white/90 dark:bg-slate-950/80 backdrop-blur-3xl border-b border-indigo-100 dark:border-white/5 py-6 transition-all duration-700 ${isFocusMode ? '-translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
+            <header className={`sticky top-0 z-40 bg-surface/95 backdrop-blur-2xl shadow-[0_1px_0_rgb(var(--c-primary)/0.12),0_8px_24px_-16px_rgb(var(--c-primary)/0.25)] py-5 transition-all duration-700 ${isFocusMode ? '-translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
+                {/* Brand underline: the blue-to-red gradient, used here as the
+                    header's only rule so light mode reads crisp instead of pale. */}
+                <div
+                    className="absolute inset-x-0 bottom-0 h-px pointer-events-none"
+                    style={{ background: 'linear-gradient(90deg, rgb(var(--c-primary)), rgb(var(--c-accent)) 55%, transparent)' }}
+                />
                 <div className="max-w-[1600px] mx-auto px-8 flex justify-between items-center">
                     <div className="flex items-center gap-6">
                         <button
                             onClick={() => navigate('/surveys')}
-                            className="p-3 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-800 transition-all text-slate-500 dark:text-slate-400 mr-2 group"
+                            className="w-11 h-11 grid place-items-center bg-surface border border-primary/20 rounded-2xl hover:border-primary/50 hover:bg-primary/[0.06] hover:text-primary-soft transition-all text-ink-muted group"
                             title="Back to Dashboard"
                         >
                             <ChevronLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
                         </button>
-                        <div className="p-3 bg-brand-blue/10 rounded-2xl border border-brand-blue/20">
-                            <Activity className="h-6 w-6 text-brand-blue" />
+                        <div
+                            className="p-3 rounded-2xl shadow-lg shadow-primary/25"
+                            style={{ background: 'linear-gradient(135deg, rgb(var(--c-primary)), rgb(var(--c-accent)))' }}
+                        >
+                            <Activity className="h-6 w-6 text-white" />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-black uppercase tracking-tight italic">
+                            <h1 className="text-xl font-black font-display tracking-tight text-ink">
                                 {report.project_name || 'Strategic Analysis'}
                             </h1>
                             <div className="flex gap-2 mt-1 flex-wrap">
                                 {(report.brands || report.brand_list)?.slice(0, 5).map((b: string, i: number) => (
-                                    <span key={`${b}-${i}`} className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-500 bg-white dark:bg-slate-900/50 px-2 py-0.5 rounded border border-slate-200 dark:border-white/5">
+                                    <span key={`${b}-${i}`} className="text-[10px] font-black uppercase tracking-widest text-ink-muted bg-surface-sunken px-2 py-0.5 rounded border border-primary/15 dark:border-line/10">
                                         {b}
                                     </span>
                                 ))}
                                 {hasNewPipeline && (
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-950/50 px-2 py-0.5 rounded border border-emerald-500/20">
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-primary-soft bg-primary/10 px-2 py-0.5 rounded border border-primary/25">
                                         V2 • {charts.length} Charts
                                     </span>
                                 )}
                                 {report?.telemetry?.document_cache_hit && (
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400 bg-indigo-950/50 px-2 py-0.5 rounded border border-indigo-500/20 flex items-center gap-1">
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-accent-soft bg-accent/10 px-2 py-0.5 rounded border border-accent/25 flex items-center gap-1">
                                         <Database className="w-2.5 h-2.5" />
                                         Neural Cache
                                     </span>
@@ -521,7 +570,7 @@ function ReportContent({
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2.5">
                         <FilterPanel
                             availableFilters={report?.available_filters || {}}
                             brands={report?.brands || report?.brand_list || []}
@@ -530,12 +579,12 @@ function ReportContent({
                             onApply={handleApplySlice}
                             isApplying={isSlicing}
                         />
-                        <button onClick={toggleFocusMode} className="p-3 bg-brand-blue/10 dark:bg-brand-blue/20 text-brand-blue border border-brand-blue/20 dark:border-brand-blue/30 rounded-2xl hover:bg-brand-blue hover:text-white transition-all shadow-sm" title="Enter Focus Mode">
+                        <button onClick={toggleFocusMode} className="p-3 bg-primary/10 dark:bg-primary/20 text-primary-soft border border-primary/20 dark:border-primary/30 rounded-2xl hover:bg-primary hover:text-white transition-all shadow-sm" title="Enter Focus Mode">
                             <Maximize className="h-5 w-5" />
                         </button>
                         <button
                             onClick={toggleTheme}
-                            className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-slate-500 dark:text-slate-400 group relative overflow-hidden active:scale-90"
+                            className="p-3 bg-surface border border-line/80 dark:border-line/10 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-ink-muted group relative overflow-hidden active:scale-90"
                             title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
                         >
                             <motion.div
@@ -556,13 +605,13 @@ function ReportContent({
                             </motion.div>
                             <div className="h-5 w-5 opacity-0">.</div> {/* Spacer */}
                         </button>
-                        <button onClick={() => handleGenerate(true)} className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-slate-500 dark:text-slate-400 hover:text-brand-blue dark:hover:text-white" title="Regenerate">
+                        <button onClick={() => handleGenerate(true)} className="w-11 h-11 grid place-items-center bg-surface border border-primary/20 rounded-2xl hover:border-primary/50 hover:bg-primary/[0.06] transition-all text-ink-muted hover:text-primary-soft" title="Regenerate">
                             <RefreshCw className="h-5 w-5" />
                         </button>
                         {localStorage.getItem('role') === 'admin' && (
                             <button
                                 onClick={handleViewAICosts}
-                                className="p-3 bg-white dark:bg-emerald-900/10 border border-slate-200 dark:border-emerald-500/20 rounded-2xl hover:bg-slate-100 dark:hover:bg-emerald-900/30 transition-all text-emerald-600 dark:text-emerald-500 hover:text-emerald-700 dark:hover:text-emerald-400 group relative"
+                                className="w-11 h-11 grid place-items-center bg-surface border border-primary/20 rounded-2xl hover:border-primary/50 hover:bg-primary/[0.06] transition-all text-ink-muted hover:text-primary-soft group relative"
                                 title="View AI Costs"
                             >
                                 <Database className="h-5 w-5" />
@@ -587,14 +636,14 @@ function ReportContent({
 
             {/* Immersive Focus Mode Overlay (Slide Presentation Engine) */}
             {isFocusMode && (
-                <div className="fixed inset-0 z-[100] bg-white dark:bg-[#020617] p-8 md:p-12 overflow-hidden flex flex-col animate-fade-in focus-mode-overlay">
+                <div className="fixed inset-0 z-[100] bg-surface p-8 md:p-12 overflow-hidden flex flex-col animate-fade-in focus-mode-overlay">
                     <div className="flex justify-between items-center mb-10 shrink-0">
                         <div className="flex items-center gap-6">
-                            <div className="p-4 bg-brand-blue/10 rounded-2xl border border-brand-blue/20">
-                                <Activity className="h-8 w-8 text-brand-blue" />
+                            <div className="p-4 bg-primary/10 rounded-2xl border border-primary/20">
+                                <Activity className="h-8 w-8 text-primary-soft" />
                             </div>
                             <div>
-                                <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight italic text-slate-900 dark:text-white leading-tight">
+                                <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight italic text-ink leading-tight">
                                     {report.project_name}
                                 </h2>
                                 <div className="flex items-center gap-3 mt-1">
@@ -604,15 +653,15 @@ function ReportContent({
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-2 px-6 py-3 bg-slate-100 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-white/5 mr-4">
+                            <div className="flex items-center gap-2 px-6 py-3 bg-surface-sunken rounded-2xl border border-line/80 dark:border-line/10 mr-4">
                                 <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Slide</span>
-                                <span className="text-brand-blue font-black font-mono text-lg">{activeGroupIndex + 1}</span>
+                                <span className="text-primary-soft font-black font-mono text-lg">{activeGroupIndex + 1}</span>
                                 <span className="text-slate-600 font-bold mx-1">/</span>
                                 <span className="text-slate-500 font-bold font-mono">{groupNames.length}</span>
                             </div>
                             <button
                                 onClick={toggleTheme}
-                                className="p-4 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-800 transition-all text-slate-500 dark:text-slate-400 relative overflow-hidden active:scale-95"
+                                className="p-4 bg-surface-sunken border border-line/80 dark:border-line/10 rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-800 transition-all text-ink-muted relative overflow-hidden active:scale-95"
                                 title="Toggle Theme"
                             >
                                 <motion.div
@@ -635,7 +684,7 @@ function ReportContent({
                             </button>
                             <button
                                 onClick={toggleFocusMode}
-                                className="p-4 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-3xl hover:bg-rose-500/10 hover:text-rose-500 transition-all text-slate-400"
+                                className="p-4 bg-surface-sunken border border-line/80 dark:border-line/10 rounded-3xl hover:bg-rose-500/10 hover:text-rose-500 transition-all text-slate-400"
                             >
                                 <X className="h-8 w-8" />
                             </button>
@@ -647,7 +696,7 @@ function ReportContent({
                         <button
                             disabled={activeGroupIndex === 0}
                             onClick={() => setActiveGroupIndex((prev: any) => prev - 1)}
-                            className={`p-6 rounded-full border bg-white dark:bg-slate-900 shadow-2xl transition-all z-20 shrink-0 ${activeGroupIndex === 0 ? 'opacity-0 scale-90 pointer-events-none' : 'opacity-0 group-hover/nav:opacity-100 scale-100 active:scale-90 border-slate-200 dark:border-white/10 text-slate-400 hover:text-brand-blue hover:border-brand-blue/30'}`}
+                            className={`p-6 rounded-full border bg-surface shadow-2xl transition-all z-20 shrink-0 ${activeGroupIndex === 0 ? 'opacity-0 scale-90 pointer-events-none' : 'opacity-0 group-hover/nav:opacity-100 scale-100 active:scale-90 border-line/80 dark:border-line/10 text-slate-400 hover:text-primary-soft hover:border-primary/30'}`}
                         >
                             <ChevronLeft className="h-10 w-10" />
                         </button>
@@ -682,7 +731,7 @@ function ReportContent({
                         <button
                             disabled={activeGroupIndex === groupNames.length - 1}
                             onClick={() => setActiveGroupIndex((prev: any) => prev + 1)}
-                            className={`p-6 rounded-full border bg-white dark:bg-slate-900 shadow-2xl transition-all z-20 shrink-0 ${activeGroupIndex === groupNames.length - 1 ? 'opacity-0 scale-90 pointer-events-none' : 'opacity-0 group-hover/nav:opacity-100 scale-100 active:scale-90 border-slate-200 dark:border-white/10 text-slate-400 hover:text-brand-blue hover:border-brand-blue/30'}`}
+                            className={`p-6 rounded-full border bg-surface shadow-2xl transition-all z-20 shrink-0 ${activeGroupIndex === groupNames.length - 1 ? 'opacity-0 scale-90 pointer-events-none' : 'opacity-0 group-hover/nav:opacity-100 scale-100 active:scale-90 border-line/80 dark:border-line/10 text-slate-400 hover:text-primary-soft hover:border-primary/30'}`}
                         >
                             <ChevronRight className="h-10 w-10" />
                         </button>
@@ -693,110 +742,275 @@ function ReportContent({
                             <button
                                 key={`nav-dot-${idx}`}
                                 onClick={() => setActiveGroupIndex(idx)}
-                                className={`h-1.5 rounded-full transition-all duration-500 ${idx === activeGroupIndex ? 'w-12 bg-brand-blue shadow-[0_0_10px_rgba(59,130,246,0.5)]' : 'w-3 bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20'}`}
+                                className={`h-1.5 rounded-full transition-all duration-500 ${idx === activeGroupIndex ? 'w-12 bg-primary shadow-[0_0_10px_rgba(59,130,246,0.5)]' : 'w-3 bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20'}`}
                             />
                         ))}
                     </div>
                 </div>
             )}
 
-            <main className="max-w-[1600px] mx-auto px-8 py-16 flex items-start relative">
-                {/* Left Sidebar - High-Fidelity Fixed Navigation */}
+            <main className="max-w-[1600px] mx-auto px-8 py-10 flex items-start relative">
+                {/* ── Report rail ──
+                    Anchored to the viewport edge and full height, matching the
+                    app-wide navigation rail rather than floating as a card. */}
                 <aside
-                    className={`fixed left-[calc(max(2rem, (100vw - 1600px) / 2 + 2rem))] top-28 w-72 hidden xl:block transition-all duration-500 z-30 ${isFocusMode ? '!hidden opacity-0 pointer-events-none' : ''}`}
+                    className={`fixed left-0 top-0 bottom-0 w-[17.5rem] brand-rail z-50 hidden xl:flex flex-col transition-transform duration-500 ${railVisible ? 'translate-x-0' : 'xl:-translate-x-full pointer-events-none'}`}
                 >
-                    <div className="glass-panel p-6 rounded-[2.5rem] border border-indigo-100/50 dark:border-white/5 bg-white/50 dark:bg-slate-900/40 backdrop-blur-3xl shadow-premium">
-                        <div className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-400 dark:text-slate-500 mb-6 px-2 flex items-center justify-between">
-                            <span>Architecture</span>
-                            <Layers className="w-3 h-3 opacity-30" />
+                    {/* Brand head — same mark and wording as the main rail */}
+                    <div className="relative px-5 py-6 border-b border-white/[0.07] shrink-0 overflow-hidden">
+                        <div
+                            className="absolute -top-12 -right-10 w-32 h-32 rounded-full blur-2xl opacity-40 pointer-events-none"
+                            style={{ background: 'rgb(var(--c-accent))' }}
+                        />
+                        <button
+                            onClick={() => navigate('/dashboard')}
+                            title="Dashboard"
+                            className="relative flex items-center gap-3 w-full text-left group/logo"
+                        >
+                            {/* White plate: the logo artwork is the same navy as
+                                the rail and would otherwise disappear. */}
+                            <div className="bg-white rounded-2xl px-4 py-3 shadow-lg shadow-black/25 shrink-0 transition-transform duration-500 group-hover/logo:scale-[1.03]">
+                                <img
+                                    src="/brand/logo-full.png"
+                                    alt="Marketeers"
+                                    className="h-[3.25rem] w-auto max-w-[10.5rem] object-contain"
+                                />
+                            </div>
+                        </button>
+
+                        <div className="relative mt-4">
+                            <div className="text-[10px] font-black uppercase tracking-[0.3em] text-white/55 leading-none mb-1.5">
+                                Decision Support
+                            </div>
+                            <div className="text-[13px] font-bold text-white leading-snug line-clamp-2">
+                                {report.project_name || 'Analytics Report'}
+                            </div>
                         </div>
 
-                        <nav className="space-y-1">
-                            <ul className="space-y-1">
-                                <li className="group">
-                                    <a href="#summary" className="flex items-center justify-between p-3 rounded-2xl transition-all hover:bg-slate-100/50 dark:hover:bg-white/5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white active:scale-95 group-active:text-brand-blue">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 group-hover:bg-brand-blue transition-all" />
-                                            <span className="font-bold text-[11px] uppercase tracking-widest leading-tight">Overview</span>
-                                        </div>
+                        {report.base_n > 0 && (
+                            <div className="relative mt-3 flex items-center gap-1.5 text-[10px] font-semibold text-white/50">
+                                <Database className="w-2.5 h-2.5 shrink-0" />
+                                <span>N={report.base_n}</span>
+                                <span className="text-white/20">·</span>
+                                <span>{(report.brands || report.brand_list)?.length || 0} brands</span>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Section navigation */}
+                    {/* Scroll region: the section list can outgrow the viewport,
+                        so it scrolls independently of the pinned head and foot. */}
+                    <div className="relative flex-1 min-h-0">
+                        {/* Fade affordances so a mid-scroll list reads as scrollable */}
+                        <div className="pointer-events-none absolute inset-x-0 top-0 h-6 z-10 bg-gradient-to-b from-[rgb(var(--c-chrome))] to-transparent" />
+                        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-6 z-10 bg-gradient-to-t from-[rgb(var(--c-chrome-deep))] to-transparent" />
+
+                        <div className="h-full overflow-y-auto overflow-x-hidden custom-scrollbar px-3 py-4">
+                        <div className="px-3 pb-2.5 text-[9px] font-black uppercase tracking-[0.3em] text-white/35">
+                            Architecture
+                        </div>
+                        <nav>
+                            <ul className="space-y-0.5">
+                                <li>
+                                    <a
+                                        href="#summary"
+                                        data-active={activeSectionId === 'summary'}
+                                        className="nav-item"
+                                    >
+                                        <span className="shrink-0 w-8 h-8 rounded-lg bg-white/10 grid place-items-center">
+                                            <Activity className="w-4 h-4" />
+                                        </span>
+                                        <span className="text-[12.5px] uppercase tracking-[0.06em] truncate">Overview</span>
                                     </a>
                                 </li>
+
                                 {report?.insights?.market_position_report && (
-                                    <li className="group">
-                                        <a href="#strategic-positioning" className="flex items-center justify-between p-3 rounded-2xl transition-all hover:bg-emerald-500/10 text-emerald-600 dark:text-emerald-500 hover:text-emerald-700 dark:hover:text-emerald-400 active:scale-95">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/20 group-hover:bg-emerald-500 transition-all" />
-                                                <span className="font-bold text-[11px] uppercase tracking-widest leading-tight">Strategic Intelligence</span>
-                                            </div>
-                                            <Sparkles className="w-3 h-3 opacity-50" />
+                                    <li>
+                                        <a
+                                            href="#strategic-positioning"
+                                            data-active={activeSectionId === 'strategic-positioning'}
+                                            className="nav-item"
+                                        >
+                                            <span className="shrink-0 w-8 h-8 rounded-lg bg-accent/25 grid place-items-center">
+                                                <Sparkles className="w-4 h-4" />
+                                            </span>
+                                            <span className="text-[12.5px] uppercase tracking-[0.06em] truncate">Strategic</span>
                                         </a>
                                     </li>
                                 )}
+
+                                <li className="py-2 px-3">
+                                    <div className="h-px bg-white/10" />
+                                </li>
+
                                 {hasNewPipeline ? (
-                                    groupNames.map((group: string, i: number) => (
-                                        <li key={group} className="group">
-                                            <a href={`#group-${i}`} className="flex items-center justify-between p-3 rounded-2xl transition-all hover:bg-slate-100/50 dark:hover:bg-white/5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white active:scale-95 group-active:text-brand-blue">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 group-hover:bg-brand-blue transition-all shrink-0" />
-                                                    <span className="font-bold text-[11px] uppercase tracking-widest leading-tight whitespace-normal">{group}</span>
-                                                </div>
-                                                <span className="text-[9px] font-black text-brand-blue/60 group-hover:text-brand-blue font-mono ml-2 border border-brand-blue/10 px-2 py-0.5 rounded-lg bg-brand-blue/5 shrink-0">
-                                                    {chartGroups[group].length}
-                                                </span>
-                                            </a>
-                                        </li>
-                                    ))
+                                    groupNames.map((group: string, i: number) => {
+                                        const id = `group-${i}`;
+                                        const count = chartGroups[group]?.length || 0;
+                                        const active = activeSectionId === id;
+                                        return (
+                                            <li key={group}>
+                                                <a href={`#${id}`} data-active={active} className="nav-item">
+                                                    {/* Sequential order number — the badge on the
+                                                        right is the chart count, kept visually
+                                                        distinct so the two are never confused. */}
+                                                    <span className={`shrink-0 w-8 h-8 rounded-lg grid place-items-center text-[11px] font-black tabular-nums transition-colors ${active ? 'bg-white/20 text-white' : 'bg-white/[0.07] text-white/50'}`}>
+                                                        {String(i + 1).padStart(2, '0')}
+                                                    </span>
+                                                    <span className="text-[12.5px] uppercase tracking-[0.06em] leading-tight truncate flex-1">
+                                                        {group}
+                                                    </span>
+                                                    {count > 0 && (
+                                                        <span className="shrink-0 min-w-[20px] h-5 px-1.5 rounded-full bg-white/10 text-[10px] font-bold text-white/60 tabular-nums grid place-items-center">
+                                                            {count}
+                                                        </span>
+                                                    )}
+                                                </a>
+                                            </li>
+                                        );
+                                    })
                                 ) : (
                                     report.sections?.map((section: any, i: number) => (
-                                        <li key={i} className="group">
-                                            <a href={`#section-${i}`} className="flex items-center justify-between p-3 rounded-2xl transition-all hover:bg-slate-100/50 dark:hover:bg-white/5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white active:scale-95 group-active:text-brand-blue">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 group-hover:bg-brand-blue transition-all shrink-0" />
-                                                    <span className="font-bold text-[11px] uppercase tracking-widest leading-tight whitespace-normal">{section.section_name}</span>
-                                                </div>
+                                        <li key={i}>
+                                            <a
+                                                href={`#section-${i}`}
+                                                data-active={activeSectionId === `section-${i}`}
+                                                className="nav-item"
+                                            >
+                                                <span className="shrink-0 w-8 h-8 rounded-lg bg-white/[0.07] grid place-items-center text-[11px] font-black text-white/50 tabular-nums">
+                                                    {String(i + 1).padStart(2, '0')}
+                                                </span>
+                                                <span className="text-[12.5px] uppercase tracking-[0.06em] leading-tight truncate">
+                                                    {section.section_name}
+                                                </span>
                                             </a>
                                         </li>
                                     ))
                                 )}
                             </ul>
-
-                            {report.base_n > 0 && (
-                                <div className="mt-8 p-5 bg-slate-50/50 dark:bg-slate-900/40 rounded-[2rem] border border-slate-200/50 dark:border-white/5 group hover:border-brand-blue/20 transition-all">
-                                    <div className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em] mb-2 flex items-center justify-between">
-                                        SAMPLE
-                                        <Database className="w-2.5 h-2.5 opacity-20" />
-                                    </div>
-                                    <div className="text-2xl font-black text-brand-blue font-display tracking-tight group-hover:scale-105 transition-transform duration-500">
-                                        N={report.base_n}
-                                    </div>
-                                    <div className="mt-2 w-full h-1 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                                        <motion.div
-                                            initial={{ width: 0 }}
-                                            animate={{ width: '100%' }}
-                                            transition={{ duration: 1.5, ease: "easeOut" }}
-                                            className="h-full bg-brand-blue shadow-[0_0_8px_rgba(59,130,246,0.3)]"
-                                        />
-                                    </div>
-                                </div>
-                            )}
                         </nav>
+                        </div>
                     </div>
+
+                    {/* Platform navigation, collapsed into one group so it does
+                        not compete with the report's own section list. */}
+                    <div className="shrink-0 px-3 pt-3 border-t border-white/[0.07]">
+                        <button
+                            onClick={() => setGoToOpen((v) => !v)}
+                            className="nav-item w-full"
+                            aria-expanded={goToOpen}
+                        >
+                            <span className="shrink-0 w-8 h-8 rounded-lg bg-white/[0.07] grid place-items-center">
+                                <LayoutDashboard className="w-4 h-4" />
+                            </span>
+                            <span className="text-[12.5px] uppercase tracking-[0.06em] truncate flex-1 text-left">
+                                Go to
+                            </span>
+                            <motion.span animate={{ rotate: goToOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                                <ChevronDown className="w-4 h-4 text-white/45" />
+                            </motion.span>
+                        </button>
+
+                        <AnimatePresence initial={false}>
+                            {goToOpen && (
+                                <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                                    className="overflow-hidden"
+                                >
+                                    <div className="pl-5 pr-1 py-1 space-y-0.5 border-l border-white/10 ml-[22px]">
+                                        {[
+                                            { label: 'Dashboard', icon: LayoutDashboard, to: '/dashboard' },
+                                            { label: 'Surveys', icon: ClipboardList, to: '/surveys' },
+                                            { label: 'Reports', icon: FileText, to: '/surveys/reports' },
+                                        ].map((item) => (
+                                            <button
+                                                key={item.to}
+                                                onClick={() => navigate(item.to)}
+                                                className="nav-item w-full"
+                                            >
+                                                <span className="shrink-0 w-7 h-7 rounded-lg bg-white/[0.07] grid place-items-center">
+                                                    <item.icon className="w-3.5 h-3.5" />
+                                                </span>
+                                                <span className="text-[12px] uppercase tracking-[0.06em] truncate">
+                                                    {item.label}
+                                                </span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+
+                    {/* Collapse sits on its own, separated from both groups */}
+                    <div className="shrink-0 px-3 py-3 mt-1 border-t border-white/[0.07]">
+                        <button
+                            onClick={() => setRailOpen(false)}
+                            className="nav-item w-full"
+                            title="Collapse sidebar"
+                        >
+                            <span className="shrink-0 w-8 h-8 rounded-lg bg-white/[0.07] grid place-items-center">
+                                <PanelLeftClose className="w-4 h-4" />
+                            </span>
+                            <span className="text-[12.5px] uppercase tracking-[0.06em] truncate">
+                                Collapse
+                            </span>
+                        </button>
+                    </div>
+
+                    {/* Sample size */}
+                    {report.base_n > 0 && (
+                        <div className="shrink-0 px-5 py-4 border-t border-white/[0.07]">
+                            <div className="flex items-center justify-between mb-1.5">
+                                <span className="text-[8px] font-black text-white/40 uppercase tracking-[0.25em]">
+                                    Sample
+                                </span>
+                                <Database className="w-3 h-3 text-white/40" />
+                            </div>
+                            <div className="text-2xl font-black font-display text-white leading-none mb-2.5">
+                                N={report.base_n}
+                            </div>
+                            <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                                <motion.div
+                                    initial={{ width: 0 }}
+                                    animate={{ width: '100%' }}
+                                    transition={{ duration: 1.4, ease: 'easeOut' }}
+                                    className="h-full rounded-full"
+                                    style={{
+                                        background:
+                                            'linear-gradient(90deg, rgb(var(--c-primary)), rgb(var(--c-accent)))',
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    )}
                 </aside>
 
                 {/* Main Content - Padded to avoid overlap */}
-                <div className={`flex-1 min-w-0 xl:ml-[352px] space-y-32 pb-32 transition-all duration-500`}>
+                <div className={`flex-1 min-w-0 space-y-16 pb-24 transition-all duration-500`}>
                     {/* Executive Summary Section */}
                     <section id="summary" className="scroll-mt-40 animate-fade-in">
-                        <div className="flex items-center gap-4 mb-12">
-                            <div className="h-1 w-12 bg-brand-blue rounded-full"></div>
-                            <h2 className="text-3xl font-black uppercase tracking-widest italic text-slate-400">Business Objective</h2>
+                        <div className="flex items-center gap-4 mb-6">
+                            <div
+                                className="h-1 w-12 rounded-full"
+                                style={{ background: 'linear-gradient(90deg, rgb(var(--c-primary)), rgb(var(--c-accent)))' }}
+                            />
+                            <h2 className="text-xl font-black uppercase tracking-[0.25em] text-ink-subtle">Business Objective</h2>
                         </div>
                         {surveyId && <ProductTestAnalyticsStrip surveyId={surveyId} />}
+                        {/* Report vitals, read off the existing payload */}
+                        <div className="mb-8">
+                            <ReportKpiRow report={report} />
+                        </div>
                         {report.insights && (
                             <ExecutiveSummary
                                 summary={report.insights.executive_summary}
                                 findings={report.insights.key_findings}
                                 opportunity_insights={report.insights.opportunity_insights}
+                                report={report}
                                 surveyId={surveyId}
                                 editable={['admin', 'analyst'].includes(localStorage.getItem('role') || '')}
                             />
@@ -820,12 +1034,12 @@ function ReportContent({
                     {hasNewPipeline ? (
                         groupNames.map((group: string, gIdx: number) => (
                             <section key={group} id={`group-${gIdx}`} className="scroll-mt-40 space-y-16 animate-slide-up" style={{ animationDelay: `${gIdx * 0.1}s` }}>
-                                <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-8">
+                                <div className="flex items-center justify-between border-b border-line/80 dark:border-line/10 pb-8">
                                     <div className="space-y-2">
-                                        <div className="text-xs font-black text-brand-blue uppercase tracking-[0.4em]">Section — {String(gIdx + 1).padStart(2, '0')}</div>
-                                        <h3 className="text-5xl font-black uppercase tracking-tighter italic text-slate-900 dark:text-white">{group}</h3>
+                                        <div className="text-xs font-black text-primary-soft uppercase tracking-[0.4em]">Section — {String(gIdx + 1).padStart(2, '0')}</div>
+                                        <h3 className="text-3xl font-black font-display tracking-tight text-ink">{group}</h3>
                                     </div>
-                                    <div className="px-6 py-2 bg-brand-blue/10 border border-brand-blue/20 rounded-full text-brand-blue text-xs font-black uppercase tracking-widest">
+                                    <div className="px-6 py-2 bg-primary/10 border border-primary/20 rounded-full text-primary-soft text-xs font-black uppercase tracking-widest">
                                         {chartGroups[group].length} {chartGroups[group].length === 1 ? 'Visualization' : 'Visualizations'}
                                     </div>
                                 </div>
@@ -838,10 +1052,10 @@ function ReportContent({
                     ) : (
                         report.sections?.map((section: any, idx: number) => (
                             <section key={idx} id={`section-${idx}`} className="scroll-mt-40 space-y-16 animate-slide-up" style={{ animationDelay: `${idx * 0.1}s` }}>
-                                <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-8">
+                                <div className="flex items-center justify-between border-b border-line/80 dark:border-line/10 pb-8">
                                     <div className="space-y-2">
-                                        <div className="text-xs font-black text-brand-blue uppercase tracking-[0.4em]">Section — {String(idx + 1).padStart(2, '0')}</div>
-                                        <h3 className="text-5xl font-black uppercase tracking-tighter italic text-slate-900 dark:text-white">{section.section_name}</h3>
+                                        <div className="text-xs font-black text-primary-soft uppercase tracking-[0.4em]">Section — {String(idx + 1).padStart(2, '0')}</div>
+                                        <h3 className="text-3xl font-black font-display tracking-tight text-ink">{section.section_name}</h3>
                                     </div>
                                 </div>
 
@@ -870,9 +1084,47 @@ function ReportContent({
                 </div>
             </main>
 
+            {/* ── Floating controls ── */}
+            {!isFocusMode && (
+                <>
+                    {/* Re-open the rail once it has been collapsed */}
+                    {!railOpen && (
+                        <button
+                            onClick={() => setRailOpen(true)}
+                            title="Show sidebar"
+                            aria-label="Show sidebar"
+                            className="hidden xl:grid fixed left-5 top-28 z-50 w-11 h-11 place-items-center rounded-2xl text-white shadow-lg shadow-primary/30 transition-transform hover:scale-105 active:scale-95"
+                            style={{ background: 'linear-gradient(135deg, rgb(var(--c-primary)), rgb(var(--c-accent)))' }}
+                        >
+                            <PanelLeftOpen className="w-5 h-5" />
+                        </button>
+                    )}
+
+                    {/* Back to top */}
+                    <AnimatePresence>
+                        {showToTop && (
+                            <motion.button
+                                initial={{ opacity: 0, y: 16, scale: 0.9 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 16, scale: 0.9 }}
+                                transition={{ duration: 0.2 }}
+                                onClick={scrollToTop}
+                                title="Back to top"
+                                aria-label="Back to top"
+                                className="fixed right-6 bottom-6 z-50 flex items-center gap-2 pl-4 pr-5 py-3 rounded-full text-white font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/30 hover:-translate-y-0.5 active:scale-95 transition-transform"
+                                style={{ background: 'linear-gradient(135deg, rgb(var(--c-primary)), rgb(var(--c-accent)))' }}
+                            >
+                                <ArrowUp className="w-4 h-4" />
+                                Top
+                            </motion.button>
+                        )}
+                    </AnimatePresence>
+                </>
+            )}
+
             {/* Scroll Progress Bar */}
             <div className="fixed bottom-0 left-0 w-full h-1.5 bg-slate-200 dark:bg-slate-900 z-50">
-                <div className="h-full bg-gradient-to-r from-brand-blue to-purple-500 transition-all duration-300"
+                <div className="h-full bg-gradient-to-r from-primary to-purple-500 transition-all duration-300"
                     style={{ width: `${loading ? 0 : 100}%` }} />
             </div>
 

@@ -24,7 +24,7 @@ export default function FunnelChart({ data }: FunnelChartProps) {
     return (
         <div className="bg-white border border-slate-100 rounded-[2.5rem] p-8 shadow-xl h-full flex flex-col text-left">
             <h3 className="text-lg font-display font-black mb-8 flex items-center gap-2 text-slate-900">
-                <Filter className="w-5 h-5 text-brand-blue" />
+                <Filter className="w-5 h-5 text-primary-soft" />
                 Conversion Funnel
             </h3>
 
@@ -57,7 +57,7 @@ export default function FunnelChart({ data }: FunnelChartProps) {
 
             <div className="mt-6 pt-6 border-t border-slate-100 grid grid-cols-2 gap-6">
                 <div className="text-center p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                    <p className="text-2xl font-black text-brand-blue">{data.qualification_rate.toFixed(1)}%</p>
+                    <p className="text-2xl font-black text-primary-soft">{data.qualification_rate.toFixed(1)}%</p>
                     <p className="text-[10px] text-slate-400 uppercase tracking-widest font-black">Qualification</p>
                 </div>
                 <div className="text-center p-4 rounded-2xl bg-slate-50 border border-slate-100">

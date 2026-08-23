@@ -27,5 +27,5 @@ def resolve_render_mode(explicit: str | None = None) -> PPTXRenderMode:
 
   rollout_stage = resolve_rollout_stage()
   if rollout_stage == PPTXRolloutStage.DEFAULT:
-    return PPTXRenderMode.NATIVE
+    return PPTXRenderMode.HYBRID
   return PPTXRenderMode.NATIVE

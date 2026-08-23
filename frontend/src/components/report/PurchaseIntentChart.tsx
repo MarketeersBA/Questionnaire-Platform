@@ -1,5 +1,6 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList } from 'recharts';
 import { useTheme } from '../../context/ThemeContext';
+import { CHART_SERIES } from '../../constants/brandPalette';
 
 const transformData = (raw: any) => {
     if (!raw || !raw.labels) return [];
@@ -13,7 +14,7 @@ const transformData = (raw: any) => {
     });
 };
 
-const COLORS = ['#8b5cf6', '#06b6d4', '#ec4899', '#f97316'];
+const COLORS = CHART_SERIES;
 
 type PurchaseIntentChartProps = {
     data: any;

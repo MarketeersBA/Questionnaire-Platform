@@ -39,7 +39,7 @@ export function ProductTestBlueprintStatusBar({ snapshot, isGenerating }: Produc
                     Product Test Blueprint Status
                 </p>
                 {isGenerating && (
-                    <span className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-brand-blue">
+                    <span className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-primary-soft">
                         <Loader2 className="w-3 h-3 animate-spin" />
                         Syncing…
                     </span>
@@ -57,7 +57,7 @@ export function ProductTestBlueprintStatusBar({ snapshot, isGenerating }: Produc
                     >
                         <p className="text-[8px] font-black uppercase tracking-widest text-slate-400">{item.label}</p>
                         <p className={`text-sm font-display font-black ${
-                            item.highlight ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-900 dark:text-white'
+                            item.highlight ? 'text-indigo-600 dark:text-indigo-400' : 'text-ink'
                         }`}>
                             {item.value}
                         </p>

@@ -195,7 +195,7 @@ export default function VoiceNoteRecorder({ language, onRecorded }: VoiceNoteRec
     };
 
     return (
-        <div className="flex flex-col gap-2 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 transition-all">
+        <div className="flex flex-col gap-2 p-4 bg-surface-raised/50 rounded-2xl border border-line/80 dark:border-line/10 transition-all">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <button
@@ -206,7 +206,7 @@ export default function VoiceNoteRecorder({ language, onRecorded }: VoiceNoteRec
                         onContextMenu={(e) => e.preventDefault()}
                         className={`w-10 h-10 rounded-full flex items-center justify-center shadow-sm transition-all select-none touch-none focus:outline-none focus:ring-2 focus:ring-offset-1 ${
                             state === 'idle'
-                                ? 'bg-brand-blue text-white hover:scale-105 active:scale-95'
+                                ? 'bg-primary text-white hover:scale-105 active:scale-95'
                                 : state === 'recording'
                                     ? 'bg-rose-500 text-white animate-pulse scale-110'
                                     : 'bg-emerald-500 text-white hover:scale-105 active:scale-95'
@@ -226,7 +226,7 @@ export default function VoiceNoteRecorder({ language, onRecorded }: VoiceNoteRec
                         )}
                     </button>
                     <div>
-                        <p className="text-xs font-black text-slate-900 dark:text-white">
+                        <p className="text-xs font-black text-ink">
                             {state === 'idle'
                                 ? (isArabic ? 'اضغط مطولاً للتسجيل' : 'Hold to Record')
                                 : state === 'recording'
@@ -263,7 +263,7 @@ export default function VoiceNoteRecorder({ language, onRecorded }: VoiceNoteRec
                             onPointerUp={onPointerUpOrCancel}
                             onPointerCancel={onPointerUpOrCancel}
                             onContextMenu={(e) => e.preventDefault()}
-                            className="p-1.5 rounded-full text-slate-400 hover:text-brand-blue hover:bg-blue-50 dark:hover:bg-brand-blue/10 transition-colors select-none touch-none"
+                            className="p-1.5 rounded-full text-slate-400 hover:text-primary-soft hover:bg-blue-50 dark:hover:bg-primary/10 transition-colors select-none touch-none"
                             aria-label="Re-record"
                         >
                             <RotateCcw className="w-4 h-4" />

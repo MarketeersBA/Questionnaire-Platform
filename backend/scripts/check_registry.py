@@ -1,18 +1,20 @@
 import asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
+from backend.database import db
 
-async def check():
-    client = AsyncIOMotorClient('mongodb://localhost:27018')
-    db = client['survey_platform']
-    
-    print("--- Collection: surveys ---")
-    surveys = await db.surveys.find().to_list(length=5)
-    for s in surveys:
-        print(f"ID: {s.get('survey_id')} | Title: {s.get('title')} | Created: {s.get('created_at')}")
+async def main():
+    db.connect()
+    try:
+        col = db.get_collection("surveys")
+        survey = await col.find_one({"_id": db.ObjectId("6a3b8939b3fa5ef1308239ed")})
+        if survey:
+            registry = survey.get("taste_test_config", {}).get("attribute_sequence", [])
+            for r in registry[:10]:
+                print(r.get("main_att"), "->", r.get("supp_att"))
+        else:
+            print("No survey found!")
+    finally:
+        db.close()
 
-    print("\n--- Collection: survey_metadata ---")
-    meta = await db.survey_metadata.find_one({"survey_id": "hero_protein_bar_legacy"})
-    print(f"Hero Meta: {meta['survey_id'] if meta else 'NOT FOUND'}")
-
-if __name__ == "__main__":
-    asyncio.run(check())
+if __name__ == '__main__':
+    asyncio.run(main())

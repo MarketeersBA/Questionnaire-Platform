@@ -83,7 +83,7 @@ export default function FormAssistantModal({ isOpen, onClose, onSave, initialUrl
             <div className="relative w-full max-w-2xl bg-white border border-slate-200 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
                 <header className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                     <div className="text-left">
-                        <h2 className="text-xl font-display font-black text-slate-900">Survey Link <span className="text-brand-blue">Assistant</span></h2>
+                        <h2 className="text-xl font-display font-black text-slate-900">Survey Link <span className="text-primary-soft">Assistant</span></h2>
                         <p className="text-sm font-medium text-slate-400">Map Layer 1 data to specific destination survey fields</p>
                     </div>
                     <button onClick={onClose} className="p-3 hover:bg-white rounded-2xl transition-all border border-transparent hover:border-slate-100 shadow-sm text-slate-400">
@@ -94,14 +94,14 @@ export default function FormAssistantModal({ isOpen, onClose, onSave, initialUrl
                 <div className="p-8 overflow-y-auto space-y-8 custom-scrollbar">
                     <section className="space-y-4 text-left">
                         <div className="flex items-center justify-between">
-                            <label className="text-[10px] font-black text-brand-blue uppercase tracking-widest ml-1">1. Paste Pre-filled URL</label>
+                            <label className="text-[10px] font-black text-primary-soft uppercase tracking-widest ml-1">1. Paste Pre-filled URL</label>
                             <div className="text-[10px] text-slate-400 flex items-center gap-1 font-bold uppercase tracking-widest">
                                 <HelpCircle className="w-3 h-3" />
                                 URL Mapping Tool
                             </div>
                         </div>
                         <textarea
-                            className="w-full h-32 bg-slate-50 border border-slate-200 rounded-2xl p-5 text-xs font-mono text-slate-600 outline-none focus:ring-4 focus:ring-brand-blue/5 focus:border-brand-blue/50 transition-all shadow-inner"
+                            className="w-full h-32 bg-slate-50 border border-slate-200 rounded-2xl p-5 text-xs font-mono text-slate-600 outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary/50 transition-all shadow-inner"
                             placeholder="https://survey-tool.com/viewform?entry.123=..."
                             value={rawUrl}
                             onChange={(e) => setRawUrl(e.target.value)}
@@ -162,7 +162,7 @@ export default function FormAssistantModal({ isOpen, onClose, onSave, initialUrl
                         <button
                             onClick={() => onSave(previewUrl)}
                             disabled={!previewUrl}
-                            className="bg-brand-blue hover:bg-blue-700 disabled:opacity-30 px-8 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white shadow-xl hover:shadow-brand-blue/20 transition-all flex items-center gap-2"
+                            className="bg-primary hover:bg-blue-700 disabled:opacity-30 px-8 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white shadow-xl hover:shadow-primary/20 transition-all flex items-center gap-2"
                         >
                             <Check className="w-4 h-4" />
                             Apply Mapping

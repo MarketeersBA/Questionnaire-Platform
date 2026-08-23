@@ -236,7 +236,10 @@ def test_qa_followup_api_rejects_module_question(mock_get_collection, client):
     )
     assert res.status_code == 200
     assert res.json()["action"] == "complete"
-    assert res.json().get("reasoning") == "Question not eligible for AI follow-up."
+    # Configurable-module questions (e.g. Brand Usage) don't resolve to a
+    # supported respondent surface — this is the same rejection path covered
+    # by test_public_followup.py::test_followup_rejects_configurable_module_question.
+    assert res.json().get("reasoning") == "Could not resolve a supported respondent surface for this question."
 
 
 @patch("backend.routers.public.smart_followup_engine.evaluate_and_followup", new_callable=AsyncMock)

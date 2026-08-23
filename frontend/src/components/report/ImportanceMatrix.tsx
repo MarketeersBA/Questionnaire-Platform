@@ -23,29 +23,29 @@ export function ImportanceMatrix({ data }: { data: any }) {
     return (
         <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700">
             <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
-                <thead className="bg-slate-50 dark:bg-slate-800">
+                <thead className="bg-surface-raised">
                     <tr>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider sticky left-0 bg-slate-50 dark:bg-slate-800 z-10 w-1/3">
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider sticky left-0 bg-surface-raised z-10 w-1/3">
                             Feature
                         </th>
-                        <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider border-r border-slate-200 dark:border-slate-700">
+                        <th className="px-6 py-4 text-center text-xs font-semibold text-ink-muted uppercase tracking-wider border-r border-slate-200 dark:border-slate-700">
                             Derived Importance (R)
                         </th>
                         {brands.map(brand => (
-                            <th key={brand} className="px-6 py-4 text-center text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                            <th key={brand} className="px-6 py-4 text-center text-xs font-semibold text-ink-muted uppercase tracking-wider">
                                 {brand} Perf.
                             </th>
                         ))}
                     </tr>
                 </thead>
-                <tbody className="bg-white dark:bg-slate-900 divide-y divide-slate-200 dark:divide-slate-700">
+                <tbody className="bg-surface divide-y divide-slate-200 dark:divide-slate-700">
                     {matrix.map((row: any, i: number) => (
                         <tr key={i} className="group">
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 dark:text-white sticky left-0 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-800 transition-colors z-10 w-1/3">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-ink sticky left-0 bg-surface group-hover:bg-slate-50 dark:group-hover:bg-slate-800 transition-colors z-10 w-1/3">
                                 {row.feature}
                             </td>
                             <td
-                                className="px-6 py-4 whitespace-nowrap text-sm text-center border-r border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
+                                className="px-6 py-4 whitespace-nowrap text-sm text-center border-r border-slate-200 dark:border-slate-700 text-ink-muted"
                                 style={{ backgroundColor: getImportanceColor(row.importance) }}
                             >
                                 {typeof row.importance === 'number' ? row.importance.toFixed(2) : 'N/A'}

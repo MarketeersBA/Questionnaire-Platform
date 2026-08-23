@@ -117,16 +117,16 @@ export function StrategicCommandSection({
                             Strategic Intelligence
                         </h2>
                     </div>
-                    <h3 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+                    <h3 className="text-4xl font-black text-ink tracking-tight">
                         Business Objective Alignment
                     </h3>
-                    <p className="text-slate-500 dark:text-slate-400 font-medium max-w-2xl">
+                    <p className="text-ink-muted font-medium max-w-2xl">
                         High-impact strategic playbooks derived from performance gaps and consumer undercurrents.
                     </p>
                 </div>
-                <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-white/5 rounded-full border border-slate-200 dark:border-white/10">
+                <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-white/5 rounded-full border border-line/80 dark:border-line/10">
                     <Activity className="text-indigo-500 w-4 h-4" />
-                    <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                    <span className="text-[10px] font-black text-ink-muted uppercase tracking-widest">
                         Engine Status: Optimized
                     </span>
                 </div>
@@ -139,13 +139,13 @@ export function StrategicCommandSection({
                         {/* Background Decoration */}
                         <div className="absolute -inset-4 bg-gradient-to-r from-indigo-500/5 to-rose-500/5 rounded-[48px] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
-                        <div className="relative glass-panel rounded-[40px] overflow-hidden border border-slate-100 dark:border-white/5 shadow-2xl transition-all duration-500 group-hover:-translate-y-2">
+                        <div className="relative glass-panel rounded-[40px] overflow-hidden border border-line/80 dark:border-line/10 shadow-2xl transition-all duration-500 group-hover:-translate-y-2">
                             {/* Accent Glow */}
                             <div className={`absolute top-0 left-0 w-full h-1.5 ${opp.impact === 'High' ? 'bg-rose-500' : 'bg-amber-500'} opacity-80`} />
 
                             <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
                                 {/* Left Column: Signal Intelligence */}
-                                <div className="lg:col-span-5 p-10 border-b lg:border-b-0 lg:border-r border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-slate-900/40">
+                                <div className="lg:col-span-5 p-10 border-b lg:border-b-0 lg:border-r border-line/80 dark:border-line/10 bg-slate-50/50 dark:bg-slate-900/40">
                                     <div className="flex items-center gap-3 mb-8">
                                         <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${opp.strategic_category === 'Product' ? 'bg-indigo-500/10 text-indigo-600' :
                                             opp.strategic_category === 'Marketing' ? 'bg-emerald-500/10 text-emerald-600' :
@@ -153,45 +153,45 @@ export function StrategicCommandSection({
                                             }`}>
                                             {opp.strategic_category} Focus
                                         </div>
-                                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 rounded-lg text-[10px] font-bold text-slate-500 shadow-sm">
+                                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-surface rounded-lg text-[10px] font-bold text-slate-500 shadow-sm">
                                             <Layers className="w-3 h-3" />
                                             Priority {opp.priority_level}
                                         </div>
                                     </div>
 
-                                    <h4 className="text-3xl font-black text-slate-900 dark:text-white mb-6 leading-[1.1] group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                    <h4 className="text-3xl font-black text-ink mb-6 leading-[1.1] group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                                         {opp.title}
                                     </h4>
 
-                                    <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-medium mb-10 text-lg">
+                                    <p className="text-ink-muted leading-relaxed font-medium mb-10 text-lg">
                                         {opp.insight}
                                     </p>
 
                                     {/* Decision Matrix */}
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div className="p-5 rounded-3xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 shadow-sm">
+                                        <div className="p-5 rounded-3xl bg-surface border border-line/80 dark:border-line/10 shadow-sm">
                                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Performance Gap</span>
                                             <div className="flex items-baseline gap-2">
                                                 <span className="text-3xl font-black text-rose-500 italic">-{opp.gap_magnitude.toFixed(1)}</span>
                                                 <TrendingDown className="text-rose-500 w-5 h-5" />
                                             </div>
                                         </div>
-                                        <div className="p-5 rounded-3xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 shadow-sm">
+                                        <div className="p-5 rounded-3xl bg-surface border border-line/80 dark:border-line/10 shadow-sm">
                                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Business Impact</span>
                                             <div className="flex items-center gap-2">
                                                 <div className={`w-3 h-3 rounded-full ${opp.impact === 'High' ? 'bg-rose-500 animate-pulse' : 'bg-amber-500'}`} />
-                                                <span className="text-xl font-black text-slate-800 dark:text-white uppercase">{opp.impact}</span>
+                                                <span className="text-xl font-black text-ink uppercase">{opp.impact}</span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="mt-8 pt-8 border-t border-slate-200 dark:border-white/5">
+                                    <div className="mt-8 pt-8 border-t border-line/80 dark:border-line/10">
                                         <div className="flex items-center justify-between text-sm">
                                             <div className="flex items-center gap-2 text-slate-400">
                                                 <Brain className="w-4 h-4" />
                                                 <span className="font-bold uppercase tracking-widest text-[10px]">Statistical Confidence</span>
                                             </div>
-                                            <span className="font-black text-slate-800 dark:text-white">{(opp.confidence * 100).toFixed(0)}%</span>
+                                            <span className="font-black text-ink">{(opp.confidence * 100).toFixed(0)}%</span>
                                         </div>
                                         <div className="mt-2 h-1.5 w-full bg-slate-200 dark:bg-white/5 rounded-full overflow-hidden">
                                             <div
@@ -210,7 +210,7 @@ export function StrategicCommandSection({
                                                 <PlayCircle className="text-white w-6 h-6" />
                                             </div>
                                             <div>
-                                                <h5 className="text-lg font-black text-slate-900 dark:text-white leading-none">Execution Playbook</h5>
+                                                <h5 className="text-lg font-black text-ink leading-none">Execution Playbook</h5>
                                                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                                                     {canEdit ? 'Click a step to edit content' : 'Tactical Implementation steps'}
                                                 </span>
@@ -232,10 +232,10 @@ export function StrategicCommandSection({
                                             return (
                                                 <div
                                                     key={i}
-                                                    className="group/item flex items-start gap-5 p-6 rounded-3xl bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-white/5 shadow-sm hover:shadow-xl hover:border-indigo-500/30 transition-all duration-300"
+                                                    className="group/item flex items-start gap-5 p-6 rounded-3xl bg-surface/80 border border-line/80 dark:border-line/10 shadow-sm hover:shadow-xl hover:border-indigo-500/30 transition-all duration-300"
                                                 >
                                                     <div className="flex flex-col items-center gap-2 pt-1">
-                                                        <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-white/5 flex items-center justify-center text-xs font-black text-slate-400 border border-slate-100 dark:border-white/5 group-hover/item:bg-indigo-500 group-hover/item:text-white transition-colors">
+                                                        <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-white/5 flex items-center justify-center text-xs font-black text-slate-400 border border-line/80 dark:border-line/10 group-hover/item:bg-indigo-500 group-hover/item:text-white transition-colors">
                                                             0{i + 1}
                                                         </div>
                                                     </div>
@@ -286,7 +286,7 @@ export function StrategicCommandSection({
                                                                 onChange={(e) => setDraftText(e.target.value)}
                                                                 rows={3}
                                                                 autoFocus
-                                                                className="w-full rounded-2xl border-2 border-indigo-500/40 bg-white dark:bg-slate-950 px-4 py-3 text-[15px] font-bold text-slate-800 dark:text-slate-100 outline-none focus:ring-4 focus:ring-indigo-500/10 resize-y"
+                                                                className="w-full rounded-2xl border-2 border-indigo-500/40 bg-surface px-4 py-3 text-[15px] font-bold text-ink outline-none focus:ring-4 focus:ring-indigo-500/10 resize-y"
                                                             />
                                                         ) : (
                                                             <p

@@ -118,14 +118,22 @@ class PromptOrchestrator:
         """
         intelligence_block = ""
         if survey_meta is not None and template_key not in _EMBEDDED_INTELLIGENCE_TEMPLATES:
+            modules_used = ", ".join(getattr(survey_meta, "modules_used", []) or []) or "Not specified"
+            measured_attributes = (
+                ", ".join(getattr(survey_meta, "measured_attributes", []) or []) or "Not specified"
+            )
             intelligence_block = (
                 "\n--- SURVEY INTELLIGENCE ---\n"
                 f"- Client Brand (Target): {survey_meta.target_brand or 'N/A'}\n"
                 f"- Product Category: {survey_meta.category or 'Not specified'}\n"
-                f"- Survey Objective: {survey_meta.survey_objective or 'Not specified'}\n"
+                f"- Survey Objective (THE BUSINESS QUESTION): {survey_meta.survey_objective or 'Not specified'}\n"
                 f"- Testing Protocol: {survey_meta.testing_protocol.upper()}\n"
                 f"- Market: {survey_meta.market or 'Not specified'}\n"
                 f"- Methodology: {survey_meta.methodology_notes}\n"
+                # The model cannot stay inside the study scope unless it is
+                # told which modules ran and which attributes were rated.
+                f"- Modules Run In This Survey: {modules_used}\n"
+                f"- Attributes Respondents Rated: {measured_attributes}\n"
             )
 
         brand_scope = (

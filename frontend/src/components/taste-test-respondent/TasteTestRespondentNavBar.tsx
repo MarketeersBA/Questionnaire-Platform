@@ -22,7 +22,7 @@ export default function TasteTestRespondentNavBar({
     const isArabic = language === 'ar';
 
     return (
-        <div className="mt-8 pt-8 border-t border-slate-100 dark:border-slate-800/50">
+        <div className="mt-8 pt-8 border-t border-line/80 dark:border-line/10">
             <div className="flex flex-col-reverse md:flex-row items-stretch md:items-center gap-4">
                 <button
                     type="button"

@@ -122,6 +122,10 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    # Browsers hide every response header from JS unless it is explicitly
+    # exposed. Without Content-Disposition the download helper cannot read the
+    # server-supplied filename and has to invent one.
+    expose_headers=["Content-Disposition", "X-PPTX-Export-Manifest-Summary"],
 )
 
 app.include_router(auth.router)

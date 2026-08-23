@@ -262,10 +262,10 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                     </div>
                                 </div>
                                 <div>
-                                    <h3 className="text-3xl font-display font-black text-slate-900 dark:text-white tracking-tight">
+                                    <h3 className="text-3xl font-display font-black text-ink tracking-tight">
                                         Architectural <span className="text-brand-accent">Blueprint</span>
                                     </h3>
-                                    <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-[0.2em] mt-1">
+                                    <p className="text-xs text-ink-muted font-bold uppercase tracking-[0.2em] mt-1">
                                         Engineering the respondent experience layer by layer
                                     </p>
                                 </div>
@@ -274,12 +274,12 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                             <div className="flex items-center gap-4 px-6 py-4 bg-slate-900/5 dark:bg-white/5 rounded-2xl border border-black/5 dark:border-white/5">
                                 <div className="text-right">
                                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Logic Phases</p>
-                                    <p className="text-xl font-display font-black text-slate-900 dark:text-white">{moduleSeq.length + 1}</p>
+                                    <p className="text-xl font-display font-black text-ink">{moduleSeq.length + 1}</p>
                                 </div>
                                 <div className="w-px h-8 bg-slate-200 dark:bg-slate-700 mx-2" />
                                 <div className="flex -space-x-2">
                                     {moduleSeq.map((m, i) => (
-                                        <div key={i} className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-800 bg-brand-blue flex items-center justify-center text-[8px] font-bold text-white shadow-sm">
+                                        <div key={i} className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-800 bg-primary flex items-center justify-center text-[8px] font-bold text-white shadow-sm">
                                             {getLayerLabel(m)}
                                         </div>
                                     ))}
@@ -295,14 +295,14 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                         )}
 
                         {/* Respondent Journey Roadmap (The Architecture Circuit) */}
-                        <div className="relative glass-card bg-slate-900/[0.02] dark:bg-white/[0.02] rounded-[3.5rem] p-4 border border-slate-200 dark:border-slate-800 overflow-hidden">
+                        <div className="relative glass-card bg-slate-900/[0.02] dark:bg-white/[0.02] rounded-[3.5rem] p-4 border border-line/80 dark:border-line/10 overflow-hidden">
                             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-brand-blue/30 to-transparent" />
 
                             <div className="p-8">
                                 <div className="flex items-center justify-between mb-12">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-2 h-2 rounded-full bg-brand-blue animate-pulse" />
-                                        <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-900 dark:text-slate-100">Live Architecture Flow</h4>
+                                        <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                                        <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-ink">Live Architecture Flow</h4>
                                     </div>
                                     <div className="px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-black text-emerald-500 uppercase tracking-widest">
                                         Status: Constructing Sequence
@@ -313,7 +313,7 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                     {/* The Advanced Flow Line */}
                                     <div className="absolute top-[32px] left-20 right-20 h-[1.5px] bg-slate-200 dark:bg-slate-800">
                                         <motion.div
-                                            className="h-full bg-gradient-to-r from-brand-blue via-brand-glow to-brand-accent"
+                                            className="h-full bg-gradient-to-r from-primary via-brand-glow to-brand-accent"
                                             initial={{ width: 0 }}
                                             animate={{ width: '100%' }}
                                             transition={{ duration: 1.5, ease: "easeInOut" }}
@@ -325,15 +325,15 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                             <button
                                                 onClick={() => setActiveLayer('screening')}
                                                 className={`w-16 h-16 rounded-[1.5rem] flex flex-col items-center justify-center transition-all duration-500 relative ${activeLayer === 'screening'
-                                                    ? 'bg-brand-blue text-white shadow-[0_20px_50px_rgba(37,94,145,0.4)] scale-110 -translate-y-2 ring-4 ring-brand-blue/20'
-                                                    : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-400'
+                                                    ? 'bg-primary text-white shadow-[0_20px_50px_rgba(37,94,145,0.4)] scale-110 -translate-y-2 ring-4 ring-primary/20'
+                                                    : 'bg-surface border border-line/80 dark:border-line/10 text-slate-400'
                                                     }`}
                                             >
                                                 <Lock className="w-6 h-6 mb-1" />
                                                 <span className="text-[10px] font-black">L1</span>
                                             </button>
                                             <div className="flex flex-col items-center">
-                                                <span className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-widest mb-1">Entry</span>
+                                                <span className="text-[10px] font-black text-ink uppercase tracking-widest mb-1">Entry</span>
                                                 <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Locked</span>
                                             </div>
                                         </div>
@@ -361,11 +361,11 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                                         <button
                                                             onClick={() => setActiveLayer(modId)}
                                                             className={`w-16 h-16 rounded-[1.5rem] flex flex-col items-center justify-center transition-all duration-500 relative ${isActive
-                                                                ? 'bg-brand-blue text-white shadow-[0_20px_50px_rgba(37,94,145,0.4)] scale-110 -translate-y-2 ring-4 ring-brand-blue/20'
-                                                                : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-400 hover:border-brand-blue/50 hover:text-brand-blue hover:-translate-y-1'
+                                                                ? 'bg-primary text-white shadow-[0_20px_50px_rgba(37,94,145,0.4)] scale-110 -translate-y-2 ring-4 ring-primary/20'
+                                                                : 'bg-surface border border-line/80 dark:border-line/10 text-slate-400 hover:border-primary/50 hover:text-primary-soft hover:-translate-y-1'
                                                                 }`}
                                                         >
-                                                            <span className={`text-[10px] font-black mb-0.5 ${isActive ? 'text-white' : 'text-slate-900 dark:text-slate-100'}`}>{label}</span>
+                                                            <span className={`text-[10px] font-black mb-0.5 ${isActive ? 'text-white' : 'text-ink'}`}>{label}</span>
                                                             {isActive && <motion.div layoutId="activeNode" className="absolute -bottom-1.5 w-1.5 h-1.5 bg-white rounded-full" />}
 
                                                             {/* Legend Indicator */}
@@ -375,10 +375,10 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                                         </button>
 
                                                         <div className="text-center space-y-1.5">
-                                                            <p className={`text-[10px] font-black uppercase tracking-widest transition-colors ${isActive ? 'text-brand-blue' : 'text-slate-600 dark:text-slate-400'}`}>
+                                                            <p className={`text-[10px] font-black uppercase tracking-widest transition-colors ${isActive ? 'text-primary-soft' : 'text-ink-muted'}`}>
                                                                 {getLayerMiniLabel(modId)}
                                                             </p>
-                                                            <div className={`h-1 w-8 mx-auto rounded-full transition-all duration-500 ${isActive ? 'bg-brand-blue w-12' : 'bg-slate-200 dark:bg-slate-700'}`} />
+                                                            <div className={`h-1 w-8 mx-auto rounded-full transition-all duration-500 ${isActive ? 'bg-primary w-12' : 'bg-slate-200 dark:bg-slate-700'}`} />
                                                         </div>
                                                     </Reorder.Item>
                                                 );
@@ -413,15 +413,15 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                                         initial={{ opacity: 0, x: 20 }}
                                                         animate={{ opacity: 1, x: 0 }}
                                                         transition={{ delay: idx * 0.05 }}
-                                                        className="group relative bg-white dark:bg-slate-950 p-10 rounded-[3rem] border-2 border-slate-100 dark:border-slate-800 transition-all hover:border-brand-blue/40 shadow-sm text-left flex flex-col md:flex-row gap-8 items-start"
+                                                        className="group relative bg-surface p-10 rounded-[3rem] border-2 border-line/80 dark:border-line/10 transition-all hover:border-primary/40 shadow-sm text-left flex flex-col md:flex-row gap-8 items-start"
                                                     >
-                                                        <div className="w-14 h-14 shrink-0 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
-                                                            <span className="text-xs font-black text-brand-blue">Q{idx + 1}</span>
+                                                        <div className="w-14 h-14 shrink-0 flex flex-col items-center justify-center bg-surface-raised rounded-2xl border border-line/80 dark:border-line/10">
+                                                            <span className="text-xs font-black text-primary-soft">Q{idx + 1}</span>
                                                         </div>
 
                                                         <div className="flex-1 space-y-6">
                                                             <div className="flex items-center gap-3">
-                                                                <span className="text-[10px] font-black text-brand-blue uppercase tracking-widest px-4 py-1.5 bg-brand-blue/5 rounded-full border border-brand-blue/15">
+                                                                <span className="text-[10px] font-black text-primary-soft uppercase tracking-widest px-4 py-1.5 bg-primary/5 rounded-full border border-primary/15">
                                                                     {q.sectionTitle}
                                                                 </span>
                                                                 <div className="flex items-center gap-2 text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em]">
@@ -436,16 +436,16 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                                                         <div className="w-1.5 h-1.5 rounded-full bg-slate-300" />
                                                                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">English Instrumentation</p>
                                                                     </div>
-                                                                    <p className="text-lg font-display font-medium text-slate-900 dark:text-white leading-snug">
+                                                                    <p className="text-lg font-display font-medium text-ink leading-snug">
                                                                         {formatModuleQuestionText(q.en_text, { product: focusLabel, category: focusLabel })}
                                                                     </p>
                                                                 </div>
-                                                                <div className="space-y-2 text-right border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-slate-800 pt-6 lg:pt-0 lg:pl-10">
+                                                                <div className="space-y-2 text-right border-t lg:border-t-0 lg:border-l border-line/80 dark:border-line/10 pt-6 lg:pt-0 lg:pl-10">
                                                                     <div className="flex items-center justify-end gap-2 mb-2">
                                                                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">المحتوى البحثي العربي</p>
-                                                                        <div className="w-1.5 h-1.5 rounded-full bg-brand-blue" />
+                                                                        <div className="w-1.5 h-1.5 rounded-full bg-primary" />
                                                                     </div>
-                                                                    <p className="text-xl font-display font-medium text-slate-900 dark:text-white leading-relaxed" dir="rtl">
+                                                                    <p className="text-xl font-display font-medium text-ink leading-relaxed" dir="rtl">
                                                                         {formatModuleQuestionText(q.ar_text, { product: focusLabel, category: focusLabel })}
                                                                     </p>
                                                                 </div>
@@ -453,7 +453,7 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                                         </div>
 
                                                         <div className="absolute top-6 right-6 flex items-center gap-2">
-                                                            <div className="p-2 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800">
+                                                            <div className="p-2 bg-surface-raised rounded-xl border border-line/80 dark:border-line/10">
                                                                 <Shield className="w-4 h-4 text-slate-300" />
                                                             </div>
                                                         </div>
@@ -588,7 +588,7 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                     >
                                         {sections.map((section: any, sIdx: number) => (
                                             <Reorder.Item key={section.title || sIdx} value={section} className="relative space-y-6 bg-slate-50/50 dark:bg-slate-900/10 p-6 rounded-[2.5rem] border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-all group/section">
-                                                <div className="absolute -left-8 top-10 opacity-0 group-hover/section:opacity-100 cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-700 hover:text-brand-blue transition-all hidden md:block">
+                                                <div className="absolute -left-8 top-10 opacity-0 group-hover/section:opacity-100 cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-700 hover:text-primary-soft transition-all hidden md:block">
                                                     {activeLayer !== 'product_test' && (
                                                         <GripHorizontal className="w-5 h-5 rotate-90" />
                                                     )}
@@ -600,9 +600,9 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                                         <div className="h-px bg-slate-300 dark:bg-slate-700 flex-1" />
                                                     </div>
                                                 )}
-                                                <div className="flex items-center justify-between px-8 py-3 bg-white dark:bg-slate-950/50 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                                                    <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-blue flex items-center gap-3 text-left flex-wrap">
-                                                        <div className="w-1.5 h-1.5 rounded-full bg-brand-blue" />
+                                                <div className="flex items-center justify-between px-8 py-3 bg-surface/50 rounded-2xl border border-line/80 dark:border-line/10 shadow-sm">
+                                                    <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary-soft flex items-center gap-3 text-left flex-wrap">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-primary" />
                                                         {section.title}
                                                         {activeLayer === 'product_test' && section.brand && (
                                                             <span className="text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
@@ -613,7 +613,7 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                                     {activeLayer === 'screening' ? (
                                                         <button
                                                             onClick={(e) => { e.stopPropagation(); handleAddQuestion(sIdx, 1); }}
-                                                            className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-brand-blue transition-colors group/add"
+                                                            className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-primary-soft transition-colors group/add"
                                                         >
                                                             <Plus className="w-3.5 h-3.5 group-hover/add:scale-110 transition-transform" /> Add Logic Block
                                                         </button>
@@ -624,7 +624,7 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                                             </div>
                                                         </div>
                                                     ) : (
-                                                        <div className="flex items-center gap-2.5 px-4 py-1.5 bg-slate-50 dark:bg-slate-900 rounded-full border border-slate-200 dark:border-slate-800 shadow-inner">
+                                                        <div className="flex items-center gap-2.5 px-4 py-1.5 bg-surface-raised rounded-full border border-line/80 dark:border-line/10 shadow-inner">
                                                             <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.2em] text-slate-900 dark:text-slate-200">
                                                                 <Lock className="w-3 h-3 text-emerald-500" /> Layer Fixed
                                                             </div>
@@ -632,13 +632,13 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                                     )}
                                                 </div>
                                                 {section.isInstruction ? (
-                                                    <div className="mx-6 p-6 rounded-2xl bg-brand-blue/5 border-2 border-brand-blue/30 flex items-start gap-4 shadow-inner">
-                                                        <div className="p-3 bg-brand-blue/10 text-brand-blue rounded-xl shrink-0">
+                                                    <div className="mx-6 p-6 rounded-2xl bg-primary/5 border-2 border-primary/30 flex items-start gap-4 shadow-inner">
+                                                        <div className="p-3 bg-primary/10 text-primary-soft rounded-xl shrink-0">
                                                             <Info className="w-5 h-5" />
                                                         </div>
                                                         <div className="space-y-1 text-left">
-                                                            <p className="text-xs font-black uppercase tracking-widest text-brand-blue">Respondent Instruction</p>
-                                                            <p className="text-sm font-black text-slate-900 dark:text-white leading-relaxed">
+                                                            <p className="text-xs font-black uppercase tracking-widest text-primary-soft">Respondent Instruction</p>
+                                                            <p className="text-sm font-black text-ink leading-relaxed">
                                                                 {section.content}
                                                             </p>
                                                         </div>
@@ -664,7 +664,7 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                                     >
                                                         {(section.questions || []).map((q: any, qIdx: number) => (
                                                             <Reorder.Item key={q.id || qIdx} value={q} className="relative group/reorder">
-                                                                <div className="absolute -left-10 top-1/2 -translate-y-1/2 opacity-0 group-hover/reorder:opacity-100 cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-700 hover:text-brand-blue transition-all">
+                                                                <div className="absolute -left-10 top-1/2 -translate-y-1/2 opacity-0 group-hover/reorder:opacity-100 cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-700 hover:text-primary-soft transition-all">
                                                                     {activeLayer !== 'product_test' && (
                                                                         <GripHorizontal className="w-5 h-5 rotate-90" />
                                                                     )}

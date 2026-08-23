@@ -99,9 +99,9 @@ export default function ProductTestQuestionRenderer({
         ? heatmapFollowUpEligibility
         : openEndFollowUpEligibility;
 
-    const cardClass = `p-4 md:p-5 rounded-2xl bg-white dark:bg-slate-900 border overflow-visible transition-all shadow-sm ${pulseError
+    const cardClass = `p-4 md:p-5 rounded-2xl bg-surface border overflow-visible transition-all shadow-sm ${pulseError
         ? 'border-rose-400 ring-4 ring-rose-500/30 animate-pulse'
-        : 'border-slate-100 dark:border-slate-800 hover:shadow-md'
+        : 'border-line/80 dark:border-line/10 hover:shadow-md'
         }`;
 
     return (
@@ -112,17 +112,17 @@ export default function ProductTestQuestionRenderer({
         >
             <div className="flex justify-between items-start gap-3 mb-3">
                 <div className="flex-1 min-w-0 space-y-1.5">
-                    <p className="text-base md:text-lg font-bold text-slate-900 dark:text-white leading-snug">
+                    <p className="text-base md:text-lg font-bold text-ink leading-snug">
                         {displayText}
                     </p>
                     {question.diagnostic_tag && (
-                        <span className="inline-block text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500">
+                        <span className="inline-block text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-surface-sunken text-slate-500">
                             {question.diagnostic_tag}
                         </span>
                     )}
                 </div>
                 {question.type === 'scale' && value != null && value !== '' && (
-                    <div className="shrink-0 px-2.5 py-1 bg-brand-blue text-white rounded-lg font-black text-sm min-w-[2rem] text-center shadow-md">
+                    <div className="shrink-0 px-2.5 py-1 bg-primary text-white rounded-lg font-black text-sm min-w-[2rem] text-center shadow-md">
                         {String(value)}
                     </div>
                 )}
@@ -158,8 +158,8 @@ export default function ProductTestQuestionRenderer({
                                 type="button"
                                 onClick={() => onChange(i + 1)}
                                 className={`w-11 h-11 rounded-xl border font-black transition-all ${value === i + 1
-                                    ? 'bg-brand-blue text-white border-brand-blue scale-110'
-                                    : 'bg-slate-50 dark:bg-slate-800 border-slate-200 text-slate-500'
+                                    ? 'bg-primary text-white border-primary scale-110'
+                                    : 'bg-surface-raised border-slate-200 text-slate-500'
                                     }`}
                             >
                                 {i + 1}
@@ -172,7 +172,7 @@ export default function ProductTestQuestionRenderer({
                     type="number"
                     value={value != null ? String(value) : ''}
                     onChange={(e) => onChange(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-800 rounded-2xl px-6 py-4 text-xl font-bold"
+                    className="w-full bg-surface-raised border-2 border-line/80 dark:border-line/10 rounded-2xl px-6 py-4 text-xl font-bold"
                     placeholder={isArabic ? 'أدخل رقماً...' : 'Enter a number...'}
                 />
             ) : question.type === 'mcq' ? (
@@ -183,8 +183,8 @@ export default function ProductTestQuestionRenderer({
                             type="button"
                             onClick={() => onChange(opt)}
                             className={`w-full p-4 rounded-2xl border-2 text-left font-semibold transition-all ${value === opt
-                                ? 'bg-brand-blue/10 border-brand-blue text-brand-blue shadow-sm'
-                                : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 text-slate-600 dark:text-slate-400 hover:border-slate-300'
+                                ? 'bg-primary/10 border-primary text-primary-soft shadow-sm'
+                                : 'bg-surface-raised/50 border-slate-100 text-ink-muted hover:border-slate-300'
                                 }`}
                         >
                             {opt}

@@ -111,22 +111,22 @@ export default function TasteTestConfigModal({ isOpen, onClose, onConfirm }: Tas
                 initial={{ opacity: 0, scale: 0.9, y: 30 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 30 }}
-                className="relative w-full max-w-4xl bg-white dark:bg-slate-950 rounded-[3rem] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] transition-colors"
+                className="relative w-full max-w-4xl bg-surface rounded-[3rem] border border-line/80 dark:border-line/10 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] transition-colors"
             >
                 {/* Header */}
-                <div className="p-10 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between transition-colors">
+                <div className="p-10 border-b border-line/80 dark:border-line/10 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between transition-colors">
                     <div className="flex items-center gap-5">
-                        <div className="w-14 h-14 rounded-2xl bg-brand-blue/10 dark:bg-brand-blue/20 text-brand-blue flex items-center justify-center shadow-inner">
+                        <div className="w-14 h-14 rounded-2xl bg-primary/10 dark:bg-primary/20 text-primary-soft flex items-center justify-center shadow-inner">
                             <Sparkles className="w-7 h-7" />
                         </div>
                         <div>
-                            <h2 className="text-3xl font-display font-black text-slate-900 dark:text-white tracking-tight transition-colors">
-                                Research <span className="text-brand-blue">Architect</span>
+                            <h2 className="text-3xl font-display font-black text-ink tracking-tight transition-colors">
+                                Research <span className="text-primary-soft">Architect</span>
                             </h2>
-                            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium transition-colors">Configure your multi-product taste test logic.</p>
+                            <p className="text-sm text-ink-muted font-medium transition-colors">Configure your multi-product taste test logic.</p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-white transition-all shadow-sm">
+                    <button onClick={onClose} className="p-3 rounded-2xl bg-surface border border-slate-100 dark:border-slate-700 text-ink-subtle hover:text-slate-600 dark:hover:text-white transition-all shadow-sm">
                         <X className="w-6 h-6" />
                     </button>
                 </div>
@@ -136,7 +136,7 @@ export default function TasteTestConfigModal({ isOpen, onClose, onConfirm }: Tas
                     {/* Basic Info */}
                     <section className="grid grid-cols-1 md:grid-cols-2 gap-10">
                         <div className="space-y-4">
-                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1 transition-colors">
+                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-ink-subtle ml-1 transition-colors">
                                 <Tag className="w-3 h-3" /> Product Category
                             </label>
                             <input
@@ -144,7 +144,7 @@ export default function TasteTestConfigModal({ isOpen, onClose, onConfirm }: Tas
                                 value={config.category}
                                 onChange={e => setConfig({ ...config, category: e.target.value })}
                                 placeholder="e.g. Premium Chocolate"
-                                className="w-full bg-slate-50 dark:bg-slate-900 border-2 border-transparent focus:border-brand-blue/30 focus:bg-white dark:focus:bg-slate-800 rounded-2xl px-6 py-4 text-lg font-bold outline-none transition-all dark:text-white dark:placeholder:text-slate-700"
+                                className="w-full bg-surface-raised border-2 border-transparent focus:border-primary/30 focus:bg-white dark:focus:bg-slate-800 rounded-2xl px-6 py-4 text-lg font-bold outline-none transition-all dark:text-white dark:placeholder:text-slate-700"
                             />
                         </div>
 
@@ -152,7 +152,7 @@ export default function TasteTestConfigModal({ isOpen, onClose, onConfirm }: Tas
 
                     {/* Scale Selection */}
                     <section className="space-y-6">
-                        <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1 transition-colors">
+                        <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-ink-subtle ml-1 transition-colors">
                             <Beaker className="w-3 h-3" /> Measurement Scale
                         </label>
                         <div className="flex gap-4">
@@ -161,8 +161,8 @@ export default function TasteTestConfigModal({ isOpen, onClose, onConfirm }: Tas
                                     key={scale}
                                     onClick={() => setConfig({ ...config, ratingScale: scale as any })}
                                     className={`w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-black border-2 transition-all ${config.ratingScale === scale
-                                        ? 'bg-slate-900 dark:bg-brand-blue border-slate-900 dark:border-brand-blue text-white hover:scale-105 shadow-xl'
-                                        : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-500 hover:border-slate-200 dark:hover:border-slate-700'}`}
+                                        ? 'bg-slate-900 dark:bg-primary border-slate-900 dark:border-primary text-white hover:scale-105 shadow-xl'
+                                        : 'bg-surface border-line/80 dark:border-line/10 text-ink-subtle hover:border-slate-200 dark:hover:border-slate-700'}`}
                                 >
                                     {scale}
                                 </button>
@@ -171,9 +171,9 @@ export default function TasteTestConfigModal({ isOpen, onClose, onConfirm }: Tas
                     </section>
 
                     {/* Brands Management Enhanced */}
-                    <section className="space-y-8 bg-slate-50/50 dark:bg-slate-900/50 p-8 rounded-[2.5rem] border border-dashed border-slate-200 dark:border-slate-800 transition-colors">
+                    <section className="space-y-8 bg-slate-50/50 dark:bg-slate-900/50 p-8 rounded-[2.5rem] border border-dashed border-line/80 dark:border-line/10 transition-colors">
                         <div className="flex flex-col gap-6">
-                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1 transition-colors">
+                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-ink-subtle ml-1 transition-colors">
                                 <Palette className="w-3 h-3" /> Managed Brands
                             </label>
 
@@ -185,16 +185,16 @@ export default function TasteTestConfigModal({ isOpen, onClose, onConfirm }: Tas
                                         onChange={e => setBrandInput(e.target.value)}
                                         onKeyPress={e => e.key === 'Enter' && handleAddBrand()}
                                         placeholder="Add brand name..."
-                                        className="w-full bg-white dark:bg-slate-950 border-2 border-transparent focus:border-brand-blue/30 rounded-2xl px-6 py-4 text-sm font-bold outline-none transition-all dark:text-white dark:placeholder:text-slate-800 shadow-sm"
+                                        className="w-full bg-surface border-2 border-transparent focus:border-primary/30 rounded-2xl px-6 py-4 text-sm font-bold outline-none transition-all dark:text-white dark:placeholder:text-slate-800 shadow-sm"
                                     />
 
                                     <div className="flex items-center gap-6 px-2">
                                         <button
                                             onClick={() => setBrandRole(brandRole === 'internal' ? 'competitor' : 'internal')}
-                                            className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all ${brandRole === 'internal' ? 'text-brand-blue' : 'text-slate-400'}`}
+                                            className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all ${brandRole === 'internal' ? 'text-primary-soft' : 'text-slate-400'}`}
                                         >
-                                            <div className={`w-10 h-5 rounded-full relative transition-all ${brandRole === 'internal' ? 'bg-brand-blue/20' : 'bg-slate-200 dark:bg-slate-800'}`}>
-                                                <div className={`absolute top-1 w-3 h-3 rounded-full transition-all ${brandRole === 'internal' ? 'right-1 bg-brand-blue' : 'left-1 bg-slate-400'}`} />
+                                            <div className={`w-10 h-5 rounded-full relative transition-all ${brandRole === 'internal' ? 'bg-primary/20' : 'bg-slate-200 dark:bg-slate-800'}`}>
+                                                <div className={`absolute top-1 w-3 h-3 rounded-full transition-all ${brandRole === 'internal' ? 'right-1 bg-primary' : 'left-1 bg-slate-400'}`} />
                                             </div>
                                             Internal Brand
                                         </button>
@@ -204,7 +204,7 @@ export default function TasteTestConfigModal({ isOpen, onClose, onConfirm }: Tas
                                 <button
                                     onClick={handleAddBrand}
                                     disabled={!brandInput.trim()}
-                                    className="bg-brand-blue text-white px-10 rounded-2xl font-black text-sm shadow-xl shadow-brand-blue/30 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+                                    className="bg-primary text-white px-10 rounded-2xl font-black text-sm shadow-xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
                                 >
                                     Add Brand
                                 </button>
@@ -217,7 +217,7 @@ export default function TasteTestConfigModal({ isOpen, onClose, onConfirm }: Tas
                                 <motion.div
                                     layout
                                     key={brand.name}
-                                    className="flex items-center gap-3 bg-brand-blue/10 text-brand-blue px-6 py-4 rounded-2xl border border-brand-blue/20 group"
+                                    className="flex items-center gap-3 bg-primary/10 text-primary-soft px-6 py-4 rounded-2xl border border-primary/20 group"
                                 >
                                     <div className="flex flex-col">
                                         <span className="text-[8px] font-black uppercase tracking-tighter opacity-60">Internal</span>
@@ -232,11 +232,11 @@ export default function TasteTestConfigModal({ isOpen, onClose, onConfirm }: Tas
                                 <motion.div
                                     layout
                                     key={brand.name}
-                                    className="flex items-center gap-3 bg-slate-50 dark:bg-slate-900 px-6 py-4 rounded-2xl border border-slate-100 dark:border-slate-800 group"
+                                    className="flex items-center gap-3 bg-surface-raised px-6 py-4 rounded-2xl border border-line/80 dark:border-line/10 group"
                                 >
                                     <div className="flex flex-col">
                                         <span className="text-[8px] font-black uppercase tracking-tighter opacity-40">Competitor</span>
-                                        <span className="font-bold text-sm tracking-tight text-slate-700 dark:text-slate-300">{brand.name}</span>
+                                        <span className="font-bold text-sm tracking-tight text-ink-muted">{brand.name}</span>
                                     </div>
                                     <button onClick={() => handleRemoveBrand(brand.name, 'competitor')} className="hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
                                         <X className="w-4 h-4" />
@@ -248,7 +248,7 @@ export default function TasteTestConfigModal({ isOpen, onClose, onConfirm }: Tas
 
                     {/* Attribute Management */}
                     <section className="space-y-6">
-                        <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1 transition-colors">
+                        <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-ink-subtle ml-1 transition-colors">
                             <Sparkles className="w-3 h-3" /> Research Attributes
                         </label>
                         <div className="flex gap-4">
@@ -258,18 +258,18 @@ export default function TasteTestConfigModal({ isOpen, onClose, onConfirm }: Tas
                                 onChange={e => setAttrInput(e.target.value)}
                                 onKeyPress={e => e.key === 'Enter' && handleAddAttribute()}
                                 placeholder="Add attribute (e.g. Aroma)..."
-                                className="flex-1 bg-slate-50 dark:bg-slate-900 border-2 border-transparent focus:border-brand-blue/30 focus:bg-white dark:focus:bg-slate-800 rounded-2xl px-6 py-4 text-sm font-bold outline-none transition-all dark:text-white dark:placeholder:text-slate-700 font-display"
+                                className="flex-1 bg-surface-raised border-2 border-transparent focus:border-primary/30 focus:bg-white dark:focus:bg-slate-800 rounded-2xl px-6 py-4 text-sm font-bold outline-none transition-all dark:text-white dark:placeholder:text-slate-700 font-display"
                             />
                             <button
                                 onClick={handleAddAttribute}
-                                className="bg-brand-blue text-white px-8 rounded-2xl font-black text-sm shadow-lg shadow-brand-blue/20 hover:scale-105 transition-all"
+                                className="bg-primary text-white px-8 rounded-2xl font-black text-sm shadow-lg shadow-primary/20 hover:scale-105 transition-all"
                             >
                                 Add
                             </button>
                         </div>
                         <div className="flex flex-wrap gap-2">
                             {Object.keys(config.attributes).map(attr => (
-                                <span key={attr} className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-4 py-2 rounded-xl text-sm font-bold border border-slate-200 dark:border-slate-700 transition-colors">
+                                <span key={attr} className="flex items-center gap-2 bg-surface-sunken text-ink-muted px-4 py-2 rounded-xl text-sm font-bold border border-slate-200 dark:border-slate-700 transition-colors">
                                     {attr}
                                     <button onClick={() => handleRemoveAttribute(attr)} className="hover:text-red-500 transition-colors"><X className="w-4 h-4" /></button>
                                 </span>
@@ -279,17 +279,17 @@ export default function TasteTestConfigModal({ isOpen, onClose, onConfirm }: Tas
                 </div>
 
                 {/* Footer */}
-                <div className="p-10 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-end gap-5 transition-colors">
+                <div className="p-10 border-t border-line/80 dark:border-line/10 bg-surface flex justify-end gap-5 transition-colors">
                     <button
                         onClick={onClose}
-                        className="px-8 py-4 text-sm font-bold text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-all"
+                        className="px-8 py-4 text-sm font-bold text-ink-subtle hover:text-slate-600 dark:hover:text-slate-300 transition-all"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={() => onConfirm(config)}
                         disabled={!config.category || (config.internal_brands_data.length === 0 && config.competitor_brands_data.length === 0) || Object.keys(config.attributes).length === 0}
-                        className="btn-premium flex items-center gap-3 bg-slate-900 dark:bg-brand-blue hover:bg-black dark:hover:bg-brand-blue/80 text-white px-10 py-5 rounded-[2rem] shadow-2xl shadow-slate-900/20 dark:shadow-brand-blue/20 disabled:opacity-30 transition-all font-black text-sm border-none"
+                        className="btn-premium flex items-center gap-3 bg-slate-900 dark:bg-primary hover:bg-black dark:hover:bg-primary/80 text-white px-10 py-5 rounded-[2rem] shadow-2xl shadow-slate-900/20 dark:shadow-primary/20 disabled:opacity-30 transition-all font-black text-sm border-none"
                     >
                         Blueprint Schema
                         <ChevronRight className="w-5 h-5" />

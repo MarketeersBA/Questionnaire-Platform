@@ -84,7 +84,7 @@ export default function AnalyticsDashboard() {
                             <ArrowLeft className="w-4 h-4" />
                         </Link>
                         <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
-                            Intelligence <span className="text-brand-blue">Layer</span>
+                            Intelligence <span className="text-primary-soft">Layer</span>
                         </div>
                     </div>
                     <h1 className="text-4xl font-display font-black tracking-tight text-slate-900">
@@ -94,9 +94,9 @@ export default function AnalyticsDashboard() {
 
                 <div className="flex flex-wrap items-center gap-4">
                     <div className="relative group">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-brand-blue transition-colors" />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-primary-soft transition-colors" />
                         <select
-                            className="pl-11 pr-10 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-900 focus:outline-none focus:border-brand-blue/50 transition-all appearance-none cursor-pointer shadow-sm"
+                            className="pl-11 pr-10 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-900 focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer shadow-sm"
                             value={surveyId}
                             onChange={(e) => window.location.href = `/analytics/${e.target.value}`}
                         >
@@ -108,7 +108,7 @@ export default function AnalyticsDashboard() {
 
                     <button
                         onClick={fetchData}
-                        className="p-3 bg-white border border-slate-200 rounded-2xl hover:bg-slate-50 transition-all text-slate-400 hover:text-brand-blue shadow-sm"
+                        className="p-3 bg-white border border-slate-200 rounded-2xl hover:bg-slate-50 transition-all text-slate-400 hover:text-primary-soft shadow-sm"
                     >
                         <RefreshCcw className="w-5 h-5" />
                     </button>
@@ -118,7 +118,7 @@ export default function AnalyticsDashboard() {
                             <button
                                 key={d}
                                 onClick={() => setDays(d)}
-                                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${days === d ? 'bg-brand-blue text-white shadow-md' : 'text-slate-500 hover:text-slate-900'}`}
+                                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${days === d ? 'bg-primary text-white shadow-md' : 'text-slate-500 hover:text-slate-900'}`}
                             >
                                 {d}D
                             </button>
@@ -128,7 +128,7 @@ export default function AnalyticsDashboard() {
                     <div className="flex gap-2">
                         <button
                             onClick={() => handleExport('ba-pf')}
-                            className="flex items-center gap-2 px-5 py-3 bg-brand-blue text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-brand-blue/90 transition-all shadow-lg hover:shadow-brand-blue/20"
+                            className="flex items-center gap-2 px-5 py-3 bg-primary text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-primary/90 transition-all shadow-lg hover:shadow-primary/20"
                         >
                             <Download className="w-4 h-4" />
                             BA & PF Export
@@ -199,11 +199,11 @@ export default function AnalyticsDashboard() {
                     <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-xl">
                         <div className="flex items-center justify-between mb-10 text-left">
                             <div>
-                                <h3 className="text-xl font-display font-black text-slate-900">Performance <span className="text-brand-blue">Velocity</span></h3>
+                                <h3 className="text-xl font-display font-black text-slate-900">Performance <span className="text-primary-soft">Velocity</span></h3>
                                 <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Daily interaction metrics</p>
                             </div>
-                            <div className="p-3 rounded-xl bg-brand-blue/10">
-                                <TrendingUp className="w-5 h-5 text-brand-blue" />
+                            <div className="p-3 rounded-xl bg-primary/10">
+                                <TrendingUp className="w-5 h-5 text-primary-soft" />
                             </div>
                         </div>
                         <div className="h-[400px]">
@@ -213,7 +213,7 @@ export default function AnalyticsDashboard() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
                         <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 flex flex-col items-center justify-center text-center shadow-lg">
-                            <div className="p-4 rounded-full bg-brand-blue/5 text-brand-blue mb-6 border border-brand-blue/10">
+                            <div className="p-4 rounded-full bg-primary/5 text-primary-soft mb-6 border border-primary/10">
                                 <MousePointer2 className="w-8 h-8" />
                             </div>
                             <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Participant Pulse</p>
@@ -221,11 +221,11 @@ export default function AnalyticsDashboard() {
                             <p className="text-xs text-slate-500 font-medium mt-3">Avg. Attention Duration</p>
                         </div>
                         <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 flex flex-col items-center justify-center text-center shadow-lg">
-                            <div className="p-4 rounded-full bg-brand-red/5 text-brand-red mb-6 border border-brand-red/10">
+                            <div className="p-4 rounded-full bg-accent/5 text-accent-soft mb-6 border border-accent/10">
                                 <Globe className="w-8 h-8" />
                             </div>
                             <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Dropout Index</p>
-                            <p className="text-4xl font-display font-black text-brand-red">{(funnelData?.drop_off_rate || 0).toFixed(1)}%</p>
+                            <p className="text-4xl font-display font-black text-accent-soft">{(funnelData?.drop_off_rate || 0).toFixed(1)}%</p>
                             <p className="text-xs text-slate-500 font-medium mt-3">Pre-submission Abandonment</p>
                         </div>
                     </div>
@@ -233,14 +233,14 @@ export default function AnalyticsDashboard() {
 
                 <div className="space-y-8 text-left">
                     <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-xl">
-                        <h3 className="text-xl font-display font-black mb-8 text-slate-900">Conversion <span className="text-brand-blue">Funnel</span></h3>
+                        <h3 className="text-xl font-display font-black mb-8 text-slate-900">Conversion <span className="text-primary-soft">Funnel</span></h3>
                         <FunnelChart data={funnelData} />
                     </div>
 
                     <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-xl">
                         <div className="flex items-center justify-between mb-8">
-                            <h3 className="text-xl font-display font-black text-slate-900">Security <span className="text-brand-red">Audit</span></h3>
-                            <ShieldAlert className="w-5 h-5 text-brand-red animate-pulse" />
+                            <h3 className="text-xl font-display font-black text-slate-900">Security <span className="text-accent-soft">Audit</span></h3>
+                            <ShieldAlert className="w-5 h-5 text-accent-soft animate-pulse" />
                         </div>
                         <OrphanAuditTable data={orphanData} />
                     </div>
@@ -252,16 +252,16 @@ export default function AnalyticsDashboard() {
 
 function AnalyticsCard({ label, value, icon: Icon, trend, color }: any) {
     const colors: any = {
-        blue: 'text-brand-blue bg-brand-blue/5 border-brand-blue/10',
+        blue: 'text-primary-soft bg-primary/5 border-primary/10',
         cyan: 'text-brand-cyan bg-brand-cyan/5 border-brand-cyan/10',
-        red: 'text-brand-red bg-brand-red/5 border-brand-red/10',
+        red: 'text-accent-soft bg-accent/5 border-accent/10',
         orange: 'text-orange-500 bg-orange-50 border-orange-100',
     };
 
     const dotColors: any = {
-        blue: 'bg-brand-blue',
+        blue: 'bg-primary',
         cyan: 'bg-brand-cyan',
-        red: 'bg-brand-red',
+        red: 'bg-accent',
         orange: 'bg-orange-500',
     };
 
@@ -269,7 +269,7 @@ function AnalyticsCard({ label, value, icon: Icon, trend, color }: any) {
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-[2.5rem] p-8 border border-slate-100 hover:border-brand-blue/30 transition-all cursor-default group shadow-sm hover:shadow-xl text-left"
+            className="bg-white rounded-[2.5rem] p-8 border border-slate-100 hover:border-primary/30 transition-all cursor-default group shadow-sm hover:shadow-xl text-left"
         >
             <div className="flex justify-between items-start mb-6">
                 <div className={`p-4 rounded-2xl ${colors[color] || colors.blue} border group-hover:scale-110 transition-transform`}>
@@ -277,7 +277,7 @@ function AnalyticsCard({ label, value, icon: Icon, trend, color }: any) {
                 </div>
                 <div className="text-right">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{label}</p>
-                    <p className="text-3xl font-display font-black text-slate-900 group-hover:text-brand-blue transition-colors">{value.toLocaleString()}</p>
+                    <p className="text-3xl font-display font-black text-slate-900 group-hover:text-primary-soft transition-colors">{value.toLocaleString()}</p>
                 </div>
             </div>
             <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 bg-slate-50 w-fit px-3 py-1.5 rounded-full border border-slate-100 shadow-inner">

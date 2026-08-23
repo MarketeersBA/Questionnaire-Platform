@@ -25,7 +25,7 @@ class WebReportSerializer:
             "TasteTestPreferenceSlide": cls._serialize_preference,
             "TasteTestImportanceSlide": cls._serialize_scatter,
             "TasteTestPurchaseIntentSlide": cls._serialize_horizontal_bar,
-            "TasteTestNpsSlide": cls._serialize_horizontal_bar,
+            "TasteTestNpsSlide": cls._serialize_nps_gauge,
             "TasteTestSubFeaturesSlide": cls._serialize_horizontal_bar,
             "TasteTestOverallFeaturesSlide": cls._serialize_overall_features,
             "TasteTestLikesSlide": lambda c, p: cls._serialize_open_end(c, p, "Likes"),
@@ -163,6 +163,31 @@ class WebReportSerializer:
             
         data = {"labels": labels, "datasets": datasets}
         return [cls._create_payload(concept, "horizontal_bar", data)]
+
+    @classmethod
+    def _serialize_nps_gauge(cls, concept: DynamicSlideConcept, payload: pd.DataFrame) -> List[ChartPayload]:
+        """One gauge chart per brand — mirrors the live report's NpsGauge component
+        (chart_type='gauge'), rather than the combined-bar view other horizontal_bar
+        slides use. DataFrame layout: rows are NPS_Score/Promoters_Pct/Passives_Pct/
+        Detractors_Pct, columns are brands."""
+        payloads: List[ChartPayload] = []
+        for brand in payload.columns:
+            series = payload[brand]
+            payloads.append(ChartPayload(
+                chart_id=f"{concept.template_slide_title}_{brand}".strip("_").replace(" ", "_").lower(),
+                chart_type="gauge",
+                title=f"{brand} NPS",
+                subtitle=getattr(concept, "template_slide_subtitle", None),
+                data={
+                    "nps": float(series.get("NPS_Score", 0)),
+                    "brand": brand,
+                    "promoters_pct": float(series.get("Promoters_Pct", 0)),
+                    "passives_pct": float(series.get("Passives_Pct", 0)),
+                    "detractors_pct": float(series.get("Detractors_Pct", 0)),
+                },
+                brands=[brand],
+            ))
+        return payloads
 
     @classmethod
     def _serialize_open_end(cls, concept: DynamicSlideConcept, payload: pd.DataFrame, oe_type: str) -> List[ChartPayload]:

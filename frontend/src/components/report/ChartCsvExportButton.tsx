@@ -96,10 +96,10 @@ export function ChartCsvExportButton({ chart, className = '' }: ChartCsvExportBu
                 'px-2.5 py-1 rounded-md transition-all duration-200',
                 'border',
                 assessment.canExport
-                    ? 'border-slate-200 dark:border-white/10 bg-slate-100/80 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:bg-brand-blue/10 hover:border-brand-blue/30 hover:text-brand-blue'
-                    : 'border-slate-200/60 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02] text-slate-400 dark:text-slate-600 cursor-not-allowed',
+                    ? 'border-line/80 dark:border-line/10 bg-slate-100/80 dark:bg-white/5 text-ink-muted hover:bg-primary/10 hover:border-primary/30 hover:text-primary-soft'
+                    : 'border-slate-200/60 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02] text-ink-subtle cursor-not-allowed',
                 'disabled:opacity-60 disabled:pointer-events-none',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/40',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
                 className,
             ].join(' ')}
         >

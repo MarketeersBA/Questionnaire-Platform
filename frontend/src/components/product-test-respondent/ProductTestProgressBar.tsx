@@ -32,12 +32,12 @@ export default function ProductTestProgressBar({
                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
                     {isArabic ? 'تقدم التقييم' : 'Evaluation Progress'}
                 </span>
-                <span className="text-[10px] font-black text-brand-blue">{progressPercent}%</span>
+                <span className="text-[10px] font-black text-primary-soft">{progressPercent}%</span>
             </div>
 
-            <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+            <div className="h-2 bg-surface-sunken rounded-full overflow-hidden">
                 <div
-                    className="h-full bg-gradient-to-r from-brand-blue via-brand-accent to-brand-cyan transition-all duration-700 ease-out"
+                    className="h-full bg-gradient-to-r from-primary via-brand-accent to-brand-cyan transition-all duration-700 ease-out"
                     style={{ width: `${progressPercent}%` }}
                 />
             </div>
@@ -53,10 +53,10 @@ export default function ProductTestProgressBar({
                             key={phase.timing}
                             className={`flex-1 min-w-[4.5rem] px-3 py-2 rounded-xl border text-center transition-all ${
                                 isActive
-                                    ? 'bg-brand-blue/10 border-brand-blue/30 text-brand-blue shadow-sm'
+                                    ? 'bg-primary/10 border-primary/30 text-primary-soft shadow-sm'
                                     : isDone
                                       ? 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200/60 text-emerald-700 dark:text-emerald-400'
-                                      : 'bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 text-slate-400'
+                                      : 'bg-surface-raised/50 border-line/80 dark:border-line/10 text-slate-400'
                             }`}
                         >
                             <p className="text-[9px] font-black uppercase tracking-wider">{short}</p>

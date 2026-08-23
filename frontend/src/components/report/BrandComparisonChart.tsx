@@ -12,6 +12,7 @@ import {
 import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { chartChrome } from '../../constants/brandPalette';
 import { buildBrandComparisonChartRows, resolveBrandComparisonSeries } from '../../utils/brandComparisonSeries';
 
 interface BrandComparisonChartProps {
@@ -22,6 +23,7 @@ interface BrandComparisonChartProps {
 
 export function BrandComparisonChart({ data, isFocusMode, presentationHeight }: BrandComparisonChartProps) {
     const { theme } = useTheme();
+    const chrome = chartChrome(theme === 'dark');
     const isDark = theme === 'dark';
     const [visibleBrands, setVisibleBrands] = useState<string[]>([]);
 
@@ -69,8 +71,8 @@ export function BrandComparisonChart({ data, isFocusMode, presentationHeight }: 
                                 className={`
                                     flex items-center gap-2 px-4 py-2 rounded-xl border transition-all duration-300
                                     ${isVisible
-                                        ? 'bg-brand-blue/10 border-brand-blue/20 text-brand-blue shadow-[0_0_15px_rgba(59,130,246,0.1)]'
-                                        : 'bg-transparent border-slate-200 dark:border-white/5 text-slate-400 opacity-40'}
+                                        ? 'bg-primary/10 border-primary/20 text-primary-soft shadow-[0_0_15px_rgba(59,130,246,0.1)]'
+                                        : 'bg-transparent border-line/80 dark:border-line/10 text-slate-400 opacity-40'}
                                 `}
                             >
                                 <div
@@ -137,7 +139,7 @@ export function BrandComparisonChart({ data, isFocusMode, presentationHeight }: 
                             />
                             <Tooltip
                                 cursor={{ fill: 'rgba(255,255,255,0.03)' }}
-                                contentStyle={{ borderRadius: '16px', border: 'none', backgroundColor: '#0f172a', color: '#fff' }}
+                                contentStyle={{ borderRadius: '14px', border: `1px solid ${chrome.tooltipBorder}`, backgroundColor: chrome.tooltipBg, color: chrome.label, fontWeight: 700 }}
                                 formatter={(val: number) => [`${val}%`, 'Intent T2B%']}
                             />
                             <Bar
@@ -187,7 +189,7 @@ export function BrandComparisonChart({ data, isFocusMode, presentationHeight }: 
                             />
                             <Tooltip
                                 cursor={{ fill: 'rgba(255,255,255,0.03)' }}
-                                contentStyle={{ borderRadius: '16px', border: 'none', backgroundColor: '#0f172a', color: '#fff' }}
+                                contentStyle={{ borderRadius: '14px', border: `1px solid ${chrome.tooltipBorder}`, backgroundColor: chrome.tooltipBg, color: chrome.label, fontWeight: 700 }}
                                 formatter={(val: number) => [val.toFixed(2), 'Affinity Score']}
                             />
                             <Bar

@@ -46,7 +46,7 @@ export default function OnboardingTooltip({ id, title, description, position = '
                         className={`absolute z-[100] w-80 ${posClasses[position]}`}
                     >
                         <div className="bg-slate-900 dark:bg-slate-950 border border-slate-700/50 dark:border-slate-800 text-white p-5 rounded-3xl shadow-2xl relative overflow-hidden group transition-colors">
-                            <div className="absolute inset-0 bg-brand-blue/10 dark:bg-brand-blue/5 blur-xl opacity-50 pointer-events-none" />
+                            <div className="absolute inset-0 bg-primary/10 dark:bg-primary/5 blur-xl opacity-50 pointer-events-none" />
 
                             <button
                                 onClick={handleDismiss}
@@ -56,17 +56,17 @@ export default function OnboardingTooltip({ id, title, description, position = '
                             </button>
 
                             <div className="flex items-start gap-4 relative z-10">
-                                <div className="p-2.5 bg-brand-blue/20 dark:bg-brand-blue/10 text-brand-blue rounded-xl shrink-0 mt-0.5 border border-brand-blue/20 dark:border-brand-blue/30 transition-colors">
+                                <div className="p-2.5 bg-primary/20 dark:bg-primary/10 text-primary-soft rounded-xl shrink-0 mt-0.5 border border-primary/20 dark:border-primary/30 transition-colors">
                                     <Sparkles className="w-5 h-5" />
                                 </div>
                                 <div className="pr-6">
                                     <h4 className="font-black font-display text-base mb-1.5 text-white">{title}</h4>
-                                    <p className="text-xs text-slate-400 dark:text-slate-500 leading-relaxed font-medium transition-colors">{description}</p>
+                                    <p className="text-xs text-ink-subtle leading-relaxed font-medium transition-colors">{description}</p>
                                 </div>
                             </div>
 
                             <div className="mt-5 flex justify-end relative z-10">
-                                <button onClick={handleDismiss} className="px-4 py-2 rounded-xl bg-brand-blue/20 dark:bg-brand-blue/10 text-brand-blue text-[10px] font-black uppercase tracking-widest hover:bg-brand-blue hover:text-white transition-all border border-brand-blue/20 dark:border-brand-blue/30">
+                                <button onClick={handleDismiss} className="px-4 py-2 rounded-xl bg-primary/20 dark:bg-primary/10 text-primary-soft text-[10px] font-black uppercase tracking-widest hover:bg-primary hover:text-white transition-all border border-primary/20 dark:border-primary/30">
                                     Got it
                                 </button>
                             </div>

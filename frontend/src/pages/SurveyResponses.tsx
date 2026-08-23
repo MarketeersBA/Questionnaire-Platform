@@ -26,14 +26,14 @@ function ExclusionModal({ isOpen, onClose, onConfirm, currentReason = '' }: any)
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-2xl p-8 max-w-md w-full"
+                className="bg-surface rounded-[2.5rem] border border-line/80 dark:border-line/10 shadow-2xl p-8 max-w-md w-full"
             >
                 <div className="flex items-center gap-4 mb-6">
                     <div className="w-12 h-12 rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-500">
                         <AlertTriangle size={24} />
                     </div>
                     <div>
-                        <h3 className="text-xl font-display font-black text-slate-900 dark:text-white">Flag for Removal</h3>
+                        <h3 className="text-xl font-display font-black text-ink">Flag for Removal</h3>
                         <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-0.5">Response Quality Control</p>
                     </div>
                 </div>
@@ -45,7 +45,7 @@ function ExclusionModal({ isOpen, onClose, onConfirm, currentReason = '' }: any)
                             value={reason}
                             onChange={(e) => setReason(e.target.value)}
                             placeholder="e.g., Short duration, gibberish audio, duplicate respondent..."
-                            className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500/50 outline-none h-32 resize-none transition-all"
+                            className="w-full bg-surface-raised border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500/50 outline-none h-32 resize-none transition-all"
                         />
                     </div>
                     <div className="bg-amber-50 dark:bg-amber-950/20 rounded-2xl p-4 border border-amber-200 dark:border-amber-900/30 flex gap-3 text-amber-700 dark:text-amber-400">
@@ -59,7 +59,7 @@ function ExclusionModal({ isOpen, onClose, onConfirm, currentReason = '' }: any)
                 <div className="flex gap-3 mt-8">
                     <button
                         onClick={onClose}
-                        className="flex-1 px-6 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all"
+                        className="flex-1 px-6 py-3 rounded-2xl bg-surface-sunken text-ink-muted font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all"
                     >
                         Cancel
                     </button>
@@ -101,7 +101,7 @@ function RenderAnswerValue({ value, questionMap, labelMap, surveyId }: { value: 
             return (
                 <div className="flex flex-wrap gap-1.5">
                     {value.map((v, i) => (
-                        <span key={i} className="px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                        <span key={i} className="px-2 py-0.5 rounded-lg bg-surface-sunken text-[10px] font-bold text-ink-muted border border-slate-200 dark:border-slate-700">
                             {typeof v === 'object' && v && 'otherText' in v ? (v as any).otherText : String(v)}
                         </span>
                     ))}
@@ -120,29 +120,29 @@ function RenderAnswerValue({ value, questionMap, labelMap, surveyId }: { value: 
                         const label = String(rawLabel).replace(/_/g, ' ');
 
                         return (
-                            <div key={key} className="p-3 bg-white dark:bg-slate-900 shadow-sm rounded-2xl border border-slate-100 dark:border-slate-800 hover:border-brand-blue/30 transition-colors">
-                                <div className="text-[9px] font-black uppercase tracking-widest text-brand-blue mb-2 truncate" title={label}>{label}</div>
+                            <div key={key} className="p-3 bg-surface shadow-sm rounded-2xl border border-line/80 dark:border-line/10 hover:border-primary/30 transition-colors">
+                                <div className="text-[9px] font-black uppercase tracking-widest text-primary-soft mb-2 truncate" title={label}>{label}</div>
 
                                 {Array.isArray(val) ? (
                                     <div className="flex flex-wrap gap-1.5">
                                         {val.map((b, bi) => (
-                                            <span key={bi} className="px-2 py-0.5 rounded-lg bg-slate-50 dark:bg-slate-800 text-[10px] font-bold text-slate-700 dark:text-slate-200 border border-slate-100 dark:border-slate-700">
+                                            <span key={bi} className="px-2 py-0.5 rounded-lg bg-surface-raised text-[10px] font-bold text-slate-700 dark:text-slate-200 border border-slate-100 dark:border-slate-700">
                                                 {b}
                                             </span>
                                         ))}
                                     </div>
                                 ) : typeof val === 'number' ? (
                                     <div className="flex items-center gap-2">
-                                        <div className="flex-1 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                        <div className="flex-1 h-1.5 bg-surface-sunken rounded-full overflow-hidden">
                                             <div
-                                                className="h-full bg-brand-blue"
+                                                className="h-full bg-primary"
                                                 style={{ width: `${(val / 5) * 100}%` }}
                                             />
                                         </div>
-                                        <span className="text-xs font-black text-brand-blue">{val}/5</span>
+                                        <span className="text-xs font-black text-primary-soft">{val}/5</span>
                                     </div>
                                 ) : (
-                                    <div className="text-xs font-bold text-slate-900 dark:text-white">
+                                    <div className="text-xs font-bold text-ink">
                                         {typeof val === 'object' && val ? JSON.stringify(val) : String(val)}
                                     </div>
                                 )}
@@ -189,7 +189,7 @@ const LIFECYCLE_CONFIG = {
         shortLabel: 'Pending',
         color: 'slate',
         icon: Clock,
-        bgClass: 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20',
+        bgClass: 'bg-slate-500/10 text-ink-muted border-slate-500/20',
         dotClass: 'bg-slate-400',
     },
     excluded: {
@@ -197,7 +197,7 @@ const LIFECYCLE_CONFIG = {
         shortLabel: 'Excluded',
         color: 'slate',
         icon: AlertTriangle,
-        bgClass: 'bg-slate-500/10 text-slate-400 dark:text-slate-500 border-slate-500/20 grayscale',
+        bgClass: 'bg-slate-500/10 text-ink-subtle border-slate-500/20 grayscale',
         dotClass: 'bg-slate-300',
     }
 } as const;
@@ -220,7 +220,7 @@ function StatCard({ icon: Icon, label, value, color, subtext }: any) {
         emerald: 'from-emerald-500/10 to-emerald-500/5 border-emerald-500/20 text-emerald-600 dark:text-emerald-400',
         amber: 'from-amber-500/10 to-amber-500/5 border-amber-500/20 text-amber-600 dark:text-amber-400',
         rose: 'from-rose-500/10 to-rose-500/5 border-rose-500/20 text-rose-600 dark:text-rose-400',
-        slate: 'from-slate-500/10 to-slate-500/5 border-slate-500/20 text-slate-600 dark:text-slate-400',
+        slate: 'from-slate-500/10 to-slate-500/5 border-slate-500/20 text-ink-muted',
         blue: 'from-blue-500/10 to-blue-500/5 border-blue-500/20 text-blue-600 dark:text-blue-400',
     };
     return (
@@ -254,13 +254,13 @@ function TimelineEvent({ event, timestamp, icon, isLast }: any) {
     return (
         <div className="flex gap-4">
             <div className="flex flex-col items-center">
-                <div className="w-8 h-8 rounded-xl bg-brand-blue/10 dark:bg-brand-blue/20 flex items-center justify-center text-brand-blue border border-brand-blue/20">
+                <div className="w-8 h-8 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary-soft border border-primary/20">
                     <Icon size={14} />
                 </div>
                 {!isLast && <div className="w-[2px] flex-1 bg-slate-200 dark:bg-slate-700 my-1 rounded-full" />}
             </div>
             <div className="pb-6">
-                <div className="font-black text-sm text-slate-900 dark:text-white">{event}</div>
+                <div className="font-black text-sm text-ink">{event}</div>
                 <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">
                     {timestamp ? new Date(timestamp).toLocaleString('en-US', {
                         month: 'short', day: 'numeric', year: 'numeric',
@@ -275,7 +275,7 @@ function TimelineEvent({ event, timestamp, icon, isLast }: any) {
 function AnswerSection({ title, answers, emptyMessage }: { title: string; answers: Record<string, any>; emptyMessage?: string }) {
     if (!answers || Object.keys(answers).length === 0) {
         return emptyMessage ? (
-            <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 text-center">
+            <div className="p-6 bg-surface-raised/50 rounded-2xl border border-slate-200 dark:border-slate-700 text-center">
                 <p className="text-xs font-bold text-slate-500 italic">{emptyMessage}</p>
             </div>
         ) : null;
@@ -288,14 +288,14 @@ function AnswerSection({ title, answers, emptyMessage }: { title: string; answer
 
     return (
         <div className="space-y-3">
-            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 dark:text-slate-400">{title}</h4>
+            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-muted">{title}</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {displayAnswers.map(([key, value]) => (
-                    <div key={key} className="bg-white dark:bg-slate-800/80 rounded-2xl p-4 border border-slate-100 dark:border-slate-700/50 hover:border-brand-blue/30 transition-colors">
-                        <div className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5 truncate" title={key}>
+                    <div key={key} className="bg-surface/80 rounded-2xl p-4 border border-slate-100 dark:border-slate-700/50 hover:border-primary/30 transition-colors">
+                        <div className="text-[9px] font-black uppercase tracking-widest text-ink-muted mb-1.5 truncate" title={key}>
                             {key.replace(/_/g, ' ')}
                         </div>
-                        <div className="text-sm font-bold text-slate-900 dark:text-white break-words whitespace-pre-wrap">
+                        <div className="text-sm font-bold text-ink break-words whitespace-pre-wrap">
                             <RenderAnswerValue value={value} />
                         </div>
                     </div>
@@ -318,20 +318,20 @@ function NestedCollapsible({ title, level = 1, defaultOpen = false, children, ba
     let contentClasses = "";
 
     if (level === 1) {
-        baseClasses = "bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm overflow-hidden mb-4";
+        baseClasses = "bg-surface/80 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm overflow-hidden mb-4";
         headerClasses = "p-4 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50";
         titleClasses = "text-xs font-black uppercase tracking-widest text-slate-800 dark:text-slate-200";
         contentClasses = "p-4 space-y-3 border-t border-slate-100 dark:border-slate-700/50 bg-slate-50/30 dark:bg-slate-800/30";
     } else if (level === 2) {
-        baseClasses = "bg-white dark:bg-slate-900/60 rounded-xl border border-slate-100 dark:border-slate-800 overflow-hidden";
+        baseClasses = "bg-surface/60 rounded-xl border border-line/80 dark:border-line/10 overflow-hidden";
         headerClasses = "p-3 hover:bg-slate-50 dark:hover:bg-slate-800/80";
-        titleClasses = "text-[10px] font-black uppercase tracking-widest text-brand-blue dark:text-blue-400";
+        titleClasses = "text-[10px] font-black uppercase tracking-widest text-primary-soft dark:text-blue-400";
         contentClasses = "p-3 pt-0 space-y-2";
     } else {
         // Level 3
         baseClasses = "bg-slate-50/80 dark:bg-slate-800/40 rounded-lg border border-slate-100 dark:border-slate-700/40 overflow-hidden";
         headerClasses = "p-3 hover:bg-slate-100/80 dark:hover:bg-slate-700/60";
-        titleClasses = "text-xs font-bold text-slate-700 dark:text-slate-300";
+        titleClasses = "text-xs font-bold text-ink-muted";
         contentClasses = "p-3 pt-0";
     }
 
@@ -342,10 +342,10 @@ function NestedCollapsible({ title, level = 1, defaultOpen = false, children, ba
                 className={`w-full flex items-center justify-between text-left transition-colors ${headerClasses}`}
             >
                 <div className="flex items-start sm:items-center gap-3 pr-4">
-                    {level === 3 && <span className="text-brand-blue font-black shrink-0 mt-0.5 sm:mt-0">Q:</span>}
+                    {level === 3 && <span className="text-primary-soft font-black shrink-0 mt-0.5 sm:mt-0">Q:</span>}
                     <h5 className={titleClasses}>{title}</h5>
                     {badge && (
-                        <span className="shrink-0 px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-[9px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-300">
+                        <span className="shrink-0 px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-[9px] font-black uppercase tracking-widest text-ink-muted">
                             {badge}
                         </span>
                     )}
@@ -376,7 +376,7 @@ function NestedCollapsible({ title, level = 1, defaultOpen = false, children, ba
 function Layer2AnswerSection({ title, answers, emptyMessage, moduleSnapshots, surveyId }: any) {
     if (!answers || Object.keys(answers).length === 0) {
         return emptyMessage ? (
-            <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 text-center">
+            <div className="p-6 bg-surface-raised/50 rounded-2xl border border-slate-200 dark:border-slate-700 text-center">
                 <p className="text-xs font-bold text-slate-500 italic">{emptyMessage}</p>
             </div>
         ) : null;
@@ -461,7 +461,7 @@ function Layer2AnswerSection({ title, answers, emptyMessage, moduleSnapshots, su
 
     return (
         <div className="space-y-6">
-            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 pb-2">{title}</h4>
+            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-muted border-b border-line/80 dark:border-line/10 pb-2">{title}</h4>
 
             {/* Module answers (PF, Usage, Pricing) from snapshots */}
             {moduleSections.map((section) => (
@@ -509,7 +509,7 @@ function Layer2AnswerSection({ title, answers, emptyMessage, moduleSnapshots, su
                                         level={3}
                                         defaultOpen={true}
                                     >
-                                        <div className="flex items-start gap-3 text-sm font-black text-slate-900 dark:text-white bg-emerald-50/50 dark:bg-emerald-950/20 p-3 rounded-md border border-emerald-100 dark:border-emerald-900/30">
+                                        <div className="flex items-start gap-3 text-sm font-black text-ink bg-emerald-50/50 dark:bg-emerald-950/20 p-3 rounded-md border border-emerald-100 dark:border-emerald-900/30">
                                             <span className="text-emerald-500 font-black shrink-0">A:</span>
                                             <RenderAnswerValue
                                                 value={metric.value}
@@ -534,7 +534,7 @@ function Layer2AnswerSection({ title, answers, emptyMessage, moduleSnapshots, su
                         const titleStr = qMeta.text || key.replace(/_/g, ' ');
                         return (
                             <NestedCollapsible key={key} title={titleStr} level={3} defaultOpen={true}>
-                                <div className="flex items-start gap-3 text-sm font-black text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-900/50 p-3 rounded-md border border-slate-100 dark:border-slate-800">
+                                <div className="flex items-start gap-3 text-sm font-black text-ink bg-surface-raised/50 p-3 rounded-md border border-line/80 dark:border-line/10">
                                     <span className="text-slate-400 font-black shrink-0">A:</span>
                                     <div className="whitespace-pre-wrap flex-1">
                                         <RenderAnswerValue
@@ -553,7 +553,7 @@ function Layer2AnswerSection({ title, answers, emptyMessage, moduleSnapshots, su
 
             {/* Absolute Fallback */}
             {!hasStructuredData && (
-                <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-800 text-sm font-mono text-slate-600 dark:text-slate-400 whitespace-pre-wrap overflow-x-auto">
+                <div className="p-4 bg-surface-raised/50 rounded-2xl border border-line/80 dark:border-line/10 text-sm font-mono text-ink-muted whitespace-pre-wrap overflow-x-auto">
                     {JSON.stringify(answers, null, 2)}
                 </div>
             )}
@@ -699,12 +699,12 @@ export default function SurveyResponses() {
                 <div>
                     <Link
                         to="/surveys"
-                        className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-500 hover:text-brand-blue transition-colors mb-4"
+                        className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-500 hover:text-primary-soft transition-colors mb-4"
                     >
                         <ArrowLeft size={14} />
                         Back to Surveys
                     </Link>
-                    <h1 className="text-4xl font-display font-black tracking-tight text-slate-900 dark:text-white">
+                    <h1 className="text-4xl font-display font-black tracking-tight text-ink">
                         {overview?.company_name || 'Survey'} <span className="text-slate-400 font-light">Responses</span>
                     </h1>
                     <div className="flex items-center gap-3 mt-3">
@@ -718,7 +718,7 @@ export default function SurveyResponses() {
                             }`}>
                             {isFinished ? 'Target Reached' : surveyStatus}
                         </span>
-                        <span className="text-sm font-black text-slate-700 dark:text-slate-300">
+                        <span className="text-sm font-black text-ink-muted">
                             {overview?.respondent_count || 0} / {overview?.respondent_target || 0}
                         </span>
                     </div>
@@ -728,8 +728,8 @@ export default function SurveyResponses() {
                         to={`/surveys/${surveyId}/report`}
                         className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all
                             ${overview?.target_reached
-                                ? 'bg-brand-blue text-white shadow-lg shadow-brand-blue/20 hover:bg-blue-600 active:scale-95'
-                                : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-200 dark:border-slate-700'
+                                ? 'bg-primary text-white shadow-lg shadow-primary/20 hover:bg-blue-600 active:scale-95'
+                                : 'bg-surface-sunken text-ink-subtle cursor-not-allowed border border-slate-200 dark:border-slate-700'
                             }`}
                         onClick={(e) => {
                             if (!overview?.target_reached) {
@@ -743,7 +743,7 @@ export default function SurveyResponses() {
                     </Link>
                     <button
                         onClick={() => { fetchOverview(); fetchRespondents(true); }}
-                        className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-black text-xs uppercase tracking-widest hover:border-brand-blue/50 transition-all active:scale-95"
+                        className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-surface border border-slate-200 dark:border-slate-700 text-ink-muted font-black text-xs uppercase tracking-widest hover:border-primary/50 transition-all active:scale-95"
                     >
                         <RefreshCw size={14} />
                         Refresh
@@ -752,19 +752,19 @@ export default function SurveyResponses() {
             </div>
 
             {/* Progress Bar */}
-            <div className="bg-white dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-800 p-6 shadow-sm transition-colors">
+            <div className="bg-surface/50 rounded-3xl border border-line/80 dark:border-line/10 p-6 shadow-sm transition-colors">
                 <div className="flex items-center justify-between mb-3">
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 dark:text-slate-400">Collection Progress</span>
-                    <span className="text-sm font-black text-brand-blue">{progressPct}%</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-muted">Collection Progress</span>
+                    <span className="text-sm font-black text-primary-soft">{progressPct}%</span>
                 </div>
-                <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div className="h-3 bg-surface-sunken rounded-full overflow-hidden">
                     <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${progressPct}%` }}
                         transition={{ duration: 1, ease: 'easeOut' }}
                         className={`h-full rounded-full ${isFinished
                             ? 'bg-gradient-to-r from-emerald-500 to-emerald-400'
-                            : 'bg-gradient-to-r from-brand-blue to-blue-400'
+                            : 'bg-gradient-to-r from-primary to-blue-400'
                             }`}
                     />
                 </div>
@@ -789,14 +789,14 @@ export default function SurveyResponses() {
 
             {/* Filter Tabs + Search */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                <div className="flex items-center gap-1.5 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-1.5 w-fit shadow-sm">
+                <div className="flex items-center gap-1.5 bg-surface border border-line/80 dark:border-line/10 rounded-2xl p-1.5 w-fit shadow-sm">
                     {filterTabs.map(tab => (
                         <button
                             key={tab.key}
                             onClick={() => handleFilterChange(tab.key)}
                             className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeFilter === tab.key
-                                ? 'bg-brand-blue text-white shadow-lg shadow-brand-blue/20'
-                                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'
+                                ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                                : 'text-ink-muted hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'
                                 }`}
                         >
                             {tab.label} <span className="opacity-60 ml-0.5">({tab.count})</span>
@@ -804,29 +804,29 @@ export default function SurveyResponses() {
                     ))}
                 </div>
                 <div className="relative group flex-1 max-w-xs">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-brand-blue transition-colors" />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-primary-soft transition-colors" />
                     <input
                         type="text"
                         placeholder="Search name, phone, token..."
                         value={searchQuery}
                         onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
-                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl pl-11 pr-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:border-brand-blue/50 focus:ring-4 focus:ring-brand-blue/10 transition-all shadow-sm"
+                        className="w-full bg-surface border border-line/80 dark:border-line/10 rounded-2xl pl-11 pr-4 py-3 text-sm font-bold text-ink focus:outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all shadow-sm"
                     />
                 </div>
             </div>
 
             {/* Respondents List */}
-            <div className="bg-white dark:bg-slate-900/50 rounded-[2.5rem] border border-slate-100 dark:border-slate-800/50 overflow-hidden shadow-premium transition-colors">
+            <div className="bg-surface/50 rounded-[2.5rem] border border-line/80 dark:border-line/10 overflow-hidden shadow-premium transition-colors">
                 {loadingRespondents ? (
                     <div className="p-16 flex items-center justify-center">
-                        <RefreshCw className="w-6 h-6 animate-spin text-brand-blue" />
+                        <RefreshCw className="w-6 h-6 animate-spin text-primary-soft" />
                     </div>
                 ) : respondents.length === 0 ? (
                     <div className="p-16 text-center">
-                        <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-3xl flex items-center justify-center mx-auto mb-4">
+                        <div className="w-16 h-16 bg-surface-sunken rounded-3xl flex items-center justify-center mx-auto mb-4">
                             <Users className="w-7 h-7 text-slate-400" />
                         </div>
-                        <h3 className="font-display font-black text-lg text-slate-900 dark:text-white mb-1">No respondents found</h3>
+                        <h3 className="font-display font-black text-lg text-ink mb-1">No respondents found</h3>
                         <p className="text-sm font-bold text-slate-500">
                             {searchQuery ? 'Try adjusting your search.' : 'No one has used a survey link yet.'}
                         </p>
@@ -857,7 +857,7 @@ export default function SurveyResponses() {
                                                 ? 'bg-rose-50 dark:bg-rose-950/30 text-rose-600 border-rose-200 dark:border-rose-800/50'
                                                 : r.lifecycle_state === 'verified_incomplete'
                                                     ? 'bg-amber-50 dark:bg-amber-950/30 text-amber-600 border-amber-200 dark:border-amber-800/50'
-                                                    : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700'
+                                                    : 'bg-surface-sunken text-slate-500 border-slate-200 dark:border-slate-700'
                                             }`}>
                                             {r.respondent_name ? r.respondent_name.charAt(0).toUpperCase() : '#'}
                                         </div>
@@ -865,12 +865,12 @@ export default function SurveyResponses() {
                                         {/* Info */}
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-3">
-                                                <span className={`font-black text-sm truncate ${r.excluded ? 'text-slate-400 line-through' : 'text-slate-900 dark:text-white'}`}>
+                                                <span className={`font-black text-sm truncate ${r.excluded ? 'text-slate-400 line-through' : 'text-ink'}`}>
                                                     {r.respondent_name || 'Anonymous'}
                                                 </span>
                                                 <LifecycleBadge state={r.excluded ? 'excluded' : r.lifecycle_state} />
                                                 {r.excluded && (
-                                                    <span className="px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-[8px] font-black uppercase tracking-widest text-slate-500 border border-slate-200 dark:border-slate-700">
+                                                    <span className="px-2 py-0.5 rounded-lg bg-surface-sunken text-[8px] font-black uppercase tracking-widest text-slate-500 border border-slate-200 dark:border-slate-700">
                                                         Quality Flag
                                                     </span>
                                                 )}
@@ -938,18 +938,18 @@ export default function SurveyResponses() {
                                                 transition={{ duration: 0.3, ease: 'easeInOut' }}
                                                 className="overflow-hidden"
                                             >
-                                                <div className="px-8 pb-8 pt-2 bg-slate-50/50 dark:bg-slate-950/30 border-t border-slate-100 dark:border-slate-800/50">
+                                                <div className="px-8 pb-8 pt-2 bg-slate-50/50 dark:bg-slate-950/30 border-t border-line/80 dark:border-line/10">
                                                     {detailLoading ? (
                                                         <div className="py-12 flex items-center justify-center">
-                                                            <RefreshCw className="w-5 h-5 animate-spin text-brand-blue" />
+                                                            <RefreshCw className="w-5 h-5 animate-spin text-primary-soft" />
                                                         </div>
                                                     ) : detailData ? (
                                                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-4">
                                                             {/* Left Column — Profile + Timeline */}
                                                             <div className="lg:col-span-4 space-y-6">
                                                                 {/* Profile Card */}
-                                                                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-5 space-y-4">
-                                                                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 dark:text-slate-400">Respondent Profile</h4>
+                                                                <div className="bg-surface rounded-2xl border border-line/80 dark:border-line/10 p-5 space-y-4">
+                                                                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-muted">Respondent Profile</h4>
                                                                     <div className="space-y-3">
                                                                         {[
                                                                             { icon: User, label: 'Name', value: detailData.respondent_name },
@@ -963,20 +963,20 @@ export default function SurveyResponses() {
                                                                                 <f.icon size={14} className="text-slate-400 shrink-0" />
                                                                                 <div>
                                                                                     <div className="text-[9px] font-black uppercase tracking-widest text-slate-500">{f.label}</div>
-                                                                                    <div className="text-sm font-bold text-slate-900 dark:text-white">{f.value}</div>
+                                                                                    <div className="text-sm font-bold text-ink">{f.value}</div>
                                                                                 </div>
                                                                             </div>
                                                                         ))}
                                                                     </div>
 
-                                                                    <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                                                                    <div className="pt-2 border-t border-line/80 dark:border-line/10">
                                                                         {!detailData.excluded ? (
                                                                             <button
                                                                                 onClick={() => {
                                                                                     setModalConfig({ token: detailData.token, currentReason: '' });
                                                                                     setShowExclusionModal(true);
                                                                                 }}
-                                                                                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 text-rose-500 border border-slate-100 dark:border-slate-700 font-black text-[10px] uppercase tracking-widest hover:bg-rose-50 dark:hover:bg-rose-950/30 hover:border-rose-200 transition-all"
+                                                                                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-surface-raised text-rose-500 border border-slate-100 dark:border-slate-700 font-black text-[10px] uppercase tracking-widest hover:bg-rose-50 dark:hover:bg-rose-950/30 hover:border-rose-200 transition-all"
                                                                             >
                                                                                 <Ban size={12} />
                                                                                 Exclude Response
@@ -995,12 +995,12 @@ export default function SurveyResponses() {
 
                                                                 {/* Exclusion Reason Display */}
                                                                 {detailData.excluded && (
-                                                                    <div className="bg-slate-100 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
+                                                                    <div className="bg-surface-sunken/80 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
                                                                         <div className="flex items-center gap-2 mb-2">
                                                                             <AlertTriangle size={14} className="text-slate-500" />
                                                                             <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Exclusion Reason</h4>
                                                                         </div>
-                                                                        <p className="text-sm font-bold text-slate-700 dark:text-slate-300 italic">"{detailData.exclusion_reason || 'No reason provided'}"</p>
+                                                                        <p className="text-sm font-bold text-ink-muted italic">"{detailData.exclusion_reason || 'No reason provided'}"</p>
                                                                         {detailData.excluded_at && (
                                                                             <div className="text-[10px] font-bold text-slate-400 mt-2">
                                                                                 Excluded on {new Date(detailData.excluded_at).toLocaleDateString()}
@@ -1035,8 +1035,8 @@ export default function SurveyResponses() {
 
                                                                 {/* Timeline */}
                                                                 {detailData.timeline && detailData.timeline.length > 0 && (
-                                                                    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-5">
-                                                                        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 dark:text-slate-400 mb-4">Lifecycle Timeline</h4>
+                                                                    <div className="bg-surface rounded-2xl border border-line/80 dark:border-line/10 p-5">
+                                                                        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-muted mb-4">Lifecycle Timeline</h4>
                                                                         <div>
                                                                             {detailData.timeline.map((ev: any, i: number) => (
                                                                                 <TimelineEvent
@@ -1087,7 +1087,7 @@ export default function SurveyResponses() {
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                    <div className="flex items-center justify-between px-8 py-5 bg-slate-50/50 dark:bg-slate-950/30 border-t border-slate-100 dark:border-slate-800">
+                    <div className="flex items-center justify-between px-8 py-5 bg-slate-50/50 dark:bg-slate-950/30 border-t border-line/80 dark:border-line/10">
                         <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
                             Page {page} of {totalPages}
                         </span>
@@ -1095,14 +1095,14 @@ export default function SurveyResponses() {
                             <button
                                 disabled={page <= 1}
                                 onClick={() => setPage(p => Math.max(1, p - 1))}
-                                className="px-4 py-2 rounded-xl text-xs font-black text-slate-600 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-blue/50 disabled:opacity-40 transition-all"
+                                className="px-4 py-2 rounded-xl text-xs font-black text-slate-600 bg-surface border border-slate-200 dark:border-slate-700 hover:border-primary/50 disabled:opacity-40 transition-all"
                             >
                                 Previous
                             </button>
                             <button
                                 disabled={page >= totalPages}
                                 onClick={() => setPage(p => p + 1)}
-                                className="px-4 py-2 rounded-xl text-xs font-black text-slate-600 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-blue/50 disabled:opacity-40 transition-all"
+                                className="px-4 py-2 rounded-xl text-xs font-black text-slate-600 bg-surface border border-slate-200 dark:border-slate-700 hover:border-primary/50 disabled:opacity-40 transition-all"
                             >
                                 Next
                             </button>

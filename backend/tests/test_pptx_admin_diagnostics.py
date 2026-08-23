@@ -18,12 +18,15 @@ def test_stale_thresholds_payload():
 
 def test_extend_status_payload_for_admin():
     now = datetime.now(timezone.utc)
+    # Idle window must exceed the "capturing_charts" stale TTL (1800s default,
+    # see STAGE_STALE_TTL_SECONDS in pptx_job_state.py) for is_pptx_job_stale
+    # to actually flag this report as stale.
     report = {
         "_id": "abc",
         "survey_id": "s1",
         "pptx_status": "PROCESSING",
         "pptx_stage": "capturing_charts",
-        "pptx_last_update": now - timedelta(seconds=1000),
+        "pptx_last_update": now - timedelta(seconds=2000),
         "pptx_error": {"code": "capture_timeout", "message": "timed out"},
     }
     stale, _, _ = is_pptx_job_stale(report)

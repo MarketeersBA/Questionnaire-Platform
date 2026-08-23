@@ -51,6 +51,13 @@ export interface UseFollowUpOrchestrationResult {
   dismissFollowUpPanel: (questionId: string) => void;
   /** Dismiss in-flight / draft follow-up UI for questions leaving the current page (answers preserved). */
   suspendFollowUpsForLeavingScope: (scopeQuestionIds: string[]) => void;
+  /**
+   * Respondent-facing override (1-3) of how many follow-up rounds THIS
+   * question should probe for, set via the in-survey rounds slider. Can only
+   * lower the effective cap below the admin's configured max_rounds, never
+   * raise it — the admin ceiling always wins.
+   */
+  setRespondentRoundCap: (questionId: string, cap: number) => void;
 }
 
 export function useFollowUpOrchestration({
@@ -64,6 +71,11 @@ export function useFollowUpOrchestration({
   const inFlightTrackerRef = useRef(new FollowUpInFlightTracker());
   const debounceGateRef = useRef(new FollowUpDebounceGate());
   const voicePollRegistryRef = useRef(new VoicePollSessionRegistry());
+  const respondentRoundCapsRef = useRef<Record<string, number>>({});
+
+  const setRespondentRoundCap = useCallback((questionId: string, cap: number) => {
+    respondentRoundCapsRef.current[questionId] = cap;
+  }, []);
 
   useEffect(() => {
     followUpStateMapRef.current = followUpStateMap;
@@ -135,7 +147,11 @@ export function useFollowUpOrchestration({
       dismissFollowUpPanel(qId);
       return false;
     }
-    const maxRounds = getMaxFollowUpRounds(survey.ai_followup, questionCategory);
+    const adminMaxRounds = getMaxFollowUpRounds(survey.ai_followup, questionCategory);
+    const respondentCap = respondentRoundCapsRef.current[qId];
+    // Respondent's slider choice can only lower the effective cap below the
+    // admin's configured ceiling, never raise it.
+    const maxRounds = respondentCap ? Math.min(adminMaxRounds, respondentCap) : adminMaxRounds;
     if (!isFollowUpRoundAllowed(requestRound, maxRounds)) {
       dismissFollowUpPanel(qId);
       return false;
@@ -318,5 +334,6 @@ export function useFollowUpOrchestration({
     handleFollowUpDismiss,
     dismissFollowUpPanel,
     suspendFollowUpsForLeavingScope,
+    setRespondentRoundCap,
   };
 }

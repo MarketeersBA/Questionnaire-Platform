@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&display=swap');
+
 /* ─── Pangram Sans — Self-hosted ─────────────────────────────────────────── */
 @font-face {
   font-family: "Pangram Sans";
@@ -55,36 +57,148 @@
   font-display: swap;
 }
 
+/* ─── Cairo — Self-hosted Arabic typeface ────────────────────────────────── */
+/* Pangram Sans (above) has no Arabic glyphs, so Arabic text was silently
+   falling back to a generic system font. Cairo is used explicitly for any
+   [dir="rtl"] subtree so Arabic reads clearly and intentionally, not as a
+   fallback accident. */
+@font-face {
+  font-family: "Cairo";
+  src: url("/fonts/Cairo-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Cairo";
+  src: url("/fonts/Cairo-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Cairo";
+  src: url("/fonts/Cairo-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Cairo";
+  src: url("/fonts/Cairo-ExtraBold.woff2") format("woff2");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+
+  /* ─────────────────────────────────────────────────────────────────────
+   *  Semantic design tokens — Marketeers brand.
+   *
+   *  Every colour a page or panel needs is named by ROLE here (surface,
+   *  ink, line, accent) and re-pointed under `.dark`. Components reference
+   *  the role (`bg-surface`, `text-ink`, `border-line`) instead of pairing
+   *  a literal with a `dark:` literal, so light and dark stay in sync by
+   *  construction rather than by discipline.
+   *
+   *  The two anchors are the logo's own colours:
+   *    Lapis Blue #255E91  ·  Brand Red #CD393B
+   * ──────────────────────────────────────────────────────────────────── */
   :root {
     --brand-glow-rgb: 37, 94, 145;
     --brand-accent-rgb: 205, 57, 59;
     --brand-blue-rgb: 37, 94, 145;
+
+    /* Brand anchors (identical in both themes — they are the logo) */
+    --c-primary: 37 94 145;
+    --c-accent: 205 57 59;
+
+    /* Brand tints that must lift in dark mode to stay legible */
+    --c-primary-soft: 37 94 145;
+    --c-accent-soft: 205 57 59;
+
+    /* Surfaces: page → card → raised → sunken */
+    --c-canvas: 255 255 255;
+    --c-surface: 255 255 255;
+    --c-surface-raised: 248 250 252;
+    --c-surface-sunken: 241 245 249;
+
+    /* Chrome — the navy rail/sidebar, constant across themes */
+    /* Sidebar navy, sampled from the logo artwork itself (#08306B).
+       Identical in light and dark mode: the rail carries the brand, so it must
+       not drift with the theme. Both stops are the same value so the rail
+       renders as a flat, exact colour rather than a gradient approximation. */
+    --c-chrome: 8 48 107;
+    --c-chrome-deep: 8 48 107;
+    --c-chrome-ink: 255 255 255;
+
+    /* Ink */
+    --c-ink: 15 23 42;
+    --c-ink-muted: 71 85 105;
+    --c-ink-subtle: 100 116 139;
+    --c-ink-inverse: 255 255 255;
+
+    /* Lines */
+    --c-line: 226 232 240;
+    --c-line-strong: 203 213 225;
+
+    /* Status */
+    --c-safe: 46 125 50;
+    --c-warning: 245 131 39;
+    --c-danger: 205 57 59;
+
+    --shadow-panel: 0 1px 2px rgba(15, 23, 42, .04), 0 12px 32px -12px rgba(15, 23, 42, .10);
+  }
+
+  .dark {
+    --c-primary-soft: 78 155 214;
+    --c-accent-soft: 240 110 112;
+
+    --c-canvas: 2 6 23;
+    --c-surface: 12 20 38;
+    --c-surface-raised: 20 30 52;
+    --c-surface-sunken: 7 14 30;
+
+    /* Unchanged from light mode on purpose — see the note above. */
+    --c-chrome: 8 48 107;
+    --c-chrome-deep: 8 48 107;
+
+    --c-ink: 241 245 249;
+    --c-ink-muted: 148 163 184;
+    --c-ink-subtle: 124 140 165;
+    --c-ink-inverse: 15 23 42;
+
+    --c-line: 255 255 255;
+    /* consumed at low alpha via the `line` token utilities */
+    --c-line-strong: 255 255 255;
+
+    --shadow-panel: 0 1px 2px rgba(0, 0, 0, .4), 0 16px 40px -16px rgba(0, 0, 0, .6);
   }
 
   body {
-    background-color: #FFFFFF;
-    color: theme('colors.slate.900');
+    background-color: rgb(var(--c-canvas));
+    color: rgb(var(--c-ink));
     font-family: theme('fontFamily.sans');
     background-image:
-      radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, rgba(205, 57, 59, 0.02) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, rgba(37, 94, 145, 0.06) 0px, transparent 55%),
+      radial-gradient(at 100% 100%, rgba(205, 57, 59, 0.04) 0px, transparent 55%);
     background-attachment: fixed;
     min-height: 100vh;
-    transition: background-color 0.5s ease, color 0.5s ease;
+    transition: background-color 0.4s ease, color 0.4s ease;
   }
 
   .dark body {
-    background-color: #020617;
-    /* Deep Space */
-    color: theme('colors.slate.100');
     background-image:
-      radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.07) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, rgba(248, 113, 113, 0.05) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, rgba(37, 94, 145, 0.22) 0px, transparent 55%),
+      radial-gradient(at 100% 100%, rgba(205, 57, 59, 0.12) 0px, transparent 55%);
   }
 
   ::selection {
@@ -98,52 +212,240 @@
   h4 {
     font-family: theme('fontFamily.display');
   }
+
+  /* Arabic reads clearly with a native Arabic typeface + slightly larger
+     body size than the Latin equivalent at the same visual weight. */
+  [dir="rtl"] {
+    font-family: "Cairo", theme('fontFamily.sans');
+  }
+
+  [dir="rtl"] h1,
+  [dir="rtl"] h2,
+  [dir="rtl"] h3,
+  [dir="rtl"] h4 {
+    font-family: "Cairo", theme('fontFamily.display');
+  }
 }
 
 @layer components {
+
+  /* ── Core surfaces ──────────────────────────────────────────────────── */
+
+  /* The standard content container. Theme-aware via tokens only. */
+  .panel {
+    background-color: rgb(var(--c-surface));
+    border: 1px solid rgb(var(--c-line) / 0.9);
+    box-shadow: var(--shadow-panel);
+    border-radius: 1rem;
+  }
+
+  .dark .panel {
+    border-color: rgb(var(--c-line) / 0.08);
+  }
+
+  .panel-raised {
+    background-color: rgb(var(--c-surface-raised));
+  }
+
+  /* Dashboard/analytics card.
+     On a near-white page a white-on-white border is invisible, so the edge is
+     drawn in a light brand blue instead; dark mode keeps the faint white
+     hairline, where a blue edge would read as a glow. */
+  .card-brand {
+    background-color: rgb(var(--c-surface) / 0.72);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgb(var(--c-primary) / 0.20);
+    box-shadow:
+      0 1px 2px rgba(37, 94, 145, .04),
+      0 10px 30px -12px rgba(37, 94, 145, .10);
+  }
+
+  .dark .card-brand {
+    background-color: rgb(var(--c-surface) / 0.55);
+    border-color: rgb(var(--c-line) / 0.10);
+    box-shadow: var(--shadow-panel);
+  }
+
   .glass-card {
-    background-color: #FFFFFF;
-    border: 1px solid theme('colors.brand.border');
-    box-shadow: theme('boxShadow.glass');
+    background-color: rgb(var(--c-surface));
+    border: 1px solid rgb(var(--c-line) / 0.9);
+    box-shadow: var(--shadow-panel);
+  }
+
+  .dark .glass-card {
+    border-color: rgb(var(--c-line) / 0.08);
   }
 
   .glass-panel {
-    background-color: rgba(255, 255, 255, 0.7);
+    background-color: rgb(var(--c-surface) / 0.72);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+    border: 1px solid rgb(var(--c-line) / 0.9);
+    box-shadow: var(--shadow-panel);
   }
 
   .dark .glass-panel {
-    background-color: rgba(255, 255, 255, 0.05);
-    /* white/5 */
-    backdrop-filter: blur(12px);
-    /* backdrop-blur-md */
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: none;
+    background-color: rgb(var(--c-surface) / 0.55);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgb(var(--c-line) / 0.08);
+  }
+
+  /* ── Brand rail / sidebar ───────────────────────────────────────────── */
+
+  /* The navy chrome carries the logo and stays dark in both themes, so it
+     reads as the brand rather than as "the dark part of dark mode". */
+  .brand-rail {
+    background-color: rgb(var(--c-chrome));
+    color: rgb(var(--c-chrome-ink));
+  }
+
+  /* A single navigation row: quiet by default, blue when hovered, and
+     marked with a red logo-accent pill when active. */
+  .nav-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-radius: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: rgb(255 255 255 / 0.66);
+    transition: background-color .2s ease, color .2s ease;
+  }
+
+  .nav-item:hover {
+    background-color: rgb(255 255 255 / 0.07);
+    color: rgb(255 255 255 / 0.95);
+  }
+
+  .nav-item[data-active="true"] {
+    background-color: rgb(var(--c-primary) / 0.30);
+    color: #fff;
+  }
+
+  .nav-item[data-active="true"]::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    height: 1.25rem;
+    width: 3px;
+    transform: translateY(-50%);
+    border-radius: 9999px;
+    background-color: rgb(var(--c-accent));
+  }
+
+  /* Light-surface variant, for sidebars that sit on the page rather than
+     on the navy rail (the in-report architecture nav). */
+  .nav-item-surface {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-radius: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: rgb(var(--c-ink-muted));
+    transition: background-color .2s ease, color .2s ease;
+  }
+
+  .nav-item-surface:hover {
+    background-color: rgb(var(--c-primary) / 0.09);
+    color: rgb(var(--c-primary-soft));
+  }
+
+  .nav-item-surface[data-active="true"] {
+    background-color: rgb(var(--c-primary) / 0.12);
+    color: rgb(var(--c-primary-soft));
+  }
+
+  .nav-item-surface[data-active="true"]::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    height: 1.15rem;
+    width: 3px;
+    transform: translateY(-50%);
+    border-radius: 9999px;
+    background-color: rgb(var(--c-accent));
+  }
+
+  /* ── Buttons ────────────────────────────────────────────────────────── */
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    border-radius: 9999px;
+    padding: .55rem 1.25rem;
+    font-size: .8125rem;
+    font-weight: 700;
+    color: #fff;
+    background-color: rgb(var(--c-primary));
+    box-shadow: 0 4px 14px rgb(var(--c-primary) / .25);
+    transition: filter .2s ease, box-shadow .2s ease, transform .1s ease;
+  }
+
+  .btn-primary:hover {
+    filter: brightness(1.08);
+    box-shadow: 0 6px 20px rgb(var(--c-primary) / .40);
+  }
+
+  .btn-primary:active {
+    transform: scale(.97);
+  }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    border-radius: 9999px;
+    padding: .55rem 1.25rem;
+    font-size: .8125rem;
+    font-weight: 700;
+    color: rgb(var(--c-ink-muted));
+    border: 1px solid rgb(var(--c-line) / .9);
+    transition: background-color .2s ease, color .2s ease;
+  }
+
+  .dark .btn-ghost {
+    border-color: rgb(var(--c-line) / .12);
+  }
+
+  .btn-ghost:hover {
+    background-color: rgb(var(--c-primary) / .10);
+    color: rgb(var(--c-primary-soft));
   }
 
   .text-glow {
     text-shadow: 0 0 15px rgba(222, 124, 126, 0.5);
   }
 
+  /* Primary call-to-action. Uses the logo red, with the logo blue as the
+     gradient tail so the two brand colours read as one mark. */
   .btn-premium {
     position: relative;
     padding: 0.625rem 1.5rem;
     border-radius: 9999px;
-    font-weight: 600;
+    font-weight: 700;
     transition-property: all;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-duration: 300ms;
-    background-image: linear-gradient(to right, theme('colors.brand.accent'), #b91c1c);
-    /* to red-700 */
+    transition-duration: 250ms;
+    background-image: linear-gradient(110deg,
+        rgb(var(--c-accent)) 0%,
+        rgb(var(--c-accent)) 55%,
+        rgb(var(--c-primary)) 160%);
     color: white;
-    box-shadow: 0 4px 15px rgba(205, 57, 59, 0.2);
+    box-shadow: 0 4px 15px rgb(var(--c-accent) / 0.25);
   }
 
   .btn-premium:hover {
-    filter: brightness(1.1);
-    box-shadow: 0 0 20px rgba(205, 57, 59, 0.5);
+    filter: brightness(1.08);
+    box-shadow: 0 6px 22px rgb(var(--c-accent) / 0.45);
   }
 
   .btn-premium:active {
@@ -230,13 +532,13 @@
 }
 
 ::selection {
-  background-color: rgba(37, 94, 145, 0.1);
-  color: theme('colors.brand.blue');
+  background-color: rgb(var(--c-primary) / 0.16);
+  color: rgb(var(--c-primary));
 }
 
 .dark ::selection {
-  background-color: rgba(56, 189, 248, 0.2);
-  color: #38bdf8;
+  background-color: rgb(var(--c-primary-soft) / 0.30);
+  color: rgb(var(--c-primary-soft));
 }
 
 /* Minimalist Global Scrollbar */

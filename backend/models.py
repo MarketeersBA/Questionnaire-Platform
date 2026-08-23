@@ -645,8 +645,6 @@ class QuestionModuleBase(BaseModel):
                         f"Duplicate option values on question {question.question_id}"
                     )
 
-        return self
-
         qid_set = set(all_qids)
         for section in self.sections:
             for question in section.questions:
@@ -657,6 +655,8 @@ class QuestionModuleBase(BaseModel):
                         raise ValueError(
                             f"brand_pipeline source '{src}' not found in module {self.module_id}"
                         )
+
+        return self
         return self
 
 
@@ -1144,6 +1144,11 @@ class SurveyContextBlock(BaseModel):
     base_n: int = 0
     brand_count: int = 0
     methodology_notes: str = ""
+    # What the survey actually measured. Without these the model can only talk
+    # in generic category language, because it never learns which modules ran
+    # or which attributes respondents were asked to rate.
+    modules_used: List[str] = Field(default_factory=list)
+    measured_attributes: List[str] = Field(default_factory=list)
 
     @staticmethod
     def _as_dict(value: Any) -> Dict[str, Any]:
@@ -1310,6 +1315,76 @@ class SurveyContextBlock(BaseModel):
         return names
 
     @classmethod
+    def _resolve_modules_used(
+        cls,
+        survey_doc: Dict[str, Any],
+        *,
+        taste_config: Dict[str, Any],
+        product_config: Dict[str, Any],
+        snapshot: Dict[str, Any],
+    ) -> List[str]:
+        """Human-readable list of the question modules this survey ran."""
+        modules: List[str] = []
+
+        def _add(value: Any) -> None:
+            text = str(value or "").strip()
+            if not text:
+                return
+            label = text.replace("_", " ").strip().title()
+            if label and label not in modules:
+                modules.append(label)
+
+        for key in ("selected_modules", "modules", "enabled_modules"):
+            for source in (survey_doc, taste_config, product_config):
+                for entry in cls._as_dict(source).get(key) or []:
+                    if isinstance(entry, dict):
+                        _add(entry.get("id") or entry.get("key") or entry.get("name"))
+                    else:
+                        _add(entry)
+
+        # Product-test snapshots express modules per section instead.
+        for phase in snapshot.get("phases") or []:
+            if not isinstance(phase, dict):
+                continue
+            for section in phase.get("sections") or []:
+                if isinstance(section, dict):
+                    _add(section.get("module"))
+
+        if survey_doc.get("purchase_funnel") or taste_config.get("purchase_funnel"):
+            _add("purchase funnel")
+
+        return modules
+
+    @classmethod
+    def _resolve_measured_attributes(
+        cls,
+        survey_doc: Dict[str, Any],
+        *,
+        blueprint: Dict[str, Any],
+        taste_config: Dict[str, Any],
+    ) -> List[str]:
+        """Main attributes respondents actually rated, in survey order."""
+        attributes: List[str] = []
+
+        def _add(value: Any) -> None:
+            text = str(value or "").strip()
+            if text and text not in attributes:
+                attributes.append(text)
+
+        for entry in taste_config.get("attribute_sequence") or []:
+            if isinstance(entry, dict):
+                _add(entry.get("main_attribute"))
+
+        for name in (blueprint.get("attributes") or {}):
+            _add(name)
+
+        for entry in blueprint.get("custom_research_attributes") or []:
+            if isinstance(entry, dict):
+                _add(entry.get("main_attribute"))
+
+        return attributes
+
+    @classmethod
     def _build_methodology_notes(cls, testing_protocol: str, base_n: int, brand_count: int) -> str:
         respondent_label = "respondent" if base_n == 1 else "respondents"
         brand_label = "brand" if brand_count == 1 else "brands"
@@ -1366,6 +1441,17 @@ class SurveyContextBlock(BaseModel):
         )
         brand_count = len(brand_names)
         methodology_notes = cls._build_methodology_notes(testing_protocol, base_n, brand_count)
+        modules_used = cls._resolve_modules_used(
+            survey_doc,
+            taste_config=taste_config,
+            product_config=product_config,
+            snapshot=snapshot,
+        )
+        measured_attributes = cls._resolve_measured_attributes(
+            survey_doc,
+            blueprint=blueprint,
+            taste_config=taste_config,
+        )
 
         return cls(
             target_brand=target_brand,
@@ -1376,6 +1462,8 @@ class SurveyContextBlock(BaseModel):
             base_n=base_n,
             brand_count=brand_count,
             methodology_notes=methodology_notes,
+            modules_used=modules_used,
+            measured_attributes=measured_attributes,
         )
 
     def to_prompt_variables(self) -> Dict[str, str]:
@@ -1390,6 +1478,8 @@ class SurveyContextBlock(BaseModel):
             "base_n": str(self.base_n),
             "brand_count": str(self.brand_count),
             "methodology_notes": self.methodology_notes,
+            "modules_used": ", ".join(self.modules_used) or "Not specified",
+            "measured_attributes": ", ".join(self.measured_attributes) or "Not specified",
         }
 
 

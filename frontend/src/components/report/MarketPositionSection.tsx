@@ -95,7 +95,7 @@ export function MarketPositionSection({ data, strategicCharts = [] }: MarketPosi
                         Executive Intelligence
                     </h2>
                 </div>
-                <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+                <h3 className="text-3xl font-black text-ink tracking-tight leading-tight">
                     Strategic Command Center
                 </h3>
             </div>
@@ -124,12 +124,12 @@ export function MarketPositionSection({ data, strategicCharts = [] }: MarketPosi
                                 <h4 className={`text-6xl font-black italic tracking-tighter ${config.color}`}>
                                     {data.market_position}
                                 </h4>
-                                <p className="text-slate-600 dark:text-slate-400 font-medium text-lg leading-relaxed max-w-sm">
+                                <p className="text-ink-muted font-medium text-lg leading-relaxed max-w-sm">
                                     {config.description}
                                 </p>
                             </div>
 
-                            <div className="pt-8 border-t border-slate-200 dark:border-white/5 space-y-4">
+                            <div className="pt-8 border-t border-line/80 dark:border-line/10 space-y-4">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2 text-slate-400">
                                         <Zap className="w-4 h-4" />
@@ -162,13 +162,13 @@ export function MarketPositionSection({ data, strategicCharts = [] }: MarketPosi
                     transition={{ delay: 0.1 }}
                     className="lg:col-span-12 xl:col-span-12 2xl:col-span-7 space-y-6"
                 >
-                    <div className="glass-panel rounded-[40px] p-8 border border-slate-100 dark:border-white/5 shadow-xl bg-white/20 dark:bg-slate-900/20 h-full">
+                    <div className="glass-panel rounded-[40px] p-8 border border-line/80 dark:border-line/10 shadow-xl bg-white/20 dark:bg-slate-900/20 h-full">
                         <div className="flex items-center gap-3 mb-6">
                             <div className="p-3 bg-indigo-500/10 rounded-2xl text-indigo-500">
                                 <Users className="w-6 h-6" />
                             </div>
                             <div>
-                                <h5 className="text-xl font-black text-slate-900 dark:text-white leading-none">Core Audience Identity</h5>
+                                <h5 className="text-xl font-black text-ink leading-none">Core Audience Identity</h5>
                                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Primary Demographic & Geographic Profile</span>
                             </div>
                         </div>
@@ -187,9 +187,9 @@ export function MarketPositionSection({ data, strategicCharts = [] }: MarketPosi
 
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-2 gap-4">
                                 {data.audience_segments.map((segment, idx) => (
-                                    <div key={idx} className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 shadow-sm space-y-3">
+                                    <div key={idx} className="p-4 rounded-2xl bg-surface border border-line/80 dark:border-line/10 shadow-sm space-y-3">
                                         <div className="flex items-center justify-between">
-                                            <span className="font-black text-slate-900 dark:text-white text-xs uppercase tracking-tight">
+                                            <span className="font-black text-ink text-xs uppercase tracking-tight">
                                                 {segment.segment_name}
                                             </span>
                                             <div className="flex items-center gap-1 text-emerald-500">
@@ -197,7 +197,7 @@ export function MarketPositionSection({ data, strategicCharts = [] }: MarketPosi
                                                 <span className="text-[10px] font-black">{segment.affinity_score.toFixed(0)} AAI</span>
                                             </div>
                                         </div>
-                                        <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium leading-relaxed line-clamp-2">
+                                        <p className="text-[10px] text-ink-muted font-medium leading-relaxed line-clamp-2">
                                             {segment.rationale}
                                         </p>
                                     </div>
@@ -210,29 +210,29 @@ export function MarketPositionSection({ data, strategicCharts = [] }: MarketPosi
                 {/* 3. Deep Analysis & Strategic Intent */}
                 <div className="lg:col-span-12 grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Competitive Stance */}
-                    <div className="glass-panel rounded-[40px] p-8 border border-slate-100 dark:border-white/5 shadow-xl bg-gradient-to-br from-white/40 to-indigo-500/5 dark:from-slate-900/40 dark:to-indigo-500/5">
+                    <div className="glass-panel rounded-[40px] p-8 border border-line/80 dark:border-line/10 shadow-xl bg-gradient-to-br from-white/40 to-indigo-500/5 dark:from-slate-900/40 dark:to-indigo-500/5">
                         <div className="flex items-center gap-3 mb-6">
                             <div className="p-3 bg-rose-500/10 rounded-2xl text-rose-500 font-black italic text-sm">
                                 vs
                             </div>
                             <div>
-                                <h5 className="text-xl font-black text-slate-900 dark:text-white leading-none">Competitive Stance</h5>
+                                <h5 className="text-xl font-black text-ink leading-none">Competitive Stance</h5>
                                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Relative Market positioning</span>
                             </div>
                         </div>
-                        <p className="text-slate-700 dark:text-slate-300 font-medium text-sm leading-relaxed">
+                        <p className="text-ink-muted font-medium text-sm leading-relaxed">
                             {data.competitive_stance}
                         </p>
                     </div>
 
                     {/* Strategic Implications */}
-                    <div className="glass-panel rounded-[40px] p-8 border border-slate-100 dark:border-white/5 shadow-xl bg-gradient-to-br from-white/40 to-emerald-500/5 dark:from-slate-900/40 dark:to-emerald-500/5">
+                    <div className="glass-panel rounded-[40px] p-8 border border-line/80 dark:border-line/10 shadow-xl bg-gradient-to-br from-white/40 to-emerald-500/5 dark:from-slate-900/40 dark:to-emerald-500/5">
                         <div className="flex items-center gap-3 mb-6">
                             <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-500">
                                 <Zap className="w-6 h-6" />
                             </div>
                             <div>
-                                <h5 className="text-xl font-black text-slate-900 dark:text-white leading-none">Positioning Imperatives</h5>
+                                <h5 className="text-xl font-black text-ink leading-none">Positioning Imperatives</h5>
                                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">3 Actionable positioning insights</span>
                             </div>
                         </div>
@@ -242,7 +242,7 @@ export function MarketPositionSection({ data, strategicCharts = [] }: MarketPosi
                                     <div className="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
                                         <CheckCircle2 className="w-3 h-3 text-emerald-500" />
                                     </div>
-                                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300 leading-snug group-hover/item:text-emerald-500 transition-colors">
+                                    <span className="text-xs font-bold text-ink-muted leading-snug group-hover/item:text-emerald-500 transition-colors">
                                         {imp}
                                     </span>
                                 </li>
@@ -256,21 +256,21 @@ export function MarketPositionSection({ data, strategicCharts = [] }: MarketPosi
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="lg:col-span-12 space-y-12 mt-12 bg-slate-50 dark:bg-white/[0.01] p-10 rounded-[60px] border border-slate-200 dark:border-white/5 shadow-inner"
+                        className="lg:col-span-12 space-y-12 mt-12 bg-slate-50 dark:bg-white/[0.01] p-10 rounded-[60px] border border-line/80 dark:border-line/10 shadow-inner"
                     >
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
                             <div className="space-y-2">
-                                <div className="text-[10px] font-black text-brand-blue uppercase tracking-[0.4em]">Visual Evidence Network</div>
-                                <h4 className="text-3xl font-black text-slate-900 dark:text-white italic tracking-tighter uppercase">Positioning Visualizations</h4>
+                                <div className="text-[10px] font-black text-primary-soft uppercase tracking-[0.4em]">Visual Evidence Network</div>
+                                <h4 className="text-3xl font-black text-ink italic tracking-tighter uppercase">Positioning Visualizations</h4>
                             </div>
 
-                            <div className="flex gap-2 p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-3xl shadow-sm">
+                            <div className="flex gap-2 p-1.5 bg-surface border border-line/80 dark:border-line/10 rounded-3xl shadow-sm">
                                 {strategicCharts.map((chart) => (
                                     <button
                                         key={chart.chart_id}
                                         onClick={() => setActiveChartId(chart.chart_id)}
                                         className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${activeChartId === chart.chart_id
-                                            ? 'bg-brand-blue text-white shadow-xl scale-105'
+                                            ? 'bg-primary text-white shadow-xl scale-105'
                                             : 'text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5'
                                             }`}
                                     >

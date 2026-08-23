@@ -50,8 +50,8 @@ export default function Analytics() {
 
     if (loading) return (
         <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 transition-colors">
-            <div className="w-12 h-12 rounded-full border-2 border-t-brand-blue border-slate-100 dark:border-slate-800 animate-spin shadow-inner-soft"></div>
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">Loading Analytics</p>
+            <div className="w-12 h-12 rounded-full border-2 border-t-brand-blue border-line/80 dark:border-line/10 animate-spin shadow-inner-soft"></div>
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-ink-subtle">Loading Analytics</p>
         </div>
     );
 
@@ -77,30 +77,30 @@ export default function Analytics() {
                 <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 text-left">
                     <div>
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2.5 rounded-xl bg-brand-blue/5 text-brand-blue border border-brand-blue/10">
+                            <div className="p-2.5 rounded-xl bg-primary/5 text-primary-soft border border-primary/10">
                                 <TrendingUp className="w-5 h-5" />
                             </div>
                             <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                                <Link to="/dashboard" className="hover:text-brand-blue transition-colors">Dashboard</Link>
+                                <Link to="/dashboard" className="hover:text-primary-soft transition-colors">Dashboard</Link>
                                 <span className="text-slate-200">/</span>
-                                <span className="text-brand-blue">{survey?.company_name}</span>
+                                <span className="text-primary-soft">{survey?.company_name}</span>
                             </div>
                         </div>
-                        <h1 className="text-5xl font-display font-black tracking-tight text-slate-900 dark:text-white transition-colors">
-                            Survey <span className="text-slate-400 dark:text-slate-500 font-light italic">Analytics</span>
+                        <h1 className="text-5xl font-display font-black tracking-tight text-ink transition-colors">
+                            Survey <span className="text-ink-subtle font-light italic">Analytics</span>
                         </h1>
                     </div>
                     <div className="flex items-center gap-4">
                         <button
                             onClick={fetchData}
-                            className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-400 dark:text-slate-500 hover:text-brand-blue hover:border-brand-blue/30 transition-all shadow-premium dark:shadow-none active:scale-95"
+                            className="p-4 bg-surface border border-line/80 dark:border-line/10 rounded-2xl text-ink-subtle hover:text-primary-soft hover:border-primary/30 transition-all shadow-premium dark:shadow-none active:scale-95"
                             title="Refresh Data"
                         >
                             <RefreshCcw className="w-5 h-5" />
                         </button>
                         <Link
                             to={`/surveys/${surveyId}`}
-                            className="flex items-center gap-3 px-8 py-4 bg-brand-blue text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 transition-all shadow-xl shadow-brand-blue/20"
+                            className="flex items-center gap-3 px-8 py-4 bg-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 transition-all shadow-xl shadow-primary/20"
                         >
                             <Users className="w-5 h-5" />
                             Access Control
@@ -110,7 +110,7 @@ export default function Analytics() {
 
                 {/* Advanced Analytical Intelligence Phase 5 */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div className="lg:col-span-2 bg-gradient-to-br from-brand-blue to-[#001529] rounded-[3rem] p-10 text-white shadow-2xl shadow-brand-blue/20 relative overflow-hidden group">
+                    <div className="lg:col-span-2 bg-gradient-to-br from-primary to-[#001529] rounded-[3rem] p-10 text-white shadow-2xl shadow-primary/20 relative overflow-hidden group">
                         <div className="absolute top-0 right-0 p-12 opacity-10 group-hover:scale-110 transition-transform duration-1000">
                             <TrendingUp className="w-64 h-64 rotate-12" />
                         </div>
@@ -141,7 +141,7 @@ export default function Analytics() {
                                             console.error(e);
                                         }
                                     }}
-                                    className="px-8 py-4 bg-white text-brand-blue rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-brand-cyan hover:text-white transition-all shadow-xl active:scale-95"
+                                    className="px-8 py-4 bg-white text-primary-soft rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-brand-cyan hover:text-white transition-all shadow-xl active:scale-95"
                                 >
                                     Generate PPTX Report
                                 </button>
@@ -154,19 +154,19 @@ export default function Analytics() {
                         </div>
                     </div>
 
-                    <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[3rem] p-10 shadow-premium dark:shadow-none flex flex-col justify-between group transition-colors">
+                    <div className="bg-surface border border-line/80 dark:border-line/10 rounded-[3rem] p-10 shadow-premium dark:shadow-none flex flex-col justify-between group transition-colors">
                         <div>
-                            <h3 className="text-xl font-black font-display mb-2 text-slate-900 dark:text-white transition-colors">Data Quality Loop</h3>
-                            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-8 transition-colors">Automated Validation</p>
+                            <h3 className="text-xl font-black font-display mb-2 text-ink transition-colors">Data Quality Loop</h3>
+                            <p className="text-[10px] font-bold text-ink-subtle uppercase tracking-widest mb-8 transition-colors">Automated Validation</p>
 
                             <div className="space-y-4">
-                                <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 transition-colors">
-                                    <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase">Integrity Score</span>
+                                <div className="flex items-center justify-between p-4 rounded-2xl bg-surface-raised border border-slate-100 dark:border-slate-700 transition-colors">
+                                    <span className="text-[10px] font-black text-ink-muted uppercase">Integrity Score</span>
                                     <span className={`text-sm font-black ${survey?.quality_status?.flagged ? 'text-rose-500' : 'text-emerald-500'}`}>
                                         {survey?.quality_status?.score || 100}%
                                     </span>
                                 </div>
-                                <div className="text-[10px] text-slate-400 dark:text-slate-500 leading-relaxed italic pr-4">
+                                <div className="text-[10px] text-ink-subtle leading-relaxed italic pr-4">
                                     {survey?.quality_status?.reason || "System reports high data significance and reliable response patterns."}
                                 </div>
                             </div>
@@ -223,12 +223,12 @@ export default function Analytics() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 text-left">
 
                     {/* Trends Chart */}
-                    <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[3rem] p-10 shadow-premium dark:shadow-none relative overflow-hidden group transition-colors">
+                    <div className="bg-surface border border-line/80 dark:border-line/10 rounded-[3rem] p-10 shadow-premium dark:shadow-none relative overflow-hidden group transition-colors">
                         <div className="absolute top-0 right-0 p-8">
-                            <div className="w-24 h-24 bg-brand-blue/5 dark:bg-brand-blue/10 rounded-full blur-3xl group-hover:bg-brand-blue/10 dark:group-hover:bg-brand-blue/20 transition-all duration-1000"></div>
+                            <div className="w-24 h-24 bg-primary/5 dark:bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/10 dark:group-hover:bg-primary/20 transition-all duration-1000"></div>
                         </div>
-                        <h3 className="text-2xl font-black font-display mb-10 flex items-center gap-3 text-slate-900 dark:text-white relative z-10 transition-colors">
-                            <TrendingUp className="w-6 h-6 text-brand-blue" />
+                        <h3 className="text-2xl font-black font-display mb-10 flex items-center gap-3 text-ink relative z-10 transition-colors">
+                            <TrendingUp className="w-6 h-6 text-primary-soft" />
                             Submission Trends
                         </h3>
                         <div className="h-[350px] relative z-10">
@@ -250,7 +250,7 @@ export default function Analytics() {
                                         axisLine={false}
                                         tickLine={false}
                                         tick={{ fill: 'currentColor', fontSize: 10, fontWeight: 900 }}
-                                        className="text-slate-400 dark:text-slate-600"
+                                        className="text-ink-subtle"
                                         tickFormatter={(val) => val.split('-').slice(1).join('/')}
                                         dy={15}
                                     />
@@ -258,23 +258,23 @@ export default function Analytics() {
                                         axisLine={false}
                                         tickLine={false}
                                         tick={{ fill: 'currentColor', fontSize: 10, fontWeight: 900 }}
-                                        className="text-slate-400 dark:text-slate-600"
+                                        className="text-ink-subtle"
                                     />
                                     <Tooltip
                                         cursor={{ stroke: '#08306B', strokeWidth: 2, strokeDasharray: '5 5' }}
                                         content={({ active, payload, label }) => {
                                             if (active && payload && payload.length) {
                                                 return (
-                                                    <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200 dark:border-slate-800 p-5 rounded-2xl shadow-premium dark:shadow-none transition-colors">
-                                                        <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 border-b border-slate-100 dark:border-slate-800 pb-2">{label}</p>
+                                                    <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-line/80 dark:border-line/10 p-5 rounded-2xl shadow-premium dark:shadow-none transition-colors">
+                                                        <p className="text-[10px] font-black text-ink-subtle uppercase tracking-widest mb-3 border-b border-line/80 dark:border-line/10 pb-2">{label}</p>
                                                         <div className="space-y-2">
                                                             {payload.map((entry: any, index: number) => (
                                                                 <div key={index} className="flex items-center justify-between gap-8">
                                                                     <div className="flex items-center gap-2">
                                                                         <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color, boxShadow: `0 0 10px ${entry.color}60` }}></div>
-                                                                        <span className="text-xs font-bold text-slate-500 dark:text-slate-400 pr-5">{entry.name}</span>
+                                                                        <span className="text-xs font-bold text-ink-muted pr-5">{entry.name}</span>
                                                                     </div>
-                                                                    <span className="text-sm font-black text-slate-900 dark:text-white pr-2">{entry.value}</span>
+                                                                    <span className="text-sm font-black text-ink pr-2">{entry.value}</span>
                                                                 </div>
                                                             ))}
                                                         </div>
@@ -292,12 +292,12 @@ export default function Analytics() {
                     </div>
 
                     {/* Funnel Breakdown */}
-                    <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[3rem] p-10 shadow-premium dark:shadow-none relative group transition-colors">
+                    <div className="bg-surface border border-line/80 dark:border-line/10 rounded-[3rem] p-10 shadow-premium dark:shadow-none relative group transition-colors">
                         <div className="absolute top-0 left-0 p-8">
                             <div className="w-24 h-24 bg-brand-cyan/5 dark:bg-brand-cyan/10 rounded-full blur-3xl group-hover:bg-brand-cyan/10 dark:group-hover:bg-brand-cyan/20 transition-all duration-1000"></div>
                         </div>
-                        <h3 className="text-2xl font-black font-display mb-10 flex items-center gap-3 text-slate-900 dark:text-white relative z-10 transition-colors">
-                            <Filter className="w-6 h-6 text-brand-blue" />
+                        <h3 className="text-2xl font-black font-display mb-10 flex items-center gap-3 text-ink relative z-10 transition-colors">
+                            <Filter className="w-6 h-6 text-primary-soft" />
                             Conversion Funnel
                         </h3>
                         <div className="h-[350px] relative z-10 flex flex-col items-center justify-center">
@@ -310,9 +310,9 @@ export default function Analytics() {
                                         content={({ active, payload, label }) => {
                                             if (active && payload && payload.length) {
                                                 return (
-                                                    <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200 dark:border-slate-800 p-5 rounded-2xl shadow-premium dark:shadow-none transition-colors">
-                                                        <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">{label}</p>
-                                                        <p className="text-lg font-black text-slate-900 dark:text-white">{payload[0].value} <span className="text-slate-400 dark:text-slate-500 text-xs font-bold ml-1">Entries</span></p>
+                                                    <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-line/80 dark:border-line/10 p-5 rounded-2xl shadow-premium dark:shadow-none transition-colors">
+                                                        <p className="text-[10px] font-black text-ink-subtle uppercase tracking-widest mb-2">{label}</p>
+                                                        <p className="text-lg font-black text-ink">{payload[0].value} <span className="text-ink-subtle text-xs font-bold ml-1">Entries</span></p>
                                                     </div>
                                                 );
                                             }
@@ -327,13 +327,13 @@ export default function Analytics() {
                                 </BarChart>
                             </ResponsiveContainer>
                             <div className="mt-8 grid grid-cols-2 gap-10 w-full px-10">
-                                <div className="text-center p-4 rounded-3xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 shadow-inner-soft transition-colors">
-                                    <p className="text-3xl font-display font-black text-brand-blue">{(funnelData?.qualification_rate || 0).toFixed(1)}%</p>
-                                    <p className="text-[9px] text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] font-black mt-1 pr-2">Qualification</p>
+                                <div className="text-center p-4 rounded-3xl bg-surface-raised/50 border border-line/80 dark:border-line/10 shadow-inner-soft transition-colors">
+                                    <p className="text-3xl font-display font-black text-primary-soft">{(funnelData?.qualification_rate || 0).toFixed(1)}%</p>
+                                    <p className="text-[9px] text-ink-subtle uppercase tracking-[0.2em] font-black mt-1 pr-2">Qualification</p>
                                 </div>
-                                <div className="text-center p-4 rounded-3xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 shadow-inner-soft transition-colors">
+                                <div className="text-center p-4 rounded-3xl bg-surface-raised/50 border border-line/80 dark:border-line/10 shadow-inner-soft transition-colors">
                                     <p className="text-3xl font-display font-black text-brand-cyan">{(funnelData?.completion_rate || 0).toFixed(1)}%</p>
-                                    <p className="text-[9px] text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] font-black mt-1 pr-2">Finalization</p>
+                                    <p className="text-[9px] text-ink-subtle uppercase tracking-[0.2em] font-black mt-1 pr-2">Finalization</p>
                                 </div>
                             </div>
                         </div>
@@ -344,8 +344,8 @@ export default function Analytics() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 text-left relative z-10">
 
                     {/* Pass Rate Trend */}
-                    <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[3rem] p-10 shadow-premium dark:shadow-none group transition-colors">
-                        <h3 className="text-2xl font-black font-display mb-10 text-slate-900 dark:text-white transition-colors">
+                    <div className="lg:col-span-2 bg-surface border border-line/80 dark:border-line/10 rounded-[3rem] p-10 shadow-premium dark:shadow-none group transition-colors">
+                        <h3 className="text-2xl font-black font-display mb-10 text-ink transition-colors">
                             Daily Qualification Analytics
                         </h3>
                         <div className="h-[250px]">
@@ -357,7 +357,7 @@ export default function Analytics() {
                                         axisLine={false}
                                         tickLine={false}
                                         tick={{ fill: 'currentColor', fontSize: 10, fontWeight: 900 }}
-                                        className="text-slate-400 dark:text-slate-600"
+                                        className="text-ink-subtle"
                                         tickFormatter={(val) => val.split('-').slice(1).join('/')}
                                         dy={15}
                                     />
@@ -365,7 +365,7 @@ export default function Analytics() {
                                         axisLine={false}
                                         tickLine={false}
                                         tick={{ fill: 'currentColor', fontSize: 10, fontWeight: 900 }}
-                                        className="text-slate-400 dark:text-slate-600"
+                                        className="text-ink-subtle"
                                         domain={[0, 100]}
                                     />
                                     <Tooltip
@@ -396,14 +396,14 @@ export default function Analytics() {
                     </div>
 
                     {/* Orphan Issues Pie */}
-                    <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[3rem] p-10 shadow-premium dark:shadow-none relative overflow-hidden transition-colors">
+                    <div className="bg-surface border border-line/80 dark:border-line/10 rounded-[3rem] p-10 shadow-premium dark:shadow-none relative overflow-hidden transition-colors">
                         <div className="absolute top-0 right-0 p-6 opacity-[0.03] dark:opacity-[0.05]">
                             <ShieldAlert className="w-40 h-40 rotate-12 dark:text-white" />
                         </div>
-                        <h3 className="text-2xl font-black font-display mb-2 flex items-center gap-3 text-slate-900 dark:text-white transition-colors">
+                        <h3 className="text-2xl font-black font-display mb-2 flex items-center gap-3 text-ink transition-colors">
                             Submission Quality
                         </h3>
-                        <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-10 border-b border-slate-50 dark:border-slate-800 pb-4 transition-colors">Validation Integrity Checks</p>
+                        <p className="text-[10px] font-bold text-ink-subtle uppercase tracking-widest mb-10 border-b border-slate-50 dark:border-slate-800 pb-4 transition-colors">Validation Integrity Checks</p>
 
                         <div className="h-[200px] relative z-10">
                             <ResponsiveContainer width="100%" height="100%">
@@ -424,8 +424,8 @@ export default function Analytics() {
                                         content={({ active, payload }) => {
                                             if (active && payload && payload.length) {
                                                 return (
-                                                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-xl shadow-premium dark:shadow-none transition-colors">
-                                                        <p className="text-xs font-black text-slate-900 dark:text-white">{payload[0].name}: {payload[0].value}</p>
+                                                    <div className="bg-surface border border-line/80 dark:border-line/10 p-3 rounded-xl shadow-premium dark:shadow-none transition-colors">
+                                                        <p className="text-xs font-black text-ink">{payload[0].name}: {payload[0].value}</p>
                                                     </div>
                                                 );
                                             }
@@ -437,12 +437,12 @@ export default function Analytics() {
                         </div>
                         <div className="mt-8 space-y-3 relative z-10">
                             {orphanData?.categories.map((c: any, i: number) => (
-                                <div key={c._id} className="flex items-center justify-between text-[10px] px-5 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-inner-soft group hover:bg-white dark:hover:bg-slate-700 hover:shadow-premium dark:hover:shadow-none transition-all duration-300">
+                                <div key={c._id} className="flex items-center justify-between text-[10px] px-5 py-3 rounded-2xl bg-surface-raised border border-slate-100 dark:border-slate-700 shadow-inner-soft group hover:bg-white dark:hover:bg-slate-700 hover:shadow-premium dark:hover:shadow-none transition-all duration-300">
                                     <div className="flex items-center gap-3 truncate pr-2">
                                         <div className="w-2.5 h-2.5 rounded-full shadow-sm" style={{ backgroundColor: COLORS[i % COLORS.length] }}></div>
-                                        <span className="text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest truncate group-hover:text-slate-900 dark:group-hover:text-white transition-colors">{c._id.replace('invalid_transition_', '').replace('_', ' ')}</span>
+                                        <span className="text-ink-muted font-black uppercase tracking-widest truncate group-hover:text-slate-900 dark:group-hover:text-white transition-colors">{c._id.replace('invalid_transition_', '').replace('_', ' ')}</span>
                                     </div>
-                                    <span className="font-black text-slate-900 dark:text-white text-xs">{c.count}</span>
+                                    <span className="font-black text-ink text-xs">{c.count}</span>
                                 </div>
                             ))}
                             {(!orphanData || orphanData.categories.length === 0) && (
@@ -450,7 +450,7 @@ export default function Analytics() {
                                     <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 flex items-center justify-center border border-emerald-100 dark:border-emerald-500/20 transition-colors">
                                         <CheckCircle2 className="w-5 h-5" />
                                     </div>
-                                    <p className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest transition-colors">System Healthy</p>
+                                    <p className="text-xs text-ink-subtle font-bold uppercase tracking-widest transition-colors">System Healthy</p>
                                 </div>
                             )}
                         </div>
@@ -465,9 +465,9 @@ export default function Analytics() {
 
 function StatCard({ title, value, icon, trend, color, delay = 0 }: any) {
     const colors: any = {
-        blue: 'text-brand-blue bg-brand-blue/5 border-brand-blue/10',
+        blue: 'text-primary-soft bg-primary/5 border-primary/10',
         cyan: 'text-brand-cyan bg-brand-cyan/5 border-brand-cyan/10',
-        rose: 'text-brand-red bg-brand-red/5 border-brand-red/10',
+        rose: 'text-accent-soft bg-accent/5 border-accent/10',
         grey: 'text-slate-400 bg-slate-50 border-slate-100'
     };
 
@@ -476,7 +476,7 @@ function StatCard({ title, value, icon, trend, color, delay = 0 }: any) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay, ease: [0.16, 1, 0.3, 1] }}
-            className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-8 rounded-[2.5rem] shadow-premium dark:shadow-none transition-all hover:translate-y-[-6px] duration-500 cursor-default text-left relative overflow-hidden group"
+            className="bg-surface border border-line/80 dark:border-line/10 p-8 rounded-[2.5rem] shadow-premium dark:shadow-none transition-all hover:translate-y-[-6px] duration-500 cursor-default text-left relative overflow-hidden group"
         >
             <div className="absolute -right-4 -top-4 opacity-[0.02] dark:opacity-[0.04] group-hover:opacity-[0.05] transition-opacity duration-1000 group-hover:scale-125 transition-transform">
                 <TrendingUp className="w-32 h-32 rotate-12 dark:text-white" />
@@ -487,10 +487,10 @@ function StatCard({ title, value, icon, trend, color, delay = 0 }: any) {
                     {icon}
                 </div>
                 <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 mb-1 pr-2 transition-colors">{title}</p>
-                    <h4 className="text-4xl font-display font-black text-slate-900 dark:text-white tracking-tight transition-colors">{value.toLocaleString()}</h4>
-                    <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 w-fit px-3 py-2 rounded-xl border border-slate-100 dark:border-slate-700 shadow-inner-soft mt-5 pr-4 transition-colors">
-                        <TrendingUp className="w-3.5 h-3.5 text-brand-blue pr-1" />
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-subtle mb-1 pr-2 transition-colors">{title}</p>
+                    <h4 className="text-4xl font-display font-black text-ink tracking-tight transition-colors">{value.toLocaleString()}</h4>
+                    <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-ink-muted bg-surface-raised w-fit px-3 py-2 rounded-xl border border-slate-100 dark:border-slate-700 shadow-inner-soft mt-5 pr-4 transition-colors">
+                        <TrendingUp className="w-3.5 h-3.5 text-primary-soft pr-1" />
                         {trend}
                     </div>
                 </div>

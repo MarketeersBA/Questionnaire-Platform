@@ -3,6 +3,7 @@ import type { QuestionModuleId } from './questionModules';
 /** High-level respondent journey phases. */
 export type SurveyStep =
     | 'loading'
+    | 'welcome'
     | 'layer1'
     | 'passed'
     | 'module'

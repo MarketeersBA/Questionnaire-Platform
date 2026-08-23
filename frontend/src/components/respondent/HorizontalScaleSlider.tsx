@@ -125,7 +125,7 @@ function ScaleValueBadge({ value, percent, visible }: ScaleValueBadgeProps) {
     return (
         <motion.div
             role="presentation"
-            className="pointer-events-none absolute z-40 -translate-x-1/2 rounded-lg bg-brand-blue px-2 py-0.5 text-xs font-black text-white shadow-md"
+            className="pointer-events-none absolute z-40 -translate-x-1/2 rounded-lg bg-primary px-2 py-0.5 text-xs font-black text-white shadow-md"
             style={{ left: `${percent}%`, top: '-0.25rem' }}
             initial={{ opacity: 0, y: 4, scale: 0.9 }}
             animate={{ opacity: 1, y: -28, scale: 1 }}
@@ -250,7 +250,7 @@ export default function HorizontalScaleSlider({
                         className={`absolute ${trackInsetClass} top-1/2 -translate-y-1/2 ${trackHeightClass} overflow-hidden rounded-full border border-slate-200 bg-slate-100 shadow-inner transition-colors dark:border-slate-800 dark:bg-slate-800/50`}
                     >
                         <motion.div
-                            className="absolute inset-y-0 left-0 bg-gradient-to-r from-brand-blue via-brand-accent to-brand-cyan shadow-[0_0_15px_rgba(37,94,145,0.3)]"
+                            className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary via-brand-accent to-brand-cyan shadow-[0_0_15px_rgba(37,94,145,0.3)]"
                             initial={false}
                             animate={{ width: `${fillPercent}%` }}
                             transition={motionTransition}
@@ -269,7 +269,7 @@ export default function HorizontalScaleSlider({
                         aria-label={ariaLabel}
                         aria-valuetext={ariaValueText}
                         onChange={(event) => onChange(parseInt(event.target.value, 10))}
-                        className={`absolute inset-x-0 top-1/2 z-30 w-full -translate-y-1/2 opacity-0 ${hitAreaHeightClass} cursor-pointer focus-visible:opacity-100 focus-visible:pointer-events-auto focus-visible:ring-4 focus-visible:ring-brand-blue/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900`}
+                        className={`absolute inset-x-0 top-1/2 z-30 w-full -translate-y-1/2 opacity-0 ${hitAreaHeightClass} cursor-pointer focus-visible:opacity-100 focus-visible:pointer-events-auto focus-visible:ring-4 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900`}
                     />
 
                     <motion.div
@@ -281,7 +281,7 @@ export default function HorizontalScaleSlider({
                         aria-valuenow={displayValue}
                         aria-valuetext={ariaValueText}
                         tabIndex={-1}
-                        className={`absolute top-1/2 z-20 flex cursor-grab items-center justify-center bg-white active:cursor-grabbing dark:bg-slate-900 ${thumbSizeClass} ${thumbBorderClass} ${thumbRadiusClass} border-brand-blue shadow-lg transition-shadow ${isDragging ? 'shadow-[0_12px_28px_-8px_rgba(37,94,145,0.45)]' : ''}`}
+                        className={`absolute top-1/2 z-20 flex cursor-grab items-center justify-center bg-white active:cursor-grabbing dark:bg-slate-900 ${thumbSizeClass} ${thumbBorderClass} ${thumbRadiusClass} border-primary shadow-lg transition-shadow ${isDragging ? 'shadow-[0_12px_28px_-8px_rgba(37,94,145,0.45)]' : ''}`}
                         animate={{
                             left: `calc(${fillPercent}% - ${thumbHalfPx}px)`,
                             y: '-50%',
@@ -294,7 +294,7 @@ export default function HorizontalScaleSlider({
                         }
                         {...thumbHandlers}
                     >
-                        <div className={`rounded-full bg-brand-blue/10 ${thumbGripClass}`} />
+                        <div className={`rounded-full bg-primary/10 ${thumbGripClass}`} />
                     </motion.div>
                 </div>
             </div>
@@ -308,6 +308,10 @@ export default function HorizontalScaleSlider({
                 maxLabel={maxLabel}
                 numberSeparator={numberSeparator}
             />
+
+            <p className="text-[11px] text-ink-subtle text-center font-medium">
+                {language === 'ar' ? 'اسحب المؤشر أو اضغط على الشريط' : 'Drag the handle or tap the bar'}
+            </p>
         </div>
     );
 }

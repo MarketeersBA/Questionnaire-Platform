@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from typing import List, Annotated
+from typing import List, Annotated, Optional
 from bson import ObjectId
 
 from datetime import datetime, timedelta
@@ -214,14 +214,20 @@ def extract_layer1_questions(doc: dict) -> list:
 @router.get("/check-code/{code}")
 async def check_survey_code(
     code: str,
-    current_user: Annotated[User, Depends(get_current_user)]
+    current_user: Annotated[User, Depends(get_current_user)],
+    exclude_id: Optional[str] = None
 ):
     """Check if a survey code is already taken by a non-deleted survey."""
     surveys_col = db.get_collection("surveys")
-    existing = await surveys_col.find_one({
+    query = {
         "survey_code": code,
         "is_deleted": {"$ne": True}
-    })
+    }
+    if exclude_id:
+        from bson import ObjectId
+        query["_id"] = {"$ne": ObjectId(exclude_id)}
+
+    existing = await surveys_col.find_one(query)
     return {"exists": existing is not None}
 
 @router.post("/", response_model=Survey)

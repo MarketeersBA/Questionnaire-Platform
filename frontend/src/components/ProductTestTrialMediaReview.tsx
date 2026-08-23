@@ -65,7 +65,7 @@ export default function ProductTestTrialMediaReview({
     return (
         <div className="space-y-3">
             <div className="flex flex-wrap gap-2 text-[9px] font-black uppercase tracking-widest text-slate-500">
-                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-brand-blue/10 text-brand-blue">
+                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-primary/10 text-primary-soft">
                     {value.media_type === 'video' ? <Film className="w-3 h-3" /> : <ImageIcon className="w-3 h-3" />}
                     {value.media_type}
                 </span>
@@ -83,13 +83,13 @@ export default function ProductTestTrialMediaReview({
                 <img
                     src={previewUrl}
                     alt={value.filename || 'Trial media'}
-                    className="max-h-56 rounded-xl border border-slate-200 dark:border-slate-800 object-contain bg-slate-50 dark:bg-slate-900"
+                    className="max-h-56 rounded-xl border border-line/80 dark:border-line/10 object-contain bg-surface-raised"
                 />
             ) : previewUrl && value.media_type === 'video' ? (
                 <video
                     src={previewUrl}
                     controls
-                    className="max-h-56 rounded-xl border border-slate-200 dark:border-slate-800 bg-black w-full"
+                    className="max-h-56 rounded-xl border border-line/80 dark:border-line/10 bg-black w-full"
                 />
             ) : (
                 <p className="text-xs font-bold text-slate-400 italic">Preview unavailable</p>
@@ -98,7 +98,7 @@ export default function ProductTestTrialMediaReview({
             <button
                 type="button"
                 onClick={() => void handleDownload()}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider bg-surface-sunken text-ink-muted hover:bg-slate-200 dark:hover:bg-slate-700"
             >
                 <Download className="w-3.5 h-3.5" />
                 Download

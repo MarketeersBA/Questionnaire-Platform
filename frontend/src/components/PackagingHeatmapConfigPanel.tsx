@@ -228,7 +228,7 @@ export default function PackagingHeatmapConfigPanel({
                 key={side}
                 className={`relative rounded-3xl border-2 border-dashed transition-all ${
                     hasContent
-                        ? 'border-violet-300 dark:border-violet-800 bg-white dark:bg-slate-950'
+                        ? 'border-violet-300 dark:border-violet-800 bg-surface'
                         : 'border-slate-300 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-900/30 hover:border-violet-400 dark:hover:border-violet-700'
                 }`}
                 onDragOver={(e) => e.preventDefault()}
@@ -272,7 +272,7 @@ export default function PackagingHeatmapConfigPanel({
                     </div>
 
                     {previewUrl ? (
-                        <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 aspect-[4/3] flex items-center justify-center">
+                        <div className="relative rounded-2xl overflow-hidden border border-line/80 dark:border-line/10 bg-surface-sunken aspect-[4/3] flex items-center justify-center">
                             <img
                                 src={previewUrl}
                                 alt={`${side} packaging preview`}
@@ -287,7 +287,7 @@ export default function PackagingHeatmapConfigPanel({
                     ) : asset?.asset_id ? (
                         <div className="rounded-2xl border border-violet-200 dark:border-violet-900/40 bg-violet-50/50 dark:bg-violet-950/20 p-6 text-center space-y-2">
                             <ImagePlus className="w-8 h-8 text-violet-500 mx-auto" />
-                            <p className="text-xs font-bold text-slate-700 dark:text-slate-300">Image saved on server</p>
+                            <p className="text-xs font-bold text-ink-muted">Image saved on server</p>
                             <p className="text-[10px] text-slate-500 font-mono truncate">{asset.filename || asset.asset_id}</p>
                         </div>
                     ) : (
@@ -295,7 +295,7 @@ export default function PackagingHeatmapConfigPanel({
                             type="button"
                             onClick={() => (side === 'front' ? frontInputRef : backInputRef).current?.click()}
                             disabled={!enabled || state.uploading}
-                            className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 py-10 flex flex-col items-center gap-3 hover:border-violet-400 dark:hover:border-violet-700 transition-colors disabled:opacity-50"
+                            className="w-full rounded-2xl border border-line/80 dark:border-line/10 bg-surface py-10 flex flex-col items-center gap-3 hover:border-violet-400 dark:hover:border-violet-700 transition-colors disabled:opacity-50"
                         >
                             {state.uploading ? (
                                 <Loader2 className="w-7 h-7 text-violet-500 animate-spin" />
@@ -323,10 +323,10 @@ export default function PackagingHeatmapConfigPanel({
                         <Crosshair className="w-7 h-7" />
                     </div>
                     <div className="space-y-1">
-                        <h4 className="text-lg font-display font-black text-slate-900 dark:text-white tracking-tight">
+                        <h4 className="text-lg font-display font-black text-ink tracking-tight">
                             Packaging Heatmap
                         </h4>
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-ink-muted">
                             Click-map testing for target brand packaging only
                         </p>
                     </div>

@@ -1,44 +1,35 @@
-import pytest
-from backend.services.analytics_service import AnalyticsService
-from unittest.mock import AsyncMock, MagicMock
+"""
+Target-gating unit tests.
 
-@pytest.fixture
-def mock_db():
-    return AsyncMock()
+NOTE: this previously tested a phantom `AnalyticsService(db, config).get_target_status()`
+API that never existed in `backend/services/analytics_service.py` (that class takes no
+constructor args and has no such method) — these tests could never have passed and were
+stale. Target-gating actually lives in `backend/services/quota_enforcement.py`
+(`resolve_respondent_target`, `compute_target_reached`), consumed inline by
+`backend/routers/responses.py`. Testing the real functions directly below.
+"""
+from backend.services.quota_enforcement import compute_target_reached, resolve_respondent_target
 
-@pytest.fixture
-def mock_config():
-    return MagicMock()
 
-@pytest.mark.asyncio
-async def test_target_reached_calculation(mock_db, mock_config):
-    # Setup: Survey with target 100
-    mock_db.surveys.find_one.return_value = {
-        "survey_id": "s1",
-        "respondent_target": 100
-    }
-    # 105 responses found
-    mock_db.responses.count_documents.return_value = 105
-    
-    service = AnalyticsService(mock_db, mock_config)
-    status = await service.get_target_status("s1")
-    
-    assert status["target_reached"] is True
-    assert status["respondent_count"] == 105
-    assert status["target"] == 100
+def test_target_reached_calculation():
+    survey = {"survey_id": "s1", "respondent_target": 100}
+    target = resolve_respondent_target(survey)
+    assert target == 100
+    assert compute_target_reached(target, quota_current=105) is True
 
-@pytest.mark.asyncio
-async def test_target_not_reached(mock_db, mock_config):
-    # Setup: Survey with target 100
-    mock_db.surveys.find_one.return_value = {
-        "survey_id": "s1",
-        "respondent_target": 100
-    }
-    # 5 responses found
-    mock_db.responses.count_documents.return_value = 5
-    
-    service = AnalyticsService(mock_db, mock_config)
-    status = await service.get_target_status("s1")
-    
-    assert status["target_reached"] is False
-    assert status["respondent_count"] == 5
+
+def test_target_not_reached():
+    survey = {"survey_id": "s1", "respondent_target": 100}
+    target = resolve_respondent_target(survey)
+    assert target == 100
+    assert compute_target_reached(target, quota_current=5) is False
+
+
+def test_target_falls_back_to_sample_capacity_when_unset():
+    survey = {"survey_id": "s1", "sample_capacity": 50}
+    assert resolve_respondent_target(survey) == 50
+
+
+def test_unset_target_never_reached():
+    # A target of 0 (unset) has no finish line — never "reached", regardless of count.
+    assert compute_target_reached(quota_target=0, quota_current=999) is False

@@ -4,17 +4,10 @@ import { motion } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
 import { useReport } from '../../context/ReportContext';
 import { Filter, ExternalLink } from 'lucide-react';
+import { CHART_SERIES } from '../../constants/brandPalette';
 
 // --- VISUAL TOKENS ---
-const BRAND_COLORS = [
-    '#60a5fa', // Blue
-    '#34d399', // Emerald
-    '#fb7185', // Rose
-    '#fbbf24', // Amber
-    '#a78bfa', // Violet
-    '#22d3ee', // Cyan
-    '#f472b6', // Pink
-];
+const BRAND_COLORS = CHART_SERIES;
 
 const SHAPES: any[] = ['circle', 'square', 'triangle', 'diamond', 'star', 'cross', 'wye'];
 
@@ -54,17 +47,17 @@ const CustomTooltip = memo(({ active, payload }: any) => {
 
     return (
         <div className="bg-white/95 dark:bg-slate-900/98 backdrop-blur-3xl border border-slate-200 dark:border-white/20 p-5 rounded-[24px] shadow-[0_24px_60px_rgba(0,0,0,0.1)] dark:shadow-[0_24px_60px_rgba(0,0,0,0.6)] min-w-[200px] border-l-4" style={{ borderLeftColor: data.color }}>
-            <div className="flex items-center gap-3 mb-4 border-b border-slate-100 dark:border-white/10 pb-3">
-                <p className="font-black text-slate-800 dark:text-white uppercase tracking-[0.15em] text-[10px] opacity-80">{data.brand}</p>
+            <div className="flex items-center gap-3 mb-4 border-b border-line/80 dark:border-line/10 pb-3">
+                <p className="font-black text-ink uppercase tracking-[0.15em] text-[10px] opacity-80">{data.brand}</p>
             </div>
-            <p className="font-black text-brand-blue uppercase tracking-widest text-xs mb-5 line-height-tight">{data.attribute}</p>
+            <p className="font-black text-primary-soft uppercase tracking-widest text-xs mb-5 line-height-tight">{data.attribute}</p>
             <div className="grid grid-cols-1 gap-3">
-                <div className="flex justify-between items-center bg-slate-50 dark:bg-white/5 px-3 py-2.5 rounded-xl border border-slate-100 dark:border-white/5">
-                    <span className="text-slate-500 dark:text-slate-400 text-[9px] font-black uppercase tracking-widest">Impact Factor</span>
+                <div className="flex justify-between items-center bg-slate-50 dark:bg-white/5 px-3 py-2.5 rounded-xl border border-line/80 dark:border-line/10">
+                    <span className="text-ink-muted text-[9px] font-black uppercase tracking-widest">Impact Factor</span>
                     <span className="text-emerald-500 dark:text-emerald-400 font-mono text-xs font-black">{(data.x || 0).toFixed(1)}%</span>
                 </div>
-                <div className="flex justify-between items-center bg-slate-50 dark:bg-white/5 px-3 py-2.5 rounded-xl border border-slate-100 dark:border-white/5">
-                    <span className="text-slate-500 dark:text-slate-400 text-[9px] font-black uppercase tracking-widest">Performance</span>
+                <div className="flex justify-between items-center bg-slate-50 dark:bg-white/5 px-3 py-2.5 rounded-xl border border-line/80 dark:border-line/10">
+                    <span className="text-ink-muted text-[9px] font-black uppercase tracking-widest">Performance</span>
                     <span className="text-blue-500 dark:text-blue-400 font-mono text-xs font-black">{(data.y || 0).toFixed(1)}%</span>
                 </div>
             </div>
@@ -90,8 +83,8 @@ const FilterBar = memo(({ mainAttributes, selectedFilter, onFilterChange, onNavi
     return (
         <div className="relative z-20 mb-12 flex flex-col gap-6">
             <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-brand-blue/10 flex items-center justify-center">
-                    <Filter size={14} className="text-brand-blue" />
+                <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Filter size={14} className="text-primary-soft" />
                 </div>
                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Filter by Dimension</span>
             </div>
@@ -101,7 +94,7 @@ const FilterBar = memo(({ mainAttributes, selectedFilter, onFilterChange, onNavi
                     whileHover={{ scale: 1.02, y: -2 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={onNavigateToMain}
-                    className="px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 border relative overflow-hidden bg-brand-blue/5 text-brand-blue border-brand-blue/20 hover:bg-brand-blue/10 flex items-center gap-3 group"
+                    className="px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 border relative overflow-hidden bg-primary/5 text-primary-soft border-primary/20 hover:bg-primary/10 flex items-center gap-3 group"
                 >
                     <ExternalLink size={12} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                     Main Attributes
@@ -114,12 +107,12 @@ const FilterBar = memo(({ mainAttributes, selectedFilter, onFilterChange, onNavi
                         whileTap={{ scale: 0.98 }}
                         onClick={() => onFilterChange(attr)}
                         className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 border relative overflow-hidden ${selectedFilter === attr
-                            ? 'bg-brand-blue text-white border-brand-blue shadow-[0_20px_40px_rgba(59,130,246,0.25)]'
-                            : 'bg-slate-50 dark:bg-white/5 text-slate-500 border-slate-200 dark:border-white/10 hover:border-brand-blue/30'
+                            ? 'bg-primary text-white border-primary shadow-[0_20px_40px_rgba(59,130,246,0.25)]'
+                            : 'bg-slate-50 dark:bg-white/5 text-slate-500 border-line/80 dark:border-line/10 hover:border-primary/30'
                             }`}
                     >
                         {selectedFilter === attr && (
-                            <motion.div layoutId="activeFilter" className="absolute inset-0 bg-brand-blue/80 backdrop-blur-md -z-10" />
+                            <motion.div layoutId="activeFilter" className="absolute inset-0 bg-primary/80 backdrop-blur-md -z-10" />
                         )}
                         {attr}
                     </motion.button>
@@ -214,7 +207,7 @@ export function ScatterPlot({ data, isFocusMode, presentationHeight }: ScatterPl
         <motion.div
             initial={{ opacity: 0, scale: 0.99, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="relative w-full p-12 bg-white dark:bg-slate-950/50 border border-slate-200 dark:border-white/5 rounded-[60px] overflow-hidden backdrop-blur-3xl shadow-[0_40px_80px_rgba(0,0,0,0.04)] dark:shadow-[0_60px_120px_-30px_rgba(0,0,0,0.6)]"
+            className="relative w-full p-12 bg-surface/50 border border-line/80 dark:border-line/10 rounded-[60px] overflow-hidden backdrop-blur-3xl shadow-[0_40px_80px_rgba(0,0,0,0.04)] dark:shadow-[0_60px_120px_-30px_rgba(0,0,0,0.6)]"
         >
             <FilterBar
                 mainAttributes={mainAttributes}
@@ -282,18 +275,20 @@ export function ScatterPlot({ data, isFocusMode, presentationHeight }: ScatterPl
                                                 stroke={rectStroke}
                                                 strokeDasharray="4 4"
                                             />
-                                            <text
-                                                x={x + width / 2}
-                                                y={y - 12}
-                                                textAnchor="middle"
-                                                fill={labelColor}
-                                                fontSize={10}
-                                                fontWeight={900}
-                                                className="uppercase opacity-80"
-                                                style={{ letterSpacing: '0.15em' }}
-                                            >
-                                                {group.attribute}
-                                            </text>
+                                            {attributeGroups.length <= 8 && (
+                                                <text
+                                                    x={x + width / 2}
+                                                    y={y - 12}
+                                                    textAnchor="middle"
+                                                    fill={labelColor}
+                                                    fontSize={10}
+                                                    fontWeight={900}
+                                                    className="uppercase opacity-80"
+                                                    style={{ letterSpacing: '0.15em' }}
+                                                >
+                                                    {group.attribute}
+                                                </text>
+                                            )}
                                         </g>
                                     );
                                 }}
@@ -327,13 +322,13 @@ export function ScatterPlot({ data, isFocusMode, presentationHeight }: ScatterPl
             </div>
 
             {/* Matrix Data Logic Footer */}
-            <div className="mt-12 flex flex-wrap justify-between items-center bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 p-8 rounded-[40px] relative z-10">
+            <div className="mt-12 flex flex-wrap justify-between items-center bg-slate-50 dark:bg-white/[0.02] border border-line/80 dark:border-line/10 p-8 rounded-[40px] relative z-10">
                 <div className="flex gap-14">
                     <div className="flex flex-col gap-2">
                         <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest leading-none">Statistical Method</span>
                         <span className="text-[12px] font-bold text-slate-800 dark:text-slate-200">Pearson Hierarchical Correlation</span>
                     </div>
-                    <div className="flex flex-col gap-2 border-l border-slate-200 dark:border-white/10 pl-14">
+                    <div className="flex flex-col gap-2 border-l border-line/80 dark:border-line/10 pl-14">
                         <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest leading-none">Reference Frame</span>
                         <span className="text-[12px] font-bold text-slate-800 dark:text-slate-200">Cross-Brand T2B Mean Benchmarks</span>
                     </div>

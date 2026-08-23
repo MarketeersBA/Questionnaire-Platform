@@ -1,5 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import {
+    ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell,
+} from 'recharts';
 import {
     Activity,
     Database,
@@ -11,7 +14,8 @@ import {
     ShieldAlert,
     BarChart3,
     Layers,
-    Clock
+    Clock,
+    Sparkles,
 } from 'lucide-react';
 import { analytics } from '../services/api';
 import { toast } from 'sonner';
@@ -40,6 +44,9 @@ interface AIAlert {
     acknowledged: boolean;
 }
 
+/** Blue → red ramp for the component mix bars. */
+const MIX_COLORS = ['#255E91', '#2E7BB8', '#21A0FF', '#E79D9E', '#CD393B'];
+
 const AdminAITelemetry = () => {
     const [status, setStatus] = useState<AIQuotaStatus | null>(null);
     const [alerts, setAlerts] = useState<AIAlert[]>([]);
@@ -52,7 +59,7 @@ const AdminAITelemetry = () => {
                 analytics.getAIAlerts()
             ]);
             setStatus(statusRes);
-            setAlerts(alertsRes);
+            setAlerts(Array.isArray(alertsRes) ? alertsRes : []);
         } catch (error) {
             toast.error('Neural Telemetry Sync Failed');
         } finally {
@@ -76,220 +83,372 @@ const AdminAITelemetry = () => {
         }
     };
 
+    const summary = status?.summary;
+    const componentMix = status?.component_mix ?? [];
+    const leaderboard = status?.leaderboard ?? [];
+
+    /** Totals derived from the payload — no invented figures. */
+    const derived = useMemo(() => {
+        const totalCalls = componentMix.reduce((acc, c) => acc + (c.calls || 0), 0);
+        const totalTokens = summary?.total_tokens ?? 0;
+        const promptShare = totalTokens > 0
+            ? Math.round(((summary?.prompt_tokens ?? 0) / totalTokens) * 100)
+            : 0;
+        const costPerCall = totalCalls > 0
+            ? (summary?.total_cost_usd ?? 0) / totalCalls
+            : 0;
+        return { totalCalls, promptShare, costPerCall };
+    }, [summary, componentMix]);
+
+    const mixChart = useMemo(
+        () => componentMix
+            .filter((c) => c.cost > 0 || c.calls > 0)
+            .map((c) => ({
+                name: String(c._id || 'unknown').replace(/_/g, ' '),
+                cost: Number(c.cost.toFixed(4)),
+                calls: c.calls,
+            })),
+        [componentMix],
+    );
+
+    /** Nothing has been recorded yet — distinct from a failed load. */
+    const hasUsage = (summary?.cache_entries ?? 0) > 0 || (summary?.total_cost_usd ?? 0) > 0;
+
     if (loading && !status) {
         return (
-            <div className="min-h-screen bg-slate-950 p-12 flex items-center justify-center">
-                <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                    className="p-4 bg-brand-blue/10 rounded-full border border-brand-blue/20"
-                >
-                    <Zap className="w-12 h-12 text-brand-blue" />
-                </motion.div>
+            <div className="min-h-[400px] flex items-center justify-center">
+                <div className="flex flex-col items-center gap-4">
+                    <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+                        className="p-4 bg-primary/10 rounded-full border border-primary/20"
+                    >
+                        <Zap className="w-10 h-10 text-primary-soft" />
+                    </motion.div>
+                    <p className="text-ink-subtle font-bold animate-pulse">Synchronizing AI Telemetry...</p>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-[#020617] text-white p-8 md:p-12 space-y-12 pb-32">
-            {/* Header Area */}
-            <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/5 pb-12">
+        <div className="space-y-8 pb-12">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div>
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-indigo-500/10 rounded-lg border border-indigo-500/20">
-                            <ShieldAlert className="w-6 h-6 text-indigo-400" />
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2 rounded-xl bg-primary/10 border border-primary/20 text-primary-soft">
+                            <ShieldAlert className="w-5 h-5" />
                         </div>
-                        <span className="text-indigo-400 font-bold tracking-[0.3em] text-[10px] uppercase">Ecosystem Manager</span>
+                        <span className="text-primary-soft font-black tracking-[0.25em] text-[10px] uppercase">
+                            Ecosystem Manager
+                        </span>
                     </div>
-                    <h1 className="text-5xl md:text-6xl font-black italic tracking-tighter uppercase leading-none">
-                        AI Neural <span className="text-brand-blue">Telemetry</span>
+                    <h1 className="text-4xl font-display font-black text-ink tracking-tight">
+                        AI <span className="text-primary-soft">Telemetry</span>
                     </h1>
+                    <p className="text-ink-muted font-medium mt-1">
+                        Model spend, token load and quota exceptions across the platform
+                    </p>
                 </div>
 
-                <div className="flex items-center gap-4">
-                    <div className="text-right">
-                        <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">System Health</p>
-                        <div className="flex items-center gap-2 justify-end">
-                            <span className="text-emerald-400 font-black tracking-widest uppercase text-sm">{status?.status || 'Operational'}</span>
-                            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulseShadow" />
-                        </div>
+                <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl card-brand">
+                    <span className={`w-2 h-2 rounded-full ${hasUsage ? 'bg-primary animate-pulse' : 'bg-ink-subtle'}`} />
+                    <div>
+                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-ink-subtle leading-none mb-1">
+                            System Health
+                        </p>
+                        <p className="text-xs font-black text-ink uppercase tracking-widest leading-none">
+                            {status?.status || 'Unknown'}
+                        </p>
                     </div>
                 </div>
-            </header>
+            </div>
 
-            {/* Top Metrics Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Metrics — every sub-line is computed from the payload */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 <MetricCard
+                    icon={DollarSign}
                     label="Total Platform Spend"
-                    value={`$${status?.summary.total_cost_usd.toFixed(2)}`}
-                    icon={<DollarSign className="w-5 h-5 text-emerald-400" />}
-                    trend="+12% vs last week"
+                    value={`$${(summary?.total_cost_usd ?? 0).toFixed(2)}`}
+                    sub={derived.totalCalls > 0 ? `$${derived.costPerCall.toFixed(4)} per call` : 'No calls recorded'}
+                    tone="red"
                 />
                 <MetricCard
+                    icon={Zap}
                     label="Neural Tokens"
-                    value={status?.summary.total_tokens.toLocaleString() || '0'}
-                    icon={<Zap className="w-5 h-5 text-brand-blue" />}
-                    trend="Prompt-heavy load"
+                    value={(summary?.total_tokens ?? 0).toLocaleString()}
+                    sub={(summary?.total_tokens ?? 0) > 0 ? `${derived.promptShare}% prompt / ${100 - derived.promptShare}% completion` : 'No tokens consumed'}
+                    tone="blue"
                 />
                 <MetricCard
-                    label="Cache Efficiency"
-                    value={`${status?.summary.cache_entries || 0}`}
-                    icon={<Database className="w-5 h-5 text-indigo-400" />}
-                    trend="Persistent nodes"
+                    icon={Database}
+                    label="Cached Responses"
+                    value={(summary?.cache_entries ?? 0).toLocaleString()}
+                    sub="Reused instead of re-billed"
+                    tone="sky"
                 />
                 <MetricCard
+                    icon={Activity}
                     label="Processing Calls"
-                    value={status?.component_mix.reduce((acc, c) => acc + c.calls, 0).toLocaleString() || '0'}
-                    icon={<Activity className="w-5 h-5 text-purple-400" />}
-                    trend="High concurrency"
+                    value={derived.totalCalls.toLocaleString()}
+                    sub={`Across ${componentMix.length} component${componentMix.length === 1 ? '' : 's'}`}
+                    tone="coral"
                 />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Active Alerts Section */}
-                <div className="lg:col-span-2 space-y-6">
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-xl font-black uppercase tracking-widest italic flex items-center gap-3">
-                            <AlertTriangle className="w-5 h-5 text-amber-500" />
-                            Critical Exceptions
-                        </h2>
-                        <span className="px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-[10px] font-bold text-amber-500">
-                            {alerts.length} PENDING ACTION
-                        </span>
+            {!hasUsage ? (
+                /* Zero-usage is a real state, not a broken page — say so plainly. */
+                <div className="card-brand rounded-[2rem] p-12 flex flex-col items-center justify-center text-center">
+                    <div className="w-16 h-16 rounded-2xl bg-primary/10 grid place-items-center mb-5">
+                        <Sparkles className="w-8 h-8 text-primary-soft" />
+                    </div>
+                    <h2 className="text-xl font-display font-black text-ink mb-2">No AI usage recorded yet</h2>
+                    <p className="text-ink-muted text-sm font-medium max-w-md">
+                        Spend, token and component figures populate as soon as a report runs with AI
+                        insights enabled. Nothing has been billed against this platform so far.
+                    </p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                    {/* Component mix */}
+                    <div className="card-brand lg:col-span-2 rounded-[2rem] p-7">
+                        <div className="flex items-center gap-3 mb-5">
+                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary-soft">
+                                <BarChart3 size={20} />
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-black text-ink leading-tight">Spend by Component</h2>
+                                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-ink-subtle">
+                                    Where the AI budget goes
+                                </p>
+                            </div>
+                        </div>
+
+                        {mixChart.length === 0 ? (
+                            <p className="text-xs font-bold text-ink-subtle py-12 text-center">
+                                No component-level usage recorded yet.
+                            </p>
+                        ) : (
+                            <div style={{ height: Math.max(180, mixChart.length * 46) }}>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={mixChart} layout="vertical" margin={{ left: 8, right: 24 }}>
+                                        <CartesianGrid
+                                            strokeDasharray="4 4"
+                                            horizontal={false}
+                                            stroke="currentColor"
+                                            className="text-primary/15 dark:text-slate-800"
+                                        />
+                                        <XAxis type="number" hide />
+                                        <YAxis
+                                            type="category"
+                                            dataKey="name"
+                                            width={140}
+                                            axisLine={false}
+                                            tickLine={false}
+                                            tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 800 }}
+                                        />
+                                        <Tooltip
+                                            cursor={false}
+                                            content={({ active, payload }: any) => {
+                                                if (!active || !payload?.length) return null;
+                                                const d = payload[0].payload;
+                                                return (
+                                                    <div className="card-brand px-4 py-3 rounded-xl">
+                                                        <p className="text-[10px] font-black text-ink-subtle uppercase tracking-widest mb-1">
+                                                            {d.name}
+                                                        </p>
+                                                        <p className="text-sm font-black text-ink">
+                                                            ${d.cost.toFixed(4)}
+                                                            <span className="text-ink-subtle font-bold ml-2">
+                                                                {d.calls} call{d.calls === 1 ? '' : 's'}
+                                                            </span>
+                                                        </p>
+                                                    </div>
+                                                );
+                                            }}
+                                        />
+                                        <Bar dataKey="cost" radius={[0, 8, 8, 0]} barSize={16}>
+                                            {mixChart.map((_, i) => (
+                                                <Cell key={i} fill={MIX_COLORS[i % MIX_COLORS.length]} />
+                                            ))}
+                                        </Bar>
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
+                        )}
                     </div>
 
-                    <div className="space-y-4">
-                        <AnimatePresence mode="popLayout">
-                            {alerts.length === 0 ? (
-                                <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    className="p-12 border border-dashed border-white/10 rounded-3xl flex flex-col items-center justify-center text-slate-500"
-                                >
-                                    <CheckCircle2 className="w-12 h-12 mb-4 opacity-20" />
-                                    <p className="font-bold tracking-widest text-xs uppercase">All Neural Thresholds Within Normal Range</p>
-                                </motion.div>
-                            ) : (
-                                alerts.map((alert) => (
-                                    <motion.div
-                                        key={alert._id}
-                                        layout
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        exit={{ opacity: 0, scale: 0.95 }}
-                                        className="p-6 bg-slate-900/50 border border-white/5 rounded-3xl hover:border-amber-500/30 transition-all group"
+                    {/* Cost leaderboard */}
+                    <div className="card-brand rounded-[2rem] p-7">
+                        <div className="flex items-center gap-3 mb-5">
+                            <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center text-accent-soft">
+                                <TrendingUp size={20} />
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-black text-ink leading-tight">Cost Leaderboard</h2>
+                                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-ink-subtle">
+                                    Most expensive surveys
+                                </p>
+                            </div>
+                        </div>
+
+                        {leaderboard.length === 0 ? (
+                            <p className="text-xs font-bold text-ink-subtle py-10 text-center">
+                                No per-survey spend recorded yet.
+                            </p>
+                        ) : (
+                            <div className="space-y-2">
+                                {leaderboard.map((item, i) => (
+                                    <div
+                                        key={item._id}
+                                        className="flex items-center gap-3 p-3 rounded-xl border border-primary/15 dark:border-line/10 bg-surface-raised/60 hover:bg-primary/[0.06] transition-colors"
                                     >
-                                        <div className="flex justify-between items-start">
-                                            <div className="flex gap-4">
-                                                <div className="mt-1 p-2 bg-amber-500/10 rounded-xl border border-amber-500/20">
-                                                    <AlertTriangle className="w-5 h-5 text-amber-500" />
-                                                </div>
-                                                <div>
-                                                    <div className="flex items-center gap-3 mb-1">
-                                                        <h3 className="font-bold text-white uppercase tracking-tight">AI Quota Exhausted</h3>
-                                                        <span className="px-2 py-0.5 bg-red-500/20 text-red-500 text-[8px] font-black rounded uppercase">CRITICAL</span>
-                                                    </div>
-                                                    <p className="text-slate-400 text-sm mb-4 leading-relaxed max-w-lg">
-                                                        {alert.error_message}
-                                                    </p>
-                                                    <div className="flex items-center gap-6">
-                                                        <div className="flex items-center gap-2">
-                                                            <Clock className="w-3.5 h-3.5 text-slate-500" />
-                                                            <span className="text-[10px] font-bold text-slate-500 uppercase">{new Date(alert.timestamp).toLocaleString()}</span>
-                                                        </div>
-                                                        <div className="flex items-center gap-2">
-                                                            <BarChart3 className="w-3.5 h-3.5 text-slate-500" />
-                                                            <span className="text-[10px] font-bold text-slate-500 uppercase">Survey ID: {alert.survey_id}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <button
-                                                onClick={() => handleAcknowledge(alert._id)}
-                                                className="px-6 py-3 bg-white text-black font-black uppercase text-[10px] tracking-widest rounded-2xl hover:bg-amber-500 hover:text-white transition-all active:scale-95 shadow-lg shadow-white/5"
-                                            >
-                                                Acknowledge
-                                            </button>
+                                        <span className="text-ink-subtle font-black font-mono text-[11px] w-5 shrink-0">
+                                            {String(i + 1).padStart(2, '0')}
+                                        </span>
+                                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                                            <Layers className="w-4 h-4 text-primary-soft" />
                                         </div>
-                                    </motion.div>
-                                ))
-                            )}
-                        </AnimatePresence>
+                                        <span className="text-[11px] font-bold text-ink-muted truncate flex-1 min-w-0 font-mono">
+                                            {item._id || 'unattributed'}
+                                        </span>
+                                        <span className="text-sm font-black text-ink tabular-nums shrink-0">
+                                            ${item.cost.toFixed(2)}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
+            )}
 
-                {/* Leaderboard & Component Mix Sidebars */}
-                <div className="space-y-8">
-                    {/* Leaderboard */}
-                    <aside className="p-8 bg-slate-900/50 border border-white/5 rounded-[40px] space-y-6">
-                        <h2 className="text-sm font-black uppercase tracking-[0.2em] italic flex items-center gap-3">
-                            <TrendingUp className="w-4 h-4 text-brand-blue" />
-                            Cost Leaderboard
-                        </h2>
-                        <div className="space-y-4">
-                            {status?.leaderboard.map((item, i) => (
-                                <div key={item._id} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 group hover:bg-white/10 transition-all">
-                                    <div className="flex items-center gap-4">
-                                        <span className="text-slate-500 font-black font-mono text-xs">0{i + 1}</span>
-                                        <div className="w-8 h-8 rounded-full bg-brand-blue/10 flex items-center justify-center border border-brand-blue/20">
-                                            <Layers className="w-4 h-4 text-brand-blue" />
+            {/* Exceptions */}
+            <div className="card-brand rounded-[2rem] p-7">
+                <div className="flex items-center justify-between mb-5 gap-4">
+                    <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center text-accent-soft shrink-0">
+                            <AlertTriangle size={20} />
+                        </div>
+                        <div>
+                            <h2 className="text-lg font-black text-ink leading-tight">Critical Exceptions</h2>
+                            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-ink-subtle">
+                                Quota and rate-limit alerts
+                            </p>
+                        </div>
+                    </div>
+                    <span className={`shrink-0 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border ${alerts.length > 0
+                        ? 'bg-accent/10 border-accent/25 text-accent-soft'
+                        : 'bg-surface-sunken border-primary/15 dark:border-line/10 text-ink-subtle'
+                        }`}>
+                        {alerts.length} pending
+                    </span>
+                </div>
+
+                <div className="space-y-3">
+                    <AnimatePresence mode="popLayout">
+                        {alerts.length === 0 ? (
+                            <motion.div
+                                key="empty"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="py-12 border border-dashed border-primary/20 dark:border-line/10 rounded-2xl flex flex-col items-center justify-center text-ink-subtle"
+                            >
+                                <CheckCircle2 className="w-10 h-10 mb-3 opacity-30" />
+                                <p className="font-black tracking-widest text-[11px] uppercase">
+                                    All quota thresholds within range
+                                </p>
+                            </motion.div>
+                        ) : (
+                            alerts.map((alert) => (
+                                <motion.div
+                                    key={alert._id}
+                                    layout
+                                    initial={{ opacity: 0, x: -16 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, scale: 0.97 }}
+                                    className="p-5 rounded-2xl border border-primary/15 dark:border-line/10 bg-surface-raised/60 hover:border-accent/35 transition-colors"
+                                >
+                                    <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+                                        <div className="flex gap-4 min-w-0">
+                                            <div className="mt-0.5 p-2 bg-accent/10 rounded-xl border border-accent/20 shrink-0">
+                                                <AlertTriangle className="w-4 h-4 text-accent-soft" />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <div className="flex items-center gap-2.5 mb-1 flex-wrap">
+                                                    <h3 className="font-black text-ink text-sm uppercase tracking-tight">
+                                                        {String(alert.type || 'AI quota alert').replace(/_/g, ' ')}
+                                                    </h3>
+                                                    <span className="px-2 py-0.5 bg-accent/15 text-accent-soft text-[8px] font-black rounded uppercase tracking-widest">
+                                                        {alert.severity || 'critical'}
+                                                    </span>
+                                                </div>
+                                                <p className="text-ink-muted text-sm mb-3 leading-relaxed max-w-2xl break-words">
+                                                    {alert.error_message}
+                                                </p>
+                                                <div className="flex items-center gap-5 flex-wrap">
+                                                    <span className="flex items-center gap-1.5 text-[10px] font-bold text-ink-subtle uppercase tracking-wider">
+                                                        <Clock className="w-3.5 h-3.5" />
+                                                        {new Date(alert.timestamp).toLocaleString()}
+                                                    </span>
+                                                    {alert.survey_id && (
+                                                        <span className="flex items-center gap-1.5 text-[10px] font-bold text-ink-subtle uppercase tracking-wider font-mono">
+                                                            <BarChart3 className="w-3.5 h-3.5" />
+                                                            {alert.survey_id}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="text-[10px] font-bold text-slate-400 truncate w-24">ID: {item._id}</div>
+                                        <button
+                                            onClick={() => handleAcknowledge(alert._id)}
+                                            className="btn-primary shrink-0 self-start"
+                                        >
+                                            Acknowledge
+                                        </button>
                                     </div>
-                                    <div className="text-right">
-                                        <span className="text-sm font-black text-white">${item.cost.toFixed(2)}</span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </aside>
-
-                    {/* Component Mix */}
-                    <aside className="p-8 bg-indigo-950/20 border border-indigo-500/10 rounded-[40px] space-y-6 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 blur-[60px] rounded-full -mr-16 -mt-16" />
-                        <h2 className="text-sm font-black uppercase tracking-[0.2em] italic flex items-center gap-3">
-                            <BarChart3 className="w-4 h-4 text-indigo-400" />
-                            Neural Surface Mix
-                        </h2>
-                        <div className="space-y-6">
-                            {status?.component_mix.map((comp) => (
-                                <div key={comp._id} className="space-y-2">
-                                    <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider">
-                                        <span className="text-slate-400">{comp._id.replace('_', ' ')}</span>
-                                        <span className="text-indigo-400">${comp.cost.toFixed(2)}</span>
-                                    </div>
-                                    <div className="h-1.5 w-full bg-indigo-950/50 rounded-full overflow-hidden">
-                                        <motion.div
-                                            initial={{ width: 0 }}
-                                            animate={{ width: `${(comp.cost / status.summary.total_cost_usd) * 100}%` }}
-                                            className="h-full bg-indigo-500 rounded-full"
-                                        />
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </aside>
+                                </motion.div>
+                            ))
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
         </div>
     );
 };
 
-const MetricCard = ({ label, value, icon, trend }: any) => (
-    <div className="p-8 bg-slate-900/40 border border-white/5 rounded-[40px] relative overflow-hidden group hover:border-brand-blue/30 transition-all animate-fade-in">
-        <div className="relative z-10 space-y-4">
-            <div className="flex items-center justify-between">
-                <div className="p-3 bg-white/5 rounded-2xl border border-white/5 group-hover:scale-110 transition-transform">
-                    {icon}
-                </div>
-                <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{trend}</div>
-            </div>
-            <div>
-                <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">{label}</p>
-                <h3 className="text-3xl font-black italic tracking-tighter text-white">{value}</h3>
-            </div>
+const TONES: Record<string, string> = {
+    blue: 'bg-primary/10 text-primary-soft',
+    sky: 'bg-[#21A0FF]/12 text-[#21A0FF]',
+    red: 'bg-accent/10 text-accent-soft',
+    coral: 'bg-[#E79D9E]/25 text-accent-soft',
+};
+
+const MetricCard = ({ icon: Icon, label, value, sub, tone = 'blue' }: any) => (
+    <div className="card-brand rounded-[1.75rem] p-6 relative overflow-hidden group transition-all hover:-translate-y-0.5 hover:border-accent/40">
+        {/* Same red-bloom graphic treatment as the other admin cards */}
+        <div
+            className="pointer-events-none absolute -top-8 -right-8 w-32 h-32 rounded-full blur-2xl opacity-70 group-hover:opacity-100 transition-opacity duration-500"
+            style={{
+                background:
+                    'radial-gradient(circle, rgba(231,157,158,0.55) 0%, rgba(205,57,59,0.20) 55%, transparent 78%)',
+            }}
+        />
+        <Icon
+            className="pointer-events-none absolute -top-1 -right-1 w-20 h-20 rotate-12 text-accent/20 group-hover:text-accent/30 transition-colors duration-500"
+            style={{ filter: 'drop-shadow(0 8px 18px rgba(205,57,59,0.35))' }}
+            strokeWidth={1.5}
+        />
+
+        <div className={`relative w-12 h-12 ${TONES[tone] || TONES.blue} rounded-2xl flex items-center justify-center mb-4`}>
+            <Icon size={24} />
         </div>
-        <div className="absolute bottom-0 right-0 w-24 h-24 bg-brand-blue/5 blur-[40px] rounded-full -mb-12 -mr-12" />
+        <p className="relative text-xs font-black uppercase tracking-widest text-ink-subtle mb-1">{label}</p>
+        <p className="relative text-2xl font-black text-ink">{value}</p>
+        {sub && (
+            <p className="relative text-[10px] font-bold text-ink-subtle mt-1.5">{sub}</p>
+        )}
     </div>
 );
 

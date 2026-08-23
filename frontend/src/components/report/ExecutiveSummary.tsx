@@ -1,3 +1,4 @@
+import { InsightsActionsSection } from './InsightsActionsSection';
 import { StrategicCommandSection } from './StrategicCommandSection';
 
 interface Finding {
@@ -26,60 +27,87 @@ interface OpportunityInsight {
     attribute: string;
 }
 
+/** Tokens worth highlighting: figures and comparative verdicts. */
+const EMPHASIS_SOURCE =
+    String.raw`\d[\d.,]*\s?%|\d[\d.,]*\s?(?:points?|pts?|bps)|N\s?=\s?\d+|` +
+    String.raw`(?:outperform\w*|underperform\w*|leads?|trails?|gap|risk|critical|absence|highest|lowest)`;
+
+/**
+ * Render a narrative sentence with the decision-relevant tokens picked out in
+ * the brand accent, so the Key Finding is scannable without the author having
+ * to mark anything up.
+ *
+ * Two regexes are used deliberately: a global one to split, and a non-global
+ * one to classify. Reusing one global regex for `.test()` would carry
+ * `lastIndex` between calls and mis-classify alternating tokens.
+ */
+function EmphasisedText({ text, className = '' }: { text?: string | null; className?: string }) {
+    const raw = String(text || '').trim();
+    if (!raw) return null;
+
+    const splitter = new RegExp(`(${EMPHASIS_SOURCE})`, 'gi');
+    const classifier = new RegExp(`^(?:${EMPHASIS_SOURCE})$`, 'i');
+
+    const parts = raw.split(splitter).filter((p) => p);
+    return (
+        <p className={className}>
+            {parts.map((part, i) =>
+                classifier.test(part) ? (
+                    <span key={i} className="text-accent-soft font-black">{part}</span>
+                ) : (
+                    <span key={i}>{part}</span>
+                ),
+            )}
+        </p>
+    );
+}
+
 export function ExecutiveSummary({
     summary,
     findings,
     opportunity_insights,
     surveyId,
     editable = false,
+    report,
 }: {
     summary?: string,
     findings?: Finding[],
     opportunity_insights?: OpportunityInsight[],
     surveyId?: string,
     editable?: boolean,
+    report?: any,
 }) {
     return (
-        <div className="space-y-12">
+        <div className="space-y-10">
             {summary && (
-                <div className="bg-white dark:bg-slate-900 p-10 rounded-[40px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] dark:shadow-2xl border border-indigo-100/50 dark:border-white/5 relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-2 h-full bg-indigo-600" />
-                    <div className="relative z-10">
-                        <h2 className="text-sm font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.4em] mb-4">Strategic Narrative</h2>
-                        <h3 className="text-4xl font-black text-slate-900 dark:text-white mb-8 tracking-tight">Key Finding</h3>
-                        <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-xl font-medium max-w-4xl">
-                            {summary}
-                        </p>
+                <div className="card-brand p-8 rounded-2xl relative overflow-hidden">
+                    {/* Brand spine: blue at the top resolving to red */}
+                    <div
+                        className="absolute top-0 left-0 w-1.5 h-full"
+                        style={{ background: 'linear-gradient(180deg, rgb(var(--c-primary)), rgb(var(--c-accent)))' }}
+                    />
+                    <div className="relative z-10 pl-3">
+                        <div className="flex items-center gap-2.5 mb-3">
+                            <h2 className="text-[20px] font-black text-primary-soft uppercase tracking-[0.18em]">
+                                Key Finding
+                            </h2>
+                            <span className="h-px flex-1 bg-primary/15" />
+                        </div>
+                        {/* Strip Arabic shape labels like (مثلث) and (مربع) which are already
+                            shown in the chart legend — they clutter the prose sentence. */}
+                        <EmphasisedText
+                            text={summary?.replace(/\s*\([\u0600-\u06FF\s]+\)/g, '').trim()}
+                            className="text-[15px] md:text-[16px] leading-[1.65] font-medium text-ink tracking-normal mt-1"
+                        />
                     </div>
-                    {/* Background decorative elements */}
-                    <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-indigo-500/5 rounded-full blur-3xl" />
                 </div>
             )}
 
-            {findings && findings.length > 0 && (
-                <div className="space-y-8">
-                    <div className="flex items-center gap-4 px-2">
-                        <div className="h-0.5 w-12 bg-slate-300 dark:bg-slate-700" />
-                        <h2 className="text-sm font-black text-slate-400 uppercase tracking-[0.4em]">Observations</h2>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {findings.map((f, i) => (
-                            <div key={i} className="bg-white dark:bg-slate-900/50 p-8 rounded-[32px] border border-slate-100 dark:border-white/5 shadow-[0_10px_40px_-5px_rgba(0,0,0,0.02)] transition-all hover:shadow-2xl hover:-translate-y-1 group">
-                                <div className="flex justify-between items-start mb-6">
-                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Finding #{String(i + 1).padStart(2, '0')}</span>
-                                    <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${f.impact === 'positive' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
-                                        f.impact === 'negative' ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' : 'bg-slate-500/10 text-slate-500 border border-slate-500/20'
-                                        }`}>
-                                        {f.impact}
-                                    </span>
-                                </div>
-                                <h4 className="text-xl font-black text-slate-800 dark:text-white mb-4 leading-tight group-hover:text-brand-blue transition-colors">{f.label}</h4>
-                                <p className="text-base text-slate-500 dark:text-slate-400 leading-relaxed font-medium">{f.finding}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
+            <InsightsActionsSection
+                findings={findings}
+                opportunityInsights={opportunity_insights}
+                report={report}
+            />
 
             {opportunity_insights && opportunity_insights.length > 0 && (
                 <StrategicCommandSection insights={opportunity_insights} surveyId={surveyId} editable={editable} />

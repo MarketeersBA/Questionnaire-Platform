@@ -216,13 +216,13 @@ const AudioRecorder: React.FC<Props> = ({
 
     const wrapperClass = compact
         ? 'space-y-3'
-        : 'bg-gradient-to-br from-brand-blue/5 to-white dark:from-brand-blue/10 dark:to-slate-900 p-6 rounded-2xl border border-brand-blue/20 border-dashed space-y-4';
+        : 'bg-gradient-to-br from-primary/5 to-white dark:from-primary/10 dark:to-slate-900 p-6 rounded-2xl border border-primary/20 border-dashed space-y-4';
 
     return (
         <div className={wrapperClass}>
             {isUploading ? (
                 <div className="flex flex-col items-center py-4">
-                    <Loader2 className="animate-spin text-brand-blue mb-2" size={28} />
+                    <Loader2 className="animate-spin text-primary-soft mb-2" size={28} />
                     <p className="text-sm font-medium text-slate-500">
                         {isAr ? 'جاري حفظ التسجيل...' : 'Saving your recording...'}
                     </p>
@@ -239,7 +239,7 @@ const AudioRecorder: React.FC<Props> = ({
                     className={`w-full select-none touch-none flex flex-col items-center justify-center py-5 rounded-2xl transition-all ${
                         isRecording
                             ? 'bg-rose-600 text-white shadow-lg shadow-rose-600/30'
-                            : 'bg-brand-blue text-white hover:bg-brand-blue/90 shadow-lg shadow-brand-blue/20'
+                            : 'bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20'
                     }`}
                 >
                     {isRecording ? (
