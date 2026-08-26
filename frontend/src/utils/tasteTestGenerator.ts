@@ -175,6 +175,16 @@ export function generateTasteTestModuleSchema(
 
     // 2. The Brand Loop
     allBrands.forEach((brand) => {
+        // Instruction Block per brand
+        layer2Sections.push({
+            title: `${brand} - ${language === 'ar' ? "تعليمات" : "Instructions"}`,
+            isInstruction: true,
+            module: 'taste_test',
+            content: language === 'ar'
+                ? `يرجى تذوق ${brand} الآن.`
+                : `Please taste ${brand} now.`
+        });
+
         // Unify the Sequence Loop
         const sequence = config.attribute_sequence && config.attribute_sequence.length > 0
             ? config.attribute_sequence

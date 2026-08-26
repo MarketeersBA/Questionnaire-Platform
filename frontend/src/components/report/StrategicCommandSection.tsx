@@ -110,10 +110,10 @@ export function StrategicCommandSection({
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
                 <div className="space-y-2">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-rose-500/10 rounded-xl">
-                            <Zap className="text-rose-500 w-5 h-5 fill-rose-500/20" />
+                        <div className="p-2 bg-primary/10 rounded-xl">
+                            <Zap className="text-primary-soft w-5 h-5 fill-primary/20" />
                         </div>
-                        <h2 className="text-xs font-black text-rose-500 uppercase tracking-[0.5em]">
+                        <h2 className="text-xs font-black text-primary-soft uppercase tracking-[0.5em]">
                             Strategic Intelligence
                         </h2>
                     </div>
@@ -141,7 +141,7 @@ export function StrategicCommandSection({
 
                         <div className="relative glass-panel rounded-[40px] overflow-hidden border border-line/80 dark:border-line/10 shadow-2xl transition-all duration-500 group-hover:-translate-y-2">
                             {/* Accent Glow */}
-                            <div className={`absolute top-0 left-0 w-full h-1.5 ${opp.impact === 'High' ? 'bg-rose-500' : 'bg-amber-500'} opacity-80`} />
+                            <div className="absolute top-0 left-0 w-full h-1.5 bg-primary opacity-80" />
 
                             <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
                                 {/* Left Column: Signal Intelligence */}

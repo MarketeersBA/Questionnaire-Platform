@@ -1,6 +1,6 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef, useLayoutEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Download, AlertCircle, RefreshCw, Activity, Database, Sparkles, LayoutPanelLeft, BarChart3, Maximize, ChevronLeft, ChevronRight, X, Sun, Moon, LayoutDashboard, ClipboardList, FileText, PanelLeftClose, PanelLeftOpen, ArrowUp, ChevronDown } from 'lucide-react';
+import { Download, AlertCircle, RefreshCw, Activity, Database, Sparkles, LayoutPanelLeft, BarChart3, Maximize, ChevronLeft, ChevronRight, X, Sun, Moon, LayoutDashboard, ClipboardList, FileText, ArrowUp, ChevronDown } from 'lucide-react';
 import { analytics } from '../services/api';
 import { toast } from 'sonner';
 import { useTheme } from '../context/ThemeContext';
@@ -161,6 +161,7 @@ export default function SurveyReport() {
     const [isSlicing, setIsSlicing] = useState(false);
     const [isFocusMode, setIsFocusMode] = useState(false);
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+    const enteredFullscreenRef = useRef(false);
 
     // Move activeGroupIndex to ReportContext
     // const [activeGroupIndex, setActiveGroupIndex] = useState(0);
@@ -168,14 +169,19 @@ export default function SurveyReport() {
     const toggleFocusMode = useCallback(() => {
         if (!isFocusMode) {
             setIsFocusMode(true);
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen();
+            enteredFullscreenRef.current = false;
+            const req = document.documentElement.requestFullscreen?.();
+            if (req && typeof (req as Promise<void>).then === 'function') {
+                (req as Promise<void>)
+                    .then(() => { enteredFullscreenRef.current = true; })
+                    .catch(() => { enteredFullscreenRef.current = false; });
             }
         } else {
             setIsFocusMode(false);
-            if (document.fullscreenElement && document.exitFullscreen) {
-                document.exitFullscreen();
+            if (enteredFullscreenRef.current && document.fullscreenElement) {
+                document.exitFullscreen?.().catch(() => { });
             }
+            enteredFullscreenRef.current = false;
         }
     }, [isFocusMode]);
 
@@ -183,13 +189,17 @@ export default function SurveyReport() {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape' && isFocusMode) {
                 setIsFocusMode(false);
-                if (document.fullscreenElement && document.exitFullscreen) {
-                    document.exitFullscreen();
+                if (enteredFullscreenRef.current && document.fullscreenElement) {
+                    document.exitFullscreen?.().catch(() => { });
                 }
+                enteredFullscreenRef.current = false;
             }
         };
         const handleFullscreenChange = () => {
-            if (!document.fullscreenElement) {
+            // Only tear down focus mode when *our* fullscreen session ends
+            // (Esc / browser UI). Do not close if fullscreen was never granted.
+            if (!document.fullscreenElement && enteredFullscreenRef.current) {
+                enteredFullscreenRef.current = false;
                 setIsFocusMode(false);
             }
         };
@@ -495,12 +505,65 @@ function ReportContent({
         return ids;
     }, [report, groupNames, hasNewPipeline]);
 
-    const activeSectionId = useScrollSpy(sectionIds, 140);
-
     // Rail visibility is user-controlled; focus mode hides it regardless.
     const [railOpen, setRailOpen] = useState(true);
     const [goToOpen, setGoToOpen] = useState(false);
     const railVisible = railOpen && !isFocusMode;
+    const wasFocusMode = useRef(false);
+    const headerRef = useRef<HTMLElement>(null);
+    const [headerHeight, setHeaderHeight] = useState(96);
+
+    const activeSectionId = useScrollSpy(sectionIds, Math.max(120, headerHeight + 16));
+
+    // Entering focus mode: jump to the section the reader was looking at.
+    useEffect(() => {
+        if (isFocusMode && !wasFocusMode.current) {
+            if (activeSectionId?.startsWith('group-')) {
+                const idx = Number(activeSectionId.slice('group-'.length));
+                if (Number.isInteger(idx) && idx >= 0 && idx < groupNames.length) {
+                    setActiveGroupIndex(idx);
+                }
+            } else if (groupNames.length > 0 && activeGroupIndex >= groupNames.length) {
+                setActiveGroupIndex(0);
+            }
+        }
+        wasFocusMode.current = isFocusMode;
+    }, [isFocusMode, activeSectionId, groupNames, activeGroupIndex, setActiveGroupIndex]);
+
+    // Keep slide index in range if groups change under us.
+    useEffect(() => {
+        if (groupNames.length === 0) return;
+        if (activeGroupIndex > groupNames.length - 1) {
+            setActiveGroupIndex(groupNames.length - 1);
+        }
+    }, [groupNames.length, activeGroupIndex, setActiveGroupIndex]);
+
+    // Arrow keys move between slides while immersed.
+    useEffect(() => {
+        if (!isFocusMode || groupNames.length === 0) return;
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+                e.preventDefault();
+                setActiveGroupIndex((prev: number) => Math.min(groupNames.length - 1, prev + 1));
+            } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                e.preventDefault();
+                setActiveGroupIndex((prev: number) => Math.max(0, prev - 1));
+            }
+        };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [isFocusMode, groupNames.length, setActiveGroupIndex]);
+
+    const focusGroupName = groupNames[Math.min(activeGroupIndex, Math.max(groupNames.length - 1, 0))];
+    const focusCharts = focusGroupName ? chartGroups[focusGroupName] : undefined;
+
+    // Lock page scroll while the immersion overlay owns the viewport.
+    useEffect(() => {
+        if (!isFocusMode) return;
+        const prev = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        return () => { document.body.style.overflow = prev; };
+    }, [isFocusMode]);
 
     // Back-to-top only earns its place once the reader is well down the page.
     const [showToTop, setShowToTop] = useState(false);
@@ -514,6 +577,21 @@ function ReportContent({
     const scrollToTop = () =>
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
+    // Keep a live spacer under the fixed header so content never sits underneath it.
+    useLayoutEffect(() => {
+        const el = headerRef.current;
+        if (!el || isFocusMode) return;
+        const update = () => setHeaderHeight(el.offsetHeight);
+        update();
+        const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(update) : null;
+        ro?.observe(el);
+        window.addEventListener('resize', update);
+        return () => {
+            ro?.disconnect();
+            window.removeEventListener('resize', update);
+        };
+    }, [isFocusMode, report?.project_name, railVisible]);
+
     return (
         <div className={`min-h-screen bg-canvas text-ink selection:bg-primary/20 transition-[padding] duration-500 ${railVisible ? "xl:pl-[17.5rem]" : ""}`}>
             {/* Global Mesh Gradient Background */}
@@ -522,8 +600,11 @@ function ReportContent({
                 <div className="mesh-orb w-[800px] h-[800px] bg-accent/[0.05] bottom-0 right-[-10%]"></div>
             </div>
 
-            {/* Premium Sticky Header */}
-            <header className={`sticky top-0 z-40 bg-surface/95 backdrop-blur-2xl shadow-[0_1px_0_rgb(var(--c-primary)/0.12),0_8px_24px_-16px_rgb(var(--c-primary)/0.25)] py-5 transition-all duration-700 ${isFocusMode ? '-translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
+            {/* Fixed report chrome — sticky fails under App's overflow-hidden root */}
+            <header
+                ref={headerRef}
+                className={`fixed top-0 right-0 z-50 bg-surface/95 backdrop-blur-2xl shadow-[0_1px_0_rgb(var(--c-primary)/0.12),0_8px_24px_-16px_rgb(var(--c-primary)/0.25)] py-5 transition-[transform,opacity,left] duration-500 ${railVisible ? 'left-0 xl:left-[17.5rem]' : 'left-0'} ${isFocusMode ? '-translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}
+            >
                 {/* Brand underline: the blue-to-red gradient, used here as the
                     header's only rule so light mode reads crisp instead of pale. */}
                 <div
@@ -579,9 +660,11 @@ function ReportContent({
                             onApply={handleApplySlice}
                             isApplying={isSlicing}
                         />
+                        {/* Focus mode — temporarily hidden from the top bar
                         <button onClick={toggleFocusMode} className="p-3 bg-primary/10 dark:bg-primary/20 text-primary-soft border border-primary/20 dark:border-primary/30 rounded-2xl hover:bg-primary hover:text-white transition-all shadow-sm" title="Enter Focus Mode">
                             <Maximize className="h-5 w-5" />
                         </button>
+                        */}
                         <button
                             onClick={toggleTheme}
                             className="p-3 bg-surface border border-line/80 dark:border-line/10 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-ink-muted group relative overflow-hidden active:scale-90"
@@ -608,6 +691,7 @@ function ReportContent({
                         <button onClick={() => handleGenerate(true)} className="w-11 h-11 grid place-items-center bg-surface border border-primary/20 rounded-2xl hover:border-primary/50 hover:bg-primary/[0.06] transition-all text-ink-muted hover:text-primary-soft" title="Regenerate">
                             <RefreshCw className="h-5 w-5" />
                         </button>
+                        {/* AI cost dashboard — temporarily hidden from the top bar
                         {localStorage.getItem('role') === 'admin' && (
                             <button
                                 onClick={handleViewAICosts}
@@ -620,6 +704,7 @@ function ReportContent({
                                 )}
                             </button>
                         )}
+                        */}
                         <button
                             onClick={handleDownload}
                             className="btn-premium flex items-center gap-3 active:scale-95 transition-transform"
@@ -634,16 +719,19 @@ function ReportContent({
                 </div>
             </header>
 
+            {/* Reserve vertical space so the fixed header does not cover content */}
+            {!isFocusMode && <div aria-hidden style={{ height: headerHeight }} />}
+
             {/* Immersive Focus Mode Overlay (Slide Presentation Engine) */}
             {isFocusMode && (
-                <div className="fixed inset-0 z-[100] bg-surface p-8 md:p-12 overflow-hidden flex flex-col animate-fade-in focus-mode-overlay">
-                    <div className="flex justify-between items-center mb-10 shrink-0">
-                        <div className="flex items-center gap-6">
-                            <div className="p-4 bg-primary/10 rounded-2xl border border-primary/20">
-                                <Activity className="h-8 w-8 text-primary-soft" />
+                <div className="fixed inset-0 z-[100] bg-surface p-4 md:p-8 overflow-hidden flex flex-col animate-fade-in focus-mode-overlay">
+                    <div className="flex justify-between items-center mb-4 md:mb-6 shrink-0">
+                        <div className="flex items-center gap-4 md:gap-6 min-w-0">
+                            <div className="p-3 md:p-4 bg-primary/10 rounded-2xl border border-primary/20 shrink-0">
+                                <Activity className="h-6 w-6 md:h-8 md:w-8 text-primary-soft" />
                             </div>
-                            <div>
-                                <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight italic text-ink leading-tight">
+                            <div className="min-w-0">
+                                <h2 className="text-xl md:text-3xl font-black uppercase tracking-tight italic text-ink leading-tight truncate">
                                     {report.project_name}
                                 </h2>
                                 <div className="flex items-center gap-3 mt-1">
@@ -652,16 +740,16 @@ function ReportContent({
                                 </div>
                             </div>
                         </div>
-                        <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-2 px-6 py-3 bg-surface-sunken rounded-2xl border border-line/80 dark:border-line/10 mr-4">
+                        <div className="flex items-center gap-3 md:gap-4 shrink-0">
+                            <div className="flex items-center gap-2 px-4 md:px-6 py-2.5 md:py-3 bg-surface-sunken rounded-2xl border border-line/80 dark:border-line/10">
                                 <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Slide</span>
-                                <span className="text-primary-soft font-black font-mono text-lg">{activeGroupIndex + 1}</span>
+                                <span className="text-primary-soft font-black font-mono text-lg">{Math.min(activeGroupIndex, Math.max(groupNames.length - 1, 0)) + 1}</span>
                                 <span className="text-slate-600 font-bold mx-1">/</span>
                                 <span className="text-slate-500 font-bold font-mono">{groupNames.length}</span>
                             </div>
                             <button
                                 onClick={toggleTheme}
-                                className="p-4 bg-surface-sunken border border-line/80 dark:border-line/10 rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-800 transition-all text-ink-muted relative overflow-hidden active:scale-95"
+                                className="p-3 md:p-4 bg-surface-sunken border border-line/80 dark:border-line/10 rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-800 transition-all text-ink-muted relative overflow-hidden active:scale-95"
                                 title="Toggle Theme"
                             >
                                 <motion.div
@@ -684,65 +772,77 @@ function ReportContent({
                             </button>
                             <button
                                 onClick={toggleFocusMode}
-                                className="p-4 bg-surface-sunken border border-line/80 dark:border-line/10 rounded-3xl hover:bg-rose-500/10 hover:text-rose-500 transition-all text-slate-400"
+                                className="p-3 md:p-4 bg-surface-sunken border border-line/80 dark:border-line/10 rounded-3xl hover:bg-rose-500/10 hover:text-rose-500 transition-all text-slate-400"
+                                title="Exit Focus Mode"
                             >
-                                <X className="h-8 w-8" />
+                                <X className="h-7 w-7 md:h-8 md:w-8" />
                             </button>
                         </div>
                     </div>
 
-                    <div className="flex-1 min-h-0 flex items-center gap-8 relative overflow-hidden group/nav">
+                    <div className="flex-1 min-h-0 flex items-stretch gap-3 md:gap-6 relative">
                         {/* Slide Navigation: Previous */}
                         <button
-                            disabled={activeGroupIndex === 0}
-                            onClick={() => setActiveGroupIndex((prev: any) => prev - 1)}
-                            className={`p-6 rounded-full border bg-surface shadow-2xl transition-all z-20 shrink-0 ${activeGroupIndex === 0 ? 'opacity-0 scale-90 pointer-events-none' : 'opacity-0 group-hover/nav:opacity-100 scale-100 active:scale-90 border-line/80 dark:border-line/10 text-slate-400 hover:text-primary-soft hover:border-primary/30'}`}
+                            disabled={activeGroupIndex <= 0}
+                            onClick={() => setActiveGroupIndex((prev: number) => Math.max(0, prev - 1))}
+                            className={`self-center p-4 md:p-5 rounded-full border bg-surface shadow-xl transition-all z-20 shrink-0 ${activeGroupIndex <= 0 ? 'opacity-0 scale-90 pointer-events-none' : 'opacity-70 hover:opacity-100 active:scale-90 border-line/80 dark:border-line/10 text-slate-400 hover:text-primary-soft hover:border-primary/30'}`}
+                            title="Previous slide"
+                            aria-label="Previous slide"
                         >
-                            <ChevronLeft className="h-10 w-10" />
+                            <ChevronLeft className="h-8 w-8 md:h-10 md:w-10" />
                         </button>
 
-                        <div className="flex-1 h-full min-h-0 relative">
-                            <AnimatePresence mode="wait">
-                                <motion.div
-                                    key={groupNames[activeGroupIndex]}
-                                    initial={{ opacity: 0, x: 50 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -50 }}
-                                    transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-                                    className="h-full flex flex-col pt-4"
-                                >
-                                    <div className="flex items-center gap-6 mb-8 shrink-0">
-                                        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-brand-blue/20 to-transparent" />
-                                        <h3 className={`text-4xl md:text-5xl font-black uppercase tracking-tighter italic ${isDark ? 'text-white' : 'text-slate-900'}`}>{groupNames[activeGroupIndex]}</h3>
-                                        <div className="h-px flex-1 bg-gradient-to-l from-transparent via-brand-blue/20 to-transparent" />
-                                    </div>
-                                    <div className="flex-1 min-h-0">
-                                        <TabbedChartGroup
-                                            groupName={groupNames[activeGroupIndex]}
-                                            charts={chartGroups[groupNames[activeGroupIndex]]}
-                                            isFocusMode={true}
-                                        />
-                                    </div>
-                                </motion.div>
-                            </AnimatePresence>
+                        <div className="flex-1 h-full min-h-0 min-w-0 relative">
+                            {focusCharts && focusGroupName ? (
+                                <AnimatePresence mode="wait">
+                                    <motion.div
+                                        key={focusGroupName}
+                                        initial={{ opacity: 0, x: 40 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: -40 }}
+                                        transition={{ type: 'spring', stiffness: 280, damping: 28 }}
+                                        className="absolute inset-0 flex flex-col"
+                                    >
+                                        <div className="flex items-center gap-4 md:gap-6 mb-3 md:mb-4 shrink-0">
+                                            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-brand-blue/20 to-transparent" />
+                                            <h3 className={`text-2xl md:text-4xl font-black uppercase tracking-tighter italic truncate max-w-[70vw] ${isDark ? 'text-white' : 'text-slate-900'}`}>{focusGroupName}</h3>
+                                            <div className="h-px flex-1 bg-gradient-to-l from-transparent via-brand-blue/20 to-transparent" />
+                                        </div>
+                                        <div className="flex-1 min-h-0">
+                                            <TabbedChartGroup
+                                                groupName={focusGroupName}
+                                                charts={focusCharts}
+                                                isFocusMode={true}
+                                            />
+                                        </div>
+                                    </motion.div>
+                                </AnimatePresence>
+                            ) : (
+                                <div className="h-full grid place-items-center text-ink-subtle font-bold uppercase tracking-widest text-sm">
+                                    No chart groups available
+                                </div>
+                            )}
                         </div>
 
                         {/* Slide Navigation: Next */}
                         <button
-                            disabled={activeGroupIndex === groupNames.length - 1}
-                            onClick={() => setActiveGroupIndex((prev: any) => prev + 1)}
-                            className={`p-6 rounded-full border bg-surface shadow-2xl transition-all z-20 shrink-0 ${activeGroupIndex === groupNames.length - 1 ? 'opacity-0 scale-90 pointer-events-none' : 'opacity-0 group-hover/nav:opacity-100 scale-100 active:scale-90 border-line/80 dark:border-line/10 text-slate-400 hover:text-primary-soft hover:border-primary/30'}`}
+                            disabled={activeGroupIndex >= groupNames.length - 1}
+                            onClick={() => setActiveGroupIndex((prev: number) => Math.min(groupNames.length - 1, prev + 1))}
+                            className={`self-center p-4 md:p-5 rounded-full border bg-surface shadow-xl transition-all z-20 shrink-0 ${activeGroupIndex >= groupNames.length - 1 ? 'opacity-0 scale-90 pointer-events-none' : 'opacity-70 hover:opacity-100 active:scale-90 border-line/80 dark:border-line/10 text-slate-400 hover:text-primary-soft hover:border-primary/30'}`}
+                            title="Next slide"
+                            aria-label="Next slide"
                         >
-                            <ChevronRight className="h-10 w-10" />
+                            <ChevronRight className="h-8 w-8 md:h-10 md:w-10" />
                         </button>
                     </div>
 
-                    <div className="mt-10 shrink-0 flex justify-center gap-3">
+                    <div className="mt-4 md:mt-6 shrink-0 flex justify-center gap-2.5">
                         {groupNames.map((_: any, idx: number) => (
                             <button
                                 key={`nav-dot-${idx}`}
                                 onClick={() => setActiveGroupIndex(idx)}
                                 className={`h-1.5 rounded-full transition-all duration-500 ${idx === activeGroupIndex ? 'w-12 bg-primary shadow-[0_0_10px_rgba(59,130,246,0.5)]' : 'w-3 bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20'}`}
+                                aria-label={`Go to slide ${idx + 1}`}
                             />
                         ))}
                     </div>
@@ -756,6 +856,17 @@ function ReportContent({
                 <aside
                     className={`fixed left-0 top-0 bottom-0 w-[17.5rem] brand-rail z-50 hidden xl:flex flex-col transition-transform duration-500 ${railVisible ? 'translate-x-0' : 'xl:-translate-x-full pointer-events-none'}`}
                 >
+                    {railVisible && (
+                        <button
+                            type="button"
+                            onClick={() => setRailOpen(false)}
+                            className="absolute top-8 -right-3 z-30 w-6 h-6 rounded-full bg-white dark:bg-slate-800 border border-white/20 dark:border-slate-600 shadow-lg shadow-black/25 flex items-center justify-center text-primary hover:scale-110 hover:bg-primary hover:text-white hover:border-primary active:scale-95 transition-all"
+                            title="Collapse sidebar"
+                            aria-label="Collapse sidebar"
+                        >
+                            <ChevronLeft size={14} strokeWidth={2.5} />
+                        </button>
+                    )}
                     {/* Brand head — same mark and wording as the main rail */}
                     <div className="relative px-5 py-6 border-b border-white/[0.07] shrink-0 overflow-hidden">
                         <div
@@ -787,6 +898,7 @@ function ReportContent({
                             </div>
                         </div>
 
+                        {/* Sample size + brand count under survey name — temporarily hidden
                         {report.base_n > 0 && (
                             <div className="relative mt-3 flex items-center gap-1.5 text-[10px] font-semibold text-white/50">
                                 <Database className="w-2.5 h-2.5 shrink-0" />
@@ -795,6 +907,7 @@ function ReportContent({
                                 <span>{(report.brands || report.brand_list)?.length || 0} brands</span>
                             </div>
                         )}
+                        */}
                     </div>
 
                     {/* Section navigation */}
@@ -805,7 +918,7 @@ function ReportContent({
                         <div className="pointer-events-none absolute inset-x-0 top-0 h-6 z-10 bg-gradient-to-b from-[rgb(var(--c-chrome))] to-transparent" />
                         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-6 z-10 bg-gradient-to-t from-[rgb(var(--c-chrome-deep))] to-transparent" />
 
-                        <div className="h-full overflow-y-auto overflow-x-hidden custom-scrollbar px-3 py-4">
+                        <div className="h-full overflow-y-auto overflow-x-hidden scrollbar-none px-3 py-4">
                         <div className="px-3 pb-2.5 text-[9px] font-black uppercase tracking-[0.3em] text-white/35">
                             Architecture
                         </div>
@@ -945,23 +1058,7 @@ function ReportContent({
                         </AnimatePresence>
                     </div>
 
-                    {/* Collapse sits on its own, separated from both groups */}
-                    <div className="shrink-0 px-3 py-3 mt-1 border-t border-white/[0.07]">
-                        <button
-                            onClick={() => setRailOpen(false)}
-                            className="nav-item w-full"
-                            title="Collapse sidebar"
-                        >
-                            <span className="shrink-0 w-8 h-8 rounded-lg bg-white/[0.07] grid place-items-center">
-                                <PanelLeftClose className="w-4 h-4" />
-                            </span>
-                            <span className="text-[12.5px] uppercase tracking-[0.06em] truncate">
-                                Collapse
-                            </span>
-                        </button>
-                    </div>
-
-                    {/* Sample size */}
+                    {/* Sample size footer — temporarily hidden
                     {report.base_n > 0 && (
                         <div className="shrink-0 px-5 py-4 border-t border-white/[0.07]">
                             <div className="flex items-center justify-between mb-1.5">
@@ -987,6 +1084,7 @@ function ReportContent({
                             </div>
                         </div>
                     )}
+                    */}
                 </aside>
 
                 {/* Main Content - Padded to avoid overlap */}
@@ -1021,8 +1119,8 @@ function ReportContent({
                     {report.insights?.market_position_report && (
                         <section id="strategic-positioning" className="scroll-mt-40 animate-slide-up">
                             <div className="flex items-center gap-4 mb-12">
-                                <div className="h-1 w-12 bg-emerald-500 rounded-full"></div>
-                                <h2 className="text-3xl font-black uppercase tracking-widest italic text-slate-400">Strategic Intelligence</h2>
+                                <div className="h-1 w-12 bg-primary rounded-full"></div>
+                                <h2 className="text-3xl font-black uppercase tracking-widest italic text-primary-soft">Strategic Intelligence</h2>
                             </div>
                             <MarketPositionSection
                                 data={report.insights.market_position_report}
@@ -1033,9 +1131,9 @@ function ReportContent({
 
                     {hasNewPipeline ? (
                         groupNames.map((group: string, gIdx: number) => (
-                            <section key={group} id={`group-${gIdx}`} className="scroll-mt-40 space-y-16 animate-slide-up" style={{ animationDelay: `${gIdx * 0.1}s` }}>
-                                <div className="flex items-center justify-between border-b border-line/80 dark:border-line/10 pb-8">
-                                    <div className="space-y-2">
+                            <section key={group} id={`group-${gIdx}`} className="scroll-mt-40 space-y-4 animate-slide-up" style={{ animationDelay: `${gIdx * 0.1}s` }}>
+                                <div className="flex items-center justify-between border-b border-line/80 dark:border-line/10 pb-4">
+                                    <div className="space-y-1">
                                         <div className="text-xs font-black text-primary-soft uppercase tracking-[0.4em]">Section — {String(gIdx + 1).padStart(2, '0')}</div>
                                         <h3 className="text-3xl font-black font-display tracking-tight text-ink">{group}</h3>
                                     </div>
@@ -1044,9 +1142,7 @@ function ReportContent({
                                     </div>
                                 </div>
 
-                                <div className="mt-8">
-                                    <TabbedChartGroup groupName={group} charts={chartGroups[group]} isFocusMode={isFocusMode} />
-                                </div>
+                                <TabbedChartGroup groupName={group} charts={chartGroups[group]} isFocusMode={false} />
                             </section>
                         ))
                     ) : (
@@ -1062,7 +1158,7 @@ function ReportContent({
                                 <div className="grid grid-cols-1 gap-12">
                                     {section.charts?.map((chart: any, cIdx: number) => (
                                         <div key={cIdx} className="hover:scale-[1.01] transition-transform duration-500">
-                                            <ChartRenderer chart={chart} isFocusMode={isFocusMode} />
+                                            <ChartRenderer chart={chart} isFocusMode={false} />
                                         </div>
                                     ))}
                                 </div>
@@ -1096,7 +1192,7 @@ function ReportContent({
                             className="hidden xl:grid fixed left-5 top-28 z-50 w-11 h-11 place-items-center rounded-2xl text-white shadow-lg shadow-primary/30 transition-transform hover:scale-105 active:scale-95"
                             style={{ background: 'linear-gradient(135deg, rgb(var(--c-primary)), rgb(var(--c-accent)))' }}
                         >
-                            <PanelLeftOpen className="w-5 h-5" />
+                            <ChevronRight className="w-5 h-5" />
                         </button>
                     )}
 
