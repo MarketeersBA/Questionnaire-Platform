@@ -19,6 +19,7 @@ export default function Login() {
       const response = await auth.login(username.trim(), password.trim());
       localStorage.setItem('token', response.access_token);
       localStorage.setItem('role', response.role || 'user');
+      localStorage.setItem('username', username.trim());
       navigate('/dashboard');
     } catch (err: any) {
       if (err.response?.status === 401) {

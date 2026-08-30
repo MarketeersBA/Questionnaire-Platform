@@ -88,38 +88,56 @@ export function TornadoChart({ data: chartDataInput }: { data: any }) {
 
     if (!chartData.length) return <div className="text-slate-500 text-center py-20">No data available</div>;
 
-    const height = Math.max(400, chartData.length * 42 + 80);
+    const angled = chartData.length > 6;
+    const barSize = Math.max(14, Math.min(36, Math.floor(520 / chartData.length)));
 
     return (
-        <div className="relative w-full p-6 bg-transparent h-full">
-            <ResponsiveContainer width="100%" height={height}>
-                <BarChart data={chartData} layout="vertical" margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+        <div className="relative w-full p-4 bg-transparent h-full">
+            <ResponsiveContainer width="100%" height={380}>
+                <BarChart
+                    data={chartData}
+                    margin={{ top: 12, right: 16, left: 8, bottom: angled ? 72 : 36 }}
+                >
                     <CartesianGrid
-                        strokeDasharray="3 3" horizontal vertical
+                        strokeDasharray="3 3"
+                        vertical={false}
                         stroke={isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)'}
                     />
                     <XAxis
-                        type="number" domain={[0, 100]}
-                        tickFormatter={(v) => `${v}%`}
+                        dataKey="name"
+                        interval={0}
+                        angle={angled ? -35 : 0}
+                        textAnchor={angled ? 'end' : 'middle'}
+                        height={angled ? 80 : 40}
                         tick={{ fill: isDark ? '#94a3b8' : '#475569', fontSize: 11, fontWeight: 700 }}
-                        axisLine={false} tickLine={false}
-                        label={{
-                            value: 'DRIVER IMPACT (CORRELATION TO OVERALL LIKENESS %)',
-                            position: 'bottom', offset: 0,
-                            fill: isDark ? '#475569' : '#64748b',
-                            fontSize: 9, fontStyle: 'italic', fontWeight: 900, letterSpacing: '0.2em',
-                        }}
+                        axisLine={false}
+                        tickLine={false}
                     />
                     <YAxis
-                        dataKey="name" type="category"
-                        tick={{ fill: isDark ? '#94a3b8' : '#475569', fontSize: 11, fontWeight: 800 }}
-                        axisLine={false} tickLine={false} width={170}
+                        type="number"
+                        domain={[0, 100]}
+                        tickFormatter={(v) => `${v}%`}
+                        tick={{ fill: isDark ? '#94a3b8' : '#475569', fontSize: 11, fontWeight: 700 }}
+                        axisLine={false}
+                        tickLine={false}
+                        width={44}
+                        label={{
+                            value: 'IMPACT %',
+                            angle: -90,
+                            position: 'insideLeft',
+                            offset: 4,
+                            fill: isDark ? '#475569' : '#64748b',
+                            fontSize: 9,
+                            fontStyle: 'italic',
+                            fontWeight: 900,
+                            letterSpacing: '0.15em',
+                        }}
                     />
                     <Tooltip
                         cursor={{ fill: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)' }}
                         content={<DriverTooltip />}
                     />
-                    <Bar dataKey="impact" radius={[0, 8, 8, 0]} barSize={20}>
+                    <Bar dataKey="impact" radius={[8, 8, 0, 0]} barSize={barSize}>
                         {chartData.map((_, index) => (
                             <Cell
                                 key={`cell-${index}`}

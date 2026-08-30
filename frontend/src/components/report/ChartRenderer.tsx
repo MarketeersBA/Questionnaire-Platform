@@ -122,7 +122,9 @@ export function ChartRenderer({
     const isCompactCard =
         chartType === 'scorecard' ||
         chartType === 'horizontal_bar' ||
-        chartType === 'preference_bar';
+        chartType === 'preference_bar' ||
+        chartType === 'driver_ranking' ||
+        chartType === 'profile_chart';
     let Component = CHART_MAP[chartType] || DataTable;
     let displayTitle = chart.title;
 

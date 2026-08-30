@@ -77,7 +77,7 @@ export function AttributeProfileChart({ data }: { data: any }) {
 
     if (!chartData.length) {
         return (
-            <div className="flex flex-col items-center justify-center h-[400px] text-slate-500 italic">
+            <div className="flex flex-col items-center justify-center h-[280px] text-slate-500 italic">
                 No performance data available to display.
             </div>
         );
@@ -88,11 +88,171 @@ export function AttributeProfileChart({ data }: { data: any }) {
     );
     const maxVal = allValues.length ? Math.max(...allValues) : 0;
     const domain: [number, number] = maxVal > 5 ? [1, 10] : [1, 5];
+    const mid = (domain[0] + domain[1]) / 2;
+    const angled = chartData.length > 6;
+
+    const legendLabel = (ds: any) => {
+        const raw = String(ds.label || ds.brand || '').trim();
+        // Drop sample-size suffixes like "(N=400)" from legend chips.
+        return raw.replace(/\s*\(\s*n\s*=\s*\d+\s*\)\s*$/i, '').trim() || raw;
+    };
 
     return (
-        <div className="w-full mt-4 flex flex-col gap-6">
-            {/* Advanced Interactive Legend */}
-            <div className="flex flex-wrap gap-2 mb-6">
+        <div className="w-full flex flex-col gap-4">
+            <div className="w-full h-[380px] relative">
+                {/* Visual Gradient Background for Context (dislike → like on Y) */}
+                <div className="absolute inset-0 flex flex-col pointer-events-none opacity-[0.03]">
+                    <div className="flex-1 bg-gradient-to-b from-primary to-transparent" />
+                    <div className="flex-1 bg-gradient-to-t from-accent to-transparent" />
+                </div>
+
+                <ResponsiveContainer width="100%" height="100%">
+                    <LineChart
+                        data={chartData}
+                        margin={{ top: 16, right: 24, left: 8, bottom: angled ? 68 : 28 }}
+                    >
+                        <defs>
+                            {datasets.map((_ds: any, idx: number) => {
+                                return (
+                                    <filter key={`glow-${idx}`} id={`glow-${idx}`} x="-20%" y="-20%" width="140%" height="140%">
+                                        <feGaussianBlur stdDeviation="3" result="blur" />
+                                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                                    </filter>
+                                );
+                            })}
+                        </defs>
+
+                        <CartesianGrid
+                            horizontal={true}
+                            vertical={false}
+                            stroke={isDark ? '#FFFFFF' : '#0F172A'}
+                            strokeOpacity={isDark ? 0.05 : 0.08}
+                            strokeDasharray="4 4"
+                        />
+
+                        <XAxis
+                            dataKey="name"
+                            type="category"
+                            interval={0}
+                            angle={angled ? -35 : 0}
+                            textAnchor={angled ? 'end' : 'middle'}
+                            height={angled ? 72 : 36}
+                            tick={{
+                                fill: isDark ? '#E2E8F0' : '#1E293B',
+                                fontSize: 11,
+                                fontWeight: 800,
+                            }}
+                            axisLine={{ stroke: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(15,23,42,0.15)', strokeWidth: 1 }}
+                            tickLine={false}
+                        />
+
+                        <YAxis
+                            type="number"
+                            domain={domain}
+                            ticks={domain[1] === 10 ? [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] : [1, 2, 3, 4, 5]}
+                            tick={{ fill: isDark ? '#94A3B8' : '#475569', fontSize: 10, fontWeight: 900 }}
+                            axisLine={false}
+                            tickLine={false}
+                            width={36}
+                            label={{
+                                value: 'LIKE ↑',
+                                angle: -90,
+                                position: 'insideLeft',
+                                offset: 0,
+                                fill: isDark ? '#64748b' : '#64748b',
+                                fontSize: 9,
+                                fontWeight: 900,
+                                letterSpacing: '0.12em',
+                            }}
+                        />
+
+                        <Tooltip
+                            cursor={{ stroke: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(37,94,145,0.07)', strokeWidth: 40 }}
+                            content={({ active, payload }) => {
+                                if (active && payload && payload.length) {
+                                    return (
+                                        <div className="bg-[#0f172a]/95 backdrop-blur-xl border border-white/20 p-5 rounded-3xl shadow-2xl min-w-[220px] animate-in zoom-in duration-200">
+                                            <div className="text-[10px] uppercase font-black tracking-widest text-slate-500 mb-4 pb-2 border-b border-white/5 font-mono">
+                                                {payload[0].payload.name}
+                                            </div>
+                                            <div className="flex flex-col gap-3">
+                                                {payload.map((entry: any, i: number) => (
+                                                    <div key={i} className="flex justify-between items-center group">
+                                                        <div className="flex items-center gap-3">
+                                                            <div
+                                                                className="w-2.5 h-2.5 rounded-full shadow-[0_0_8px_rgba(255,255,255,0.3)]"
+                                                                style={{ backgroundColor: entry.color }}
+                                                            />
+                                                            <span className="text-xs font-bold text-slate-300 uppercase tracking-tight">
+                                                                {String(entry.name).replace(/\s*\(\s*n\s*=\s*\d+\s*\)\s*$/i, '').split('(')[0].trim()}
+                                                            </span>
+                                                        </div>
+                                                        <span className="text-sm font-black text-white font-mono tabular-nums">
+                                                            {Number(entry.value).toFixed(2)}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                }
+                                return null;
+                            }}
+                        />
+
+                        <ReferenceLine
+                            y={mid}
+                            stroke={isDark ? 'rgba(255,255,255,0.18)' : 'rgba(15,23,42,0.18)'}
+                            strokeDasharray="5 5"
+                            label={{
+                                position: 'insideTopRight',
+                                value: `NEUTRAL (${mid})`,
+                                fill: '#64748b',
+                                fontSize: 9,
+                                fontWeight: 900,
+                                offset: 8,
+                            }}
+                        />
+
+                        {datasets.map((ds: any, idx: number) => {
+                            const brand = ds.brand || ds.label;
+                            if (!visibleBrands.includes(brand)) return null;
+
+                            const color = ds.is_benchmark ? '#94a3b8' : COLORS[idx % COLORS.length];
+
+                            return (
+                                <Line
+                                    key={brand}
+                                    type="monotone"
+                                    dataKey={brand}
+                                    name={legendLabel(ds) || brand}
+                                    stroke={color}
+                                    strokeWidth={ds.is_benchmark ? 3 : 4}
+                                    strokeDasharray={ds.is_benchmark ? '10 5' : '0'}
+                                    dot={<CustomDot />}
+                                    activeDot={{
+                                        r: 8,
+                                        fill: color,
+                                        stroke: '#fff',
+                                        strokeWidth: 3,
+                                        className: 'animate-pulse',
+                                    }}
+                                    connectNulls={true}
+                                    isAnimationActive={true}
+                                    animationDuration={1200}
+                                    style={{
+                                        filter: ds.is_benchmark ? 'none' : `url(#glow-${idx})`,
+                                        opacity: ds.is_benchmark ? 0.6 : 1,
+                                    }}
+                                />
+                            );
+                        })}
+                    </LineChart>
+                </ResponsiveContainer>
+            </div>
+
+            {/* Legend under the chart */}
+            <div className="flex flex-wrap justify-center gap-2">
                 {datasets.map((ds: any, idx: number) => {
                     const brand = ds.brand || ds.label;
                     const isVisible = visibleBrands.includes(brand);
@@ -118,188 +278,14 @@ export function AttributeProfileChart({ data }: { data: any }) {
                                     boxShadow: isVisible ? `0 0 10px ${color}` : 'none'
                                 }}
                             />
-                            <span className="text-[10px] font-black uppercase tracking-widest">{ds.label}</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest">{legendLabel(ds)}</span>
                         </motion.button>
                     );
                 })}
             </div>
 
-            <div className="w-full h-[700px] relative">
-                {/* Visual Gradient Background for Context */}
-                <div className="absolute inset-0 flex pointer-events-none opacity-[0.03]">
-                    <div className="flex-1 bg-gradient-to-r from-accent to-transparent" />
-                    <div className="flex-1 bg-gradient-to-r from-transparent to-primary" />
-                </div>
-
-                {/* Semantic Scale Labels */}
-                <div className="flex justify-between items-center max-w-[calc(100%-160px)] ml-[140px] mb-8 text-[10px] font-black uppercase tracking-[0.2em] text-ink-subtle">
-                    <span className="flex items-center gap-3">
-                        <span className="text-accent-soft">Dislike</span>
-                        <div className="w-16 h-px bg-accent/30" />
-                    </span>
-                    <span className="text-ink-muted bg-surface-sunken px-4 py-1.5 rounded-full border border-primary/15 dark:border-line/10">
-                        Neutral ({(domain[0] + domain[1]) / 2})
-                    </span>
-                    <span className="flex items-center gap-3">
-                        <div className="w-16 h-px bg-primary/30" />
-                        <span className="text-primary-soft">Like</span>
-                    </span>
-                </div>
-
-                <ResponsiveContainer width="100%" height="100%">
-                    <LineChart
-                        layout="vertical"
-                        data={chartData}
-                        margin={{ top: 20, right: 40, left: 140, bottom: 40 }}
-                    >
-                        <defs>
-                            {datasets.map((_ds: any, idx: number) => {
-                                return (
-                                    <filter key={`glow-${idx}`} id={`glow-${idx}`} x="-20%" y="-20%" width="140%" height="140%">
-                                        <feGaussianBlur stdDeviation="3" result="blur" />
-                                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                                    </filter>
-                                );
-                            })}
-                        </defs>
-
-                        <CartesianGrid
-                            horizontal={true}
-                            vertical={true}
-                            stroke={isDark ? '#FFFFFF' : '#0F172A'}
-                            strokeOpacity={isDark ? 0.05 : 0.08}
-                            strokeDasharray="4 4"
-                        />
-
-                        <XAxis
-                            type="number"
-                            domain={domain}
-                            orientation="top"
-                            ticks={domain[1] === 10 ? [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] : [1, 2, 3, 4, 5]}
-                            tick={{ fill: isDark ? '#94A3B8' : '#475569', fontSize: 10, fontWeight: 900 }}
-                            axisLine={false}
-                            tickLine={false}
-                        />
-
-                        <YAxis
-                            yAxisId="0"
-                            dataKey="name"
-                            type="category"
-                            tick={(props: any) => {
-                                const { x, y, payload } = props;
-                                return (
-                                    <g transform={`translate(${x},${y})`}>
-                                        <text
-                                            x={-10}
-                                            y={0}
-                                            dy={4}
-                                            /* Was hardcoded #f8fafc — near-white,
-                                               so every attribute name vanished
-                                               against the light-mode canvas. */
-                                            textAnchor="end"
-                                            fill={isDark ? '#E2E8F0' : '#1E293B'}
-                                            fontSize={11}
-                                            fontWeight={800}
-                                            className="uppercase tracking-wider"
-                                        >
-                                            {payload.value}
-                                        </text>
-                                    </g>
-                                );
-                            }}
-                            width={130}
-                            axisLine={{ stroke: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(15,23,42,0.15)', strokeWidth: 1 }}
-                            tickLine={false}
-                        />
-
-                        <Tooltip
-                            cursor={{ stroke: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(37,94,145,0.07)', strokeWidth: 40 }}
-                            content={({ active, payload }) => {
-                                if (active && payload && payload.length) {
-                                    return (
-                                        <div className="bg-[#0f172a]/95 backdrop-blur-xl border border-white/20 p-5 rounded-3xl shadow-2xl min-w-[220px] animate-in zoom-in duration-200">
-                                            <div className="text-[10px] uppercase font-black tracking-widest text-slate-500 mb-4 pb-2 border-b border-white/5 font-mono">
-                                                {payload[0].payload.name}
-                                            </div>
-                                            <div className="flex flex-col gap-3">
-                                                {payload.map((entry: any, i: number) => (
-                                                    <div key={i} className="flex justify-between items-center group">
-                                                        <div className="flex items-center gap-3">
-                                                            <div
-                                                                className="w-2.5 h-2.5 rounded-full shadow-[0_0_8px_rgba(255,255,255,0.3)]"
-                                                                style={{ backgroundColor: entry.color }}
-                                                            />
-                                                            <span className="text-xs font-bold text-slate-300 uppercase tracking-tight">
-                                                                {entry.name.split('(')[0].trim()}
-                                                            </span>
-                                                        </div>
-                                                        <span className="text-sm font-black text-white font-mono tabular-nums">
-                                                            {Number(entry.value).toFixed(2)}
-                                                        </span>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    );
-                                }
-                                return null;
-                            }}
-                        />
-
-                        <ReferenceLine
-                            x={(domain[0] + domain[1]) / 2}
-                            stroke={isDark ? 'rgba(255,255,255,0.18)' : 'rgba(15,23,42,0.18)'}
-                            strokeDasharray="5 5"
-                            label={{
-                                position: 'insideBottomRight',
-                                value: 'NEUTRAL',
-                                fill: '#475569',
-                                fontSize: 9,
-                                fontWeight: 900,
-                                offset: 10
-                            }}
-                        />
-
-                        {datasets.map((ds: any, idx: number) => {
-                            const brand = ds.brand || ds.label;
-                            if (!visibleBrands.includes(brand)) return null;
-
-                            const color = ds.is_benchmark ? '#94a3b8' : COLORS[idx % COLORS.length];
-
-                            return (
-                                <Line
-                                    key={brand}
-                                    yAxisId="0"
-                                    type="monotone"
-                                    dataKey={brand}
-                                    name={ds.label || brand}
-                                    stroke={color}
-                                    strokeWidth={ds.is_benchmark ? 3 : 5}
-                                    strokeDasharray={ds.is_benchmark ? "10 5" : "0"}
-                                    dot={<CustomDot />}
-                                    activeDot={{
-                                        r: 8,
-                                        fill: color,
-                                        stroke: '#fff',
-                                        strokeWidth: 3,
-                                        className: "animate-pulse"
-                                    }}
-                                    connectNulls={true}
-                                    isAnimationActive={true}
-                                    animationDuration={1500}
-                                    style={{
-                                        filter: ds.is_benchmark ? 'none' : `url(#glow-${idx})`,
-                                        opacity: ds.is_benchmark ? 0.6 : 1
-                                    }}
-                                />
-                            );
-                        })}
-                    </LineChart>
-                </ResponsiveContainer>
-            </div>
-
             {/* Footnote about Benchmark */}
-            <div className="flex items-center gap-2 text-[9px] text-slate-600 font-mono uppercase tracking-widest ml-[140px]">
+            <div className="flex items-center gap-2 text-[9px] text-slate-600 font-mono uppercase tracking-widest">
                 <div className="w-8 h-0.5 border-t border-dashed border-slate-700" />
                 <span>"OVERALL" serves as the market average benchmark across all evaluated brands.</span>
             </div>

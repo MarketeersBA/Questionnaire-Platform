@@ -104,7 +104,7 @@ export function CriteriaTableChart({ data, brands: propBrands, presentationHeigh
 
     return (
         <div className="w-full flex flex-col gap-8">
-            <div className={`flex flex-col gap-4 p-5 rounded-[24px] border backdrop-blur-md ${isDark ? 'bg-white/[0.02] border-white/5' : 'bg-slate-50 border-slate-200'}`}>
+            <div className={`flex flex-col gap-4 p-5 rounded-[24px] border backdrop-blur-md ${isDark ? 'bg-white/[0.02] border-white/5' : 'bg-transparent border-slate-200'}`}>
                 <div className="flex flex-wrap items-end gap-6">
                     {/* Active brands */}
                     <div className="flex flex-col gap-2">

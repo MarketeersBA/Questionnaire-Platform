@@ -65,6 +65,18 @@ export default function Layout({ children }: LayoutProps) {
     const [sidebarVisible, setSidebarVisible] = useState(true);
     const [surveysOpen, setSurveysOpen] = useState(true);
     const [adminOpen, setAdminOpen] = useState(false);
+    const [username, setUsername] = useState(() => localStorage.getItem('username') || '');
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        auth.me()
+            .then((user) => {
+                setUsername(user.username);
+                localStorage.setItem('username', user.username);
+            })
+            .catch(() => {});
+    }, []);
 
     // Auto-expand Surveys section when on survey-related routes
     useEffect(() => {
@@ -94,6 +106,7 @@ export default function Layout({ children }: LayoutProps) {
             await auth.logout();
             localStorage.removeItem('token');
             localStorage.removeItem('role');
+            localStorage.removeItem('username');
             navigate('/');
         } catch (err) {
             console.error('Logout failed:', err);
@@ -452,49 +465,19 @@ export default function Layout({ children }: LayoutProps) {
                         <div className="flex items-center gap-4 pl-6 border-l border-line/80 dark:border-line/10">
                             <div className="text-right hidden sm:block">
                                 <p className="text-[11px] font-black text-ink leading-none mb-1">
-                                    Admin Portal
+                                    {username || 'User'}
                                 </p>
                                 <p className="text-[9px] font-black text-ink-muted uppercase tracking-widest">
                                     {(isAdmin || isAnalyst) ? 'Intelligence Hub' : 'Research Portal'}
                                 </p>
                             </div>
 
-                            {/* Admin Quick Menu */}
-                            <div className="relative group/admin">
-                                <button
-                                    onClick={() => isAdmin && navigate('/admin/analytics')}
-                                    className={`relative w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-300 border-2 hover:-translate-y-0.5 active:scale-95 bg-primary border-primary text-white shadow-lg shadow-primary/20 ${isAdmin ? 'hover:scale-105' : ''}`}
-                                >
-                                    <Users size={18} />
-                                    <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-safe border-2 border-surface rounded-full shadow-sm animate-pulse-slow"></div>
-                                </button>
-
-                                {isAdmin && (
-                                    <div className="absolute top-full right-0 mt-3 w-64 opacity-0 invisible group-hover/admin:opacity-100 group-hover/admin:visible transition-all duration-300 translate-y-2 group-hover/admin:translate-y-0 z-[60]">
-                                        <div className="panel !rounded-[1.75rem] overflow-hidden">
-                                            <div className="bg-surface-raised px-6 py-4 border-b border-line/80 dark:border-line/10">
-                                                <p className="text-[9px] font-black text-ink-subtle uppercase tracking-widest">Partner Command Center</p>
-                                            </div>
-                                            <div className="p-3 space-y-1">
-                                                {adminItems.map((item) => (
-                                                    <button
-                                                        key={item.path}
-                                                        onClick={() => navigate(item.path)}
-                                                        className="w-full flex items-center gap-3.5 p-3 rounded-2xl hover:bg-primary/[0.07] hover:-translate-y-0.5 active:scale-95 transition-all group/item text-left"
-                                                    >
-                                                        <div className="w-10 h-10 rounded-xl bg-surface border border-line/80 dark:border-line/10 flex items-center justify-center text-ink-subtle group-hover/item:text-primary-soft group-hover/item:border-primary/30 transition-all shadow-sm">
-                                                            <item.icon size={16} />
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-[12px] font-black text-ink">{item.label}</p>
-                                                            <p className="text-[10px] font-bold text-ink-subtle">{item.description}</p>
-                                                        </div>
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
+                            <div
+                                className="relative w-11 h-11 rounded-xl flex items-center justify-center border-2 bg-primary border-primary text-white shadow-lg shadow-primary/20"
+                                aria-hidden
+                            >
+                                <Users size={18} />
+                                <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-safe border-2 border-surface rounded-full shadow-sm animate-pulse-slow"></div>
                             </div>
                         </div>
                     </div>
