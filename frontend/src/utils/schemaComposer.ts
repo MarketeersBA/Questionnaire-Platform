@@ -27,8 +27,19 @@ export async function composeSurveySchema(
         product_test_snapshot: null,
     };
 
+    // Mirror resolve_orchestration_language in
+    // backend/services/product_test_orchestration.py: the config belonging to
+    // the survey's own type wins. These two used opposite precedence, so the
+    // Architect preview could render Arabic while the backend persisted the
+    // schema in English for the very same form.
+    const isProductTest =
+        formData.survey_type === 'product_test' || sequence.includes('product_test');
+    const languageCandidates = isProductTest
+        ? [formData.product_test_config?.language, formData.config?.language]
+        : [formData.config?.language, formData.product_test_config?.language];
+
     const baseConfig = {
-        language: (formData.config?.language || formData.product_test_config?.language || 'en') as 'en' | 'ar',
+        language: (languageCandidates.find(Boolean) || 'en') as 'en' | 'ar',
         category: formData.config?.category || '',
     };
 

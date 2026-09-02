@@ -15,11 +15,30 @@ from backend.utils.rate_limit import limiter, rate_limit_exceeded_handler
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     setup_logging()
-    db.connect()
-    # Ensure database indexes and voice storage
-    await db.ensure_indexes()
-    # Ensure admin user exists from environment variables
-    await seed_admin()
+
+    # Startup must not depend on the database being reachable. A transient DNS
+    # or Atlas outage used to raise out of here, abort the lifespan and exit the
+    # container — which then stayed down after the network recovered, taking the
+    # login page with it. Now the API starts regardless and reconnects on demand.
+    import logging as _logging
+    _startup_log = _logging.getLogger("uvicorn")
+
+    if db.connect():
+        try:
+            await db.ensure_indexes()
+        except Exception as exc:
+            _startup_log.warning("Index creation skipped — database unreachable: %s", exc)
+
+        try:
+            await seed_admin()
+        except Exception as exc:
+            _startup_log.warning("Admin seeding skipped — database unreachable: %s", exc)
+    else:
+        _startup_log.error(
+            "Starting WITHOUT a database connection (%s). Requests needing data "
+            "will fail until it recovers; /health reports live status.",
+            db.last_error,
+        )
     
     # Task 4.4: Prefix Warmup logic
     try:
@@ -155,3 +174,20 @@ app.include_router(product_test_media.router)
 @app.get("/")
 async def root():
     return {"message": "Survey Platform API is running"}
+
+
+@app.get("/health")
+async def health():
+    """
+    Liveness plus real database reachability.
+
+    The API now starts even when the database is down, so "the process is up"
+    is no longer enough to know it can serve. This pings the server, which also
+    triggers a reconnect if an earlier attempt failed.
+    """
+    database_ok = await db.ping()
+    return {
+        "status": "ok" if database_ok else "degraded",
+        "database": "connected" if database_ok else "unavailable",
+        "detail": None if database_ok else db.last_error,
+    }

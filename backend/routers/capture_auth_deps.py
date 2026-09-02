@@ -24,11 +24,22 @@ from backend.analytics_module.pptx_builder.hybrid_export.capture_auth import (
 from backend.config import settings
 from backend.database import db
 from backend.models import TokenData, User, UserInDB
+from backend.services.report_viewer_token import VIEWER_TOKEN_SUBJECT
 
 logger = logging.getLogger(__name__)
 
 # Synthetic user identity returned to route handlers for capture tokens.
 CAPTURE_SERVICE_USERNAME = CAPTURE_TOKEN_SUBJECT
+
+#: Reserved JWT subjects that identify a *service* or a *share viewer*, never a
+#: platform user. Every one of these must be refused by the general-purpose
+#: dependencies below, no matter what else the token carries.
+#:
+#: This is deliberately a set rather than a per-subject check. Rejecting them
+#: only because no user document happens to bear these names would be safety by
+#: coincidence: create a user called ``report-viewer`` and a share link would
+#: silently become an analyst session.
+NON_USER_SUBJECTS = frozenset({CAPTURE_TOKEN_SUBJECT, VIEWER_TOKEN_SUBJECT})
 
 AuthKind = Literal["user", "capture"]
 
@@ -57,10 +68,19 @@ def _credentials_exception() -> HTTPException:
     )
 
 
-def _forbidden_capture_scope() -> HTTPException:
+#: Human-readable name per reserved subject, so the 403 says which kind of
+#: token was refused instead of a generic "not valid here".
+_SUBJECT_LABELS = {
+    CAPTURE_TOKEN_SUBJECT: "Capture",
+    VIEWER_TOKEN_SUBJECT: "Report share viewer",
+}
+
+
+def _forbidden_capture_scope(subject: Optional[str] = None) -> HTTPException:
+    label = _SUBJECT_LABELS.get(subject, "Capture")
     return HTTPException(
         status_code=status.HTTP_403_FORBIDDEN,
-        detail="Capture access token is not valid for this endpoint.",
+        detail=f"{label} access token is not valid for this endpoint.",
     )
 
 
@@ -85,6 +105,11 @@ def _is_capture_subject(payload: dict) -> bool:
     return payload.get("sub") == CAPTURE_TOKEN_SUBJECT
 
 
+def _is_non_user_subject(payload: dict) -> bool:
+    """True for any reserved service/viewer subject — see NON_USER_SUBJECTS."""
+    return payload.get("sub") in NON_USER_SUBJECTS
+
+
 def user_from_capture_claims(claims: CaptureTokenClaims) -> User:
     """Map validated capture claims to a synthetic active User for route handlers."""
     return User(
@@ -97,7 +122,7 @@ def user_from_capture_claims(claims: CaptureTokenClaims) -> User:
 
 async def _authenticate_regular_user(payload: dict) -> User:
     username = payload.get("sub")
-    if not username or username == CAPTURE_TOKEN_SUBJECT:
+    if not username or username in NON_USER_SUBJECTS:
         raise _credentials_exception()
 
     user_in_db = await _get_user(str(username))
@@ -153,6 +178,12 @@ async def resolve_report_read_auth(
             capture_claims=claims,
         )
 
+    # Share-viewer tokens read reports through /analytics/shared/*, which
+    # sanitizes the payload. This route returns the raw report document, so a
+    # viewer token must not reach it even though it names a survey.
+    if _is_non_user_subject(payload):
+        raise _forbidden_capture_scope(payload.get("sub"))
+
     user = await _authenticate_regular_user(payload)
     return ReportReadAuthContext(
         user=user,
@@ -175,8 +206,8 @@ async def reject_capture_token(token: Annotated[str, Depends(oauth2_scheme)]) ->
     except JWTError:
         raise _credentials_exception() from None
 
-    if _is_capture_subject(payload):
-        raise _forbidden_capture_scope()
+    if _is_non_user_subject(payload):
+        raise _forbidden_capture_scope(payload.get("sub"))
 
     return token.strip()
 
@@ -185,12 +216,12 @@ async def get_current_user(
     token: Annotated[str, Depends(reject_capture_token)],
 ) -> User:
     """
-    Standard user authentication — capture-purpose JWTs are explicitly rejected.
+    Standard user authentication — capture and share-viewer JWTs are rejected.
     """
     try:
         payload = _decode_jwt_payload(token)
-        if _is_capture_subject(payload):
-            raise _forbidden_capture_scope()
+        if _is_non_user_subject(payload):
+            raise _forbidden_capture_scope(payload.get("sub"))
         username: str = payload.get("sub")
         if username is None:
             raise _credentials_exception()

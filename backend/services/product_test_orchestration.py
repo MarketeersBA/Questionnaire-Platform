@@ -158,16 +158,39 @@ def build_product_test_brand_context(
 
 
 def resolve_orchestration_language(survey_data: Dict[str, Any]) -> str:
-    """Resolve survey language with product test config taking precedence."""
+    """
+    Resolve the language the survey schema is composed in.
+
+    Precedence follows the survey's TYPE, not a fixed config order. It used to
+    read `product_test_config.language` first for every survey, which broke
+    Arabic taste tests: switching survey type in the wizard leaves the old
+    `product_test_config` on the form (defaulting to "en"), so a taste test
+    explicitly set to Arabic still composed in English. The question text is
+    baked into `template_snapshot_schema` at creation, so respondents then saw
+    English permanently — nothing at render time could recover it.
+    """
     config = survey_data.get("config") or {}
     pt_config = survey_data.get("product_test_config") or {}
     tt_config = survey_data.get("taste_test_config") or {}
-    return (
-        pt_config.get("language")
-        or tt_config.get("language")
-        or config.get("language")
-        or "en"
-    )
+
+    survey_type = (survey_data.get("type") or "").strip().lower()
+    modules = set(survey_data.get("selected_modules") or [])
+    modules.update(survey_data.get("module_sequence") or [])
+    is_product_test = survey_type == "product_test" or "product_test" in modules
+
+    # The config belonging to this survey's own type wins; the others are only
+    # consulted as a fallback so surveys with no type-specific config still work.
+    if is_product_test:
+        ordered = (pt_config, tt_config, config)
+    else:
+        ordered = (tt_config, config, pt_config)
+
+    for candidate in ordered:
+        language = (candidate or {}).get("language")
+        if language:
+            return language
+
+    return "en"
 
 
 def resolve_orchestration_category(survey_data: Dict[str, Any]) -> str:

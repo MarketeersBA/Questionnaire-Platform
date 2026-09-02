@@ -579,7 +579,7 @@ QuestionModuleId = Literal[
     "package_test",
 ]
 
-QuestionType = Literal["open_single", "open_loop", "scq", "mcq"]
+QuestionType = Literal["open_single", "open_loop", "scq", "mcq", "linear_scale"]
 BrandPipelineMode = Literal["exclude_prior", "include_prior"]
 IncludeStrategy = Literal["cascade", "union", "intersection"]
 
@@ -613,8 +613,62 @@ class ModuleQuestion(BaseModel):
     has_other: bool = False
     cati_instruction: Optional[str] = None
 
+    # ── Research attribute mapping ──────────────────────────────────────────
+    # The owning ModuleSection carries the MAIN attribute (its title); this is
+    # the optional finer-grained breakdown beneath it. Optional by design: a
+    # question may sit directly on its main attribute with no sub-attribute.
+    sub_attribute: Optional[str] = None
+
+    # ── linear_scale configuration ──────────────────────────────────────────
+    # Ignored for every other question type. Defaults describe a 1-5 scale so
+    # existing documents (which carry none of these keys) stay valid.
+    #
+    # `scale_variant` mirrors the frontend ScaleAnchorVariant:
+    #   linear  — plain low-to-high intensity scale
+    #   bipolar — opposed adjectives at each end
+    #   jar     — Just About Right, the sensory-research scale whose midpoint
+    #             is the ideal. Analytics treats JAR differently from an
+    #             intensity scale (a 3 is the best score, not a middling one),
+    #             so the variant has to be persisted, not inferred.
+    scale_variant: Literal["linear", "bipolar", "jar"] = "linear"
+    scale_min: int = Field(default=1, ge=0, le=100)
+    scale_max: int = Field(default=5, ge=1, le=100)
+    min_label: str = ""
+    max_label: str = ""
+
+    @model_validator(mode="after")
+    def validate_scale(self) -> "ModuleQuestion":
+        """
+        Enforced here rather than on QuestionModuleBase because
+        QuestionModuleCreate does not inherit that validator — a scale bound
+        checked only there would go unchecked on the create path.
+        """
+        if self.type != "linear_scale":
+            return self
+
+        if self.scale_max <= self.scale_min:
+            raise ValueError(
+                f"scale_max must exceed scale_min on question {self.question_id}"
+            )
+
+        # JAR anchors are fixed at 1 / 3 / 5 by definition, so any other range
+        # renders labels that do not match the points respondents can pick.
+        if self.scale_variant == "jar" and (self.scale_min != 1 or self.scale_max != 5):
+            raise ValueError(
+                f"JAR scale on question {self.question_id} must run 1-5"
+            )
+
+        return self
+
 
 class ModuleSection(BaseModel):
+    """
+    A section is the MAIN research attribute for the questions it holds.
+
+    `title_en` / `title_ar` are the attribute name, and every question inside
+    belongs to it. Finer breakdowns live on `ModuleQuestion.sub_attribute`,
+    giving the module -> attribute -> question hierarchy the builder exposes.
+    """
     section_id: str = Field(..., min_length=1)
     title_en: str = ""
     title_ar: str = ""
@@ -645,6 +699,10 @@ class QuestionModuleBase(BaseModel):
                         f"Duplicate option values on question {question.question_id}"
                     )
 
+                # Scale constraints live on ModuleQuestion itself so they apply
+                # on every path, including QuestionModuleCreate (which does not
+                # inherit this validator).
+
         qid_set = set(all_qids)
         for section in self.sections:
             for question in section.questions:
@@ -656,7 +714,6 @@ class QuestionModuleBase(BaseModel):
                             f"brand_pipeline source '{src}' not found in module {self.module_id}"
                         )
 
-        return self
         return self
 
 
@@ -759,6 +816,18 @@ class MasterQuestion(MasterQuestionBase, MongoBaseModel):
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 
+#: How a rating scale should be read. Deliberately descriptive rather than a
+#: "JAR" flag: the per-point labels carry the meaning, and this only records
+#: which end (or middle) is the good outcome so reporting does not have to
+#: guess from the scale length.
+#:
+#:   centered  — 5 points, the MIDDLE label is the ideal ("مناسب لى")
+#:   hedonic   — 1-10, the TOP is best
+#:   monotonic — 1-5 ladder, the TOP is best (e.g. purchase intent)
+#:   open_end  — free text, no scale
+ScaleShape = Literal["centered", "hedonic", "monotonic", "bipolar", "open_end"]
+
+
 class TasteTestQuestionBase(BaseModel):
     question_id: str
     legacy_id: Optional[str] = None
@@ -776,6 +845,69 @@ class TasteTestQuestionBase(BaseModel):
     en_max_label: Optional[str] = None
     timing: str  # "Before Taste" or "After Taste"
     question_status: str  # "fixed" or "optional"
+
+    # ── Scale definition ────────────────────────────────────────────────────
+    # `point_labels_*` hold one label per scale point (5 for a centered scale).
+    # These are the authoritative description of what each answer means — both
+    # the respondent UI and the reporting prompt read them, so a 3 on a
+    # "مناسب لى" scale is understood as ideal while a 3 on purchase intent is
+    # understood as lukewarm. All fields default, so documents written before
+    # this existed stay valid.
+    scale_shape: ScaleShape = "hedonic"
+    scale_min: int = 1
+    scale_max: int = 10
+    point_labels_ar: List[str] = Field(default_factory=list)
+    point_labels_en: List[str] = Field(default_factory=list)
+
+    # Shown under the question for centered scales, explaining that the middle
+    # option means "exactly right for me".
+    instruction_ar: Optional[str] = None
+    instruction_en: Optional[str] = None
+
+    # Source-document guidance for `question_status == "optional"` attributes,
+    # e.g. only ask about bitterness when bitterness is expected.
+    condition_ar: Optional[str] = None
+    condition_en: Optional[str] = None
+
+    analytical_role: Optional[str] = None
+    ai_followup: bool = False
+    order: int = 0
+
+    @model_validator(mode="after")
+    def validate_scale(self) -> "TasteTestQuestionBase":
+        if self.scale_shape == "open_end":
+            return self
+
+        if self.scale_max <= self.scale_min:
+            raise ValueError(
+                f"scale_max must exceed scale_min on question {self.question_id}"
+            )
+
+        # A labelled scale must label every point, or the respondent sees gaps
+        # and reporting cannot map a score back to its meaning.
+        for labels in (self.point_labels_ar, self.point_labels_en):
+            if labels and len(labels) != (self.scale_max - self.scale_min + 1):
+                raise ValueError(
+                    f"question {self.question_id} has {len(labels)} labels for a "
+                    f"{self.scale_min}-{self.scale_max} scale"
+                )
+
+        # The whole point of a centered scale is the labelled midpoint.
+        if self.scale_shape == "centered" and not self.point_labels_ar:
+            raise ValueError(
+                f"centered scale {self.question_id} needs point_labels_ar"
+            )
+
+        return self
+
+    @property
+    def ideal_point(self) -> Optional[int]:
+        """The score that represents the best outcome, or None for open ends."""
+        if self.scale_shape == "centered":
+            return (self.scale_min + self.scale_max) // 2
+        if self.scale_shape in ("hedonic", "monotonic"):
+            return self.scale_max
+        return None
 
 
 class TasteTestQuestion(TasteTestQuestionBase, MongoBaseModel):

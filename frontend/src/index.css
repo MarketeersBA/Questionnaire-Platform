@@ -638,3 +638,53 @@ input[type=number] {
   -moz-appearance: textfield;
   appearance: textfield;
 }
+
+/* ---------------------------------------------------------------------------
+   Print mode — the report as it appears in an exported PDF.
+
+   Applied when the page is loaded with `?print=1`, which is how the server-side
+   PDF renderer requests a paper version. It is a real screen render, not a
+   print-stylesheet: headless Chromium prints the DOM, so anything left visible
+   here ends up in the file. The rules below remove the parts of the app that
+   only make sense in a browser — the fixed navigation rail, floating controls,
+   the export menu that produced this file — and stop cards from being sliced in
+   half across a page break.
+--------------------------------------------------------------------------- */
+.report-print-mode {
+  padding-left: 0 !important;
+}
+
+/* App chrome: navigation, floating buttons, and the export control itself. */
+.report-print-mode .brand-rail,
+.report-print-mode [data-export-menu],
+.report-print-mode .focus-mode-overlay,
+.report-print-mode [data-print-hide] {
+  display: none !important;
+}
+
+/* The mesh orbs are decorative gradients that turn into muddy blocks on paper
+   and inflate the file size for nothing. */
+.report-print-mode .bg-mesh {
+  display: none !important;
+}
+
+/* A sticky header repeats on every printed page; a static one appears once. */
+.report-print-mode .sticky {
+  position: static !important;
+}
+
+@media print {
+  /* Keep a chart and its insight on the same sheet — a chart separated from
+     the sentence explaining it is the main way an exported report loses its
+     meaning. */
+  section,
+  .chart-card,
+  [data-chart-card] {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  section {
+    break-after: auto;
+  }
+}

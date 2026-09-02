@@ -50,7 +50,7 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
                     </div>
                     <div>
                         <h3 className="text-2xl font-display font-black text-ink line-height-tight transition-colors">Quality <span className="text-primary-soft">Control</span></h3>
-                        <p className="text-[10px] text-ink font-black uppercase tracking-widest transition-colors leading-relaxed">Enforcement & Reliability Nodes</p>
+                        <p className="text-sm text-ink font-black uppercase tracking-widest transition-colors leading-relaxed">Enforcement & Reliability Nodes</p>
                     </div>
                 </div>
             </div>
@@ -66,13 +66,13 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
                             </div>
                             <div>
                                 <h4 className="text-xl font-display font-black text-ink uppercase tracking-tight">Survey Quality Control</h4>
-                                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1 italic opacity-80">Enforce performance nodes to ensure respondent cognitive focus.</p>
+                                <p className="text-sm text-slate-500 font-bold uppercase tracking-widest mt-1 italic opacity-80">Enforce performance nodes to ensure respondent cognitive focus.</p>
                             </div>
                         </div>
 
                         <button
                             onClick={() => updateQC({ is_enabled: !qc.is_enabled })}
-                            className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${qc.is_enabled
+                            className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all ${qc.is_enabled
                                 ? 'bg-emerald-500 text-white shadow-xl shadow-emerald-500/30 hover:scale-[1.02]'
                                 : 'bg-surface-sunken text-slate-400 border-2 border-slate-300 dark:border-slate-700'
                                 }`}
@@ -98,9 +98,9 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
                                             <div className="flex items-center justify-between px-1">
                                                 <div className="flex items-center gap-2">
                                                     <Clock className="w-3.5 h-3.5 text-primary-soft" />
-                                                    <label className="text-[10px] font-black uppercase tracking-widest text-ink">Minimum Duration</label>
+                                                    <label className="text-sm font-black uppercase tracking-widest text-ink">Minimum Duration</label>
                                                 </div>
-                                                <span className="text-[10px] font-black text-primary-soft bg-primary/10 px-3 py-1 rounded-full uppercase">Cognitive Guard</span>
+                                                <span className="text-sm font-black text-primary-soft bg-primary/10 px-3 py-1 rounded-full uppercase">Cognitive Guard</span>
                                             </div>
                                             <div className="relative">
                                                 <input
@@ -110,29 +110,29 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
                                                     onChange={e => updateQC({ min_time_seconds: minutesToSeconds(parseInt(e.target.value, 10) || 0) })}
                                                     className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 focus:border-primary rounded-2xl px-6 py-5 text-ink font-black text-lg outline-none transition-all shadow-sm group-hover:border-slate-400 dark:group-hover:border-slate-600"
                                                 />
-                                                <div className="absolute right-6 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400 uppercase tracking-widest pointer-events-none">Minutes</div>
+                                                <div className="absolute right-6 top-1/2 -translate-y-1/2 text-sm font-black text-slate-400 uppercase tracking-widest pointer-events-none">Minutes</div>
                                             </div>
                                             <div className="p-5 rounded-2xl bg-slate-100/50 dark:bg-slate-900/50 border border-line/80 dark:border-line/10 space-y-3">
-                                                <div className="flex items-center gap-2 text-[9px] font-black text-rose-500 uppercase tracking-widest">
+                                                <div className="flex items-center gap-2 text-xs font-black text-rose-500 uppercase tracking-widest">
                                                     <Ban className="w-3 h-3" /> Rejection Payload (Before Min)
                                                 </div>
                                                 <div className="space-y-2">
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-[8px] font-black text-slate-400 uppercase w-4">EN</span>
+                                                        <span className="text-sm font-black text-slate-400 uppercase w-4">EN</span>
                                                         <input
                                                             value={qc.min_time_message_en}
                                                             onChange={e => updateQC({ min_time_message_en: e.target.value })}
-                                                            className="flex-1 bg-transparent border-none outline-none text-[11px] font-bold text-ink-muted italic"
+                                                            className="flex-1 bg-transparent border-none outline-none text-base font-bold text-ink-muted italic"
                                                             placeholder="English message..."
                                                         />
                                                     </div>
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-[8px] font-black text-slate-400 uppercase w-4 text-right">AR</span>
+                                                        <span className="text-sm font-black text-slate-400 uppercase w-4 text-right">AR</span>
                                                         <input
                                                             dir="rtl"
                                                             value={qc.min_time_message_ar}
                                                             onChange={e => updateQC({ min_time_message_ar: e.target.value })}
-                                                            className="flex-1 bg-transparent border-none outline-none text-[11px] font-bold text-ink-muted italic text-right font-arabic"
+                                                            className="flex-1 bg-transparent border-none outline-none text-base font-bold text-ink-muted italic text-right font-arabic"
                                                             placeholder="Arabic message..."
                                                         />
                                                     </div>
@@ -145,9 +145,9 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
                                             <div className="flex items-center justify-between px-1">
                                                 <div className="flex items-center gap-2">
                                                     <Timer className="w-3.5 h-3.5 text-brand-cyan" />
-                                                    <label className="text-[10px] font-black uppercase tracking-widest text-ink">Maximum Duration</label>
+                                                    <label className="text-sm font-black uppercase tracking-widest text-ink">Maximum Duration</label>
                                                 </div>
-                                                <span className="text-[10px] font-black text-brand-cyan bg-brand-cyan/10 px-3 py-1 rounded-full uppercase">Runtime Limit</span>
+                                                <span className="text-sm font-black text-brand-cyan bg-brand-cyan/10 px-3 py-1 rounded-full uppercase">Runtime Limit</span>
                                             </div>
                                             <div className="relative">
                                                 <input
@@ -157,29 +157,29 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
                                                     onChange={e => updateQC({ max_time_seconds: minutesToSeconds(parseInt(e.target.value, 10) || 0) })}
                                                     className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 focus:border-brand-cyan rounded-2xl px-6 py-5 text-ink font-black text-lg outline-none transition-all shadow-sm group-hover:border-slate-400 dark:group-hover:border-slate-600"
                                                 />
-                                                <div className="absolute right-6 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400 uppercase tracking-widest pointer-events-none">Minutes</div>
+                                                <div className="absolute right-6 top-1/2 -translate-y-1/2 text-sm font-black text-slate-400 uppercase tracking-widest pointer-events-none">Minutes</div>
                                             </div>
                                             <div className="p-5 rounded-2xl bg-slate-100/50 dark:bg-slate-900/50 border border-line/80 dark:border-line/10 space-y-3">
-                                                <div className="flex items-center gap-2 text-[9px] font-black text-amber-500 uppercase tracking-widest">
+                                                <div className="flex items-center gap-2 text-xs font-black text-amber-500 uppercase tracking-widest">
                                                     <AlertCircle className="w-3 h-3" /> Rejection Payload (After Max)
                                                 </div>
                                                 <div className="space-y-2">
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-[8px] font-black text-slate-400 uppercase w-4">EN</span>
+                                                        <span className="text-sm font-black text-slate-400 uppercase w-4">EN</span>
                                                         <input
                                                             value={qc.max_time_message_en}
                                                             onChange={e => updateQC({ max_time_message_en: e.target.value })}
-                                                            className="flex-1 bg-transparent border-none outline-none text-[11px] font-bold text-ink-muted italic"
+                                                            className="flex-1 bg-transparent border-none outline-none text-base font-bold text-ink-muted italic"
                                                             placeholder="English message..."
                                                         />
                                                     </div>
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-[8px] font-black text-slate-400 uppercase w-4 text-right">AR</span>
+                                                        <span className="text-sm font-black text-slate-400 uppercase w-4 text-right">AR</span>
                                                         <input
                                                             dir="rtl"
                                                             value={qc.max_time_message_ar}
                                                             onChange={e => updateQC({ max_time_message_ar: e.target.value })}
-                                                            className="flex-1 bg-transparent border-none outline-none text-[11px] font-bold text-ink-muted italic text-right font-arabic"
+                                                            className="flex-1 bg-transparent border-none outline-none text-base font-bold text-ink-muted italic text-right font-arabic"
                                                             placeholder="Arabic message..."
                                                         />
                                                     </div>
@@ -194,8 +194,8 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
                                             <ShieldCheck className="w-4 h-4" />
                                         </div>
                                         <div>
-                                            <p className="text-[10px] font-black text-blue-900 dark:text-blue-200 uppercase tracking-widest">Automatic Enforcement Node</p>
-                                            <p className="text-[9px] text-blue-700 dark:text-blue-400 font-bold mt-0.5">The backend protocol will automatically nullify any results outside these variance nodes upon webhooks receipt.</p>
+                                            <p className="text-sm font-black text-blue-900 dark:text-blue-200 uppercase tracking-widest">Automatic Enforcement Node</p>
+                                            <p className="text-xs text-blue-700 dark:text-blue-400 font-bold mt-0.5">The backend protocol will automatically nullify any results outside these variance nodes upon webhooks receipt.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -214,7 +214,7 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
                             </div>
                             <div>
                                 <h4 className="text-xl font-display font-black text-ink uppercase tracking-tight">AI Voice Analysis</h4>
-                                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1 italic opacity-80">
+                                <p className="text-sm text-slate-500 font-bold uppercase tracking-widest mt-1 italic opacity-80">
                                     After Taste open-ended brand questions — text plus optional voice recording.
                                 </p>
                             </div>
@@ -222,7 +222,7 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
                         <button
                             type="button"
                             onClick={() => toggleVoice(!voice.is_enabled)}
-                            className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${voice.is_enabled
+                            className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all ${voice.is_enabled
                                 ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-600/30 hover:scale-[1.02]'
                                 : 'bg-surface-sunken text-slate-400 border-2 border-slate-300 dark:border-slate-700'
                                 }`}
@@ -242,18 +242,18 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                         <div className="space-y-4">
-                                            <label className="text-[10px] font-black uppercase tracking-widest">AI Analysis Pipeline</label>
+                                            <label className="text-sm font-black uppercase tracking-widest">AI Analysis Pipeline</label>
                                             <button
                                                 type="button"
                                                 onClick={() => updateVoice({ ai_analysis_enabled: !voice.ai_analysis_enabled })}
                                                 className={`w-full flex items-center justify-between px-6 py-4 rounded-2xl border-2 ${voice.ai_analysis_enabled ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40' : 'border-slate-200 dark:border-slate-700'}`}
                                             >
                                                 <span className="text-sm font-bold">Run transcription & NLP</span>
-                                                <span className="text-[10px] font-black uppercase">{voice.ai_analysis_enabled ? 'On' : 'Off'}</span>
+                                                <span className="text-sm font-black uppercase">{voice.ai_analysis_enabled ? 'On' : 'Off'}</span>
                                             </button>
                                         </div>
                                         <div className="space-y-4">
-                                            <label className="text-[10px] font-black uppercase tracking-widest">Transcription Language</label>
+                                            <label className="text-sm font-black uppercase tracking-widest">Transcription Language</label>
                                             <select
                                                 value={voice.transcription_language || 'auto'}
                                                 onChange={(e) => updateVoice({ transcription_language: e.target.value as 'auto' | 'en' | 'ar' })}
@@ -274,3 +274,4 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
         </div>
     );
 }
+

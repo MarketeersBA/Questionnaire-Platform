@@ -18,6 +18,72 @@ def _get_prompts() -> Dict[str, Any]:
     """Retrieve chart insights prompts via the registry."""
     return registry.get_template("chart_insights")
 
+
+#: What to tell the model when a chart carries no scale definition. Without
+#: this the prompt asks it to classify a scale from labels it was never given,
+#: which invites a guess — and guessing wrong flips the meaning of a score
+#: (a 3 is ideal on a sensory scale, lukewarm on purchase intent).
+_NO_SCALE_CONTEXT = (
+    "Scale definition: NOT PROVIDED for this chart. Do not assume a direction. "
+    "Do not claim a midpoint is ideal and do not claim the maximum is best — "
+    "describe the distribution and differences between brands instead, and say "
+    "the scale is unlabelled if direction matters to the point you are making."
+)
+
+
+def build_scale_context(metadata: Optional[Dict[str, Any]]) -> str:
+    """
+    Render a chart's scale definition for the prompt.
+
+    Reads `ChartPayload.metadata["scale"]`, whose shape mirrors the taste-test
+    library: `shape` (centered | hedonic | monotonic), `min`, `max`,
+    `ideal_point` and the per-point `labels`. The labels are what let the model
+    tell a "middle is ideal" sensory scale from a "top is best" ladder, so they
+    are spelled out point by point rather than summarised.
+    """
+    scale = (metadata or {}).get("scale")
+    if not isinstance(scale, dict) or not scale:
+        return _NO_SCALE_CONTEXT
+
+    shape = str(scale.get("shape") or "").lower()
+    lo = scale.get("min", 1)
+    hi = scale.get("max")
+    ideal = scale.get("ideal_point")
+    labels = scale.get("labels") or []
+
+    lines = []
+    if hi is not None:
+        lines.append(f"Scale: {lo} to {hi}.")
+
+    if shape == "centered":
+        lines.append(
+            f"Shape: CENTERED — the midpoint ({ideal}) is the ideal answer. "
+            "Both ends are failures: the top means 'too much', the bottom 'too little'. "
+            "Do NOT use Top-2-Box. Report Just Right % and the direction of the skew."
+        )
+    elif shape == "hedonic":
+        lines.append(f"Shape: HEDONIC — higher is better, {ideal} is best. T2B and means are valid.")
+    elif shape == "monotonic":
+        lines.append(
+            f"Shape: MONOTONIC ladder — higher is better, {ideal} is best. "
+            "The midpoint is lukewarm, NOT ideal. Never penalise a high score."
+        )
+    elif shape:
+        lines.append(f"Shape: {shape}.")
+
+    if labels:
+        rendered = "; ".join(
+            f"{lo + idx} = {label}" + (" [IDEAL]" if (lo + idx) == ideal else "")
+            for idx, label in enumerate(labels)
+        )
+        lines.append(f"Answer labels: {rendered}")
+
+    note = scale.get("interpretation_note")
+    if note:
+        lines.append(f"Note (overrides inference): {note}")
+
+    return "Scale definition: " + " ".join(lines)
+
 class ChartInsightEngine:
     def __init__(self,
                  client: Any,
@@ -86,6 +152,7 @@ class ChartInsightEngine:
                     "brands": ", ".join(chart.brands) if chart.brands else "N/A",
                     "base_n": chart.base_n,
                     "brand_name": self.my_brand,
+                    "scale_context": build_scale_context(chart.metadata),
                 },
                 user_extra=user_extra,
                 output_budget=0,
@@ -188,6 +255,7 @@ class ChartInsightEngine:
             "base_n": chart.base_n,
             "data_summary": summary,
             "brand_name": self.my_brand,
+            "scale_context": build_scale_context(chart.metadata),
         }
         if self.survey_context:
             batch_vars.update(self.survey_context.to_prompt_variables())

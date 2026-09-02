@@ -176,6 +176,21 @@ export function KeyPreferenceDriversChart({ data, brands, isFocusMode, presentat
         const boxHalf = Math.max((x1 - x0) * 0.014, 1e-6);
         const yPad = (y1 - y0) * 0.035;
 
+        /* Labels sit on one of three heights, assigned in X order so that two
+           boxes standing next to each other never print on the same line.
+           Sorting by X first means index adjacency IS spatial adjacency. */
+        const labelTier = new Map<string, number>();
+        [...groups]
+            .sort((a, b) => a.x - b.x)
+            .forEach((g, i) => labelTier.set(g.key, i % 3));
+
+        /* Draw the selected box last so its highlight is not painted over by a
+           neighbour that happens to come later in the array. */
+        const orderedGroups = interactive
+            ? [...groups].sort((a, b) =>
+                (a.key === selected ? 1 : 0) - (b.key === selected ? 1 : 0))
+            : groups;
+
         /* One flat series so every marker shares a tooltip/scale. */
         const points = groups.flatMap((g) =>
             g.marks.map((m) => ({
@@ -191,7 +206,7 @@ export function KeyPreferenceDriversChart({ data, brands, isFocusMode, presentat
 
         return (
             <ResponsiveContainer width="100%" height={chartHeight}>
-                <ScatterChart margin={{ top: 34, right: 26, left: 10, bottom: 46 }}>
+                <ScatterChart margin={{ top: 62, right: 26, left: 10, bottom: 46 }}>
                     <CartesianGrid strokeDasharray="4 4" stroke={chrome.grid} />
 
                     <XAxis
@@ -226,7 +241,7 @@ export function KeyPreferenceDriversChart({ data, brands, isFocusMode, presentat
                     <ReferenceLine y={avgY} stroke={chrome.refLine} strokeDasharray="6 4" />
 
                     {/* One box per attribute, spanning the brand spread */}
-                    {groups.map((g) => {
+                    {orderedGroups.map((g) => {
                         const active = interactive && g.key === selected;
                         const stroke = active
                             ? seriesColor(0, isDark)
@@ -244,6 +259,9 @@ export function KeyPreferenceDriversChart({ data, brands, isFocusMode, presentat
                                 label={{
                                     value: g.label,
                                     position: 'top',
+                                    // Lift onto this attribute's tier; the chart's
+                                    // top margin already reserves room for three.
+                                    dy: -(labelTier.get(g.key) ?? 0) * 13,
                                     fill: active ? seriesColor(0, isDark) : chrome.label,
                                     fontSize: 10,
                                     fontWeight: 800,

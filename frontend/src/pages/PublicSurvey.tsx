@@ -986,7 +986,7 @@ export default function PublicSurvey() {
               {survey?.language === 'ar' ? 'أداة' : 'Study'} <span className="text-slate-400 font-light">{survey?.language === 'ar' ? 'البحث' : 'Instrument'}</span>
             </h1>
 
-            <form onSubmit={handleL2Submit} className="space-y-12 h-full flex flex-col">
+            <form onSubmit={handleL2Submit} className="space-y-6 h-full flex flex-col">
               <div className="flex-1 space-y-16 px-0 md:px-4">
                 {(() => {
                   if (!tasteTestNavigationPosition) return null;
@@ -1006,7 +1006,7 @@ export default function PublicSurvey() {
                   );
 
                   return (
-                    <div className="space-y-12">
+                    <div className="space-y-8">
                       {/* Top Brand Progress (only during brand pages) */}
                       {!isOverallStep && totalBrandPages > 0 && (
                         <div className="flex items-center justify-between mb-2">
@@ -1024,7 +1024,7 @@ export default function PublicSurvey() {
                       )}
 
                       {visibleSections.map((section: any, sIdx: number) => (
-                          <div key={sIdx} className="space-y-12">
+                          <div key={sIdx} className="space-y-6">
                             {(() => {
                               const sectionTitle = localizeTasteTestSectionTitle(
                                 renderCleanText(section.title || '', currentBrand),
@@ -1103,6 +1103,22 @@ export default function PublicSurvey() {
                                               setL2Answers({ ...l2Answers, [uniqueKey]: nextValue });
                                             }}
                                             language={computedModuleLanguage}
+                                            // The question's own point labels decide how the
+                                            // scale reads. Only fall back to inferring a
+                                            // centered scale from its length for questions
+                                            // authored before labels existed — which also
+                                            // stops a 1-5 purchase-intent ladder being
+                                            // mislabelled as a "suitable in the middle" scale.
+                                            variant={
+                                                q.questionMeta?.scaleShape === 'centered' ||
+                                                (!q.questionMeta?.scaleShape &&
+                                                    survey?.survey_type === 'taste_test' &&
+                                                    scaleMax === 5)
+                                                    ? 'jar'
+                                                    : 'linear'
+                                            }
+                                            pointLabels={q.questionMeta?.pointLabels}
+                                            idealPoint={q.questionMeta?.idealPoint}
                                             minLabel={q.questionMeta?.minLabel}
                                             maxLabel={q.questionMeta?.maxLabel}
                                             numberSeparator="dash"
@@ -1168,7 +1184,7 @@ export default function PublicSurvey() {
                                           onMaxRoundsChange={setRespondentRoundCap}
                                         />
                                       ) : (
-                                        <div className="grid grid-cols-1 gap-3">
+                                        <div className="grid grid-cols-1 gap-2">
                                           {q.options?.map((opt: string) => {
                                             const optionLabel = renderCleanText(String(opt), currentBrand || String(opt));
                                             return (
@@ -1180,7 +1196,7 @@ export default function PublicSurvey() {
                                                 const allQs = section.questions;
                                                 scrollToNextQuestion(q.id, allQs);
                                               }}
-                                              className={`w-full p-5 rounded-2xl border-2 text-left font-bold transition-all ${l2Answers[uniqueKey] === opt ? 'bg-primary/10 border-primary text-primary-soft shadow-lg' : 'bg-slate-50 border-slate-100/50 text-slate-500 hover:border-slate-300'} `}
+                                              className={`w-full px-4 py-3.5 rounded-xl border-2 text-left font-bold transition-all ${l2Answers[uniqueKey] === opt ? 'bg-primary/10 border-primary text-primary-soft shadow-md' : 'bg-surface-sunken border-line/60 dark:border-line/15 text-ink-muted hover:border-primary/50 hover:text-ink'} `}
                                             >
                                               {optionLabel}
                                             </button>
@@ -1230,7 +1246,7 @@ export default function PublicSurvey() {
               const isAr = isArabicUi;
               return (
             <div dir={isAr ? 'rtl' : 'ltr'}>
-            <div className="flex flex-col items-center mb-10">
+            <div className="flex flex-col items-center mb-6">
               <img src="/brand/logo-icon.png" alt="Logo" className="w-20 h-20 mb-4 object-contain brightness-100 dark:brightness-125" />
               <div className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-subtle">
                 {isAr ? (
@@ -1256,14 +1272,14 @@ export default function PublicSurvey() {
               </span>
             </div>
 
-            <p className="text-ink-muted font-medium leading-relaxed mb-10 pb-8 border-b border-slate-50 dark:border-slate-800 transition-colors text-center">
+            <p className="text-ink-muted font-medium leading-relaxed mb-6 pb-5 border-b border-line/60 dark:border-line/15 transition-colors text-center">
               {isAr
                 ? 'يرجى إكمال أسئلة التأهل التالية. بعد التحقق سيتم توجيهك إلى أداة البحث.'
                 : 'Please complete the following qualification probe. Upon synchronization, you will be redirected to the research instrument.'}
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-10">
-              <div className="space-y-8 px-0 md:px-2">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-5 px-0 md:px-2">
                 {/* Always include Phone for handoff matching */}
                 <div className="space-y-3">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">

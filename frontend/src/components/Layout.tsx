@@ -34,6 +34,7 @@ const adminItems = [
     { icon: Activity, label: 'Platform Stats', path: '/admin/analytics', description: 'Global ecosystem intelligence' },
     { icon: Zap, label: 'AI Telemetry', path: '/admin/ai-telemetry', description: 'Neural quota & cost monitoring' },
     { icon: Database, label: 'Product Bank', path: '/admin/attributes', description: 'Configure research attributes' },
+    { icon: Layers, label: 'Custom Modules', path: '/module-builder', description: 'Build and manage custom logic modules' },
 ];
 
 const ThemeToggle = () => {
@@ -163,11 +164,11 @@ export default function Layout({ children }: LayoutProps) {
                                         <img
                                             src="/brand/logo-full.png"
                                             alt="Marketeers"
-                                            className="h-16 w-auto max-w-[14rem] object-contain"
+                                            className="h-20 w-auto max-w-[16rem] object-contain"
                                         />
                                     </div>
                                 ) : (
-                                    <div className="relative w-12 h-12 rounded-2xl bg-white shadow-lg shadow-black/25 grid place-items-center p-1.5 transition-transform duration-500 group-hover/logo:scale-105">
+                                    <div className="relative w-16 h-16 rounded-2xl bg-white shadow-lg shadow-black/25 grid place-items-center p-1.5 transition-transform duration-500 group-hover/logo:scale-105">
                                         <img
                                             src="/brand/logo-icon.png"
                                             alt="Marketeers"
@@ -242,7 +243,7 @@ export default function Layout({ children }: LayoutProps) {
                                         <div className="pl-6 pr-2 pb-2 pt-1 space-y-0.5 border-l border-white/10 ml-[26px] mt-1">
                                             <NavLink
                                                 to="/create-survey"
-                                                className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-black transition-all group/sub whitespace-nowrap ${isActive
+                                                className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-black transition-all group/sub whitespace-nowrap ${isActive
                                                     ? 'bg-white/10 text-white shadow-md border border-white/10 translate-x-1'
                                                     : 'text-white/50 hover:text-white hover:bg-white/10 hover:translate-x-1.5'
                                                     }`}
@@ -254,7 +255,7 @@ export default function Layout({ children }: LayoutProps) {
                                             </NavLink>
                                             <NavLink
                                                 to="/surveys"
-                                                className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-black transition-all group/sub whitespace-nowrap ${isActive && location.pathname === '/surveys'
+                                                className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-black transition-all group/sub whitespace-nowrap ${isActive && location.pathname === '/surveys'
                                                     ? 'bg-white/10 text-white shadow-md border border-white/10 translate-x-1'
                                                     : 'text-white/50 hover:text-white hover:bg-white/10 hover:translate-x-1.5'
                                                     }`}
@@ -266,7 +267,7 @@ export default function Layout({ children }: LayoutProps) {
                                             </NavLink>
                                             <NavLink
                                                 to="/surveys/reports"
-                                                className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-black transition-all group/sub whitespace-nowrap ${isActive
+                                                className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-black transition-all group/sub whitespace-nowrap ${isActive
                                                     ? 'bg-white/10 text-white shadow-md border border-white/10 translate-x-1'
                                                     : 'text-white/50 hover:text-white hover:bg-white/10 hover:translate-x-1.5'
                                                     }`}
@@ -373,7 +374,7 @@ export default function Layout({ children }: LayoutProps) {
                                                     <NavLink
                                                         key={item.path}
                                                         to={item.path}
-                                                        className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-black transition-all group/sub whitespace-nowrap ${isActive
+                                                        className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-black transition-all group/sub whitespace-nowrap ${isActive
                                                             ? 'bg-white/10 text-white shadow-md border border-white/10 translate-x-1'
                                                             : 'text-white/50 hover:text-white hover:bg-white/10 hover:translate-x-1.5'
                                                             }`}
@@ -417,7 +418,7 @@ export default function Layout({ children }: LayoutProps) {
                         >
                             <LogOut size={18} className="group-hover:-translate-x-1 transition-transform flex-shrink-0" />
                             {sidebarOpen && (
-                                <span className="font-black uppercase tracking-widest text-[9px] whitespace-nowrap">
+                                <span className="font-black uppercase tracking-widest text-[11px] whitespace-nowrap">
                                     Sign Out
                                 </span>
                             )}
@@ -456,7 +457,7 @@ export default function Layout({ children }: LayoutProps) {
                                 <p className="text-[11px] font-black text-ink leading-none mb-1">
                                     Admin Portal
                                 </p>
-                                <p className="text-[9px] font-black text-ink-muted uppercase tracking-widest">
+                                <p className="text-[11px] font-black text-ink-muted uppercase tracking-widest">
                                     {(isAdmin || isAnalyst) ? 'Intelligence Hub' : 'Research Portal'}
                                 </p>
                             </div>
@@ -475,7 +476,7 @@ export default function Layout({ children }: LayoutProps) {
                                     <div className="absolute top-full right-0 mt-3 w-64 opacity-0 invisible group-hover/admin:opacity-100 group-hover/admin:visible transition-all duration-300 translate-y-2 group-hover/admin:translate-y-0 z-[60]">
                                         <div className="panel !rounded-[1.75rem] overflow-hidden">
                                             <div className="bg-surface-raised px-6 py-4 border-b border-line/80 dark:border-line/10">
-                                                <p className="text-[9px] font-black text-ink-subtle uppercase tracking-widest">Partner Command Center</p>
+                                                <p className="text-[11px] font-black text-ink-subtle uppercase tracking-widest">Partner Command Center</p>
                                             </div>
                                             <div className="p-3 space-y-1">
                                                 {adminItems.map((item) => (
@@ -489,7 +490,7 @@ export default function Layout({ children }: LayoutProps) {
                                                         </div>
                                                         <div>
                                                             <p className="text-[12px] font-black text-ink">{item.label}</p>
-                                                            <p className="text-[10px] font-bold text-ink-subtle">{item.description}</p>
+                                                            <p className="text-xs font-bold text-ink-subtle">{item.description}</p>
                                                         </div>
                                                     </button>
                                                 ))}
@@ -518,3 +519,4 @@ export default function Layout({ children }: LayoutProps) {
         </div>
     );
 }
+

@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Download, AlertCircle, RefreshCw, Activity, Database, Sparkles, LayoutPanelLeft, BarChart3, Maximize, ChevronLeft, ChevronRight, X, Sun, Moon, LayoutDashboard, ClipboardList, FileText, PanelLeftClose, PanelLeftOpen, ArrowUp, ChevronDown } from 'lucide-react';
+import { AlertCircle, RefreshCw, Activity, Database, Sparkles, LayoutPanelLeft, BarChart3, Maximize, ChevronLeft, ChevronRight, X, Sun, Moon, LayoutDashboard, ClipboardList, FileText, PanelLeftClose, PanelLeftOpen, ArrowUp, ChevronDown } from 'lucide-react';
 import { analytics } from '../services/api';
 import { toast } from 'sonner';
 import { useTheme } from '../context/ThemeContext';
@@ -18,6 +18,8 @@ import { ReportProvider, useReport } from '../context/ReportContext';
 import { AICostDashboard, CostData } from '../components/report/AICostDashboard';
 import ProductTestAnalyticsStrip from '../components/report/ProductTestAnalyticsStrip';
 import ExportConfigModal from '../components/report/ExportConfigModal';
+import { ExportMenu, type ExportFormat } from '../components/report/ExportMenu';
+import ReportShareBar from '../components/report/ReportShareBar';
 import { useReportStatusPoll } from '../hooks/useReportStatusPoll';
 import { useScrollSpy } from '../hooks/useScrollSpy';
 
@@ -144,8 +146,49 @@ const buildOrderedCharts = (rawCharts: any[]): any[] => {
     return ordered;
 };
 
+
+/**
+ * Identifying facts about the study, pinned to the bottom of the rail.
+ *
+ * Every field is optional and a missing one is simply omitted — a partially
+ * configured survey should show fewer rows, never "undefined".
+ */
+function ProjectFacts({ report }: { report: any }) {
+    const meta = report?.survey_context || report?.metadata || {};
+
+    const rows = [
+        { label: 'Category', value: meta.category || report?.category },
+        { label: 'Market', value: meta.market || report?.market },
+        { label: 'Brand', value: meta.target_brand || report?.target_brand },
+        {
+            label: 'Base',
+            value: report?.base_n ? `n = ${report.base_n}` : undefined,
+        },
+    ].filter((r) => Boolean(r.value));
+
+    if (rows.length === 0) return null;
+
+    return (
+        <div className="shrink-0 px-4 py-4 mt-1 border-t border-white/[0.07] space-y-2.5">
+            {rows.map((row) => (
+                <div key={row.label} className="leading-tight">
+                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-white/40">
+                        {row.label}
+                    </p>
+                    <p className="text-[12.5px] font-bold text-white/85 break-words">
+                        {row.value}
+                    </p>
+                </div>
+            ))}
+        </div>
+    );
+}
+
 export default function SurveyReport() {
-    const { surveyId } = useParams<{ surveyId: string }>();
+    // `/r/:shareToken` is the client-facing route; `/surveys/:surveyId/report`
+    // is the internal one. Presence of a token is what puts the page into the
+    // chrome-less shared view.
+    const { surveyId, shareToken } = useParams<{ surveyId: string; shareToken: string }>();
     const navigate = useNavigate();
     const { theme, toggleTheme } = useTheme();
     const isDark = theme === 'dark';
@@ -210,12 +253,24 @@ export default function SurveyReport() {
         return () => clearInterval(interval);
     }, [isGenerating]);
 
+    /**
+     * Print mode is how the PDF renderer asks for a paper version of this page:
+     * headless Chromium loads `?print=1`, which drops the app chrome that would
+     * otherwise repeat on every page of the export.
+     */
+    const isPrintMode = useMemo(
+        () => new URLSearchParams(window.location.search).get('print') === '1',
+        []
+    );
+
     const fetchReport = useCallback(async () => {
         try {
-            if (!surveyId) return;
+            if (!surveyId && !shareToken) return;
             setError(null);
 
-            const data = await analytics.getReport(surveyId);
+            const data = shareToken
+                ? await analytics.getSharedReport(shareToken)
+                : await analytics.getReport(surveyId!);
 
             if (data?.status === 'failed') {
                 const msg = data.error_message || 'The report could not be generated at this time.';
@@ -229,22 +284,53 @@ export default function SurveyReport() {
             setIsGenerating(false);
             setLoading(false);
         } catch (err: any) {
-            if (err.response?.status === 202) {
+            const status = err.response?.status;
+            setLoading(false);
+
+            if (status === 202) {
                 setIsGenerating(true);
-                setLoading(false);
-            } else if (err.response?.status === 404) {
-                setLoading(false);
-                handleGenerate();
-            } else {
-                setError('Failed to reach neural engine.');
-                setLoading(false);
+                return;
             }
+
+            if (status === 403) {
+                // The share link is full. This is the one failure a visitor can
+                // actually do something about, so it says so rather than
+                // reporting a generic fault.
+                const detail = err.response?.data?.detail;
+                setError(
+                    typeof detail?.message === 'string'
+                        ? detail.message
+                        : 'This report link has reached the number of people it can be shared with.'
+                );
+                return;
+            }
+
+            if (status === 404) {
+                // Auto-generating on a miss is an analyst affordance and must
+                // not fire here. On a share link it would call an authenticated
+                // endpoint the visitor cannot use; in print mode it would kick
+                // off a fresh build that the PDF renderer then sits waiting on.
+                if (shareToken || isPrintMode) {
+                    setError(
+                        shareToken
+                            ? 'This report is not available. Ask whoever shared the link to regenerate it.'
+                            : 'No report has been generated for this survey yet.'
+                    );
+                    return;
+                }
+                handleGenerate();
+                return;
+            }
+
+            setError('Failed to reach neural engine.');
         }
-    }, [surveyId]);
+    }, [surveyId, shareToken, isPrintMode]);
 
     useReportStatusPoll({
         surveyId,
-        enabled: isGenerating,
+        // Polling hits an authenticated route; a share-link visitor has no
+        // credentials for it and print mode has nothing to wait for.
+        enabled: isGenerating && !shareToken && !isPrintMode,
         watch: 'report',
         onTerminal: (statusData, reason) => {
             if (reason === 'report_ready') {
@@ -262,9 +348,68 @@ export default function SurveyReport() {
         fetchReport();
     }, [fetchReport]);
 
-    const handleDownload = async () => {
-        setIsExportModalOpen(true);
-    };
+    const handleExport = useCallback(
+        async (format: ExportFormat) => {
+            if (format === 'pptx') {
+                // Export must end in a file. If the deck exists this is a
+                // straight download; if it does not, it is built first and the
+                // toast narrates the wait. Either way the user clicks once.
+                const pending = toast.loading('Preparing PowerPoint…');
+                try {
+                    await analytics.downloadPptxEnsuringBuild(
+                        shareToken ? { shareToken } : { surveyId: surveyId! },
+                        (stage, percent) =>
+                            toast.loading(
+                                percent != null ? `${stage} — ${Math.round(percent)}%` : stage,
+                                { id: pending }
+                            )
+                    );
+                    toast.success('PowerPoint downloaded', { id: pending });
+                } catch (err: any) {
+                    const detail = err?.response?.data?.detail;
+                    toast.error(
+                        typeof detail === 'string'
+                            ? detail
+                            : typeof detail?.message === 'string'
+                              ? detail.message
+                              : err?.message || 'Could not export the presentation.',
+                        { id: pending, duration: 8000 }
+                    );
+                }
+                return;
+            }
+
+            // PDF prints the live page server-side, which takes a little while.
+            const pending = toast.loading('Preparing PDF — this can take a minute…');
+            try {
+                if (shareToken) {
+                    await analytics.downloadSharedReport(shareToken, 'pdf');
+                } else if (surveyId) {
+                    await analytics.downloadReportPdf(surveyId);
+                }
+                toast.success('PDF downloaded', { id: pending });
+            } catch (err: any) {
+                // PDF failures are usually operational — a browser that was
+                // never installed on the server, a frontend it cannot reach —
+                // and the backend already worked out which. Passing that
+                // through beats "try again", which for these causes is advice
+                // to repeat something that cannot work.
+                const detail = err?.response?.data?.detail;
+                const message =
+                    typeof detail?.message === 'string'
+                        ? detail.message
+                        : err?.code === 'ECONNABORTED'
+                          ? 'The PDF took too long to build and the request timed out.'
+                          : 'PDF export failed.';
+                toast.error(message, {
+                    id: pending,
+                    description: typeof detail?.remedy === 'string' ? detail.remedy : undefined,
+                    duration: 10000,
+                });
+            }
+        },
+        [shareToken, surveyId]
+    );
 
     const handleApplySlice = async () => {
         try {
@@ -312,6 +457,10 @@ export default function SurveyReport() {
         }
     };
 
+    // A visitor arriving through a share link has no account, so the gating
+    // screens below must not offer them account-only actions.
+    const isSharedView = Boolean(shareToken);
+
     if (loading) return <div className="min-h-screen bg-surface-raised py-12"><ReportSkeleton /></div>;
 
     if (isGenerating) {
@@ -343,15 +492,29 @@ export default function SurveyReport() {
     }
 
     if (error || (report && report.status === 'failed')) {
+        const message = error || report?.error_message;
+        // `data-report-error` is what the PDF renderer watches for. Without it a
+        // report that cannot load looks identical to one still rendering, and
+        // the export sits until its timeout instead of failing in a second.
         return (
-            <div className="min-h-screen bg-surface flex flex-col items-center justify-center p-8 text-center">
-                <div className="glass-panel p-16 rounded-[40px] max-w-2xl border border-line/80 dark:border-line/10 shadow-[0_32px_64px_rgba(0,0,0,0.06)] dark:shadow-2xl bg-white dark:bg-transparent">
-                    <AlertCircle className="h-24 w-24 text-brand-accent mx-auto mb-8 animate-bounce" />
-                    <h2 className="text-5xl font-black text-ink mb-6 uppercase tracking-tighter italic">Interrupted</h2>
-                    <p className="text-slate-400 text-xl font-medium mb-12 leading-relaxed">{error || report?.error_message}</p>
-                    <button onClick={() => handleGenerate(true)} className="btn-premium px-12 py-5 text-xl tracking-widest uppercase">
-                        Force Restart
-                    </button>
+            <div
+                data-report-error={message || 'unknown'}
+                className="min-h-screen bg-surface flex flex-col items-center justify-center p-8 text-center"
+            >
+                <div className="glass-panel p-12 rounded-[40px] max-w-2xl border border-line/80 dark:border-line/10 shadow-[0_32px_64px_rgba(0,0,0,0.06)] dark:shadow-2xl bg-white dark:bg-transparent">
+                    <AlertCircle className="h-20 w-20 text-brand-accent mx-auto mb-6" />
+                    <h2 className="text-4xl font-black text-ink mb-5 uppercase tracking-tighter italic">
+                        {isSharedView ? 'Report unavailable' : 'Interrupted'}
+                    </h2>
+                    <p className="text-slate-400 text-lg font-medium mb-10 leading-relaxed">{message}</p>
+                    {/* Regenerating is an analyst action against an authenticated
+                        endpoint — offering it to a share-link visitor would only
+                        produce a second, more confusing failure. */}
+                    {!isSharedView && (
+                        <button onClick={() => handleGenerate(true)} className="btn-premium px-12 py-5 text-xl tracking-widest uppercase">
+                            Force Restart
+                        </button>
+                    )}
                 </div>
             </div>
         );
@@ -393,7 +556,6 @@ export default function SurveyReport() {
                 isDark={isDark}
                 toggleTheme={toggleTheme}
                 handleGenerate={handleGenerate}
-                handleDownload={handleDownload}
                 hasPptx={!!hasPptx}
                 charts={charts}
                 strategicCharts={strategicCharts}
@@ -405,6 +567,8 @@ export default function SurveyReport() {
                 isExportModalOpen={isExportModalOpen}
                 setIsExportModalOpen={setIsExportModalOpen}
                 onExportReady={fetchReport}
+                handleExport={handleExport}
+                isPrintMode={isPrintMode}
             />
         </ReportProvider>
     );
@@ -422,7 +586,6 @@ interface ReportContentProps {
     isDark: boolean;
     toggleTheme: () => void;
     handleGenerate: (force?: boolean) => Promise<void>;
-    handleDownload: () => Promise<void>;
     hasPptx: boolean;
     charts: any[];
     strategicCharts: any[];
@@ -434,15 +597,21 @@ interface ReportContentProps {
     isExportModalOpen: boolean;
     setIsExportModalOpen: (open: boolean) => void;
     onExportReady: () => Promise<void>;
+    handleExport: (format: ExportFormat) => Promise<void>;
+    isPrintMode: boolean;
 }
 
 function ReportContent({
     report, isFocusMode, toggleFocusMode, activeFilters, setActiveFilters,
     handleApplySlice, isSlicing, isDark, toggleTheme, handleGenerate,
-    handleDownload, hasPptx, charts, strategicCharts, chartGroups, groupNames, hasNewPipeline,
-    loading, navigate, isExportModalOpen, setIsExportModalOpen, onExportReady
+    hasPptx, charts, strategicCharts, chartGroups, groupNames, hasNewPipeline,
+    loading, navigate, isExportModalOpen, setIsExportModalOpen, onExportReady,
+    handleExport, isPrintMode
 }: ReportContentProps) {
-    const { surveyId } = useParams<{ surveyId: string }>();
+    const { surveyId, shareToken } = useParams<{ surveyId: string; shareToken: string }>();
+    // A client viewing via a share link has no account, so account-only chrome
+    // is removed rather than disabled.
+    const isSharedView = Boolean(shareToken);
     const { activeGroupIndex, setActiveGroupIndex, registerChartLocation } = useReport();
 
     // AI Cost Dashboard State
@@ -514,8 +683,24 @@ function ReportContent({
     const scrollToTop = () =>
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
+    // The PDF renderer waits on this attribute before printing. Charts animate
+    // in on mount, so a printer that fired on `load` would capture half-drawn
+    // bars; flipping it a beat after the charts exist is what makes the export
+    // deterministic instead of a race.
+    const [printReady, setPrintReady] = useState(false);
+    useEffect(() => {
+        if (!report) return;
+        const timer = window.setTimeout(() => setPrintReady(true), 900);
+        return () => window.clearTimeout(timer);
+    }, [report, charts?.length]);
+
     return (
-        <div className={`min-h-screen bg-canvas text-ink selection:bg-primary/20 transition-[padding] duration-500 ${railVisible ? "xl:pl-[17.5rem]" : ""}`}>
+        <div
+            data-report-ready={printReady ? 'true' : 'false'}
+            className={`min-h-screen bg-canvas text-ink selection:bg-primary/20 transition-[padding] duration-500 ${
+                isPrintMode ? 'report-print-mode' : railVisible ? 'xl:pl-[17.5rem]' : ''
+            }`}
+        >
             {/* Global Mesh Gradient Background */}
             <div className="bg-mesh">
                 <div className="mesh-orb w-[600px] h-[600px] bg-primary/[0.07] top-0 left-[-10%]"></div>
@@ -523,15 +708,16 @@ function ReportContent({
             </div>
 
             {/* Premium Sticky Header */}
-            <header className={`sticky top-0 z-40 bg-surface/95 backdrop-blur-2xl shadow-[0_1px_0_rgb(var(--c-primary)/0.12),0_8px_24px_-16px_rgb(var(--c-primary)/0.25)] py-5 transition-all duration-700 ${isFocusMode ? '-translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
+            {!isPrintMode && <header className={`sticky top-0 z-40 bg-surface/95 backdrop-blur-2xl shadow-[0_1px_0_rgb(var(--c-primary)/0.12),0_8px_24px_-16px_rgb(var(--c-primary)/0.25)] py-5 transition-all duration-700 ${isFocusMode ? '-translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
                 {/* Brand underline: the blue-to-red gradient, used here as the
                     header's only rule so light mode reads crisp instead of pale. */}
                 <div
                     className="absolute inset-x-0 bottom-0 h-px pointer-events-none"
                     style={{ background: 'linear-gradient(90deg, rgb(var(--c-primary)), rgb(var(--c-accent)) 55%, transparent)' }}
                 />
-                <div className="max-w-[1600px] mx-auto px-8 flex justify-between items-center">
-                    <div className="flex items-center gap-6">
+                <div className="max-w-[1600px] mx-auto px-8 flex flex-col gap-3">
+                  <div className="flex justify-between items-center gap-6">
+                    <div className="flex items-center gap-6 min-w-0">
                         <button
                             onClick={() => navigate('/surveys')}
                             className="w-11 h-11 grid place-items-center bg-surface border border-primary/20 rounded-2xl hover:border-primary/50 hover:bg-primary/[0.06] hover:text-primary-soft transition-all text-ink-muted group"
@@ -546,7 +732,7 @@ function ReportContent({
                             <Activity className="h-6 w-6 text-white" />
                         </div>
                         <div>
-                            <h1 className="text-xl font-black font-display tracking-tight text-ink">
+                            <h1 className="text-xl font-black font-display tracking-tight text-ink truncate max-w-[22rem]" title={report.project_name || 'Strategic Analysis'}>
                                 {report.project_name || 'Strategic Analysis'}
                             </h1>
                             <div className="flex gap-2 mt-1 flex-wrap">
@@ -570,7 +756,7 @@ function ReportContent({
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-2.5 shrink-0">
                         <FilterPanel
                             availableFilters={report?.available_filters || {}}
                             brands={report?.brands || report?.brand_list || []}
@@ -605,10 +791,12 @@ function ReportContent({
                             </motion.div>
                             <div className="h-5 w-5 opacity-0">.</div> {/* Spacer */}
                         </button>
-                        <button onClick={() => handleGenerate(true)} className="w-11 h-11 grid place-items-center bg-surface border border-primary/20 rounded-2xl hover:border-primary/50 hover:bg-primary/[0.06] transition-all text-ink-muted hover:text-primary-soft" title="Regenerate">
-                            <RefreshCw className="h-5 w-5" />
-                        </button>
-                        {localStorage.getItem('role') === 'admin' && (
+                        {!isSharedView && (
+                            <button onClick={() => handleGenerate(true)} className="w-11 h-11 grid place-items-center bg-surface border border-primary/20 rounded-2xl hover:border-primary/50 hover:bg-primary/[0.06] transition-all text-ink-muted hover:text-primary-soft" title="Regenerate">
+                                <RefreshCw className="h-5 w-5" />
+                            </button>
+                        )}
+                        {!isSharedView && localStorage.getItem('role') === 'admin' && (
                             <button
                                 onClick={handleViewAICosts}
                                 className="w-11 h-11 grid place-items-center bg-surface border border-primary/20 rounded-2xl hover:border-primary/50 hover:bg-primary/[0.06] transition-all text-ink-muted hover:text-primary-soft group relative"
@@ -620,19 +808,19 @@ function ReportContent({
                                 )}
                             </button>
                         )}
-                        <button
-                            onClick={handleDownload}
-                            className="btn-premium flex items-center gap-3 active:scale-95 transition-transform"
-                            title={hasPptx ? "Download or rebuild presentation" : "Generate presentation export"}
-                        >
-                            <Download className="h-5 w-5" />
-                            <span className="uppercase tracking-widest text-sm font-bold">
-                                {hasPptx ? 'Download PPTX' : 'Export PPTX'}
-                            </span>
-                        </button>
+                        <ExportMenu onExport={handleExport} hasPptx={hasPptx} />
                     </div>
+                  </div>
+
+                  {/* Its own row: the URL needs horizontal space, and squeezing
+                      it into the button cluster truncated it to uselessness. */}
+                  {!isSharedView && !isPrintMode && surveyId && (
+                    <div className="flex justify-end">
+                      <ReportShareBar surveyId={surveyId} />
+                    </div>
+                  )}
                 </div>
-            </header>
+            </header>}
 
             {/* Immersive Focus Mode Overlay (Slide Presentation Engine) */}
             {isFocusMode && (
@@ -892,8 +1080,10 @@ function ReportContent({
                         </div>
                     </div>
 
-                    {/* Platform navigation, collapsed into one group so it does
-                        not compete with the report's own section list. */}
+                    {/* Platform navigation. Hidden for a shared client view:
+                        those routes require an account, so they would bounce a
+                        client to the login screen. */}
+                    {!isSharedView && (
                     <div className="shrink-0 px-3 pt-3 border-t border-white/[0.07]">
                         <button
                             onClick={() => setGoToOpen((v) => !v)}
@@ -944,6 +1134,11 @@ function ReportContent({
                             )}
                         </AnimatePresence>
                     </div>
+                    )}
+
+                    {/* Study metadata — what a reader needs to interpret the
+                        numbers: what was tested, where, and on what base. */}
+                    <ProjectFacts report={report} />
 
                     {/* Collapse sits on its own, separated from both groups */}
                     <div className="shrink-0 px-3 py-3 mt-1 border-t border-white/[0.07]">

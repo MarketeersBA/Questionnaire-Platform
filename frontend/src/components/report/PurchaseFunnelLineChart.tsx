@@ -99,10 +99,31 @@ export function PurchaseFunnelLineChart({ data, isFocusMode, presentationHeight 
         );
     };
 
+    const renderCustomLabel = (props: any, brand: string, color: string) => {
+        const { x, y, index } = props;
+        // Only show label on the last point
+        if (index === chartData.length - 1) {
+            return (
+                <text 
+                    x={x + 10} 
+                    y={y} 
+                    fill={color}
+                    fontSize={12} 
+                    fontWeight="bold"
+                    textAnchor="start" 
+                    dominantBaseline="central"
+                >
+                    {brand}
+                </text>
+            );
+        }
+        return null;
+    };
+
     return (
         <div className="w-full h-full flex flex-col pt-4">
             <ResponsiveContainer width="100%" height={isFocusMode ? ((presentationHeight || 800) - 240) : 400}>
-                <LineChart data={chartData} margin={{ top: 20, right: 40, left: 20, bottom: 20 }}>
+                <LineChart data={chartData} margin={{ top: 20, right: 80, left: 20, bottom: 20 }}>
                     {/* Horizontal grid lines for cleaner design */}
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? '#1e293b' : '#cbd5e1'} strokeOpacity={0.8} />
                     <XAxis
@@ -140,18 +161,21 @@ export function PurchaseFunnelLineChart({ data, isFocusMode, presentationHeight 
                         // Skip rendering the line if hidden via Legend
                         if (!visibleBrands.includes(brand)) return null;
 
+                        const color = COLORS[idx % COLORS.length];
+
                         return (
                             <Line
                                 key={brand}
                                 type="monotone" // "Snake" style smooth curvature
                                 dataKey={brand}
-                                stroke={COLORS[idx % COLORS.length]}
+                                stroke={color}
                                 strokeWidth={4}
-                                dot={{ fill: COLORS[idx % COLORS.length], stroke: isDark ? '#0f172a' : '#ffffff', r: 6, strokeWidth: 2 }}
-                                activeDot={{ fill: COLORS[idx % COLORS.length], stroke: '#ffffff', strokeWidth: 3, r: 8 }}
+                                dot={{ fill: color, stroke: isDark ? '#0f172a' : '#ffffff', r: 6, strokeWidth: 2 }}
+                                activeDot={{ fill: color, stroke: '#ffffff', strokeWidth: 3, r: 8 }}
                                 isAnimationActive={true}
                                 animationDuration={1500}
                                 animationEasing="ease-in-out"
+                                label={(props) => renderCustomLabel(props, brand, color)}
                             />
                         );
                     })}

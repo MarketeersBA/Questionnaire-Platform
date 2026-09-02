@@ -1,0 +1,32 @@
+import asyncio
+from motor.motor_asyncio import AsyncIOMotorClient
+from backend.database import db
+
+async def main():
+    db.connect()
+    try:
+        col = db.get_collection("survey_reports")
+        report = await col.find_one({"survey_id": "69f86a4564a3943cd07f8cc6"}, sort=[("generated_at", -1)])
+        if report:
+            print(type(report.get("report_data")))
+            if isinstance(report.get("report_data"), dict):
+                print("Keys:", report["report_data"].keys())
+                for k, v in report["report_data"].items():
+                    if isinstance(v, dict) and "key_pref" in k:
+                        print("Found in dict:", k)
+            elif isinstance(report.get("report_data"), list):
+                print("Num charts:", len(report["report_data"]))
+                for chart in report["report_data"]:
+                    if chart.get("chart_id") == "key_preference_drivers":
+                        print("Found chart in list")
+                        data = chart.get("data", {})
+                        print("main datasets:", len(data.get("main_scatter", {}).get("datasets", [])))
+                        if len(data.get("main_scatter", {}).get("datasets", [])) > 0:
+                            print("first pt:", data["main_scatter"]["datasets"][0]["data"][0])
+        else:
+            print("No report found!")
+    finally:
+        db.close()
+
+if __name__ == '__main__':
+    asyncio.run(main())

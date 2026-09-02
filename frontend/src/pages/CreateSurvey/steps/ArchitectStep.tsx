@@ -273,13 +273,13 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
 
                             <div className="flex items-center gap-4 px-6 py-4 bg-slate-900/5 dark:bg-white/5 rounded-2xl border border-black/5 dark:border-white/5">
                                 <div className="text-right">
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Logic Phases</p>
+                                    <p className="text-sm font-black uppercase tracking-widest text-slate-400">Total Logic Phases</p>
                                     <p className="text-xl font-display font-black text-ink">{moduleSeq.length + 1}</p>
                                 </div>
                                 <div className="w-px h-8 bg-slate-200 dark:bg-slate-700 mx-2" />
                                 <div className="flex -space-x-2">
                                     {moduleSeq.map((m, i) => (
-                                        <div key={i} className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-800 bg-primary flex items-center justify-center text-[8px] font-bold text-white shadow-sm">
+                                        <div key={i} className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-800 bg-primary flex items-center justify-center text-sm font-bold text-white shadow-sm">
                                             {getLayerLabel(m)}
                                         </div>
                                     ))}
@@ -302,9 +302,9 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                 <div className="flex items-center justify-between mb-12">
                                     <div className="flex items-center gap-3">
                                         <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                                        <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-ink">Live Architecture Flow</h4>
+                                        <h4 className="text-sm font-black uppercase tracking-[0.4em] text-ink">Live Architecture Flow</h4>
                                     </div>
-                                    <div className="px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-black text-emerald-500 uppercase tracking-widest">
+                                    <div className="px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-black text-emerald-500 uppercase tracking-widest">
                                         Status: Constructing Sequence
                                     </div>
                                 </div>
@@ -330,11 +330,11 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                                     }`}
                                             >
                                                 <Lock className="w-6 h-6 mb-1" />
-                                                <span className="text-[10px] font-black">L1</span>
+                                                <span className="text-sm font-black">L1</span>
                                             </button>
                                             <div className="flex flex-col items-center">
-                                                <span className="text-[10px] font-black text-ink uppercase tracking-widest mb-1">Entry</span>
-                                                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Locked</span>
+                                                <span className="text-sm font-black text-ink uppercase tracking-widest mb-1">Entry</span>
+                                                <span className="text-sm font-bold text-slate-400 uppercase tracking-tighter">Locked</span>
                                             </div>
                                         </div>
 
@@ -365,17 +365,17 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                                                 : 'bg-surface border border-line/80 dark:border-line/10 text-slate-400 hover:border-primary/50 hover:text-primary-soft hover:-translate-y-1'
                                                                 }`}
                                                         >
-                                                            <span className={`text-[10px] font-black mb-0.5 ${isActive ? 'text-white' : 'text-ink'}`}>{label}</span>
+                                                            <span className={`text-sm font-black mb-0.5 ${isActive ? 'text-white' : 'text-ink'}`}>{label}</span>
                                                             {isActive && <motion.div layoutId="activeNode" className="absolute -bottom-1.5 w-1.5 h-1.5 bg-white rounded-full" />}
 
                                                             {/* Legend Indicator */}
-                                                            <div className={`absolute -top-1.5 -right-1.5 w-5 h-5 rounded-lg flex items-center justify-center text-[8px] border-2 bg-blue-500 border-white dark:border-slate-900 text-white`}>
+                                                            <div className={`absolute -top-1.5 -right-1.5 w-5 h-5 rounded-lg flex items-center justify-center text-sm border-2 bg-blue-500 border-white dark:border-slate-900 text-white`}>
                                                                 <ShieldCheck className="w-2.5 h-2.5" />
                                                             </div>
                                                         </button>
 
                                                         <div className="text-center space-y-1.5">
-                                                            <p className={`text-[10px] font-black uppercase tracking-widest transition-colors ${isActive ? 'text-primary-soft' : 'text-ink-muted'}`}>
+                                                            <p className={`text-sm font-black uppercase tracking-widest transition-colors ${isActive ? 'text-primary-soft' : 'text-ink-muted'}`}>
                                                                 {getLayerMiniLabel(modId)}
                                                             </p>
                                                             <div className={`h-1 w-8 mx-auto rounded-full transition-all duration-500 ${isActive ? 'bg-primary w-12' : 'bg-slate-200 dark:bg-slate-700'}`} />
@@ -421,10 +421,10 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
 
                                                         <div className="flex-1 space-y-6">
                                                             <div className="flex items-center gap-3">
-                                                                <span className="text-[10px] font-black text-primary-soft uppercase tracking-widest px-4 py-1.5 bg-primary/5 rounded-full border border-primary/15">
+                                                                <span className="text-sm font-black text-primary-soft uppercase tracking-widest px-4 py-1.5 bg-primary/5 rounded-full border border-primary/15">
                                                                     {q.sectionTitle}
                                                                 </span>
-                                                                <div className="flex items-center gap-2 text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em]">
+                                                                <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">
                                                                     <Layers className="w-3 h-3" />
                                                                     {q.type.replace('_', ' ')} logic
                                                                 </div>
@@ -434,7 +434,7 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                                                 <div className="space-y-2">
                                                                     <div className="flex items-center gap-2 mb-2">
                                                                         <div className="w-1.5 h-1.5 rounded-full bg-slate-300" />
-                                                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">English Instrumentation</p>
+                                                                        <p className="text-sm font-black text-slate-400 uppercase tracking-[0.3em]">English Instrumentation</p>
                                                                     </div>
                                                                     <p className="text-lg font-display font-medium text-ink leading-snug">
                                                                         {formatModuleQuestionText(q.en_text, { product: focusLabel, category: focusLabel })}
@@ -442,7 +442,7 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                                                 </div>
                                                                 <div className="space-y-2 text-right border-t lg:border-t-0 lg:border-l border-line/80 dark:border-line/10 pt-6 lg:pt-0 lg:pl-10">
                                                                     <div className="flex items-center justify-end gap-2 mb-2">
-                                                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">المحتوى البحثي العربي</p>
+                                                                        <p className="text-sm font-black text-slate-400 uppercase tracking-[0.3em]">المحتوى البحثي العربي</p>
                                                                         <div className="w-1.5 h-1.5 rounded-full bg-primary" />
                                                                     </div>
                                                                     <p className="text-xl font-display font-medium text-ink leading-relaxed" dir="rtl">
@@ -482,7 +482,7 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                                         <h3 className="text-xl font-display font-black text-emerald-600 flex items-center gap-2">
                                                             Premium Performance Metrics
                                                         </h3>
-                                                        <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mt-1 opacity-80">
+                                                        <p className="text-sm font-black text-emerald-500 uppercase tracking-widest mt-1 opacity-80">
                                                             Proprietary instrumentation • Max 3 Custom Ratings
                                                         </p>
                                                     </div>
@@ -490,7 +490,7 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                                 <button
                                                     onClick={handleAddCustomRatingL3}
                                                     disabled={customRatingsCount >= 3}
-                                                    className={`flex items-center gap-3 px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${customRatingsCount >= 3
+                                                    className={`flex items-center gap-3 px-8 py-4 rounded-2xl text-sm font-black uppercase tracking-[0.2em] transition-all duration-300 ${customRatingsCount >= 3
                                                         ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
                                                         : 'bg-emerald-500 text-white shadow-[0_15px_30px_rgba(16,185,129,0.3)] hover:scale-105 active:scale-95'
                                                         }`}
@@ -596,16 +596,16 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                                 {activeLayer === 'taste_test' && section.title === 'Before Taste' && (
                                                     <div className="flex items-center gap-4 px-6 mb-10">
                                                         <div className="h-px bg-slate-300 dark:bg-slate-700 flex-1" />
-                                                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-900 dark:text-200">Respondent Priming</span>
+                                                        <span className="text-sm font-black uppercase tracking-[0.3em] text-slate-900 dark:text-200">Respondent Priming</span>
                                                         <div className="h-px bg-slate-300 dark:bg-slate-700 flex-1" />
                                                     </div>
                                                 )}
                                                 <div className="flex items-center justify-between px-8 py-3 bg-surface/50 rounded-2xl border border-line/80 dark:border-line/10 shadow-sm">
-                                                    <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary-soft flex items-center gap-3 text-left flex-wrap">
+                                                    <h4 className="text-sm font-black uppercase tracking-[0.3em] text-primary-soft flex items-center gap-3 text-left flex-wrap">
                                                         <div className="w-1.5 h-1.5 rounded-full bg-primary" />
                                                         {section.title}
                                                         {activeLayer === 'product_test' && section.brand && (
-                                                            <span className="text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                                                            <span className="text-sm font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
                                                                 {section.displayBrand || section.brand}
                                                             </span>
                                                         )}
@@ -613,19 +613,19 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                                     {activeLayer === 'screening' ? (
                                                         <button
                                                             onClick={(e) => { e.stopPropagation(); handleAddQuestion(sIdx, 1); }}
-                                                            className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-primary-soft transition-colors group/add"
+                                                            className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-500 hover:text-primary-soft transition-colors group/add"
                                                         >
                                                             <Plus className="w-3.5 h-3.5 group-hover/add:scale-110 transition-transform" /> Add Logic Block
                                                         </button>
                                                     ) : blueprintEditable ? (
                                                         <div className="flex items-center gap-2.5 px-4 py-1.5 bg-emerald-50 dark:bg-emerald-950/30 rounded-full border border-emerald-200 dark:border-emerald-800 shadow-inner">
-                                                            <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-300">
+                                                            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-300">
                                                                 <Edit3 className="w-3 h-3 text-emerald-500" /> Editable Copy
                                                             </div>
                                                         </div>
                                                     ) : (
                                                         <div className="flex items-center gap-2.5 px-4 py-1.5 bg-surface-raised rounded-full border border-line/80 dark:border-line/10 shadow-inner">
-                                                            <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.2em] text-slate-900 dark:text-slate-200">
+                                                            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-slate-900 dark:text-slate-200">
                                                                 <Lock className="w-3 h-3 text-emerald-500" /> Layer Fixed
                                                             </div>
                                                         </div>
@@ -737,3 +737,4 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
         </div>
     );
 }
+

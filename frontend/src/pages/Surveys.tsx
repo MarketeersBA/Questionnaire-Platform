@@ -5,6 +5,7 @@ import { getMasterLink } from '../utils/surveyLinks';
 import { toast } from 'sonner';
 import { SurveyStateToggle } from '../components/SurveyStateManagement';
 import {
+    Share2,
     Plus,
     Users,
     TrendingUp,
@@ -24,6 +25,7 @@ import {
     Clock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ShareLinkModal from '../components/report/ShareLinkModal';
 
 const PAGE_SIZE = 5;
 
@@ -45,6 +47,7 @@ export default function SurveysPage() {
     const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'draft' | 'closed'>('all');
     const [page, setPage] = useState(1);
     const [reportStatuses, setReportStatuses] = useState<Record<string, string>>({});
+    const [shareTarget, setShareTarget] = useState<{ id: string; name: string } | null>(null);
 
     const fetchSurveys = async () => {
         try {
@@ -117,15 +120,31 @@ export default function SurveysPage() {
     );
     const pageSurveyIds = paginatedSurveys.map((s: any) => s._id).join(',');
 
+    /**
+     * Report status for the surveys on this page.
+     *
+     * The dependency list is deliberately just `pageSurveyIds` — a joined
+     * string, so it only changes when the page's surveys actually change.
+     *
+     * It previously also listed `paginatedSurveys` and `reportStatuses`, which
+     * made this loop without end: `paginatedSurveys` comes from `.slice()` and
+     * is a new array on every render, and the effect's own `setReportStatuses`
+     * returned a fresh object every time. Either one re-triggered the effect,
+     * which fetched again, which set state again — a status request per render,
+     * as fast as the network allowed, for every survey on the page.
+     *
+     * Whether anything is still generating is now decided inside the tick
+     * rather than baked into the dependencies, which is what let that state
+     * leak into the list in the first place.
+     */
     useEffect(() => {
         const ids = pageSurveyIds ? pageSurveyIds.split(',') : [];
         if (ids.length === 0) return;
 
         let cancelled = false;
-        
-        const fetchStatuses = async () => {
-            if (ids.length === 0) return;
+        let interval: ReturnType<typeof setInterval> | null = null;
 
+        const fetchStatuses = async () => {
             const results = await Promise.all(
                 ids.map(async (id: string) => {
                     try {
@@ -136,33 +155,45 @@ export default function SurveysPage() {
                     }
                 })
             );
-            
-            if (cancelled) return;
-            
+
+            if (cancelled) return results;
+
             setReportStatuses((prev) => {
+                // Hand back the same object when nothing moved. A new reference
+                // on every poll would re-render the whole grid ten times a
+                // minute to display identical values.
+                let changed = false;
                 const next = { ...prev };
-                for (const [id, status] of results) next[id] = status;
-                return next;
+                for (const [id, status] of results) {
+                    if (next[id] !== status) {
+                        next[id] = status;
+                        changed = true;
+                    }
+                }
+                return changed ? next : prev;
             });
+
+            return results;
         };
 
-        fetchStatuses();
+        void fetchStatuses();
 
-        // Optional polling every 10 seconds for surveys that are currently generating
-        const generatingIds = paginatedSurveys
-            .filter((s: any) => reportStatuses[s._id] === 'generating')
-            .map((s: any) => s._id);
-            
-        let interval: NodeJS.Timeout | null = null;
-        if (generatingIds.length > 0) {
-            interval = setInterval(fetchStatuses, 10000);
-        }
+        // Keep polling only while something is still being generated; once the
+        // page has settled there is nothing left to watch for.
+        interval = setInterval(async () => {
+            const results = await fetchStatuses();
+            const stillGenerating = results?.some(([, status]) => status === 'generating');
+            if (!stillGenerating && interval) {
+                clearInterval(interval);
+                interval = null;
+            }
+        }, 10000);
 
         return () => {
             cancelled = true;
             if (interval) clearInterval(interval);
         };
-    }, [pageSurveyIds, paginatedSurveys, reportStatuses]);
+    }, [pageSurveyIds]);
 
     const handleGenerateReport = async (surveyId: string) => {
         try {
@@ -389,7 +420,7 @@ export default function SurveysPage() {
                                                     </div>
                                                     <span className="text-xs font-bold text-primary-soft uppercase tracking-wide">Target: {survey.sample_capacity || 0}</span>
                                                 </div>
-                                                <div className="w-full h-1.5 bg-surface-sunken rounded-full overflow-hidden border border-slate-200/50 dark:border-slate-700/50 shadow-inner">
+                                                <div className="w-full h-3 bg-surface-sunken rounded-full overflow-hidden border border-slate-200/50 dark:border-slate-700/50 shadow-inner">
                                                     <motion.div
                                                         initial={{ width: 0 }}
                                                         animate={{ width: `${survey.sample_capacity ? Math.min(100, Math.round((survey.respondent_count || 0) / survey.sample_capacity * 100)) : 0}%` }}
@@ -416,21 +447,38 @@ export default function SurveysPage() {
                                                 const status = reportStatuses[survey._id];
                                                 if (status === 'complete' || status === 'ready') {
                                                     return (
-                                                        <div className="flex flex-col items-center gap-2">
-                                                            <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/30">Ready</span>
+                                                        <div className="flex items-center justify-center gap-2 whitespace-nowrap">
+                                                            <span className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest bg-emerald-100 dark:bg-emerald-500/20 px-2.5 py-1 rounded-full border border-emerald-500/40 whitespace-nowrap">Ready</span>
                                                             <Link
                                                                 to={`/surveys/${survey._id}/report`}
-                                                                className="px-5 py-2.5 bg-primary text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-lg shadow-primary/30 hover:-translate-y-0.5 transition-all w-full text-center"
+                                                                className="px-3 py-1.5 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-wider rounded-lg shadow-sm shadow-indigo-600/25 hover:bg-indigo-500 transition-all whitespace-nowrap"
                                                             >
                                                                 View Report
                                                             </Link>
+                                                            {/* Sharing settings belong next to the report they govern.
+                                                                Kept on this row because this table is where an analyst
+                                                                decides a report is finished — the same moment they
+                                                                decide who may read it and for how long. */}
+                                                            <button
+                                                                onClick={() =>
+                                                                    setShareTarget({
+                                                                        id: survey._id,
+                                                                        name: survey.company_name || survey.title || 'Report',
+                                                                    })
+                                                                }
+                                                                className="px-3 py-1.5 flex items-center gap-1.5 bg-surface-raised border border-primary/25 text-primary-soft text-[10px] font-black uppercase tracking-wider rounded-lg hover:bg-primary hover:text-white hover:border-primary transition-all whitespace-nowrap"
+                                                                title="Set how many people may open this report and when the link expires"
+                                                            >
+                                                                <Share2 className="w-3 h-3" />
+                                                                Share
+                                                            </button>
                                                         </div>
                                                     );
                                                 }
                                                 if (status === 'generating') {
                                                     return (
-                                                        <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500/10 text-amber-600 font-black text-xs uppercase tracking-wider border border-amber-500/30 mx-auto shadow-sm">
-                                                            <RefreshCw className="w-4 h-4 animate-spin" />
+                                                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 text-white font-black text-[10px] uppercase tracking-wider mx-auto shadow-sm">
+                                                            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                                                             In Progress
                                                         </div>
                                                     );
@@ -438,7 +486,7 @@ export default function SurveysPage() {
                                                 return (
                                                     <button
                                                         onClick={() => handleGenerateReport(survey._id)}
-                                                        className="px-5 py-2.5 bg-primary/5 border border-primary/40 text-primary-soft text-xs font-black uppercase tracking-wider rounded-xl hover:bg-primary hover:text-white transition-all shadow-sm w-full"
+                                                        className="px-3 py-1.5 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-wider rounded-lg hover:bg-indigo-500 transition-all shadow-sm w-full"
                                                     >
                                                         Generate Report
                                                     </button>
@@ -550,6 +598,15 @@ export default function SurveysPage() {
                     </div>
                 )}
             </div>
+
+            {shareTarget && (
+                <ShareLinkModal
+                    surveyId={shareTarget.id}
+                    surveyName={shareTarget.name}
+                    isOpen
+                    onClose={() => setShareTarget(null)}
+                />
+            )}
         </div>
     );
 }

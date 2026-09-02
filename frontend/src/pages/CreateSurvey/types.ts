@@ -135,6 +135,10 @@ export interface SurveyFormData {
     sample_intelligence?: boolean;
     ai_followup?: AiFollowupConfig;
     module_sequence?: string[];
+    /** Modules enabled for this survey (purchase_funnel, taste_test, …). */
+    selected_modules?: string[];
+    /** `module_id`s of the custom modules attached to this survey. */
+    attached_modules?: string[];
 }
 
 export interface StepProps {

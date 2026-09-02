@@ -1,3 +1,13 @@
+# Pinned so the project identity does not depend on the directory this file is
+# run from. Without it Compose derives the project name from the parent folder —
+# "docker" here — while the containers below carry fixed `container_name` values
+# prefixed "questioner_". Run the stack once from a differently named path (or
+# with -p) and Compose creates a second project that fights the first over those
+# same fixed names: `down` then finds containers it recognises by name but which
+# carry another project's label, and fails instantly with an ownership error
+# rather than stopping them.
+name: questioner
+
 services:
   redis:
     image: redis:alpine
@@ -27,10 +37,26 @@ services:
       - PPTX_RENDER_MODE=hybrid
       - PPTX_ROLLOUT_STAGE=comparison
       - PPTX_EXPORT_FRONTEND_BASE_URL=https://questionnaire.marketeers-ba.com
+      # Server-to-server address for headless rendering (PDF export and
+      # PPTX chart capture). Distinct from the public URL above: without it
+      # the browser inside this container is sent to the live site with a
+      # locally-signed token, which is refused, so every export waits out
+      # its timeout instead of rendering.
+      - REPORT_RENDER_BASE_URL=http://frontend:5173
     depends_on:
       - redis
     networks:
       - questioner_network
+    # Public resolvers: Docker's embedded DNS forwards to the host resolver,
+    # which on some networks (VPNs, captive portals) cannot answer the SRV
+    # lookup that a mongodb+srv:// URI requires. A failed lookup used to kill
+    # startup outright.
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    # Without this a single transient failure left the container exited and the
+    # whole app unreachable until someone restarted it by hand.
+    restart: unless-stopped
     volumes:
       - ../../backend:/app/backend
       - reports_data:/app/reports
@@ -50,6 +76,12 @@ services:
       - PPTX_RENDER_MODE=hybrid
       - PPTX_ROLLOUT_STAGE=comparison
       - PPTX_EXPORT_FRONTEND_BASE_URL=https://questionnaire.marketeers-ba.com
+      # Server-to-server address for headless rendering (PDF export and
+      # PPTX chart capture). Distinct from the public URL above: without it
+      # the browser inside this container is sent to the live site with a
+      # locally-signed token, which is refused, so every export waits out
+      # its timeout instead of rendering.
+      - REPORT_RENDER_BASE_URL=http://frontend:5173
       # Preflight report API probe: hit backend directly inside Docker network (recommended).
       - PPTX_CAPTURE_API_BASE_URL=http://backend:8080
       - PPTX_QUEUE_ENABLED=true
@@ -92,7 +124,7 @@ services:
       - "443:443"
       - "80:80"
     volumes:
-      - ../../infra/nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - ../../infra/nginx/nginx.dev.conf:/etc/nginx/nginx.conf:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - ../../certs:/etc/nginx/certs:ro
     depends_on:

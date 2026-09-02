@@ -10,12 +10,14 @@ import json
 import os
 import logging
 import re
+import uuid
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
 from typing import Annotated, Dict, Any, List, Optional
 
 from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request, Response
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from backend.models import User, OpportunityInsight
@@ -27,7 +29,13 @@ from backend.routers.auth import (
     get_current_user_or_capture_user,
 )
 from backend.services.analytics_service import analytics_service
-from backend.utils.rate_limit import limiter, POLLING_LIMIT, polling_rate_key
+from backend.services import report_share_service
+from backend.utils.rate_limit import (
+    limiter,
+    POLLING_LIMIT,
+    get_client_address,
+    polling_rate_key,
+)
 from backend.utils.report_status_cache import (
     compute_poll_interval_seconds,
     get_cached_status,
@@ -151,6 +159,561 @@ async def get_report(
     # Convert _id to string for json serialization
     report["_id"] = str(report["_id"])
     return report
+
+
+# ── Client-shareable report links ───────────────────────────────────────────
+#
+# NOTE: `/report/share/...` is declared before the `/report/{survey_id}`-style
+# routes it sits beside, because FastAPI matches in declaration order and a
+# literal registered after a path parameter is swallowed by it.
+
+
+async def _load_report_for_response(survey_id: str) -> Dict[str, Any]:
+    """Fetch the latest report and shape it exactly as `get_report` does."""
+    report = await db.get_collection("survey_reports").find_one(
+        {"survey_id": survey_id},
+        sort=[("generated_at", -1)],
+    )
+    if not report:
+        raise HTTPException(404, "Report not generated yet")
+
+    if report["status"] == "generating":
+        raise HTTPException(
+            202,
+            detail={"status": "generating", "message": "Report is being generated"},
+        )
+
+    report["_id"] = str(report["_id"])
+
+    if report["status"] == "failed":
+        return {
+            "status": "failed",
+            "error_message": report.get("error_message", "Unknown error"),
+            "survey_id": survey_id,
+            "retry_count": report.get("retry_count", 0),
+            "status_history": report.get("status_history", []),
+        }
+
+    return report
+
+
+#: Fields on a report document that must never reach a share-link viewer.
+#:
+#: These are operational, not analytical: `telemetry` carries the AI cost
+#: manifest (what you spend with OpenAI), `pptx_path` and the export manifests
+#: describe the server filesystem, and the status/authorship fields expose who
+#: works here and how often generation fails. None of them is needed to render
+#: a report, and all of them were being served to anyone holding a share link.
+_VIEWER_STRIPPED_FIELDS = (
+    "_id",
+    "telemetry",
+    "ai_cost_manifest",
+    "pptx_path",
+    "pptx_export_manifest",
+    "pptx_job_id",
+    "pptx_diagnostics",
+    "brand_analyzer_excel_path",
+    "status_history",
+    "last_edited_by",
+    "created_by",
+    "retry_count",
+    "error_message",
+    "prompt_versions",
+)
+
+
+def sanitize_report_for_viewer(
+    report: Dict[str, Any],
+    *,
+    share: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """
+    Strip a report down to what a client viewing it through a share link needs.
+
+    Allow-listing would be safer in principle, but the report schema grows a new
+    chart or insight key most releases and a missed addition would silently blank
+    part of the client's report. Deny-listing keeps the analytics surface whole;
+    the accompanying test asserts on these keys by name so a newly added
+    operational field fails loudly rather than leaking quietly.
+    """
+    clean = {k: v for k, v in (report or {}).items() if k not in _VIEWER_STRIPPED_FIELDS}
+
+    # A failed report still has to say *something*, but not why — an internal
+    # traceback or a model name is not the client's business.
+    if (report or {}).get("status") == "failed":
+        clean["error_message"] = "This report is not available right now."
+
+    clean["is_shared_view"] = True
+    if share:
+        clean["recipient_name"] = share.get("recipient_name")
+        clean["allow_download"] = bool(share.get("allow_download"))
+
+    return clean
+
+
+class ShareCreateRequest(BaseModel):
+    """
+    Everything the analyst decides when handing a report to a client.
+
+    `max_viewers` is the seat limit — how many distinct people may ever open the
+    link. `None` means unlimited. `expires_at` ends access on a date; passing
+    `unlimited_expiry` instead means the link never lapses. Neither is forced by
+    the backend: an analyst who wants an open-ended link gets one.
+    """
+
+    label: Optional[str] = Field(default=None, max_length=120)
+    max_viewers: Optional[int] = Field(default=None, ge=1, le=10000)
+    expires_at: Optional[datetime] = None
+    unlimited_expiry: bool = False
+
+
+class ShareUpdateRequest(BaseModel):
+    label: Optional[str] = Field(default=None, max_length=120)
+    max_viewers: Optional[int] = Field(default=None, ge=0, le=10000)
+    expires_at: Optional[datetime] = None
+    unlimited_expiry: bool = False
+
+
+def _share_base_url(request: Request) -> str:
+    """
+    Origin to build a copyable link against.
+
+    Prefers the configured public URL, because the API may sit behind a proxy
+    whose host header is an internal name that would produce a link nobody
+    outside the network can open.
+    """
+    configured = (
+        os.getenv("PPTX_EXPORT_FRONTEND_BASE_URL")
+        or os.getenv("PUBLIC_APP_URL")
+        or ""
+    ).strip()
+    if configured:
+        return configured.rstrip("/")
+    return str(request.base_url).rstrip("/")
+
+
+class ShareLinkSettings(BaseModel):
+    """
+    The restrictions on a report's link.
+
+    Both are optional and both mean "no limit" when cleared: `max_viewers=None`
+    lets any number of people open it, `unlimited_expiry` makes it work until
+    it is reset. Neither is imposed by the backend — the analyst decides.
+    """
+
+    label: Optional[str] = Field(default=None, max_length=120)
+    max_viewers: Optional[int] = Field(default=None, ge=0, le=10000)
+    expires_at: Optional[datetime] = None
+    unlimited_expiry: bool = False
+
+
+@router.get("/report/{survey_id}/share-link")
+async def get_report_share_link(
+    survey_id: str,
+    request: Request,
+    current_user: Annotated[User, Depends(get_current_active_analyst)],
+):
+    """
+    The report's share link, created on first request.
+
+    One link per report, like the survey master link — so "copy the link for
+    this report" is never ambiguous. Safe to call repeatedly; it returns the
+    same URL rather than minting another.
+    """
+    share = await report_share_service.get_or_create_master_share(
+        survey_id, username=getattr(current_user, "username", None)
+    )
+    return report_share_service.to_admin_dict(share, base_url=_share_base_url(request))
+
+
+@router.patch("/report/{survey_id}/share-link")
+async def update_report_share_link(
+    survey_id: str,
+    payload: ShareLinkSettings,
+    request: Request,
+    current_user: Annotated[User, Depends(get_current_active_analyst)],
+):
+    """Change the viewer limit or expiry. The URL itself is unaffected."""
+    share = await report_share_service.get_or_create_master_share(
+        survey_id, username=getattr(current_user, "username", None)
+    )
+    updated = await report_share_service.update_share(
+        share["share_id"],
+        label=payload.label,
+        max_viewers=payload.max_viewers,
+        expires_at=payload.expires_at,
+        clear_expiry=payload.unlimited_expiry,
+    )
+    return report_share_service.to_admin_dict(
+        updated or share, base_url=_share_base_url(request)
+    )
+
+
+@router.post("/report/{survey_id}/share-link/reset")
+async def reset_report_share_link(
+    survey_id: str,
+    request: Request,
+    current_user: Annotated[User, Depends(get_current_active_analyst)],
+):
+    """
+    Issue a new URL and stop the old one working.
+
+    For a link that reached the wrong person, or whose viewer slots are used up
+    by people who should no longer have access. The limits carry over — this
+    changes the address, not the policy.
+    """
+    share = await report_share_service.reset_master_share(
+        survey_id, username=getattr(current_user, "username", None)
+    )
+    return report_share_service.to_admin_dict(share, base_url=_share_base_url(request))
+
+
+@router.post("/report/{survey_id}/share")
+async def create_report_share(
+    survey_id: str,
+    request: Request,
+    current_user: Annotated[User, Depends(get_current_active_analyst)],
+):
+    """
+    Mint (or return) the client-shareable link for a survey's report.
+
+    Idempotent: pressing "copy link" repeatedly hands back the same token rather
+    than silently invalidating a link the client may already be using. Retained
+    for the one-click copy button; `POST .../shares` is the richer path.
+    """
+    share = await report_share_service.create_or_get_share(
+        survey_id, username=getattr(current_user, "username", None)
+    )
+    return {
+        "survey_id": survey_id,
+        "token": share["token"],
+        "share_id": share.get("share_id"),
+        "url": f"{_share_base_url(request)}/r/{share['token']}",
+        "created_at": share.get("created_at"),
+        "view_count": share.get("view_count", 0),
+    }
+
+
+@router.delete("/report/{survey_id}/share")
+async def revoke_report_share(
+    survey_id: str,
+    current_user: Annotated[User, Depends(get_current_active_analyst)],
+):
+    """Revoke every live link for this report. Existing URLs stop working."""
+    revoked = await report_share_service.revoke_share(survey_id)
+    return {"survey_id": survey_id, "revoked": revoked}
+
+
+def _viewer_id_from(request: Request) -> Optional[str]:
+    """
+    The visitor's browser-issued id, used to charge one seat per person.
+
+    Sent as a header by the report page. Absent on a first-ever visit, in which
+    case the caller mints one and hands it back for the browser to keep.
+    """
+    raw = (request.headers.get("X-Report-Viewer-Id") or "").strip()
+    return raw[:64] or None
+
+
+@router.get("/public/report/{token}")
+async def get_shared_report(token: str, request: Request, response: Response):
+    """
+    Read a report through a share token — deliberately unauthenticated.
+
+    Anyone holding the URL may open it; what the analyst controls is how many
+    distinct people ever do. Each visitor is issued a `viewer_id` their browser
+    keeps, and a seat is charged to that id. A returning viewer never spends a
+    second seat, so a client re-reading their own report is never locked out.
+
+    Three failure modes, deliberately distinguished:
+      * unknown / revoked / expired -> 404, all identical, so a revoked link
+        cannot be told apart from one that never existed;
+      * seat limit reached -> 403 with a message the visitor can act on, since
+        pretending the report does not exist would send them back to the person
+        who shared it with a false story;
+      * report not generated yet -> the same 202/404 the analyst view returns.
+    """
+    share = await report_share_service.resolve_share(token)
+    if not share:
+        raise HTTPException(404, "This report link is not available")
+
+    viewer_id = _viewer_id_from(request) or f"v_{uuid.uuid4().hex}"
+
+    try:
+        share = await report_share_service.register_viewer(
+            token,
+            viewer_id,
+            ip=get_client_address(request),
+            user_agent=request.headers.get("User-Agent"),
+        )
+    except report_share_service.ShareLimitReached as exc:
+        raise HTTPException(
+            403,
+            detail={
+                "code": "share_limit_reached",
+                "message": (
+                    "This report link has reached the number of people it can be "
+                    "shared with. Ask whoever sent it to you for a new link."
+                ),
+                "max_viewers": exc.max_viewers,
+            },
+        ) from None
+
+    report = await _load_report_for_response(share["survey_id"])
+
+    # Echoed so a first-time visitor's browser can store the id it was assigned.
+    response.headers["X-Report-Viewer-Id"] = viewer_id
+
+    # Sanitized, not returned raw: this endpoint is unauthenticated, and the
+    # stored document carries AI spend and server paths alongside the charts.
+    return sanitize_report_for_viewer(report, share=share)
+
+# ── Exports ─────────────────────────────────────────────────────────────────
+#
+# PPTX is assembled from the analytics payload slide by slide. PDF prints the
+# live report page instead, so it keeps the on-screen layout with the insights
+# beside their charts and the text still selectable for downstream parsing.
+
+
+def _origin_hint(request: Request) -> Optional[str]:
+    """
+    Where the caller's browser is talking to us from.
+
+    Used as a fallback for locating the frontend when no public URL is
+    configured: the analyst's browser is by definition able to reach the app,
+    and in local development it is the same machine Chromium runs on. The
+    Origin header is preferred over Referer because it is just the scheme and
+    host, with no path to strip.
+    """
+    origin = (request.headers.get("Origin") or "").strip()
+    if origin and origin.lower() != "null":
+        return origin
+
+    referer = (request.headers.get("Referer") or "").strip()
+    if referer:
+        from urllib.parse import urlparse
+
+        parsed = urlparse(referer)
+        if parsed.scheme and parsed.netloc:
+            return f"{parsed.scheme}://{parsed.netloc}"
+    return None
+
+
+async def _render_pdf_or_502(
+    survey_id: str,
+    *,
+    origin_hint: Optional[str] = None,
+    watermark: Optional[str] = None,
+) -> Path:
+    """
+    Print the report, turning any failure into a message someone can act on.
+
+    Playwright's failures are operational, not user error — a browser that was
+    never installed, a frontend the server cannot reach — so the remedy travels
+    with the error instead of being buried in a log the analyst cannot see.
+    """
+    from starlette.concurrency import run_in_threadpool
+
+    from backend.services.report_pdf_service import PdfExportError, render_report_pdf
+
+    try:
+        return await run_in_threadpool(
+            render_report_pdf,
+            survey_id,
+            origin_hint=origin_hint,
+            watermark=watermark,
+        )
+    except PdfExportError as exc:
+        logger.error(
+            "[PDF] Export failed for survey %s: %s (remedy: %s)",
+            survey_id,
+            exc,
+            exc.remedy or "none",
+        )
+        raise HTTPException(
+            502,
+            detail={
+                "code": "pdf_export_failed",
+                "message": str(exc),
+                "remedy": exc.remedy,
+            },
+        ) from None
+    except Exception:  # noqa: BLE001 - surface any renderer fault as 502
+        logger.exception("[PDF] Unexpected failure for survey %s", survey_id)
+        raise HTTPException(
+            502,
+            detail={
+                "code": "pdf_export_failed",
+                "message": "PDF export failed unexpectedly. Check the server logs.",
+                "remedy": None,
+            },
+        ) from None
+
+
+def _pdf_filename(report: Dict[str, Any], survey_id: str) -> str:
+    raw = (report or {}).get("metadata", {}).get("title") or f"report-{survey_id}"
+    safe = re.sub(r"[^A-Za-z0-9._-]+", "-", str(raw)).strip("-") or f"report-{survey_id}"
+    return f"{safe}.pdf"
+
+
+async def _require_ready_report(survey_id: str) -> Dict[str, Any]:
+    report = await db.get_collection("survey_reports").find_one(
+        {"survey_id": survey_id}, sort=[("generated_at", -1)]
+    )
+    if not report:
+        raise HTTPException(404, "Report not found.")
+    if report.get("status") not in ("ready", "stale"):
+        raise HTTPException(409, "Report is not ready yet.")
+    return report
+
+
+@router.get("/report/{survey_id}/download-pdf")
+async def download_report_pdf(
+    survey_id: str,
+    request: Request,
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    """Print this report to PDF and stream it back."""
+    report = await _require_ready_report(survey_id)
+    path = await _render_pdf_or_502(survey_id, origin_hint=_origin_hint(request))
+    return FileResponse(
+        path,
+        media_type="application/pdf",
+        filename=_pdf_filename(report, survey_id),
+    )
+
+
+async def _share_or_404(token: str) -> Dict[str, Any]:
+    share = await report_share_service.resolve_share(token)
+    if not share:
+        raise HTTPException(404, "This report link is not available")
+    return share
+
+
+@router.get("/public/report/{token}/download-pdf")
+async def download_shared_report_pdf(token: str, request: Request):
+    """
+    PDF export through a share link.
+
+    No seat is charged here: exporting is something a viewer who already holds a
+    seat does, and charging one would let a client burn their own limit by
+    downloading twice.
+    """
+    share = await _share_or_404(token)
+    report = await _require_ready_report(share["survey_id"])
+    path = await _render_pdf_or_502(
+        share["survey_id"],
+        origin_hint=_origin_hint(request),
+        watermark=share.get("label") or None,
+    )
+    await report_share_service.record_download(token, "pdf")
+    return FileResponse(
+        path,
+        media_type="application/pdf",
+        filename=_pdf_filename(report, share["survey_id"]),
+    )
+
+
+@router.post("/public/report/{token}/generate-pptx")
+async def generate_shared_report_pptx(
+    token: str,
+    background_tasks: BackgroundTasks,
+    request: Request,
+):
+    """
+    Build the PPTX for a shared report when one does not already exist.
+
+    Exporting has to work from the link, not only from the analyst's own view —
+    a client told to "download the deck" cannot be met with "ask someone to
+    generate it first". So a viewer may start the build, bounded by a per-link
+    rate limit because it is real work on the server.
+
+    Delegates to the same enqueue path the analyst route uses, so the two cannot
+    drift into producing different decks.
+    """
+    share = await _share_or_404(token)
+    survey_id = share["survey_id"]
+
+    report = await db.get_collection("survey_reports").find_one(
+        {"survey_id": survey_id}, sort=[("generated_at", -1)]
+    )
+    if not report or report.get("status") not in ("ready", "stale"):
+        raise HTTPException(409, "This report is not ready to export yet.")
+
+    # Already built — nothing to do, and saying so lets the client skip straight
+    # to downloading instead of waiting out a redundant build.
+    if _resolve_pptx_file(report) is not None:
+        return {"status": "READY", "already_available": True}
+
+    return await generate_pptx_v2(
+        survey_id,
+        background_tasks,
+        current_user=None,
+        force_retry=False,
+    )
+
+
+@router.get("/public/report/{token}/pptx-status")
+async def shared_report_pptx_status(token: str):
+    """
+    Poll the export from a share link.
+
+    Reports only what a viewer needs to decide whether to keep waiting — stage,
+    progress, and whether the file is there. Deliberately not the analyst status
+    payload, which carries job ids, retry counts and worker telemetry.
+    """
+    share = await _share_or_404(token)
+
+    report = await db.get_collection("survey_reports").find_one(
+        {"survey_id": share["survey_id"]},
+        {"pptx_status": 1, "pptx_path": 1, "pptx_progress": 1, "pptx_stage": 1, "survey_id": 1},
+        sort=[("generated_at", -1)],
+    )
+    if not report:
+        raise HTTPException(404, "This report link is not available")
+
+    available = _resolve_pptx_file(report) is not None
+    return {
+        "status": "READY" if available else (report.get("pptx_status") or "NONE"),
+        "available": available,
+        "progress": report.get("pptx_progress"),
+        "stage": report.get("pptx_stage"),
+    }
+
+
+@router.get("/public/report/{token}/download")
+async def download_shared_report_pptx(token: str):
+    """
+    PPTX export through a share link.
+
+    Serves the deck the analyst already generated rather than starting a build:
+    a client clicking Export should not be able to queue a Playwright job, and
+    in practice a ready report already has one.
+    """
+    share = await _share_or_404(token)
+    survey_id = share["survey_id"]
+
+    report = await db.get_collection("survey_reports").find_one(
+        {"survey_id": survey_id}, sort=[("generated_at", -1)]
+    )
+    if not report:
+        raise HTTPException(404, "Report not found.")
+
+    file_path = _resolve_pptx_file(report)
+    if file_path is None:
+        raise HTTPException(
+            409,
+            "The PowerPoint version of this report has not been generated yet. "
+            "Download it as PDF, or ask whoever shared the link to generate it.",
+        )
+
+    await report_share_service.record_download(token, "pptx")
+    return FileResponse(
+        file_path,
+        media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        filename=file_path.name,
+    )
+
 
 
 class OpportunityInsightsUpdate(BaseModel):
@@ -389,6 +952,51 @@ async def slice_report(
 
 
 
+def _resolve_pptx_file(report: Dict[str, Any]) -> Optional[Path]:
+    """
+    Locate a report's generated PPTX on disk.
+
+    The stored path is whatever the worker wrote, which differs between a local
+    run and a container whose volume is mounted at a different root — hence the
+    fallbacks. Extracted so the analyst download and the share-link download
+    resolve identically; when this lived inline, only one of them knew about
+    the container cases.
+
+    Returns None when the deck does not exist, leaving the caller to decide
+    whether that is a 404, a 409, or an invitation to export as PDF instead.
+    """
+    pptx_path = (report or {}).get("pptx_path")
+    if not pptx_path:
+        return None
+
+    # Case 1: Direct match.
+    file_path = Path(pptx_path)
+    if file_path.exists():
+        return file_path
+
+    # Case 2: container-absolute path resolved against the current root.
+    if pptx_path.startswith("/app/"):
+        rel_path = pptx_path.replace("/app/", "", 1)
+        candidate = Path(rel_path)
+        if candidate.exists():
+            return candidate
+        # Case 3: 'backend' prefix mismatch in Docker volume mapping.
+        if rel_path.startswith("backend/"):
+            candidate = Path(rel_path.replace("backend/", "", 1))
+            if candidate.exists():
+                return candidate
+
+    # Case 4: filename-only lookup in the known reports directories.
+    filename = Path(pptx_path).name
+    for directory in (Path("reports"), Path("backend/reports")):
+        candidate = directory / filename
+        if candidate.exists():
+            return candidate
+
+    logger.error("[Download] ALL path resolution attempts failed for: %s", pptx_path)
+    return None
+
+
 @router.get("/report/{survey_id}/download")
 async def download_report(
     survey_id: str,
@@ -433,42 +1041,9 @@ async def download_report(
         raise HTTPException(202, "Report is still in analytical computation phase.")
 
     logger.info(f"[Download] Request for report {report.get('_id')} | Stored Path: {pptx_path}")
-    
-    # Robust Path Resolution
-    file_path = Path(pptx_path)
-    
-    # Case 1: Direct Match
-    if file_path.exists():
-        logger.info(f"[Download] Found file at primary path: {file_path}")
-    
-    # Case 2: Docker Environment Fallback (Internal Absolute -> Relative)
-    elif pptx_path.startswith("/app/"):
-        rel_path = pptx_path.replace("/app/", "", 1)
-        file_path = Path(rel_path)
-        logger.info(f"[Download] Attempting relative fallback: {rel_path}")
-        if not file_path.exists():
-             # Case 3: 'backend' prefix mismatch in Docker volume mapping
-             if rel_path.startswith("backend/"):
-                 deep_rel = rel_path.replace("backend/", "", 1)
-                 file_path = Path(deep_rel)
-                 logger.info(f"[Download] Attempting deep relative fallback: {deep_rel}")
-    
-    # Case 4: Filename-only check in known reports dir
-    if not file_path.exists():
-        filename = Path(pptx_path).name
-        direct_check = Path("reports") / filename
-        if direct_check.exists():
-           file_path = direct_check
-           logger.info(f"[Download] Found file via direct directory check: {direct_check}")
-        else:
-           # Legacy/Contextual check
-           direct_check_v2 = Path("backend/reports") / filename
-           if direct_check_v2.exists():
-               file_path = direct_check_v2
-               logger.info(f"[Download] Found file via contextual check: {direct_check_v2}")
 
-    if not file_path.exists():
-        logger.error(f"[Download] ALL path resolution attempts failed for: {pptx_path}")
+    file_path = _resolve_pptx_file(report)
+    if file_path is None:
         raise HTTPException(410, "The report file has expired or is inaccessible. Please regenerate.")
 
     from fastapi.responses import FileResponse
@@ -542,7 +1117,7 @@ async def download_brand_analyzer_excel(
 async def generate_pptx_v2(
     survey_id: str,
     background_tasks: BackgroundTasks,
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: Annotated[Optional[User], Depends(get_current_user)] = None,
     force_retry: bool = False,
 ):
     """

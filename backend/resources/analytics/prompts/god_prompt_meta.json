@@ -2,7 +2,7 @@
   "name": "Immutable God Prompt",
   "version": "2.0.0",
   "prefix_version": "2.0.0",
-  "sha256": "10f9cad08990e506",
+  "sha256": "c4efead61752a4e9",
   "last_validated": "2026-07-06",
-  "impact": "v2.0 adds Survey Intelligence Protocol, Category Intelligence Layer, and Objective Alignment Rule — invalidates prior prefix caches; expect one-time cache-miss until provider re-warms (~1900 tokens)"
+  "impact": "v2.0 adds Survey Intelligence Protocol, Category Intelligence Layer, and Objective Alignment Rule, plus label-driven scale reading (centered / hedonic / monotonic) so a sensory midpoint is scored as the ideal and purchase intent is not — invalidates prior prefix caches; expect one-time cache-miss until provider re-warms"
 }

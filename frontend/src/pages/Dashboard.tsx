@@ -122,10 +122,10 @@ export default function Dashboard() {
 
   const chartData = stats.engagement_chart;
   const chartMax = Math.max(1, ...chartData.map((d: any) => d.surveys || 0));
-  // Sequential (single-hue, magnitude-encoded) gradients — richer for higher
-  // months rather than one flat color repeated on every bar. The peak month
-  // gets the brand accent as a single focal highlight, not a rainbow of
-  // per-bar identity colors.
+  // Magnitude-encoded gradients where colour carries a judgement: RED marks a
+  // low month so a weak period is obvious at a glance, deepening through blue
+  // as volume rises. Previously red sat on the PEAK, which read as an alarm on
+  // the best month.
   const barGradients = ['barGradLow', 'barGradMid', 'barGradHigh'];
   const gradientForValue = (val: number) => {
     const ratio = val / chartMax;
@@ -238,18 +238,20 @@ export default function Dashboard() {
                   {/* Magnitude ramp built from the two logo colours: quiet months
                       stay blue, the peak resolves blue -> red. The previous high
                       stop was gold (#FBC210), which read as off-brand orange. */}
+                  {/* Low volume — brand red, the attention state. */}
                   <linearGradient id="barGradLow" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#E06264" />
+                    <stop offset="100%" stopColor="#CD393B" />
+                  </linearGradient>
+                  {/* Mid volume — transitional. */}
+                  <linearGradient id="barGradMid" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#8ACAEC" />
                     <stop offset="100%" stopColor="#53B5FF" />
                   </linearGradient>
-                  <linearGradient id="barGradMid" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#21A0FF" />
-                    <stop offset="100%" stopColor="#255E91" />
-                  </linearGradient>
+                  {/* High volume — full brand blue, the healthy state. */}
                   <linearGradient id="barGradHigh" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#21A0FF" />
-                    <stop offset="55%" stopColor="#2E7BB8" />
-                    <stop offset="100%" stopColor="#CD393B" />
+                    <stop offset="100%" stopColor="#255E91" />
                   </linearGradient>
                 </defs>
               </ComposedChart>
@@ -447,27 +449,27 @@ function ReachMeter({ reached, target }: { reached: number; target: number }) {
 
   return (
     <div className="hidden md:flex flex-1 justify-center min-w-0">
-      <div className="w-44 max-w-full">
-      <div className="flex items-baseline justify-between gap-2 mb-1.5">
-        <span className="text-[9px] font-black uppercase tracking-[0.14em] text-ink-subtle shrink-0">
+      <div className="w-72 max-w-full">
+      <div className="flex items-baseline justify-between gap-3 mb-2">
+        <span className="text-[11px] font-black uppercase tracking-[0.14em] text-ink-subtle shrink-0">
           {met ? 'Met' : 'Reached'}
         </span>
-        <span className="text-[10px] font-black text-ink tabular-nums truncate">
-          {reached.toLocaleString()}
+        <span className="font-black text-ink tabular-nums truncate">
+          <span className="text-lg leading-none">{reached.toLocaleString()}</span>
           {hasTarget && (
             <>
-              <span className="text-ink-subtle font-bold"> / {target.toLocaleString()}</span>
-              <span className={`ml-2 ${met ? 'text-emerald-600 dark:text-emerald-400' : 'text-ink-subtle'}`}>
+              <span className="text-ink-subtle font-bold text-sm"> / {target.toLocaleString()}</span>
+              <span className={`ml-2.5 text-sm ${met ? 'text-emerald-600 dark:text-emerald-400' : 'text-ink-subtle'}`}>
                 {pct}%
               </span>
             </>
           )}
-          {!hasTarget && <span className="text-ink-subtle font-bold ml-1.5">responses</span>}
+          {!hasTarget && <span className="text-ink-subtle font-bold text-sm ml-1.5">responses</span>}
         </span>
       </div>
 
       {hasTarget ? (
-        <div className="h-1.5 rounded-full bg-surface-sunken overflow-hidden border border-primary/10 dark:border-line/5">
+        <div className="h-3 rounded-full bg-surface-sunken overflow-hidden border border-primary/10 dark:border-line/5 shadow-inner">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${pct}%` }}
@@ -481,7 +483,7 @@ function ReachMeter({ reached, target }: { reached: number; target: number }) {
           />
         </div>
       ) : (
-        <div className="h-1.5 rounded-full bg-surface-sunken border border-dashed border-primary/20 dark:border-line/10" />
+        <div className="h-3 rounded-full bg-surface-sunken border border-dashed border-primary/20 dark:border-line/10" />
         )}
       </div>
     </div>
@@ -545,9 +547,11 @@ function MetricCard({ title, value, icon: Icon, trend, color, delay = 0 }: any) 
             'radial-gradient(circle, rgba(231,157,158,0.50) 0%, rgba(205,57,59,0.18) 55%, transparent 78%)',
         }}
       />
+      {/* Decorative watermark. Kept well under the card's height so it reads as
+          a background mark rather than competing with the metric itself. */}
       <Icon
-        className="pointer-events-none absolute -top-3 -right-3 w-28 h-28 rotate-12 text-accent/[0.18] group-hover:text-accent/[0.28] transition-colors duration-500"
-        style={{ filter: 'drop-shadow(0 10px 22px rgba(205,57,59,0.32))' }}
+        className="pointer-events-none absolute -top-1 -right-1 w-16 h-16 rotate-12 text-accent/[0.16] group-hover:text-accent/[0.24] transition-colors duration-500"
+        style={{ filter: 'drop-shadow(0 6px 14px rgba(205,57,59,0.22))' }}
         strokeWidth={1.5}
       />
       <div className="flex flex-col gap-4 relative z-10">

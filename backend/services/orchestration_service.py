@@ -107,7 +107,21 @@ class OrchestrationService:
                     if val.strip() == str(scale_max) or p == parts[-1]: max_label = lbl.strip()
 
         canonical_id = resolve_taste_test_question_id(q, meta)
-        
+
+        # Per-point labels are the authoritative description of a scale: they
+        # state whether the midpoint or the top is the good answer, which the
+        # scale length alone cannot. Passed through to the respondent UI and
+        # into the reporting payload so neither has to guess.
+        point_labels = q.get("point_labels_ar" if is_arabic else "point_labels_en") or []
+        scale_shape = q.get("scale_shape")
+        scale_min = q.get("scale_min", 1)
+
+        ideal_point = None
+        if scale_shape == "centered":
+            ideal_point = (scale_min + q.get("scale_max", scale_max or 5)) // 2
+        elif scale_shape in ("hedonic", "monotonic"):
+            ideal_point = q.get("scale_max", scale_max)
+
         return {
             "id": canonical_id or f"q_{''.join(random.choices(string.ascii_lowercase + string.digits, k=9))}",
             "text": self.format_text(text, product=brand_name if brand_name else category, category=category, brand=brand_name),
@@ -122,6 +136,10 @@ class OrchestrationService:
                 "scaleMax": scale_max if is_scale else None,
                 "minLabel": min_label,
                 "maxLabel": max_label,
+                "pointLabels": point_labels,
+                "idealPoint": ideal_point,
+                "scaleShape": scale_shape,
+                "instruction": q.get("instruction_ar" if is_arabic else "instruction_en"),
                 "bipolarLeft": min_label if is_bipolar else None,
                 "bipolarRight": max_label if is_bipolar else None,
                 "canonicalQuestionId": canonical_id,
@@ -231,8 +249,30 @@ class OrchestrationService:
                         
                         customs = tt_config.get("custom_research_attributes") or []
                         for c in customs:
-                            if c["main_attribute"] not in selections:
-                                sequence.append({"main_attribute": c["main_attribute"], "sub_attributes": [s["label"] for s in c.get("sub_attributes", [])], "source": "custom"})
+                            custom_main = c["main_attribute"]
+                            custom_labels = [s["label"] for s in c.get("sub_attributes", [])]
+
+                            if custom_main in selections:
+                                # A custom sub-attribute added to a LIBRARY attribute
+                                # used to be dropped here, so it silently never
+                                # reached the respondent. Merge instead: the
+                                # generation loop below already handles a mixed
+                                # attribute via `matching_custom`.
+                                existing = next(
+                                    (s for s in sequence if s["main_attribute"] == custom_main),
+                                    None,
+                                )
+                                if existing is not None:
+                                    for label in custom_labels:
+                                        if label not in existing["sub_attributes"]:
+                                            existing["sub_attributes"].append(label)
+                                    continue
+
+                            sequence.append({
+                                "main_attribute": custom_main,
+                                "sub_attributes": custom_labels,
+                                "source": "custom",
+                            })
 
                     for seq_item in sequence:
                         main_attr = seq_item["main_attribute"]

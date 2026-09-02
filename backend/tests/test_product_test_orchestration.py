@@ -11,7 +11,12 @@ from backend.services.product_test_orchestration import (
 
 
 def test_resolve_orchestration_language_prefers_product_test_config():
+    # `type` is now required to make this a product test. Previously the mere
+    # presence of a product_test_config won, which meant a stale config left on
+    # the form after switching survey type silently composed Arabic taste tests
+    # in English. See test_orchestration_language.py for that regression.
     survey = {
+        "type": "product_test",
         "config": {"language": "en"},
         "taste_test_config": {"language": "en"},
         "product_test_config": {"language": "ar"},

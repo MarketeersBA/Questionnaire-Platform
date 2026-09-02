@@ -1,12 +1,10 @@
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
-import { ShieldCheck, Copy, ExternalLink, QrCode } from 'lucide-react';
+import { ShieldCheck, Copy, ExternalLink, Download } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { useNavigate } from 'react-router-dom';
-import StatCard from './StatCard';
 import { toast } from 'sonner';
-import { ExportActions } from '../../../components/ExportActions';
-import { exportSurveyLinks } from '../../../utils/exportUtils';
-import { getSurveyBaseUrl, getSurveyLink } from '../../../utils/surveyLinks';
+import { getSurveyBaseUrl, getMasterLink } from '../../../utils/surveyLinks';
 
 interface SuccessModalProps {
     successData: any;
@@ -17,15 +15,82 @@ export function SuccessModal({ successData }: SuccessModalProps) {
 
     if (!successData) return null;
 
-    const handleExport = (format: 'csv' | 'txt' | 'json') => {
-        if (format === 'json') return; // Not implemented yet
-        exportSurveyLinks(
-            successData.generated_tokens,
-            getSurveyBaseUrl(),
-            format,
-            successData._id
-        );
-        toast.success(`Registry exported as ${format.toUpperCase()}`);
+    // Every consumer below needs the id; slicing it unguarded used to throw and
+    // blank the whole modal when the API response shape shifted.
+    const surveyId: string = successData._id ?? '';
+    const shortId = surveyId ? surveyId.slice(-8).toUpperCase() : '—';
+    const masterLink = getMasterLink(surveyId);
+
+    /** Copy with a fallback for non-secure contexts, where clipboard is unavailable. */
+    const copyText = (text: string, successMessage: string) => {
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard
+                .writeText(text)
+                .then(() => toast.success(successMessage))
+                .catch(() => toast.error('Copy failed'));
+            return;
+        }
+
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            toast.success(successMessage);
+        } catch {
+            toast.error('Copy failed');
+        }
+        document.body.removeChild(textArea);
+    };
+
+    /**
+     * Save the QR as a PNG.
+     *
+     * qrcode.react renders SVG, so this rasterises it through a canvas rather
+     * than shipping a second canvas-based QR just for downloads.
+     */
+    const downloadQr = () => {
+        const svg = document.getElementById('survey-master-qr');
+        if (!svg) return;
+
+        const source = new XMLSerializer().serializeToString(svg);
+        const svgBlob = new Blob([source], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(svgBlob);
+
+        const image = new Image();
+        image.onload = () => {
+            // 3x for a crisp print/scan resolution.
+            const scale = 3;
+            const canvas = document.createElement('canvas');
+            canvas.width = image.width * scale;
+            canvas.height = image.height * scale;
+
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                URL.revokeObjectURL(url);
+                return;
+            }
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+            URL.revokeObjectURL(url);
+
+            const link = document.createElement('a');
+            link.href = canvas.toDataURL('image/png');
+            link.download = `survey-${shortId}-qr.png`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            toast.success('QR code downloaded');
+        };
+        image.onerror = () => {
+            URL.revokeObjectURL(url);
+            toast.error('Could not export the QR code');
+        };
+        image.src = url;
     };
 
     return createPortal(
@@ -52,10 +117,22 @@ export function SuccessModal({ successData }: SuccessModalProps) {
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-10 space-y-8 custom-scrollbar text-left">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <StatCard label="Survey ID" value={successData._id.slice(-8).toUpperCase()} sub="Provisioned ID" />
-                        <StatCard label="Link Count" value={successData.generated_tokens?.length || 0} sub="Unique Keys" />
-                        <StatCard label="Security" value="One-Time" sub="State Invalidation" />
+                    <div className="flex items-center justify-center">
+                        <div className="inline-flex items-center gap-4 px-6 py-4 rounded-2xl bg-surface-raised border border-line/70 dark:border-line/15">
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-subtle">
+                                Survey ID
+                            </span>
+                            <span className="text-2xl font-black text-ink tracking-wider tabular-nums">
+                                {shortId}
+                            </span>
+                            <button
+                                onClick={() => copyText(surveyId, 'Survey ID copied')}
+                                className="p-2 rounded-lg text-ink-subtle hover:text-primary hover:bg-primary/10 transition-colors"
+                                aria-label="Copy survey ID"
+                            >
+                                <Copy className="w-4 h-4" />
+                            </button>
+                        </div>
                     </div>
 
                     <div className="space-y-4 max-w-2xl mx-auto mt-4">
@@ -68,9 +145,28 @@ export function SuccessModal({ successData }: SuccessModalProps) {
                             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none group-hover:bg-primary/10 transition-colors" />
                             
                             <div className="relative z-10 flex flex-col items-center text-center gap-6">
-                                <div className="w-16 h-16 rounded-2xl bg-surface border border-slate-200 dark:border-slate-700 flex items-center justify-center shadow-md">
-                                    <QrCode className="w-8 h-8 text-primary-soft" />
+                                {/* A real, scannable QR of the master link — this
+                                    was previously a decorative lucide glyph that
+                                    encoded nothing. Rendered on a white plate
+                                    because scanners need light-on-dark contrast
+                                    regardless of the app theme. */}
+                                <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-md">
+                                    <QRCodeSVG
+                                        id="survey-master-qr"
+                                        value={masterLink}
+                                        size={168}
+                                        level="M"
+                                        marginSize={0}
+                                        bgColor="#FFFFFF"
+                                        fgColor="#255E91"
+                                    />
                                 </div>
+                                <button
+                                    onClick={downloadQr}
+                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-xs font-black hover:bg-primary/20 transition-colors"
+                                >
+                                    <Download className="w-3.5 h-3.5" /> Download QR
+                                </button>
                                 
                                 <div>
                                     <h3 className="text-lg font-black text-ink mb-2">Unique Survey Master Link</h3>

@@ -78,3 +78,7 @@ certs/
 
 # ─── Logs ───
 *.log
+
+# Generated export artifacts — chart screenshots and decks produced by the
+# PPTX/PDF export pipeline at runtime. Reproducible output, not source.
+backend/presintion report/

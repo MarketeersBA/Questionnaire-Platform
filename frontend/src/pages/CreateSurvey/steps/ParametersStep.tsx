@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Settings2, Tag, Layers, Palette, EyeOff, X, Info, Sparkles, Plus, ShieldCheck, Search, ChevronDown, ChevronUp, Trash2, PlusCircle, ArrowUp, ArrowDown, MoveVertical, BarChart3, Wallet, Check, Zap, Box } from 'lucide-react';
 import { StepProps, DEFAULT_TASTE_CONFIG, DEFAULT_PRODUCT_TEST_CONFIG, DEFAULT_AI_FOLLOWUP } from '../types';
+import TasteAttributeLibraryPanel from '../components/TasteAttributeLibraryPanel';
 import {
     AI_FOLLOWUP_SURFACE_OPTIONS,
     DEFAULT_AI_FOLLOWUP_DEDUPE_WINDOW_MS,
@@ -15,6 +16,7 @@ import {
 } from '../../../constants/surveyModules';
 import { toast } from 'sonner';
 import { masterQuestions, brandAttributes, productTestQuestions } from '../../../services/api';
+import api from '../../../services/api';
 import ProductTestConfigModal from '../../../components/ProductTestConfigModal';
 import PackagingHeatmapConfigPanel from '../../../components/PackagingHeatmapConfigPanel';
 import { ProductTestL2PreviewPanel } from '../../../components/ProductTestL2PreviewPanel';
@@ -52,6 +54,22 @@ export function ParametersStep({
     const [pricingExpanded, setPricingExpanded] = useState(false);
     const [baExpanded, setBaExpanded] = useState(false);
     const [pfBrandInput, setPfBrandInput] = useState('');
+    
+    // Custom Modules
+    const [customModules, setCustomModules] = useState<any[]>([]);
+    
+    useEffect(() => {
+        const fetchCustomModules = async () => {
+            try {
+                const res = await api.get('/modules/');
+                // Only keep custom modules (filtering out standard ones if they ever end up there, custom modules start with 'custom_')
+                setCustomModules(res.data.filter((m: any) => m.module_id.startsWith('custom_')));
+            } catch (err) {
+                console.error('Failed to fetch custom modules', err);
+            }
+        };
+        fetchCustomModules();
+    }, []);
     const [baCustomAttrInput, setBaCustomAttrInput] = useState('');
     const [expandedAttr, setExpandedAttr] = useState<number | null>(null);
     const [showCategoryConfig, setShowCategoryConfig] = useState(false);
@@ -444,13 +462,13 @@ export function ParametersStep({
         <section className="space-y-6 border-t border-line/80 dark:border-line/10 pt-10" id="ai-moderator-section">
             <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                    <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-ink ml-1">
+                    <label className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-ink ml-1">
                         <Sparkles className="w-3.5 h-3.5 text-primary-soft" /> Smart Follow-up Engine (AI / MI)
                     </label>
-                    <p className="text-[10px] text-slate-800 dark:text-slate-300 font-black ml-1 uppercase tracking-tighter">
+                    <p className="text-sm text-slate-800 dark:text-slate-300 font-black ml-1 uppercase tracking-tighter">
                         AI-driven qualitative probing for deeper open-ended insights.
                     </p>
-                    <p className="text-[9px] text-primary-soft font-bold ml-1 leading-relaxed max-w-xl">
+                    <p className="text-xs text-primary-soft font-bold ml-1 leading-relaxed max-w-xl">
                         Runs on open-ended like / dislike / recommend questions only.
                     </p>
                 </div>
@@ -475,7 +493,7 @@ export function ParametersStep({
                     className="grid grid-cols-1 md:grid-cols-3 gap-6 p-8 bg-primary/5 dark:bg-primary/10 border-2 border-primary/20 rounded-[2.5rem]"
                 >
                     <div className="space-y-3">
-                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Moderation Depth</label>
+                        <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Moderation Depth</label>
                         <select
                             value={formData.ai_followup?.max_rounds || DEFAULT_AI_FOLLOWUP.max_rounds}
                             onChange={(e) => setFormData(prev => ({
@@ -491,7 +509,7 @@ export function ParametersStep({
                     </div>
 
                     <div className="space-y-3">
-                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Input Channels</label>
+                        <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Input Channels</label>
                         <div className="flex gap-2">
                             <button
                                 type="button"
@@ -499,7 +517,7 @@ export function ParametersStep({
                                     ...prev,
                                     ai_followup: { ...prev.ai_followup!, apply_to_voice: !prev.ai_followup?.apply_to_voice }
                                 }))}
-                                className={`flex-1 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest border-2 transition-all ${formData.ai_followup?.apply_to_voice ? 'bg-primary text-white border-primary' : 'bg-surface border-line/80 dark:border-line/10 text-slate-400'}`}
+                                className={`flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-widest border-2 transition-all ${formData.ai_followup?.apply_to_voice ? 'bg-primary text-white border-primary' : 'bg-surface border-line/80 dark:border-line/10 text-slate-400'}`}
                             >
                                 Voice
                             </button>
@@ -509,20 +527,20 @@ export function ParametersStep({
                                     ...prev,
                                     ai_followup: { ...prev.ai_followup!, apply_to_text: !prev.ai_followup?.apply_to_text }
                                 }))}
-                                className={`flex-1 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest border-2 transition-all ${formData.ai_followup?.apply_to_text ? 'bg-primary text-white border-primary' : 'bg-surface border-line/80 dark:border-line/10 text-slate-400'}`}
+                                className={`flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-widest border-2 transition-all ${formData.ai_followup?.apply_to_text ? 'bg-primary text-white border-primary' : 'bg-surface border-line/80 dark:border-line/10 text-slate-400'}`}
                             >
                                 Text
                             </button>
                         </div>
-                        <p className="text-[9px] text-ink-muted font-bold leading-relaxed ml-1">
+                        <p className="text-xs text-ink-muted font-bold leading-relaxed ml-1">
                             Enable each channel that should trigger live AI moderation after the respondent answers.
                         </p>
                     </div>
 
                     <div className="space-y-3 md:col-span-2">
                         <div className="flex justify-between items-center ml-1">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-400">Custom AI Instructions</label>
-                            <span className={`text-[8px] font-black uppercase tracking-widest ${(formData.ai_followup?.custom_instructions?.length || 0) > 450 ? 'text-amber-500' : 'text-slate-400'
+                            <label className="text-xs font-black uppercase tracking-widest text-slate-400">Custom AI Instructions</label>
+                            <span className={`text-sm font-black uppercase tracking-widest ${(formData.ai_followup?.custom_instructions?.length || 0) > 450 ? 'text-amber-500' : 'text-slate-400'
                                 }`}>
                                 {formData.ai_followup?.custom_instructions?.length || 0} / 500
                             </span>
@@ -547,8 +565,8 @@ export function ParametersStep({
                             <ShieldCheck size={18} />
                         </div>
                         <div className="space-y-0.5">
-                            <p className="text-[9px] font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-400">Context Aware</p>
-                            <p className="text-[8px] text-emerald-600/70 dark:text-emerald-500/70 font-bold uppercase tracking-tighter leading-tight">Prober uses brand objectives and survey category for tailored follow-ups.</p>
+                            <p className="text-xs font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-400">Context Aware</p>
+                            <p className="text-sm text-emerald-600/70 dark:text-emerald-500/70 font-bold uppercase tracking-tighter leading-tight">Prober uses brand objectives and survey category for tailored follow-ups.</p>
                         </div>
                     </div>
 
@@ -558,7 +576,7 @@ export function ParametersStep({
                             className="flex items-center justify-between cursor-pointer group"
                             onClick={() => setShowAdvancedAiMiControls(!showAdvancedAiMiControls)}
                         >
-                            <label className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-ink ml-1 cursor-pointer">
+                            <label className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-ink ml-1 cursor-pointer">
                                 <Settings2 className="w-3.5 h-3.5 text-primary-soft" />
                                 Advanced AI/MI Controls
                             </label>
@@ -576,10 +594,10 @@ export function ParametersStep({
                                     className="overflow-hidden space-y-6"
                                 >
                                     <div className="space-y-3">
-                                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">
+                                        <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">
                                             Eligible Respondent Surfaces
                                         </label>
-                                        <p className="text-[9px] text-ink-muted font-bold ml-1 leading-relaxed">
+                                        <p className="text-xs text-ink-muted font-bold ml-1 leading-relaxed">
                                             Default: taste-test and product-test open ends. Add heatmap surfaces only when needed.
                                         </p>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -595,8 +613,8 @@ export function ParametersStep({
                                                             : 'bg-surface border-line/80 dark:border-line/10 text-slate-400'
                                                         }`}
                                                     >
-                                                        <span className="text-[9px] font-black uppercase tracking-widest block">{surface.label}</span>
-                                                        <span className="text-[8px] font-bold mt-1 block opacity-70">{surface.description}</span>
+                                                        <span className="text-xs font-black uppercase tracking-widest block">{surface.label}</span>
+                                                        <span className="text-sm font-bold mt-1 block opacity-70">{surface.description}</span>
                                                     </button>
                                                 );
                                             })}
@@ -605,7 +623,7 @@ export function ParametersStep({
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="space-y-2">
-                                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">
+                                            <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">
                                                 Minimum Answer Length (characters)
                                             </label>
                                             <input
@@ -624,7 +642,7 @@ export function ParametersStep({
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">
+                                            <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">
                                                 Text Trigger Debounce (ms)
                                             </label>
                                             <input
@@ -642,7 +660,7 @@ export function ParametersStep({
                                                 }))}
                                                 className="w-full bg-surface border-2 border-line/80 dark:border-line/10 rounded-xl px-4 py-3 text-xs font-bold outline-none focus:border-primary transition-all"
                                             />
-                                            <p className="text-[8px] text-slate-500 font-bold ml-1">Suppresses duplicate blur triggers per question.</p>
+                                            <p className="text-sm text-slate-500 font-bold ml-1">Suppresses duplicate blur triggers per question.</p>
                                         </div>
                                     </div>
 
@@ -652,7 +670,7 @@ export function ParametersStep({
                                             className="flex items-center justify-between cursor-pointer group"
                                             onClick={() => setShowCategoryConfig(!showCategoryConfig)}
                                         >
-                                            <label className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-ink-muted ml-1 cursor-pointer">
+                                            <label className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-ink-muted ml-1 cursor-pointer">
                                                 <Sparkles className="w-3.5 h-3.5 text-primary-soft" />
                                                 Per-Category Probing Overrides
                                             </label>
@@ -680,7 +698,7 @@ export function ParametersStep({
                                                             return (
                                                                 <div key={category} className="p-4 bg-surface border-2 border-line/80 dark:border-line/10 rounded-2xl space-y-3 shadow-sm hover:border-primary/30 transition-all">
                                                                     <div className="flex items-center justify-between">
-                                                                        <span className="text-[9px] font-black uppercase tracking-widest text-ink-muted">
+                                                                        <span className="text-xs font-black uppercase tracking-widest text-ink-muted">
                                                                             {category}
                                                                         </span>
                                                                         <div
@@ -701,7 +719,7 @@ export function ParametersStep({
                                                                     </div>
 
                                                                     <div className={`transition-opacity ${!isCatEnabled ? 'opacity-30 pointer-events-none' : 'opacity-100'}`}>
-                                                                        <label className="text-[8px] font-bold uppercase tracking-widest text-slate-400 block mb-1.5">Max Rounds</label>
+                                                                        <label className="text-sm font-bold uppercase tracking-widest text-slate-400 block mb-1.5">Max Rounds</label>
                                                                         <select
                                                                             value={catConfig.max_rounds}
                                                                             onChange={(e) => setFormData(prev => ({
@@ -745,10 +763,10 @@ export function ParametersStep({
             <section className="space-y-6 border-t border-line/80 dark:border-line/10 pt-10" id="testing-protocol-section">
                 <div className="flex items-center justify-between">
                     <div className="space-y-1">
-                        <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-ink ml-1">
+                        <label className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-ink ml-1">
                             <ShieldCheck className="w-3.5 h-3.5 text-primary-soft" /> Testing Protocol / بروتوكول الاختبار
                         </label>
-                        <p className="text-[10px] text-slate-800 dark:text-slate-300 font-black ml-1 uppercase tracking-tighter">Choose between branded evaluation or blind testing with product codes.</p>
+                        <p className="text-sm text-slate-800 dark:text-slate-300 font-black ml-1 uppercase tracking-tighter">Choose between branded evaluation or blind testing with product codes.</p>
                     </div>
                 </div>
 
@@ -774,7 +792,7 @@ export function ParametersStep({
                             </div>
                             <div>
                                 <span className="text-xs font-black uppercase tracking-widest block">{p.label}</span>
-                                <span className="text-[8px] font-bold uppercase tracking-widest opacity-60 mt-0.5 block">{p.desc}</span>
+                                <span className="text-sm font-bold uppercase tracking-widest opacity-60 mt-0.5 block">{p.desc}</span>
                             </div>
                             {(formData.config?.testing_protocol || 'branded') === p.id && (
                                 <div className="absolute top-4 right-4">
@@ -792,10 +810,10 @@ export function ParametersStep({
             <section className="space-y-10 border-t border-line/80 dark:border-line/10 pt-10">
                 <div className="flex items-center justify-between" id="brand-architecture-section">
                     <div className="space-y-1">
-                        <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-ink ml-1">
+                        <label className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-ink ml-1">
                             <Palette className="w-3 h-3 text-primary-soft" /> Brand Architecture
                         </label>
-                        <p className="text-[10px] text-slate-800 dark:text-slate-400 font-black ml-1 uppercase tracking-tighter">Define the study subjects for comparison.</p>
+                        <p className="text-sm text-slate-800 dark:text-slate-400 font-black ml-1 uppercase tracking-tighter">Define the study subjects for comparison.</p>
                     </div>
                 </div>
 
@@ -839,7 +857,7 @@ export function ParametersStep({
                                 <div className="flex items-center gap-6 px-2">
                                     <button
                                         onClick={() => setBrandRole(brandRole === 'internal' ? 'competitor' : 'internal')}
-                                        className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all ${brandRole === 'internal' ? 'text-primary-soft' : 'text-ink'}`}
+                                        className={`flex items-center gap-2 text-sm font-black uppercase tracking-widest transition-all ${brandRole === 'internal' ? 'text-primary-soft' : 'text-ink'}`}
                                     >
                                         <div className={`w-10 h-5 rounded-full relative transition-all ${brandRole === 'internal' ? 'bg-primary/20' : 'bg-slate-300 dark:bg-slate-700'}`}>
                                             <div className={`absolute top-1 w-3 h-3 rounded-full transition-all ${brandRole === 'internal' ? 'right-1 bg-primary' : 'left-1 bg-slate-900 dark:bg-slate-100'}`} />
@@ -880,7 +898,7 @@ export function ParametersStep({
                     {/* Chips Display */}
                     <div className="flex flex-wrap gap-4 pt-4">
                         {(!formData.config?.own_brand && ([...(formData.config?.internal_brands_data || []), ...(formData.config?.competitor_brands_data || [])].length > 0)) && (
-                            <div className="w-full mb-2 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 animate-pulse">
+                            <div className="w-full mb-2 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-sm font-black uppercase tracking-widest flex items-center gap-2 animate-pulse">
                                 <Sparkles className="w-3.5 h-3.5" />
                                 Action Required: Select a target brand by clicking the sparkle icon on a brand chip.
                             </div>
@@ -945,7 +963,7 @@ export function ParametersStep({
                                                         }));
                                                     }}
                                                     placeholder="e.g. SAMPLE-123"
-                                                    className="bg-white/50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-md px-2 py-1 text-[9px] font-black uppercase tracking-widest outline-none focus:border-primary transition-all"
+                                                    className="bg-white/50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-md px-2 py-1 text-xs font-black uppercase tracking-widest outline-none focus:border-primary transition-all"
                                                 />
                                             </div>
                                         )}
@@ -988,7 +1006,7 @@ export function ParametersStep({
                 </div>
                 <div>
                     <h3 className="text-2xl font-display font-black text-ink transition-colors">Research <span className="text-primary-soft">Parameters</span></h3>
-                    <p className="text-[10px] text-ink font-black uppercase tracking-widest leading-relaxed mt-1">Define category scope, brands, and deep research attributes.</p>
+                    <p className="text-sm text-ink font-black uppercase tracking-widest leading-relaxed mt-1">Define category scope, brands, and deep research attributes.</p>
                 </div>
             </div>
 
@@ -1000,12 +1018,12 @@ export function ParametersStep({
                         </div>
                         <div>
                             <h4 className="text-sm font-black text-amber-900 dark:text-amber-100 uppercase tracking-widest leading-none">Blueprint Type Mismatch</h4>
-                            <p className="text-[10px] text-amber-600 dark:text-amber-400 font-bold mt-1">This page is optimized for Taste Tests. Current type: <span className="font-black underline">{formData.survey_type || 'Unset'}</span></p>
+                            <p className="text-sm text-amber-600 dark:text-amber-400 font-bold mt-1">This page is optimized for Taste Tests. Current type: <span className="font-black underline">{formData.survey_type || 'Unset'}</span></p>
                         </div>
                     </div>
                     <button
                         onClick={() => setFormData(prev => ({ ...prev, survey_type: 'taste_test', config: prev.config || DEFAULT_TASTE_CONFIG }))}
-                        className="px-6 py-2.5 bg-amber-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-700 transition-all shadow-md"
+                        className="px-6 py-2.5 bg-amber-600 text-white rounded-xl text-sm font-black uppercase tracking-widest hover:bg-amber-700 transition-all shadow-md"
                     >
                         Force Taste Test UI
                     </button>
@@ -1020,10 +1038,10 @@ export function ParametersStep({
                         <div className="space-y-6 bg-slate-50/50 dark:bg-slate-950/50 p-8 rounded-[2.5rem] border-2 border-line/80 dark:border-line/10 shadow-inner">
                             <div className="flex items-center gap-3 border-b border-line/80 dark:border-line/10 pb-4 mb-2">
                                 <Tag className="w-4 h-4 text-primary-soft" />
-                                <h4 className="text-[10px] font-black uppercase tracking-widest text-ink">Product Category</h4>
+                                <h4 className="text-sm font-black uppercase tracking-widest text-ink">Product Category</h4>
                             </div>
                             <div className="space-y-4">
-                                <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 ml-1">Survey Category</label>
+                                <label className="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Survey Category</label>
                                 <input
                                     id="config-category-input"
                                     type="text"
@@ -1047,7 +1065,7 @@ export function ParametersStep({
 
                         {/* Language */}
                         <div className="space-y-6 bg-slate-50/50 dark:bg-slate-950/50 p-8 rounded-[2.5rem] border-2 border-line/80 dark:border-line/10 shadow-inner">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-ink ml-1">Survey Language</label>
+                            <label className="text-sm font-black uppercase tracking-widest text-ink ml-1">Survey Language</label>
                             <div className="flex gap-2">
                                 {['en', 'ar'].map(lang => (
                                     <button
@@ -1070,19 +1088,87 @@ export function ParametersStep({
                     {renderSharedProtocolsAndBrands()}
 
                     {/* ═══ Unified Attribute Engine ═══ */}
-                    <section className="space-y-6 border-t border-line/80 dark:border-line/10 pt-10" id="attribute-engine-section">
+                    <section className="space-y-5 border-t border-line/80 dark:border-line/10 pt-7" id="attribute-engine-section">
                         <div className="space-y-1">
-                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-ink ml-1">
+                            <label className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-ink ml-1">
                                 <Sparkles className="w-3.5 h-3.5 text-primary-soft" /> Attribute Engine
                             </label>
-                            <p className="text-[10px] text-slate-800 dark:text-slate-300 font-black ml-1 uppercase tracking-tighter">Define main attributes and their sub-dimensions for diagnostic evaluation.</p>
+                            <p className="text-sm text-ink-muted font-semibold ml-1">Define main attributes and their sub-dimensions for diagnostic evaluation.</p>
                         </div>
 
+                        {/* ── Canonical library (taste test only) ──
+                            Shows each attribute's real question and its five
+                            answer labels, so what is selected here is exactly
+                            what the respondent sees. */}
+                        {formData.survey_type === 'taste_test' && (
+                            <TasteAttributeLibraryPanel
+                                selected={formData.config?.attributes || {}}
+                                language="ar"
+                                onToggleSub={(mainAttribute, subAttribute) => {
+                                    setFormData(prev => {
+                                        const baseConfig = prev.config || DEFAULT_TASTE_CONFIG;
+                                        const currentAttrs = baseConfig.attributes || {};
+                                        const subs = currentAttrs[mainAttribute] || [];
+                                        const next = subs.includes(subAttribute)
+                                            ? subs.filter(s => s !== subAttribute)
+                                            : [...subs, subAttribute];
+                                        return {
+                                            ...prev,
+                                            config: {
+                                                ...baseConfig,
+                                                attributes: { ...currentAttrs, [mainAttribute]: next },
+                                            },
+                                        };
+                                    });
+                                }}
+                                onAddCustom={(draft) => {
+                                    setFormData(prev => {
+                                        const baseConfig = prev.config || DEFAULT_TASTE_CONFIG;
+                                        const customs = baseConfig.custom_research_attributes || [];
+                                        const existing = customs.find(
+                                            c => c.main_attribute === draft.main_attribute
+                                        );
+
+                                        // Merge into the attribute rather than bailing out —
+                                        // bailing meant a second sub-attribute added to the
+                                        // same attribute silently did nothing.
+                                        const next = existing
+                                            ? customs.map(c => {
+                                                if (c.main_attribute !== draft.main_attribute) return c;
+                                                const seen = new Set(
+                                                    (c.sub_attributes || []).map(s => s.label.toLowerCase())
+                                                );
+                                                return {
+                                                    ...c,
+                                                    sub_attributes: [
+                                                        ...(c.sub_attributes || []),
+                                                        ...draft.sub_attributes.filter(
+                                                            s => !seen.has(s.label.toLowerCase())
+                                                        ),
+                                                    ],
+                                                };
+                                            })
+                                            : [...customs, draft];
+
+                                        return {
+                                            ...prev,
+                                            config: { ...baseConfig, custom_research_attributes: next },
+                                        };
+                                    });
+                                }}
+                            />
+                        )}
+
+                        {/* Legacy free-text attribute box — superseded for
+                            taste tests by TasteAttributeLibraryPanel above,
+                            which previews each question and its labels.
+                            Other survey types have no library, so they keep it. */}
+                        {formData.survey_type !== 'taste_test' && (<>
                         {/* ── Add New Attribute Box ── */}
                         <div className="p-6 rounded-[2rem] bg-slate-50/70 dark:bg-slate-950/60 border-2 border-line/80 dark:border-line/10 shadow-inner space-y-4">
                             <div className="flex items-center gap-2 mb-1">
                                 <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                                <span className="text-[9px] font-black uppercase tracking-widest text-ink">Add New Attribute</span>
+                                <span className="text-xs font-black uppercase tracking-widest text-ink">Add New Attribute</span>
                             </div>
                             <div className="relative group">
                                 <input
@@ -1138,7 +1224,7 @@ export function ParametersStep({
                             {/* Suggest Main Attributes Button */}
                             <button
                                 onClick={() => setShowLibrary(!showLibrary)}
-                                className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border-2 ${showLibrary
+                                className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-black uppercase tracking-widest transition-all border-2 ${showLibrary
                                     ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20'
                                     : 'bg-surface border-slate-300 dark:border-slate-700 text-ink-muted hover:border-primary hover:text-primary-soft'
                                     }`}
@@ -1147,9 +1233,10 @@ export function ParametersStep({
                                 {showLibrary ? 'Hide Attribute Library' : 'Suggest Main Attributes'}
                             </button>
                         </div>
+                        </>)}
 
-                        {/* ── Library Drawer ── */}
-                        {showLibrary && (
+                        {/* ── Library Drawer (legacy, non-taste-test only) ── */}
+                        {showLibrary && formData.survey_type !== 'taste_test' && (
                             <motion.div
                                 initial={{ opacity: 0, height: 0 }}
                                 animate={{ opacity: 1, height: 'auto' }}
@@ -1159,7 +1246,7 @@ export function ParametersStep({
                                 <div className="p-5 bg-primary/5 dark:bg-primary/10 border-b border-primary/10 flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <Layers className="w-4 h-4 text-primary-soft" />
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-ink">Knowledge Graph Library</span>
+                                        <span className="text-sm font-black uppercase tracking-widest text-ink">Knowledge Graph Library</span>
                                     </div>
                                     {banksLoading && <Sparkles className="w-3 h-3 animate-spin text-primary-soft" />}
                                 </div>
@@ -1169,19 +1256,19 @@ export function ParametersStep({
                                         {banksLoading ? (
                                             <div className="py-8 flex flex-col items-center justify-center gap-2 opacity-50">
                                                 <Search className="w-5 h-5 text-primary-soft animate-pulse" />
-                                                <span className="text-[9px] font-bold uppercase tracking-widest">Loading...</span>
+                                                <span className="text-xs font-bold uppercase tracking-widest">Loading...</span>
                                             </div>
                                         ) : attributeBanksData.length === 0 ? (
                                             <div className="py-8 flex flex-col items-center justify-center gap-2 opacity-40">
                                                 <Layers className="w-5 h-5 text-slate-400" />
-                                                <span className="text-[9px] font-bold uppercase tracking-widest">No domains</span>
+                                                <span className="text-xs font-bold uppercase tracking-widest">No domains</span>
                                             </div>
                                         ) : (
                                             attributeBanksData.map((bank: any) => (
                                                 <button
                                                     key={bank.category}
                                                     onClick={() => setSelectedBank(selectedBank === bank.category ? null : bank.category)}
-                                                    className={`flex items-center justify-between p-3 rounded-xl text-[11px] font-black transition-all ${selectedBank === bank.category
+                                                    className={`flex items-center justify-between p-3 rounded-xl text-base font-black transition-all ${selectedBank === bank.category
                                                         ? 'bg-primary text-white shadow-md'
                                                         : 'text-slate-700 dark:text-white hover:bg-white dark:hover:bg-slate-800'
                                                         }`}
@@ -1199,7 +1286,7 @@ export function ParametersStep({
                                             <div className="space-y-4">
                                                 <div className="flex items-center justify-between pb-3 border-b border-line/80 dark:border-line/10">
                                                     <h4 className="text-sm font-black text-ink uppercase">{bankDetails?.display_name || selectedBank}</h4>
-                                                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Click to toggle</span>
+                                                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Click to toggle</span>
                                                 </div>
                                                 <div className="flex flex-wrap gap-2">
                                                     {bankDetails?.core_attributes?.map((attr: any) => {
@@ -1220,7 +1307,7 @@ export function ParametersStep({
                                                                     });
                                                                     if (!isSelected) toast.success(`Added ${attr.label}`);
                                                                 }}
-                                                                className={`px-3 py-1.5 rounded-lg text-[11px] font-black transition-all border ${isSelected ? 'bg-primary text-white border-primary shadow-sm' : 'bg-surface border-slate-300 dark:border-slate-600 text-slate-700 dark:text-white hover:border-primary'}`}
+                                                                className={`px-3 py-1.5 rounded-lg text-base font-black transition-all border ${isSelected ? 'bg-primary text-white border-primary shadow-sm' : 'bg-surface border-slate-300 dark:border-slate-600 text-slate-700 dark:text-white hover:border-primary'}`}
                                                             >
                                                                 {attr.label}
                                                             </button>
@@ -1232,7 +1319,7 @@ export function ParametersStep({
                                                 <div className="mt-8 pt-6 border-t border-line/80 dark:border-line/10 space-y-4">
                                                     <div className="flex items-center gap-2">
                                                         <PlusCircle className="w-3.5 h-3.5 text-primary-soft" />
-                                                        <span className="text-[10px] font-black uppercase tracking-widest text-ink">Add Custom Dimension to "{selectedBank}"</span>
+                                                        <span className="text-sm font-black uppercase tracking-widest text-ink">Add Custom Dimension to "{selectedBank}"</span>
                                                     </div>
                                                     <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                                                         <input
@@ -1299,7 +1386,7 @@ export function ParametersStep({
                                                                 toast.success(`Custom dimenson "${libCustomInput.label}" added`);
                                                                 setLibCustomInput({ label: '', min: '', max: '' });
                                                             }}
-                                                            className="bg-primary text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md hover:scale-[1.02] active:scale-95 transition-all py-2.5"
+                                                            className="bg-primary text-white rounded-xl text-sm font-black uppercase tracking-widest shadow-md hover:scale-[1.02] active:scale-95 transition-all py-2.5"
                                                         >
                                                             Add Inline
                                                         </button>
@@ -1309,7 +1396,7 @@ export function ParametersStep({
                                         ) : (
                                             <div className="flex-1 flex flex-col items-center justify-center text-center py-12 opacity-40">
                                                 <Layers className="w-8 h-8 text-slate-300 mb-2" />
-                                                <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Select a domain</span>
+                                                <span className="text-xs font-black uppercase tracking-widest text-slate-400">Select a domain</span>
                                             </div>
                                         )}
                                     </div>
@@ -1325,26 +1412,27 @@ export function ParametersStep({
                             if (!hasAny) return (
                                 <div className="py-8 flex flex-col items-center justify-center opacity-40 bg-slate-50/50 dark:bg-slate-950/30 border-2 border-dashed border-line/80 dark:border-line/10 rounded-[2rem]">
                                     <Layers className="w-8 h-8 text-slate-300 mb-3" />
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">No attributes added yet</p>
-                                    <p className="text-[9px] text-slate-400 mt-1">Add custom or use the library above</p>
+                                    <p className="text-sm font-black uppercase tracking-widest text-slate-400">No attributes added yet</p>
+                                    <p className="text-xs text-slate-400 mt-1">Add custom or use the library above</p>
                                 </div>
                             );
                             return (
-                                <div className="space-y-3">
-                                    <div className="flex items-center gap-2 px-1">
-                                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-ink">Active Attributes ({libraryEntries.length + customEntries.length})</span>
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2 px-1 mb-1">
+                                        <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                                        <span className="text-base font-black uppercase tracking-widest text-ink">Active Attributes ({libraryEntries.length + customEntries.length})</span>
                                     </div>
 
+                                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-2 items-start">
                                     {/* Library-sourced main attrs */}
                                     {libraryEntries.map(([bankName, attrs]: [string, any]) => (
                                         <motion.div key={`lib-${bankName}`} layout className="bg-surface rounded-2xl border-2 border-line/80 dark:border-line/10 overflow-hidden group transition-all hover:border-slate-300 dark:hover:border-slate-700">
-                                            <div className="px-5 py-3.5 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30">
+                                            <div className="px-4 py-3 flex items-center justify-between bg-[#21A0FF]/[0.05]">
                                                 <div className="flex items-center gap-3">
                                                     <div className="p-2 rounded-xl bg-primary/10 text-primary-soft"><Tag className="w-3.5 h-3.5" /></div>
                                                     <div>
-                                                        <h5 className="font-black text-sm text-ink uppercase tracking-tight leading-none">{bankName}</h5>
-                                                        <span className="text-[8px] font-black uppercase tracking-widest text-primary-soft/70 mt-0.5 block">Library · {attrs.length} sub-attributes</span>
+                                                        <h5 className="font-black text-base text-ink uppercase tracking-tight leading-none">{bankName}</h5>
+                                                        <span className="text-xs font-black uppercase tracking-widest text-[#255E91] dark:text-[#8ACAEC] mt-1 block">Library · {attrs.length} sub-attribute{attrs.length === 1 ? '' : 's'}</span>
                                                     </div>
                                                 </div>
                                                 <button
@@ -1367,7 +1455,7 @@ export function ParametersStep({
                                                     const customMeta = libraryCustoms.find(c => c.label === attr);
 
                                                     return (
-                                                        <div key={attr} className={`px-3 py-1 text-[10px] font-black rounded-lg flex items-center gap-1.5 border transition-all ${customMeta ? 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 text-amber-700 dark:text-amber-400' : 'bg-primary/10 text-primary-soft border-primary/20'}`}>
+                                                        <div key={attr} className={`px-3 py-1 text-sm font-black rounded-lg flex items-center gap-1.5 border transition-all ${customMeta ? 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 text-amber-700 dark:text-amber-400' : 'bg-primary/10 text-primary-soft border-primary/20'}`}>
                                                             {customMeta && <Sparkles className="w-2.5 h-2.5 fill-current" />}
                                                             <div className="flex flex-col">
                                                                 <span>{attr}</span>
@@ -1413,7 +1501,7 @@ export function ParametersStep({
                                                     </div>
                                                     <div>
                                                         <h5 className="font-black text-sm text-ink uppercase tracking-tight leading-none">{custom.main_attribute}</h5>
-                                                        <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 mt-0.5 block">Custom · {custom.sub_attributes.length} sub-attributes</span>
+                                                        <span className="text-sm font-black uppercase tracking-widest text-slate-400 mt-0.5 block">Custom · {custom.sub_attributes.length} sub-attributes</span>
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-1">
@@ -1429,7 +1517,7 @@ export function ParametersStep({
                                                     <div className="p-4 bg-surface-raised/50 rounded-xl space-y-3 border border-line/80 dark:border-line/10">
                                                         <div className="flex items-center gap-2">
                                                             <PlusCircle className="w-3 h-3 text-primary-soft" />
-                                                            <span className="text-[9px] font-black uppercase tracking-widest text-ink">Add Custom Sub-Attribute</span>
+                                                            <span className="text-xs font-black uppercase tracking-widest text-ink">Add Custom Sub-Attribute</span>
                                                         </div>
                                                         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                                                             <input type="text" placeholder="Name (e.g. Crispness)" id={`sub-name-${cIdx}`} className="md:col-span-2 bg-surface border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs font-bold outline-none focus:border-primary dark:text-white" />
@@ -1454,7 +1542,7 @@ export function ParametersStep({
                                                                     toast.success("Sub-attribute added");
                                                                 } else { toast.error("Fill all fields"); }
                                                             }}
-                                                            className="w-full py-2.5 bg-primary text-white rounded-lg text-[10px] font-black uppercase tracking-widest shadow-sm hover:scale-[1.01] active:scale-95 transition-all"
+                                                            className="w-full py-2.5 bg-primary text-white rounded-lg text-sm font-black uppercase tracking-widest shadow-sm hover:scale-[1.01] active:scale-95 transition-all"
                                                         >
                                                             Add Sub-Attribute
                                                         </button>
@@ -1466,7 +1554,7 @@ export function ParametersStep({
                                                             setSuggestSubFor(suggestSubFor === custom.main_attribute ? null : custom.main_attribute);
                                                             setSelectedBank(custom.main_attribute);
                                                         }}
-                                                        className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border ${suggestSubFor === custom.main_attribute ? 'bg-primary/10 text-primary-soft border-primary/30' : 'bg-surface border-slate-200 dark:border-slate-700 text-slate-500 hover:border-primary hover:text-primary-soft'}`}
+                                                        className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all border ${suggestSubFor === custom.main_attribute ? 'bg-primary/10 text-primary-soft border-primary/30' : 'bg-surface border-slate-200 dark:border-slate-700 text-slate-500 hover:border-primary hover:text-primary-soft'}`}
                                                     >
                                                         <Search className="w-3 h-3" />
                                                         Suggest Sub-Attributes
@@ -1475,7 +1563,7 @@ export function ParametersStep({
                                                     {/* Library sub-attributes suggestions */}
                                                     {suggestSubFor === custom.main_attribute && bankDetails?.core_attributes && (
                                                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 bg-primary/5 dark:bg-primary/10 rounded-xl border border-primary/20">
-                                                            <div className="text-[9px] font-black uppercase tracking-widest text-primary-soft mb-2">Library Suggestions</div>
+                                                            <div className="text-xs font-black uppercase tracking-widest text-primary-soft mb-2">Library Suggestions</div>
                                                             <div className="flex flex-wrap gap-2">
                                                                 {bankDetails.core_attributes.map((attr: any) => {
                                                                     const alreadyHas = custom.sub_attributes.some((s: any) => s.label === attr.label);
@@ -1493,7 +1581,7 @@ export function ParametersStep({
                                                                                 });
                                                                                 toast.success(`Added "${attr.label}"`);
                                                                             }}
-                                                                            className={`px-3 py-1 rounded-lg text-[10px] font-black transition-all border ${alreadyHas ? 'bg-surface-sunken border-slate-200 dark:border-slate-700 text-slate-300 cursor-not-allowed' : 'bg-surface border-slate-300 dark:border-slate-600 text-slate-700 dark:text-white hover:border-primary hover:text-primary-soft'}`}
+                                                                            className={`px-3 py-1 rounded-lg text-sm font-black transition-all border ${alreadyHas ? 'bg-surface-sunken border-slate-200 dark:border-slate-700 text-slate-300 cursor-not-allowed' : 'bg-surface border-slate-300 dark:border-slate-600 text-slate-700 dark:text-white hover:border-primary hover:text-primary-soft'}`}
                                                                         >
                                                                             {alreadyHas ? '✓ ' : '+ '}{attr.label}
                                                                         </button>
@@ -1506,16 +1594,16 @@ export function ParametersStep({
                                                     {/* Sub-attributes list */}
                                                     {custom.sub_attributes.length > 0 && (
                                                         <div className="space-y-2">
-                                                            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 px-1">Sub-Attributes</span>
+                                                            <span className="text-xs font-black uppercase tracking-widest text-slate-400 px-1">Sub-Attributes</span>
                                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                                                 {custom.sub_attributes.map((sub: any, sIdx: number) => (
                                                                     <div key={sIdx} className="p-3 rounded-xl bg-surface-raised border border-line/80 dark:border-line/10 flex items-center justify-between group/pill hover:border-primary/30 transition-all">
                                                                         <div className="space-y-1">
-                                                                            <div className="text-[11px] font-black text-ink uppercase tracking-tight">{sub.label}</div>
+                                                                            <div className="text-base font-black text-ink uppercase tracking-tight">{sub.label}</div>
                                                                             <div className="flex items-center gap-2">
-                                                                                <span className="text-[8px] font-bold text-slate-400 uppercase">{sub.minLabel}</span>
+                                                                                <span className="text-sm font-bold text-slate-400 uppercase">{sub.minLabel}</span>
                                                                                 <div className="w-10 h-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden"><div className="w-1/2 h-full bg-primary/30" /></div>
-                                                                                <span className="text-[8px] font-bold text-slate-400 uppercase">{sub.maxLabel}</span>
+                                                                                <span className="text-sm font-bold text-slate-400 uppercase">{sub.maxLabel}</span>
                                                                             </div>
                                                                         </div>
                                                                         <button onClick={() => { setFormData(prev => { if (!prev.config) return prev; const customs = [...(prev.config.custom_research_attributes || [])]; const target = { ...customs[cIdx] }; const nextSubs = [...target.sub_attributes]; nextSubs.splice(sIdx, 1); customs[cIdx] = { ...target, sub_attributes: nextSubs }; return { ...prev, config: { ...prev.config, custom_research_attributes: customs } }; }); }} className="p-1.5 text-slate-300 hover:text-rose-500 rounded-lg transition-all opacity-0 group-hover/pill:opacity-100"><Trash2 className="w-3.5 h-3.5" /></button>
@@ -1528,10 +1616,14 @@ export function ParametersStep({
                                             )}
                                         </motion.div>
                                     ))}
+                                    </div>
                                 </div>
                             );
                         })()}
                     </section>
+
+
+
 
                     {/* ═══ Smart Follow-up Engine ═══ */}
                     {renderSmartFollowupSection()}
@@ -1543,8 +1635,8 @@ export function ParametersStep({
                             <div className="flex items-center justify-between cursor-pointer" onClick={() => setSeqCollapsed(!seqCollapsed)}>
                                 <div className="flex items-center gap-2">
                                     <MoveVertical className="w-3.5 h-3.5 text-primary-soft" />
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-ink">Evaluation Sequence</span>
-                                    <span className="text-[9px] font-bold text-slate-400 ml-1">({formData.config.attribute_sequence.length} items)</span>
+                                    <span className="text-sm font-black uppercase tracking-widest text-ink">Evaluation Sequence</span>
+                                    <span className="text-xs font-bold text-slate-400 ml-1">({formData.config.attribute_sequence.length} items)</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <button
@@ -1556,7 +1648,7 @@ export function ParametersStep({
                                                 toast.success("Sequence order reset");
                                             }
                                         }}
-                                        className="px-3 py-1 rounded-lg border border-line/80 dark:border-line/10 text-[8px] font-black uppercase tracking-widest text-slate-400 hover:text-rose-500 hover:border-rose-300 transition-all"
+                                        className="px-3 py-1 rounded-lg border border-line/80 dark:border-line/10 text-sm font-black uppercase tracking-widest text-slate-400 hover:text-rose-500 hover:border-rose-300 transition-all"
                                     >
                                         Reset
                                     </button>
@@ -1573,9 +1665,9 @@ export function ParametersStep({
                                             <div key={`${seq.source}-${seq.main_attribute}`} className="bg-surface border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
                                                 <div className="flex items-center justify-between px-4 py-2">
                                                     <div className="flex items-center gap-3">
-                                                        <span className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary-soft font-black text-[10px]">{idx + 1}</span>
+                                                        <span className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary-soft font-black text-sm">{idx + 1}</span>
                                                         <div>
-                                                            <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 block">{seq.source === 'library' ? 'Library' : 'Custom'}</span>
+                                                            <span className="text-sm font-black uppercase tracking-widest text-slate-400 block">{seq.source === 'library' ? 'Library' : 'Custom'}</span>
                                                             <span className="text-xs font-black text-ink uppercase tracking-tight">{seq.main_attribute}</span>
                                                         </div>
                                                     </div>
@@ -1587,7 +1679,7 @@ export function ParametersStep({
                                                 {seq.sub_attributes.length > 0 && (
                                                     <div className="px-4 pb-2 flex flex-wrap gap-1.5">
                                                         {seq.sub_attributes.map((subAttr, subIdx) => (
-                                                            <div key={`${seq.source}-${seq.main_attribute}-${subAttr}`} className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-raised border border-line/80 dark:border-line/10 text-[9px] font-bold text-ink-muted">
+                                                            <div key={`${seq.source}-${seq.main_attribute}-${subAttr}`} className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-raised border border-line/80 dark:border-line/10 text-xs font-bold text-ink-muted">
                                                                 <Layers className="w-2.5 h-2.5 text-slate-300" />
                                                                 {subAttr}
                                                                 <div className="flex gap-0.5 ml-1">
@@ -1622,7 +1714,7 @@ export function ParametersStep({
                                     </div>
                                     <div className="text-left">
                                         <p className="text-xs font-black uppercase tracking-[0.2em] text-ink">+ Add Purchase Funnel Module</p>
-                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Optional · Brand awareness, consideration &amp; usage tracking</p>
+                                        <p className="text-sm text-slate-400 font-bold uppercase tracking-widest mt-0.5">Optional · Brand awareness, consideration &amp; usage tracking</p>
                                     </div>
                                 </div>
                                 <Plus className="w-5 h-5 text-slate-400 group-hover:text-primary-soft transition-colors" />
@@ -1646,7 +1738,7 @@ export function ParametersStep({
                                         <div>
                                             <h4 className={`text-lg font-black uppercase tracking-tight ${pfConfig.is_enabled ? 'text-primary-soft' : 'text-ink'
                                                 }`}>Purchase Funnel Module</h4>
-                                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Track awareness, consideration &amp; usage</p>
+                                            <p className="text-sm text-slate-500 font-bold uppercase tracking-widest mt-0.5">Track awareness, consideration &amp; usage</p>
                                         </div>
                                     </div>
                                     <button
@@ -1665,9 +1757,9 @@ export function ParametersStep({
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
                                             <Tag className="w-3 h-3 text-primary-soft" />
-                                            <span className="text-[10px] font-black uppercase tracking-widest text-ink">
+                                            <span className="text-sm font-black uppercase tracking-widest text-ink">
                                                 Funnel Brands
-                                                <span className="ml-2 text-[9px] text-slate-400 normal-case tracking-normal font-bold">— separate from your study brands above</span>
+                                                <span className="ml-2 text-xs text-slate-400 normal-case tracking-normal font-bold">— separate from your study brands above</span>
                                             </span>
                                         </div>
                                         <button
@@ -1692,7 +1784,7 @@ export function ParametersStep({
                                                     toast.info("All architecture brands already in funnel");
                                                 }
                                             }}
-                                            className="px-3 py-1.5 rounded-xl bg-primary/10 text-primary-soft text-[9px] font-black uppercase tracking-widest hover:bg-primary hover:text-white transition-all flex items-center gap-2"
+                                            className="px-3 py-1.5 rounded-xl bg-primary/10 text-primary-soft text-xs font-black uppercase tracking-widest hover:bg-primary hover:text-white transition-all flex items-center gap-2"
                                         >
                                             <Sparkles className="w-3 h-3" />
                                             Sync from Architecture
@@ -1762,9 +1854,9 @@ export function ParametersStep({
                                     )}
 
                                     {/* Brand count indicator */}
-                                    <div className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest ${(pfConfig.brand_list || []).length >= 3
+                                    <div className={`flex items-center gap-2 text-sm font-black uppercase tracking-widest ${(pfConfig.brand_list || []).length >= 3
                                         ? 'text-emerald-600 dark:text-emerald-400'
-                                        : 'text-amber-500 dark:text-amber-400'
+                                        : 'text-[#CD393B]'
                                         }`}>
                                         {(pfConfig.brand_list || []).length >= 3
                                             ? `✓ ${(pfConfig.brand_list || []).length} brands — module ready to enable`
@@ -1774,7 +1866,7 @@ export function ParametersStep({
 
                                 {/* Category field */}
                                 <div className="space-y-2">
-                                    <label className="text-[9px] font-black uppercase tracking-[0.2em] text-ink-muted block">Target Category</label>
+                                    <label className="text-xs font-black uppercase tracking-[0.2em] text-ink-muted block">Target Category</label>
                                     <input
                                         type="text"
                                         value={syncedCategory}
@@ -1787,7 +1879,7 @@ export function ParametersStep({
                                 {/* Enable/Disable toggle */}
                                 <div className="pt-2">
                                     {(pfConfig.brand_list || []).length < 3 ? (
-                                        <div className="p-5 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-2xl text-[10px] text-amber-600 dark:text-amber-400 font-black uppercase tracking-widest">
+                                        <div className="p-5 bg-[#CD393B]/[0.07] border border-[#CD393B]/25 rounded-2xl text-sm text-[#CD393B] font-black uppercase tracking-widest">
                                             Add {3 - (pfConfig.brand_list || []).length} more brand{3 - (pfConfig.brand_list || []).length > 1 ? 's' : ''} to enable this module
                                         </div>
                                     ) : (
@@ -1820,7 +1912,7 @@ export function ParametersStep({
                                     </div>
                                     <div className="text-left">
                                         <p className="text-xs font-black uppercase tracking-[0.2em] text-ink">+ Add Brand Usage Module</p>
-                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Optional · Recency, frequency, timing &amp; occasion</p>
+                                        <p className="text-sm text-slate-400 font-bold uppercase tracking-widest mt-0.5">Optional · Recency, frequency, timing &amp; occasion</p>
                                     </div>
                                 </div>
                                 <Plus className="w-5 h-5 text-slate-400 group-hover:text-primary-soft transition-colors" />
@@ -1842,7 +1934,7 @@ export function ParametersStep({
                                         <div>
                                             <h4 className={`text-lg font-black uppercase tracking-tight ${usageConfig.is_enabled ? 'text-primary-soft' : 'text-ink'
                                                 }`}>Brand Usage Module</h4>
-                                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Layer 5 · us_q1–us_q4 from question bank</p>
+                                            <p className="text-sm text-slate-500 font-bold uppercase tracking-widest mt-0.5">Layer 5 · us_q1–us_q4 from question bank</p>
                                         </div>
                                     </div>
                                     <button
@@ -1859,12 +1951,12 @@ export function ParametersStep({
                                 {/* Question Bank Preview & Selection */}
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
-                                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 flex items-center gap-2">
+                                        <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 flex items-center gap-2">
                                             <Layers className="w-3 h-3" /> Question Bank Control
                                         </p>
                                         <div className="flex items-center gap-2">
-                                            <span className="text-[8px] font-black text-slate-400 uppercase">Selected:</span>
-                                            <span className="text-[8px] font-black text-primary-soft bg-primary/10 px-2 py-0.5 rounded-full">
+                                            <span className="text-sm font-black text-slate-400 uppercase">Selected:</span>
+                                            <span className="text-sm font-black text-primary-soft bg-primary/10 px-2 py-0.5 rounded-full">
                                                 {(usageConfig.selected_questions || ['us_q1', 'us_q2', 'us_q3', 'us_q4']).length}/4
                                             </span>
                                         </div>
@@ -1895,16 +1987,16 @@ export function ParametersStep({
                                                     <div className="relative z-10 flex flex-col h-full justify-between gap-4">
                                                         <div className="flex items-center justify-between">
                                                             <div className="flex items-center gap-2">
-                                                                <span className={`text-[8px] font-black transition-colors px-2 py-0.5 rounded-full uppercase ${isSelected ? 'text-primary-soft bg-primary/10' : 'text-slate-400 bg-surface-sunken'}`}>{q.id}</span>
-                                                                <span className="text-[8px] font-black text-slate-400 bg-surface-sunken px-2 py-0.5 rounded-full uppercase">{q.type}</span>
+                                                                <span className={`text-sm font-black transition-colors px-2 py-0.5 rounded-full uppercase ${isSelected ? 'text-primary-soft bg-primary/10' : 'text-slate-400 bg-surface-sunken'}`}>{q.id}</span>
+                                                                <span className="text-sm font-black text-slate-400 bg-surface-sunken px-2 py-0.5 rounded-full uppercase">{q.type}</span>
                                                             </div>
                                                             <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'border-primary bg-primary text-white' : 'border-slate-200'}`}>
                                                                 {isSelected && <Check className="w-3 h-3" />}
                                                             </div>
                                                         </div>
                                                         <div>
-                                                            <p className={`text-[10px] font-black transition-colors ${isSelected ? 'text-ink' : 'text-slate-500'}`}>{q.label}</p>
-                                                            <p className="text-[9px] text-slate-400 leading-snug mt-1">{q.desc.replace('[product]', usageConfig.target_brand || formData.config?.category || '[product]')}</p>
+                                                            <p className={`text-sm font-black transition-colors ${isSelected ? 'text-ink' : 'text-slate-500'}`}>{q.label}</p>
+                                                            <p className="text-xs text-slate-400 leading-snug mt-1">{q.desc.replace('[product]', usageConfig.target_brand || formData.config?.category || '[product]')}</p>
                                                         </div>
                                                     </div>
                                                 </button>
@@ -1917,11 +2009,11 @@ export function ParametersStep({
                                 <div className="p-6 rounded-[2.5rem] bg-indigo-500/5 border border-indigo-500/10 space-y-5">
                                     <div className="flex items-center gap-3">
                                         <Zap className="w-4 h-4 text-indigo-500" />
-                                        <h5 className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Integrated Intelligence</h5>
+                                        <h5 className="text-sm font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Integrated Intelligence</h5>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="space-y-2">
-                                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-500">Auto-Fill Intelligence</label>
+                                            <label className="text-xs font-black uppercase tracking-widest text-slate-500">Auto-Fill Intelligence</label>
                                             <div className="flex p-1 bg-surface-sunken rounded-xl">
                                                 <button
                                                     onClick={() => {
@@ -1933,22 +2025,22 @@ export function ParametersStep({
                                                             toast.error("No brands found in Purchase Funnel to sync");
                                                         }
                                                     }}
-                                                    className="flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all bg-white dark:bg-slate-700 text-ink shadow-sm"
+                                                    className="flex-1 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all bg-white dark:bg-slate-700 text-ink shadow-sm"
                                                 >
                                                     Sync First Funnel Brand
                                                 </button>
                                             </div>
                                         </div>
                                         <div className="space-y-2 text-right">
-                                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 text-right block">Survey Blueprint</label>
-                                            <p className="text-[8px] font-bold text-slate-400 uppercase leading-relaxed text-right">This module will focus exclusively on the selected brand above for deep-dive diagnostics.</p>
+                                            <label className="text-xs font-black uppercase tracking-widest text-slate-500 text-right block">Survey Blueprint</label>
+                                            <p className="text-sm font-bold text-slate-400 uppercase leading-relaxed text-right">This module will focus exclusively on the selected brand above for deep-dive diagnostics.</p>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Target Brand Selection */}
                                 <div className="space-y-2">
-                                    <label className="text-[9px] font-black uppercase tracking-[0.2em] text-ink-muted block italic">Focus Brand</label>
+                                    <label className="text-xs font-black uppercase tracking-[0.2em] text-ink-muted block italic">Focus Brand</label>
                                     <div className="relative group">
                                         <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary-soft transition-colors">
                                             <Palette className="w-4 h-4" />
@@ -1966,7 +2058,7 @@ export function ParametersStep({
                                 {/* Enable/Disable toggle */}
                                 <div className="pt-2">
                                     {!usageConfig.target_brand?.trim() ? (
-                                        <div className="p-6 bg-amber-500/5 border border-amber-500/10 rounded-2xl text-[10px] text-amber-600 dark:text-amber-400 font-black uppercase tracking-widest text-center">
+                                        <div className="p-6 bg-amber-500/5 border border-amber-500/10 rounded-2xl text-sm text-amber-600 dark:text-amber-400 font-black uppercase tracking-widest text-center">
                                             Please define a focus brand to reach structural threshold
                                         </div>
                                     ) : (
@@ -1998,7 +2090,7 @@ export function ParametersStep({
                                     </div>
                                     <div className="text-left">
                                         <p className="text-xs font-black uppercase tracking-[0.2em] text-ink">+ Add Purchase Behaviour Module</p>
-                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Optional · Budget, stocking, channels &amp; pack sizes</p>
+                                        <p className="text-sm text-slate-400 font-bold uppercase tracking-widest mt-0.5">Optional · Budget, stocking, channels &amp; pack sizes</p>
                                     </div>
                                 </div>
                                 <Plus className="w-5 h-5 text-slate-400 group-hover:text-primary-soft transition-colors" />
@@ -2020,7 +2112,7 @@ export function ParametersStep({
                                         <div>
                                             <h4 className={`text-lg font-black uppercase tracking-tight ${pricingConfig.is_enabled ? 'text-primary-soft' : 'text-ink'
                                                 }`}>Purchase Behaviour Module</h4>
-                                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Layer 6 · cb_q1–cb_q4 from question bank</p>
+                                            <p className="text-sm text-slate-500 font-bold uppercase tracking-widest mt-0.5">Layer 6 · cb_q1–cb_q4 from question bank</p>
                                         </div>
                                     </div>
                                     <button
@@ -2037,12 +2129,12 @@ export function ParametersStep({
                                 {/* Question Bank Preview & Selection */}
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
-                                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 flex items-center gap-2">
+                                        <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 flex items-center gap-2">
                                             <Layers className="w-3 h-3" /> Question Bank Control
                                         </p>
                                         <div className="flex items-center gap-2">
-                                            <span className="text-[8px] font-black text-slate-400 uppercase">Selected:</span>
-                                            <span className="text-[8px] font-black text-indigo-600 bg-indigo-500/10 px-2 py-0.5 rounded-full">
+                                            <span className="text-sm font-black text-slate-400 uppercase">Selected:</span>
+                                            <span className="text-sm font-black text-indigo-600 bg-indigo-500/10 px-2 py-0.5 rounded-full">
                                                 {(pricingConfig.selected_questions || ['cb_q1', 'cb_q2', 'cb_q3', 'cb_q4']).length}/4
                                             </span>
                                         </div>
@@ -2073,16 +2165,16 @@ export function ParametersStep({
                                                     <div className="relative z-10 flex flex-col h-full justify-between gap-4">
                                                         <div className="flex items-center justify-between">
                                                             <div className="flex items-center gap-2">
-                                                                <span className={`text-[8px] font-black transition-colors px-2 py-0.5 rounded-full uppercase ${isSelected ? 'text-indigo-600 bg-indigo-500/10' : 'text-slate-400 bg-surface-sunken'}`}>{q.id}</span>
-                                                                <span className="text-[8px] font-black text-slate-400 bg-surface-sunken px-2 py-0.5 rounded-full uppercase">{q.type}</span>
+                                                                <span className={`text-sm font-black transition-colors px-2 py-0.5 rounded-full uppercase ${isSelected ? 'text-indigo-600 bg-indigo-500/10' : 'text-slate-400 bg-surface-sunken'}`}>{q.id}</span>
+                                                                <span className="text-sm font-black text-slate-400 bg-surface-sunken px-2 py-0.5 rounded-full uppercase">{q.type}</span>
                                                             </div>
                                                             <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'border-indigo-500 bg-indigo-500 text-white' : 'border-slate-200'}`}>
                                                                 {isSelected && <Check className="w-3 h-3" />}
                                                             </div>
                                                         </div>
                                                         <div>
-                                                            <p className={`text-[10px] font-black transition-colors ${isSelected ? 'text-ink' : 'text-slate-500'}`}>{q.label}</p>
-                                                            <p className="text-[9px] text-slate-400 leading-snug mt-1">{q.desc.replace('[product]', pricingConfig.target_brand || formData.config?.category || '[product]')}</p>
+                                                            <p className={`text-sm font-black transition-colors ${isSelected ? 'text-ink' : 'text-slate-500'}`}>{q.label}</p>
+                                                            <p className="text-xs text-slate-400 leading-snug mt-1">{q.desc.replace('[product]', pricingConfig.target_brand || formData.config?.category || '[product]')}</p>
                                                         </div>
                                                     </div>
                                                 </button>
@@ -2095,11 +2187,11 @@ export function ParametersStep({
                                 <div className="p-6 rounded-[2.5rem] bg-indigo-500/5 border border-indigo-500/10 space-y-5">
                                     <div className="flex items-center gap-3">
                                         <Zap className="w-4 h-4 text-indigo-500" />
-                                        <h5 className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Integrated Intelligence</h5>
+                                        <h5 className="text-sm font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Integrated Intelligence</h5>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="space-y-2">
-                                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-500">Auto-Fill Intelligence</label>
+                                            <label className="text-xs font-black uppercase tracking-widest text-slate-500">Auto-Fill Intelligence</label>
                                             <div className="flex p-1 bg-surface-sunken rounded-xl">
                                                 <button
                                                     onClick={() => {
@@ -2111,22 +2203,22 @@ export function ParametersStep({
                                                             toast.error("No brands found in Purchase Funnel to sync");
                                                         }
                                                     }}
-                                                    className="flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all bg-white dark:bg-slate-700 text-ink shadow-sm"
+                                                    className="flex-1 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all bg-white dark:bg-slate-700 text-ink shadow-sm"
                                                 >
                                                     Sync First Funnel Brand
                                                 </button>
                                             </div>
                                         </div>
                                         <div className="space-y-2 text-right">
-                                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 text-right block">Financial Blueprint</label>
-                                            <p className="text-[8px] font-bold text-slate-400 uppercase leading-relaxed text-right">This module will focus exclusively on the price perception of the selected brand.</p>
+                                            <label className="text-xs font-black uppercase tracking-widest text-slate-500 text-right block">Financial Blueprint</label>
+                                            <p className="text-sm font-bold text-slate-400 uppercase leading-relaxed text-right">This module will focus exclusively on the price perception of the selected brand.</p>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Target Brand Selection */}
                                 <div className="space-y-2">
-                                    <label className="text-[9px] font-black uppercase tracking-[0.2em] text-ink-muted block italic">Target Brand</label>
+                                    <label className="text-xs font-black uppercase tracking-[0.2em] text-ink-muted block italic">Target Brand</label>
                                     <div className="relative group">
                                         <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary-soft transition-colors">
                                             <Palette className="w-4 h-4" />
@@ -2144,7 +2236,7 @@ export function ParametersStep({
                                 {/* Enable/Disable toggle */}
                                 <div className="pt-2">
                                     {!pricingConfig.target_brand?.trim() ? (
-                                        <div className="p-6 bg-amber-500/5 border border-amber-500/10 rounded-2xl text-[10px] text-amber-600 dark:text-amber-400 font-black uppercase tracking-widest text-center">
+                                        <div className="p-6 bg-amber-500/5 border border-amber-500/10 rounded-2xl text-sm text-amber-600 dark:text-amber-400 font-black uppercase tracking-widest text-center">
                                             Please define a focus brand to reach structural threshold
                                         </div>
                                     ) : (
@@ -2176,7 +2268,7 @@ export function ParametersStep({
                                     </div>
                                     <div className="text-left">
                                         <p className="text-xs font-black uppercase tracking-[0.2em] text-ink">+ Add Brand Analyzer Module</p>
-                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Advanced Analytics · CBI, POP/POD & Performance Matrix</p>
+                                        <p className="text-sm text-slate-400 font-bold uppercase tracking-widest mt-0.5">Advanced Analytics · CBI, POP/POD & Performance Matrix</p>
                                     </div>
                                 </div>
                                 <Plus className="w-5 h-5 text-slate-400 group-hover:text-primary-soft transition-colors" />
@@ -2199,7 +2291,7 @@ export function ParametersStep({
                                         <div>
                                             <h4 className={`text-lg font-black uppercase tracking-tight ${baConfig.is_enabled ? 'text-primary-soft' : 'text-ink'
                                                 }`}>Brand Analyzer module</h4>
-                                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Strategic Equity & Attribute Perception Analysis</p>
+                                            <p className="text-sm text-slate-500 font-bold uppercase tracking-widest mt-0.5">Strategic Equity & Attribute Perception Analysis</p>
                                         </div>
                                     </div>
                                     <button
@@ -2220,8 +2312,8 @@ export function ParametersStep({
                                             <ShieldCheck className="w-5 h-5" />
                                         </div>
                                         <div>
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-ink">Sync with Purchase Funnel</p>
-                                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter mt-0.5">Automatically link brand awareness (L4) to perception grids (L7)</p>
+                                            <p className="text-sm font-black uppercase tracking-widest text-ink">Sync with Purchase Funnel</p>
+                                            <p className="text-xs text-slate-400 font-bold uppercase tracking-tighter mt-0.5">Automatically link brand awareness (L4) to perception grids (L7)</p>
                                         </div>
                                     </div>
                                     <div
@@ -2240,8 +2332,8 @@ export function ParametersStep({
                                                 <Layers className="w-4 h-4" />
                                             </div>
                                             <div>
-                                                <span className="text-[10px] font-black uppercase tracking-[0.1em] text-ink">Attribute Selection Bank</span>
-                                                <p className="text-[9px] text-slate-400 font-bold uppercase mt-0.5">Select high-impact image attributes for analysis</p>
+                                                <span className="text-sm font-black uppercase tracking-[0.1em] text-ink">Attribute Selection Bank</span>
+                                                <p className="text-xs text-slate-400 font-bold uppercase mt-0.5">Select high-impact image attributes for analysis</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3">
@@ -2255,7 +2347,7 @@ export function ParametersStep({
                                                 </motion.div>
                                             </button>
                                             <div className="w-px h-6 bg-slate-200 dark:bg-slate-800" />
-                                            <span className="text-[9px] font-black text-primary-soft bg-primary/10 px-4 py-1.5 rounded-full uppercase tracking-widest border border-primary/20">
+                                            <span className="text-xs font-black text-primary-soft bg-primary/10 px-4 py-1.5 rounded-full uppercase tracking-widest border border-primary/20">
                                                 {baConfig.selected_attributes.length} ACTIVE
                                             </span>
                                         </div>
@@ -2289,10 +2381,10 @@ export function ParametersStep({
                                                         </div>
                                                     </div>
                                                     <div>
-                                                        <p className="text-[10px] font-black uppercase tracking-tight leading-tight">
+                                                        <p className="text-sm font-black uppercase tracking-tight leading-tight">
                                                             {formData.config?.language === 'ar' ? attr.label_ar : attr.label_en}
                                                         </p>
-                                                        <p className={`text-[8px] font-bold uppercase mt-1 ${isSelected ? 'text-white/60' : 'text-slate-400'}`}>
+                                                        <p className={`text-sm font-bold uppercase mt-1 ${isSelected ? 'text-white/60' : 'text-slate-400'}`}>
                                                             {attr.category}
                                                         </p>
                                                     </div>
@@ -2301,7 +2393,7 @@ export function ParametersStep({
                                         })}
                                         {/* Proprietary Attributes Input */}
                                         <div className="p-4 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center gap-3 transition-all bg-slate-50/50 dark:bg-slate-900/50 min-h-[7rem]">
-                                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest text-center">Add Custom Attribute</span>
+                                            <span className="text-sm font-black text-slate-400 uppercase tracking-widest text-center">Add Custom Attribute</span>
 
                                             <div className="flex gap-2 w-full">
                                                 <input
@@ -2309,7 +2401,7 @@ export function ParametersStep({
                                                     value={baCustomAttrInput}
                                                     onChange={e => setBaCustomAttrInput(e.target.value)}
                                                     placeholder="Type attribute..."
-                                                    className="flex-1 bg-surface border border-line/80 dark:border-line/10 rounded-xl px-3 py-1.5 text-[10px] font-bold outline-none focus:border-primary transition-all"
+                                                    className="flex-1 bg-surface border border-line/80 dark:border-line/10 rounded-xl px-3 py-1.5 text-sm font-bold outline-none focus:border-primary transition-all"
                                                     onKeyPress={e => {
                                                         if (e.key === 'Enter' && baCustomAttrInput.trim()) {
                                                             const newAttr = {
@@ -2390,10 +2482,10 @@ export function ParametersStep({
                                                         </div>
                                                     </div>
                                                     <div>
-                                                        <p className="text-[10px] font-black uppercase tracking-tight leading-tight">
+                                                        <p className="text-sm font-black uppercase tracking-tight leading-tight">
                                                             {attr.label_en}
                                                         </p>
-                                                        <p className={`text-[8px] font-bold uppercase mt-1 ${isSelected ? 'text-amber-600' : 'text-slate-400'}`}>
+                                                        <p className={`text-sm font-bold uppercase mt-1 ${isSelected ? 'text-amber-600' : 'text-slate-400'}`}>
                                                             CUSTOM
                                                         </p>
                                                     </div>
@@ -2408,8 +2500,8 @@ export function ParametersStep({
                                     <div className="space-y-4 p-8 bg-surface-sunken/50 rounded-[2rem] border-2 border-line/80 dark:border-line/10">
                                         <div className="flex items-center justify-between mb-4">
                                             <div>
-                                                <h5 className="text-[10px] font-black uppercase tracking-widest text-ink">Manual Brand Context</h5>
-                                                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter mt-0.5">Define brands specifically for equity analysis</p>
+                                                <h5 className="text-sm font-black uppercase tracking-widest text-ink">Manual Brand Context</h5>
+                                                <p className="text-xs text-slate-400 font-bold uppercase tracking-tighter mt-0.5">Define brands specifically for equity analysis</p>
                                             </div>
                                             <button
                                                 onClick={() => {
@@ -2424,7 +2516,7 @@ export function ParametersStep({
                                                     updateBA({ brand_list: nextList });
                                                     toast.success("Synchronized with study brands");
                                                 }}
-                                                className="px-4 py-2 bg-surface border border-slate-200 dark:border-slate-700 rounded-xl text-[9px] font-black uppercase tracking-widest hover:border-primary hover:text-primary-soft transition-all"
+                                                className="px-4 py-2 bg-surface border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-black uppercase tracking-widest hover:border-primary hover:text-primary-soft transition-all"
                                             >
                                                 Clone Study Brands
                                             </button>
@@ -2433,7 +2525,7 @@ export function ParametersStep({
                                             {baConfig.brand_list.map((b, idx) => (
                                                 <div key={idx} className="px-4 py-2 bg-surface rounded-xl border border-line/80 dark:border-line/10 flex items-center gap-3">
                                                     <div className={`w-1.5 h-1.5 rounded-full ${b.role === 'internal' ? 'bg-emerald-500' : 'bg-slate-400'}`} />
-                                                    <span className="text-[10px] font-black uppercase tracking-tight text-ink">{b.name}</span>
+                                                    <span className="text-sm font-black uppercase tracking-tight text-ink">{b.name}</span>
                                                     <button onClick={() => updateBA({ brand_list: baConfig.brand_list.filter((_, i) => i !== idx) })} className="text-slate-300 hover:text-rose-500"><X size={12} /></button>
                                                 </div>
                                             ))}
@@ -2444,7 +2536,7 @@ export function ParametersStep({
                                 {/* Validation & Deployment */}
                                 <div className="pt-2">
                                     {(baConfig.selected_attributes.length === 0) ? (
-                                        <div className="p-6 bg-amber-500/5 border border-amber-500/10 rounded-2xl text-[10px] text-amber-600 dark:text-amber-400 font-black uppercase tracking-widest text-center">
+                                        <div className="p-6 bg-amber-500/5 border border-amber-500/10 rounded-2xl text-sm text-amber-600 dark:text-amber-400 font-black uppercase tracking-widest text-center">
                                             Select at least one attribute to enable the Analyzer
                                         </div>
                                     ) : (
@@ -2472,10 +2564,10 @@ export function ParametersStep({
                         <div className="space-y-6 bg-slate-50/50 dark:bg-slate-950/50 p-8 rounded-[2.5rem] border-2 border-line/80 dark:border-line/10 shadow-inner">
                             <div className="flex items-center gap-3 border-b border-line/80 dark:border-line/10 pb-4 mb-2">
                                 <Tag className="w-4 h-4 text-primary-soft" />
-                                <h4 className="text-[10px] font-black uppercase tracking-widest text-ink">Product Category</h4>
+                                <h4 className="text-sm font-black uppercase tracking-widest text-ink">Product Category</h4>
                             </div>
                             <div className="space-y-4">
-                                <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 ml-1">Survey Category</label>
+                                <label className="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Survey Category</label>
                                 <input
                                     id="config-category-input"
                                     type="text"
@@ -2500,7 +2592,7 @@ export function ParametersStep({
                         <div className="space-y-6 bg-slate-50/50 dark:bg-slate-950/50 p-8 rounded-[2.5rem] border-2 border-line/80 dark:border-line/10 shadow-inner">
                             <div className="flex items-center gap-3 border-b border-line/80 dark:border-line/10 pb-4 mb-2">
                                 <Layers className="w-4 h-4 text-primary-soft" />
-                                <h4 className="text-[10px] font-black uppercase tracking-widest text-ink">Survey Language</h4>
+                                <h4 className="text-sm font-black uppercase tracking-widest text-ink">Survey Language</h4>
                             </div>
                             <div className="space-y-4">
                                 <label className="text-[9.5px] font-black uppercase tracking-widest text-slate-500 ml-1">Translation Locale</label>
@@ -2564,29 +2656,29 @@ export function ParametersStep({
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left bg-surface p-8 rounded-3xl border-2 border-line/80 dark:border-line/10 shadow-sm transition-colors">
                                     <div className="space-y-4">
                                         <div className="flex items-center gap-3">
-                                            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Active Sensory Attributes</span>
-                                            <span className="text-[9px] font-black bg-emerald-500/10 text-emerald-600 px-3 py-1 rounded-full">{formData.product_test_config.selected_attributes.length} selected</span>
+                                            <span className="text-sm font-black uppercase tracking-wider text-slate-400">Active Sensory Attributes</span>
+                                            <span className="text-xs font-black bg-emerald-500/10 text-emerald-600 px-3 py-1 rounded-full">{formData.product_test_config.selected_attributes.length} selected</span>
                                         </div>
                                         <div className="flex flex-wrap gap-2">
                                             {formData.product_test_config.selected_attributes.map(attr => (
-                                                <span key={attr} className="text-[10px] font-black tracking-tight bg-surface-sunken text-ink-muted px-3.5 py-2 rounded-xl border border-line/80 dark:border-line/10 shadow-xs">{attr}</span>
+                                                <span key={attr} className="text-sm font-black tracking-tight bg-surface-sunken text-ink-muted px-3.5 py-2 rounded-xl border border-line/80 dark:border-line/10 shadow-xs">{attr}</span>
                                             ))}
                                         </div>
                                     </div>
 
                                     <div className="space-y-4 border-t md:border-t-0 md:border-l border-slate-100 dark:border-slate-850 pt-4 md:pt-0 md:pl-8">
                                         <div className="flex items-center gap-3">
-                                            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Package Test Attachment</span>
-                                            <span className={`text-[9px] font-black px-3 py-1 rounded-full ${formData.product_test_config.package_test_enabled ? 'bg-indigo-500/10 text-indigo-600' : 'bg-slate-150 text-slate-450 dark:bg-slate-900 dark:text-slate-500'}`}>
+                                            <span className="text-sm font-black uppercase tracking-wider text-slate-400">Package Test Attachment</span>
+                                            <span className={`text-xs font-black px-3 py-1 rounded-full ${formData.product_test_config.package_test_enabled ? 'bg-indigo-500/10 text-indigo-600' : 'bg-slate-150 text-slate-450 dark:bg-slate-900 dark:text-slate-500'}`}>
                                                 {formData.product_test_config.package_test_enabled ? 'Enabled' : 'Disabled'}
                                             </span>
                                         </div>
                                         {formData.product_test_config.package_test_enabled ? (
                                             <div className="space-y-2">
-                                                <p className="text-[10px] text-slate-500 font-medium">Selected packaging diagnostics: {formData.product_test_config.package_test_attributes?.length || 0}</p>
+                                                <p className="text-sm text-slate-500 font-medium">Selected packaging diagnostics: {formData.product_test_config.package_test_attributes?.length || 0}</p>
                                                 <div className="flex flex-wrap gap-1.5">
                                                     {(formData.product_test_config.package_test_attributes || []).map(attr => (
-                                                        <span key={attr} className="text-[9px] font-bold bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 px-2.5 py-1 rounded-lg border border-indigo-100 dark:border-indigo-900/30">{attr}</span>
+                                                        <span key={attr} className="text-xs font-bold bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 px-2.5 py-1 rounded-lg border border-indigo-100 dark:border-indigo-900/30">{attr}</span>
                                                     ))}
                                                 </div>
                                             </div>
@@ -2598,7 +2690,7 @@ export function ParametersStep({
                             ) : (
                                 <div className="p-8 bg-amber-500/5 rounded-3xl border border-amber-500/15 text-center">
                                     <p className="text-xs font-black uppercase tracking-widest text-amber-600 dark:text-amber-400">No Custom Attributes Configured</p>
-                                    <p className="text-[10px] text-slate-550 dark:text-slate-400 mt-2 font-medium">Fixed questions will still appear in the blueprint. Open the modal to add optional attributes and package evaluation.</p>
+                                    <p className="text-sm text-slate-550 dark:text-slate-400 mt-2 font-medium">Fixed questions will still appear in the blueprint. Open the modal to add optional attributes and package evaluation.</p>
                                 </div>
                             )}
 
@@ -2615,10 +2707,10 @@ export function ParametersStep({
                                     >
                                         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                                             <div className="flex items-center gap-3">
-                                                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                                                <span className="text-sm font-black uppercase tracking-wider text-slate-400">
                                                     Trial Media Upload
                                                 </span>
-                                                <span className={`text-[9px] font-black px-3 py-1 rounded-full ${trialMedia.enabled ? 'bg-violet-500/10 text-violet-600' : 'bg-slate-150 text-slate-450 dark:bg-slate-900 dark:text-slate-500'}`}>
+                                                <span className={`text-xs font-black px-3 py-1 rounded-full ${trialMedia.enabled ? 'bg-violet-500/10 text-violet-600' : 'bg-slate-150 text-slate-450 dark:bg-slate-900 dark:text-slate-500'}`}>
                                                     {trialMedia.enabled
                                                         ? (isArabic ? 'مفعّل' : 'Enabled')
                                                         : (isArabic ? 'معطل' : 'Disabled')}
@@ -2627,7 +2719,7 @@ export function ParametersStep({
                                             <button
                                                 type="button"
                                                 onClick={() => setIsPtModalOpen(true)}
-                                                className="text-[10px] font-black uppercase tracking-widest text-primary-soft hover:underline"
+                                                className="text-sm font-black uppercase tracking-widest text-primary-soft hover:underline"
                                             >
                                                 {isArabic ? 'تعديل' : 'Configure'}
                                             </button>
@@ -2636,7 +2728,7 @@ export function ParametersStep({
                                         {trialMedia.enabled ? (
                                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                                 <div className="space-y-1">
-                                                    <p className="text-[9px] font-black uppercase tracking-wider text-slate-400">
+                                                    <p className="text-xs font-black uppercase tracking-wider text-slate-400">
                                                         {isArabic ? 'نوع الوسائط' : 'Accepted media'}
                                                     </p>
                                                     <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
@@ -2644,7 +2736,7 @@ export function ParametersStep({
                                                     </p>
                                                 </div>
                                                 <div className="space-y-1">
-                                                    <p className="text-[9px] font-black uppercase tracking-wider text-slate-400">
+                                                    <p className="text-xs font-black uppercase tracking-wider text-slate-400">
                                                         {isArabic ? 'الإجابة' : 'Response rule'}
                                                     </p>
                                                     <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
@@ -2654,7 +2746,7 @@ export function ParametersStep({
                                                     </p>
                                                 </div>
                                                 <div className="space-y-1">
-                                                    <p className="text-[9px] font-black uppercase tracking-wider text-slate-400">
+                                                    <p className="text-xs font-black uppercase tracking-wider text-slate-400">
                                                         {isArabic ? 'المرحلة' : 'Timing'}
                                                     </p>
                                                     <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
@@ -2662,7 +2754,7 @@ export function ParametersStep({
                                                     </p>
                                                 </div>
                                                 <div className="space-y-1">
-                                                    <p className="text-[9px] font-black uppercase tracking-wider text-slate-400">
+                                                    <p className="text-xs font-black uppercase tracking-wider text-slate-400">
                                                         {isArabic ? 'حد الفيديو' : 'Video limit'}
                                                     </p>
                                                     <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
@@ -2728,7 +2820,7 @@ export function ParametersStep({
                             }));
                             if (nextStep) nextStep();
                         }}
-                        className="px-6 py-3 bg-surface text-ink border border-line/80 dark:border-line/10 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-sm"
+                        className="px-6 py-3 bg-surface text-ink border border-line/80 dark:border-line/10 rounded-xl text-sm font-black uppercase tracking-widest hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-sm"
                     >
                         Use Standard Template
                     </button>
@@ -2750,3 +2842,6 @@ export function ParametersStep({
         </div>
     );
 }
+
+
+

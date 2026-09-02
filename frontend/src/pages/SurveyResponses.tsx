@@ -724,22 +724,26 @@ export default function SurveyResponses() {
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
+                    {/* A report can be generated at any point, not only once the
+                        quota is met — analysts need interim reads while fieldwork
+                        is still running. Below target the action stays available
+                        but is styled as provisional and says so, rather than
+                        being blocked outright. */}
                     <Link
                         to={`/surveys/${surveyId}/report`}
-                        className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all
+                        title={
+                            overview?.target_reached
+                                ? 'View the full report'
+                                : `Interim report on ${overview?.respondent_count || 0} of ${overview?.respondent_target || 0} responses`
+                        }
+                        className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all active:scale-95
                             ${overview?.target_reached
-                                ? 'bg-primary text-white shadow-lg shadow-primary/20 hover:bg-blue-600 active:scale-95'
-                                : 'bg-surface-sunken text-ink-subtle cursor-not-allowed border border-slate-200 dark:border-slate-700'
+                                ? 'bg-primary text-white shadow-lg shadow-primary/20 hover:bg-blue-600'
+                                : 'bg-[#CD393B]/10 text-[#CD393B] border-2 border-[#CD393B]/30 hover:bg-[#CD393B]/20'
                             }`}
-                        onClick={(e) => {
-                            if (!overview?.target_reached) {
-                                e.preventDefault();
-                                toast.info('Report unlocks when the response target is reached.');
-                            }
-                        }}
                     >
                         <Activity size={14} />
-                        View Report
+                        {overview?.target_reached ? 'View Report' : 'Interim Report'}
                     </Link>
                     <button
                         onClick={() => { fetchOverview(); fetchRespondents(true); }}

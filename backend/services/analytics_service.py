@@ -104,26 +104,51 @@ class AnalyticsService:
         snapshot = survey_doc.get("template_snapshot_l2") or {}
         sections = snapshot.get("sections", [])
         
-        # 1. Map all scale-5 questions from the snapshot by attribute name
-        # Key: attribute_name_lower, Value: list of scale-5 metadata
+        # 1. Map every scale question from the snapshot by attribute name.
+        #
+        # This used to filter to `scaleMax == 5`, which kept the sub-attribute
+        # questions and silently dropped the 1-10 hedonic "Overall" question
+        # sitting beside them — so the registry never knew about the very
+        # question that measures overall liking. `role` now carries the
+        # distinction that scale length was standing in for.
         snapshot_map = {}
         for section in sections:
             main_att = (section.get("attribute") or "").strip().lower()
             if not main_att: continue
-            
+
             if main_att not in snapshot_map:
                 snapshot_map[main_att] = []
-            
+
             for q in section.get("questions", []):
+                if q.get("type") != "scale":
+                    continue
+
                 meta = q.get("questionMeta", {})
-                # We identify "sub-attribute" questions by scale 5
-                if q.get("type") == "scale" and int(meta.get("scaleMax", 5)) == 5:
-                    snapshot_map[main_att].append({
-                        "text": q.get("text", q.get("label", "")).strip(),
-                        "min_label": (meta.get("minLabel") or "Poor").strip(),
-                        "max_label": (meta.get("maxLabel") or "Excellent").strip(),
-                        "id": q.get("id")
-                    })
+                scale_max = int(meta.get("scaleMax", 5) or 5)
+                # A question naming a sub-attribute is a diagnostic; one that
+                # does not is the attribute's own summary question. Mirrors the
+                # aggregator's "metric == attribute means main" convention.
+                supp = (meta.get("suppAtt") or meta.get("supp_att") or "").strip()
+
+                snapshot_map[main_att].append({
+                    "text": q.get("text", q.get("label", "")).strip(),
+                    "min_label": (meta.get("minLabel") or "Poor").strip(),
+                    "max_label": (meta.get("maxLabel") or "Excellent").strip(),
+                    "id": q.get("id"),
+                    "role": "sub" if supp else ("main" if scale_max > 5 else "sub"),
+                    # Scale semantics, carried through so reporting reads a
+                    # score correctly instead of assuming higher is better.
+                    # A centered sensory scale is best at its midpoint; a
+                    # purchase-intent ladder of the same length is best at
+                    # its top. Absent on questions authored before this
+                    # existed, which report as "unlabelled" rather than
+                    # being guessed at.
+                    "scale_shape": meta.get("scaleShape"),
+                    "point_labels": meta.get("pointLabels") or [],
+                    "ideal_point": meta.get("idealPoint"),
+                    "scale_min": meta.get("min") or 1,
+                    "scale_max": scale_max,
+                })
 
         # 2. Build Library Fallback Map (Global defaults)
         library_cursor = self.db.taste_test_questions.find(
@@ -201,10 +226,46 @@ class AnalyticsService:
                     reg_item["min_label"] = cm["min"] if cm else "Poor"
                     reg_item["max_label"] = cm["max"] if cm else "Excellent"
                     reg_item["en_text"] = ""
-                
+
+                # --- STEP B: Carry the scale's semantics, whichever branch won ---
+                #
+                # These were read off the snapshot above and then dropped on the
+                # floor: none of the four branches copied them, so the registry
+                # described *what* was measured but never *which direction is
+                # good*. Downstream that meant charts carried no scale block, so
+                # the god prompt's "READING RATING SCALES" contract sat inert and
+                # Top-2-Box was applied to centered sensory scales.
+                #
+                # Deliberately independent of the label branches: the min/max
+                # labels follow the analyst's authoring intent (custom blueprint
+                # vs library default), but the scale semantics must follow the
+                # question the respondent actually answered — the snapshot.
+                if matched_snap:
+                    reg_item["scale_shape"] = matched_snap.get("scale_shape")
+                    reg_item["point_labels"] = matched_snap.get("point_labels") or []
+                    reg_item["ideal_point"] = matched_snap.get("ideal_point")
+                    reg_item["scale_min"] = matched_snap.get("scale_min", 1)
+                    reg_item["scale_max"] = matched_snap.get("scale_max", 5)
+                    reg_item["role"] = matched_snap.get("role", "sub")
+                    reg_item["question_id"] = matched_snap.get("id")
+                else:
+                    # No snapshot match: leave the shape unset rather than
+                    # defaulting. An unlabelled scale costs the report a
+                    # directional claim; a guessed one inverts the finding.
+                    reg_item["scale_shape"] = None
+                    reg_item["point_labels"] = []
+                    reg_item["ideal_point"] = None
+                    reg_item["role"] = "sub"
+
                 registry.append(reg_item)
 
-        logger.info("[AttributeRegistry] Built %d entries from snapshot and fallbacks", len(registry))
+        typed = sum(1 for r in registry if r.get("scale_shape"))
+        logger.info(
+            "[AttributeRegistry] Built %d entries from snapshot and fallbacks "
+            "(%d with resolved scale semantics)",
+            len(registry),
+            typed,
+        )
         return registry
         
 

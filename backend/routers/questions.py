@@ -129,6 +129,29 @@ async def fetch_structural_questions(
     return grouped
 
 
+@router.get("/taste-test/library")
+async def get_taste_test_library(
+    language: str = "en",
+    current_user: User = Depends(get_current_user),
+):
+    """
+    The canonical Taste Test attribute library, grouped main -> sub-attributes.
+
+    Served from `backend/resources/taste_test/attribute_library.json` rather
+    than from Mongo so the creation UI always shows the reviewed library, even
+    on an environment where the seeder has not been run. Each entry carries its
+    question text, its per-point labels and which point is the ideal answer, so
+    the analyst sees exactly what a respondent will see.
+    """
+    from backend.services.taste_test_library import grouped_library, library_version
+
+    return {
+        "version": library_version(),
+        "language": language,
+        "groups": grouped_library(language),
+    }
+
+
 @router.get("/taste-test/attributes", response_model=List[str])
 async def get_taste_test_attributes(
     current_user: User = Depends(get_current_user)

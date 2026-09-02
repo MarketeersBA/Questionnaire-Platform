@@ -91,3 +91,98 @@ describe('scaleAnchorLabels', () => {
         expect(buildScaleRangeAriaValueText(3, 5, 'ar')).toBe('القيمة 3 من 5');
     });
 });
+
+/**
+ * Per-point labels: the mechanism that replaced inferring a "JAR" scale from
+ * its length. The labels state what each answer means, so a sensory midpoint
+ * reads as ideal while a purchase-intent midpoint does not.
+ */
+describe('scaleAnchorLabels — per-point labels', () => {
+    const SALTY = ['مش مملح كفاية', 'مش مملح', 'مناسب لى', 'مملح', 'مملح جدا'];
+
+    it('returns one point per label with the ideal marked', () => {
+        const resolved = resolveScaleAnchorLabels({
+            language: 'ar',
+            scaleMin: 1,
+            scaleMax: 5,
+            pointLabels: SALTY,
+            idealPoint: 3,
+        });
+
+        expect(resolved.points).toHaveLength(5);
+        expect(resolved.points?.map((p) => p.value)).toEqual([1, 2, 3, 4, 5]);
+        expect(resolved.points?.map((p) => p.text)).toEqual(SALTY);
+        expect(resolved.points?.filter((p) => p.isIdeal).map((p) => p.value)).toEqual([3]);
+    });
+
+    it('exposes the ideal label as the middle anchor', () => {
+        const resolved = resolveScaleAnchorLabels({
+            language: 'ar',
+            pointLabels: SALTY,
+            idealPoint: 3,
+        });
+        expect(resolved.middleText).toBe('مناسب لى');
+        expect(resolved.leftText).toBe('مش مملح كفاية');
+        expect(resolved.rightText).toBe('مملح جدا');
+    });
+
+    it('marks the top as ideal for a monotonic ladder, not the midpoint', () => {
+        // Purchase intent is 1-5 like a sensory scale but 5 is genuinely best.
+        const intent = ['مش هاشتريه خالص', 'مش هشتريه', 'هشتريه الى حد ما', 'هشتريه', 'هشتريه جدا'];
+        const resolved = resolveScaleAnchorLabels({
+            language: 'ar',
+            pointLabels: intent,
+            idealPoint: 5,
+        });
+
+        expect(resolved.points?.filter((p) => p.isIdeal).map((p) => p.value)).toEqual([5]);
+        expect(resolved.points?.find((p) => p.value === 3)?.isIdeal).toBe(false);
+    });
+
+    it('point labels win over the legacy jar variant', () => {
+        const resolved = resolveScaleAnchorLabels({
+            language: 'ar',
+            variant: 'jar',
+            pointLabels: SALTY,
+            idealPoint: 3,
+        });
+        // Not the generic قليل جداً / مناسب / كثير جداً defaults.
+        expect(resolved.leftText).toBe('مش مملح كفاية');
+        expect(resolved.points).toHaveLength(5);
+    });
+
+    it('ignores a label set that does not match the scale length', () => {
+        const resolved = resolveScaleAnchorLabels({
+            language: 'ar',
+            scaleMin: 1,
+            scaleMax: 10,
+            pointLabels: SALTY, // only 5 labels for a 10-point scale
+        });
+        expect(resolved.points).toBeUndefined();
+    });
+
+    it('falls back to anchors when no labels are supplied', () => {
+        const resolved = resolveScaleAnchorLabels({
+            language: 'en',
+            scaleMin: 1,
+            scaleMax: 10,
+            minLabel: 'Do not like it at all',
+            maxLabel: 'Like it very much',
+        });
+        expect(resolved.points).toBeUndefined();
+        expect(resolved.rightText).toContain('Like it very much');
+    });
+
+    it('no longer swallows author anchors on a legacy jar scale', () => {
+        // The jar branch previously read only leftLabel/rightLabel, which the
+        // slider never forwards, so minLabel/maxLabel were silently discarded.
+        const resolved = resolveScaleAnchorLabels({
+            language: 'en',
+            variant: 'jar',
+            minLabel: 'Not salty enough',
+            maxLabel: 'Far too salty',
+        });
+        expect(resolved.leftText).toContain('Not salty enough');
+        expect(resolved.rightText).toContain('Far too salty');
+    });
+});

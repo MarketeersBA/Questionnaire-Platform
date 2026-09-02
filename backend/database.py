@@ -7,15 +7,78 @@ logger = logging.getLogger(__name__)
 class Database:
     client: AsyncIOMotorClient = None
     db = None
+    #: Why the last connect() attempt failed, for health reporting.
+    last_error: str = None
 
-    def connect(self):
-        self.client = AsyncIOMotorClient(settings.MONGO_URI)
-        self.db = self.client[settings.DATABASE_NAME]
+    def connect(self) -> bool:
+        """
+        Create the Motor client. Returns True when the client exists.
+
+        This must never raise. For a `mongodb+srv://` URI pymongo resolves the
+        SRV record *eagerly*, inside the constructor — so a momentary DNS
+        outage (a laptop changing network, a flaky resolver) raised straight
+        out of startup, FastAPI aborted the lifespan, and the container exited.
+        Nothing restarted it, so a blip that lasted seconds took the whole API
+        down until someone noticed. Failing soft here lets the process stay up
+        and reconnect on the next call once DNS returns.
+        """
+        try:
+            self.client = AsyncIOMotorClient(
+                settings.MONGO_URI,
+                # Fail an unreachable server in seconds rather than the 30s
+                # default, so requests surface a clear error instead of hanging.
+                serverSelectionTimeoutMS=5000,
+                connectTimeoutMS=5000,
+            )
+            self.db = self.client[settings.DATABASE_NAME]
+            self.last_error = None
+            logger.info("MongoDB client initialised (database=%s)", settings.DATABASE_NAME)
+            return True
+        except Exception as exc:
+            self.client = None
+            self.db = None
+            self.last_error = f"{type(exc).__name__}: {exc}"
+            logger.error(
+                "MongoDB client could not be created — the API will start "
+                "without a database and retry on demand. Cause: %s",
+                self.last_error,
+            )
+            return False
+
+    @property
+    def is_connected(self) -> bool:
+        return self.db is not None
+
+    def ensure_connected(self) -> bool:
+        """Reconnect if a previous attempt failed. Cheap when already connected."""
+        if self.db is not None:
+            return True
+        return self.connect()
+
+    async def ping(self) -> bool:
+        """Verify the server actually answers, not just that a client exists."""
+        if not self.ensure_connected():
+            return False
+        try:
+            await self.client.admin.command("ping")
+            self.last_error = None
+            return True
+        except Exception as exc:
+            self.last_error = f"{type(exc).__name__}: {exc}"
+            return False
 
     def close(self):
-        self.client.close()
+        if self.client is not None:
+            self.client.close()
 
     def get_collection(self, collection_name: str):
+        # Retry here so the API self-heals once DNS/Atlas comes back, instead
+        # of staying broken until a manual restart.
+        if not self.ensure_connected():
+            raise RuntimeError(
+                f"Database unavailable — cannot access '{collection_name}'. "
+                f"Last error: {self.last_error}"
+            )
         return self.db[collection_name]
 
     def get_gridfs_bucket(self, bucket_name: str = "voice_recordings"):

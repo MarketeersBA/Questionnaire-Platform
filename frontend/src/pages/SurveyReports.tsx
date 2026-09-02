@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { surveys, analytics } from '../services/api';
 import {
@@ -8,10 +8,12 @@ import {
     Download,
     Eye,
     CheckCircle2,
-    BarChart3
-} from 'lucide-react';
+    BarChart3, Share2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import ShareLinkModal from '../components/report/ShareLinkModal';
+import ShareStatusStrip from '../components/report/ShareStatusStrip';
+import type { ReportShareLink } from '../services/api';
 
 export default function SurveyReports() {
     const navigate = useNavigate();
@@ -33,6 +35,62 @@ export default function SurveyReports() {
         fetchSurveys();
     }, []);
 
+
+    /** Which card is currently minting a link, so its button can disable. */
+
+    /**
+     * Copy a client-facing report link.
+     *
+     * Minting is idempotent server-side, so pressing this repeatedly returns
+     * the same URL rather than invalidating one the client already has.
+     */
+    /**
+     * Open the share settings for a report.
+     *
+     * This replaced a one-click "copy link" button. Copying still happens on
+     * create, but the viewer limit and expiry have to be a decision at the
+     * moment of sharing rather than a default nobody revisits — an unlimited,
+     * never-expiring link handed to a client is not something to fall into by
+     * pressing a clipboard icon.
+     */
+    const [shareTarget, setShareTarget] = useState<{ id: string; name: string } | null>(null);
+
+    /**
+     * Share state per survey, fetched once for the whole grid.
+     *
+     * Loaded here rather than inside each card so a list of twenty reports does
+     * not open twenty connections, and so the strip updates immediately after
+     * the editor closes instead of going stale.
+     */
+    const [sharesBySurvey, setSharesBySurvey] = useState<Record<string, ReportShareLink | null>>({});
+    const [sharesLoading, setSharesLoading] = useState(false);
+
+    const loadShares = useCallback(async (surveyIds: string[]) => {
+        if (surveyIds.length === 0) return;
+        setSharesLoading(true);
+        try {
+            const results = await Promise.all(
+                surveyIds.map(async (id) => {
+                    try {
+                        return [id, await analytics.getShareLink(id)] as const;
+                    } catch {
+                        // One unreadable report must not blank the whole grid.
+                        return [id, null] as const;
+                    }
+                })
+            );
+            setSharesBySurvey(Object.fromEntries(results));
+        } finally {
+            setSharesLoading(false);
+        }
+    }, []);
+    useEffect(() => {
+        const withResponses = surveyList
+            .filter((s) => (s.respondent_count || 0) > 0)
+            .map((s) => s._id);
+        void loadShares(withResponses);
+    }, [surveyList, loadShares]);
+
     const handleDownload = async (id: string, name: string) => {
         try {
             toast.info(`Downloading PPTX export for ${name}...`);
@@ -42,13 +100,19 @@ export default function SurveyReports() {
         }
     };
 
-    // Filter to surveys matching responses vs target.
+    // A report can be generated at any point in fieldwork, so this no longer
+    // hides surveys that have not met their target — it only requires at least
+    // one response (nothing to report on otherwise). Under-target surveys are
+    // still marked, so an interim read is never mistaken for a final one.
     const eligibleSurveys = surveyList.filter(s => {
         const matchesSearch = s.company_name.toLowerCase().includes(searchQuery.toLowerCase());
-        const target = s.sample_capacity || s.respondent_target || 0;
-        const targetMet = target > 0 && s.respondent_count >= target;
-        return matchesSearch && targetMet;
+        return matchesSearch && (s.respondent_count || 0) > 0;
     });
+
+    const isTargetMet = (s: any) => {
+        const target = s.sample_capacity || s.respondent_target || 0;
+        return target > 0 && (s.respondent_count || 0) >= target;
+    };
 
     if (loading) return (
         <div className="space-y-10 pb-20 animate-pulse">
@@ -67,6 +131,7 @@ export default function SurveyReports() {
     );
 
     return (
+        <>
         <div className="space-y-10 pb-20">
             {/* Header */}
             <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8">
@@ -149,12 +214,31 @@ export default function SurveyReports() {
                                 </div>
                             </div>
 
-                            <div className="flex gap-3 mt-auto">
+                            <div className="mt-auto">
+                                <ShareStatusStrip
+                                    share={sharesBySurvey[survey._id]}
+                                    loading={sharesLoading && !sharesBySurvey[survey._id]}
+                                    onManage={() =>
+                                        setShareTarget({ id: survey._id, name: survey.company_name })
+                                    }
+                                />
+                            </div>
+
+                            <div className="flex gap-3">
                                 <button
                                     onClick={() => navigate(`/surveys/${survey._id}/report`)}
                                     className="flex-1 bg-primary/10 dark:bg-primary/10 text-primary-soft dark:text-brand-cyan hover:bg-primary hover:text-white py-3.5 rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 transition-all border border-primary/20 dark:border-primary/30"
                                 >
-                                    <Eye size={16} /> Screen Report
+                                    <Eye size={16} /> {isTargetMet(survey) ? 'Screen Report' : 'Interim Report'}
+                                </button>
+                                <button
+                                    onClick={() =>
+                                        setShareTarget({ id: survey._id, name: survey.company_name })
+                                    }
+                                    className="p-3.5 rounded-xl bg-surface-raised text-ink-muted hover:bg-slate-100 dark:hover:bg-slate-700 transition-all border border-slate-200 dark:border-slate-700 hover:text-primary-soft"
+                                    title="Share this report — set a viewer limit and expiry"
+                                >
+                                    <Share2 size={18} />
                                 </button>
                                 <button
                                     onClick={() => handleDownload(survey._id, survey.company_name)}
@@ -181,5 +265,19 @@ export default function SurveyReports() {
                 )}
             </div>
         </div>
+
+            {shareTarget && (
+                <ShareLinkModal
+                    surveyId={shareTarget.id}
+                    surveyName={shareTarget.name}
+                    isOpen
+                    onClose={() => {
+                        const id = shareTarget.id;
+                        setShareTarget(null);
+                        void loadShares([id]);
+                    }}
+                />
+            )}
+        </>
     );
 }

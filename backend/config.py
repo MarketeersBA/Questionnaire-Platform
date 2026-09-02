@@ -55,6 +55,32 @@ class Settings(BaseSettings):
     MAX_AUDIO_FILE_MB: int = int(os.getenv("MAX_AUDIO_FILE_MB", "10"))
     VOICE_RESOURCES_DIR: str = os.getenv("VOICE_RESOURCES_DIR", "backend/resources/voice_feedback")
 
+    # ── Report share links ──────────────────────────────────────────────
+    # Every one of these is a *default* the analyst can override per link from
+    # the UI. Nothing here is a hard rule: an expiry of "unlimited" is a valid
+    # choice and is stored as a null `expires_at`, and MAX_EXPIRY_DAYS left at
+    # 0 means "no ceiling". They exist so a fresh install has sane starting
+    # values, not so the backend can overrule the person sharing the report.
+    REPORT_SHARE_DEFAULT_EXPIRY_DAYS: int = int(
+        os.getenv("REPORT_SHARE_DEFAULT_EXPIRY_DAYS", "30")
+    )
+    REPORT_SHARE_MAX_EXPIRY_DAYS: int = int(
+        os.getenv("REPORT_SHARE_MAX_EXPIRY_DAYS", "0")  # 0 = no ceiling
+    )
+    REPORT_SHARE_PIN_LENGTH: int = int(os.getenv("REPORT_SHARE_PIN_LENGTH", "6"))
+    REPORT_SHARE_LOCKOUT_THRESHOLD: int = int(
+        os.getenv("REPORT_SHARE_LOCKOUT_THRESHOLD", "5")
+    )
+    REPORT_SHARE_LOCKOUT_MINUTES: int = int(
+        os.getenv("REPORT_SHARE_LOCKOUT_MINUTES", "15")
+    )
+    REPORT_SHARE_VIEWER_TTL_MINUTES: int = int(
+        os.getenv("REPORT_SHARE_VIEWER_TTL_MINUTES", "30")
+    )
+    REPORT_SHARE_SESSION_MAX_HOURS: int = int(
+        os.getenv("REPORT_SHARE_SESSION_MAX_HOURS", "8")
+    )
+
     # Packaging heatmap image uploads (product test)
     MAX_PACKAGING_IMAGE_MB: int = int(os.getenv("MAX_PACKAGING_IMAGE_MB", "5"))
 

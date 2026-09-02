@@ -35,7 +35,17 @@ def get_client_address(request: Request) -> str:
     return get_remote_address(request)
 
 
-def _username_from_bearer(request: Request) -> Optional[str]:
+#: JWT subjects that are a token *class*, not a person. Their `sub` is a
+#: constant shared by every holder, so bucketing on it would put every share
+#: viewer (or every capture worker) into one counter and let a single busy
+#: client 429 everyone else. Each needs a key drawn from its own claims.
+_SERVICE_SUBJECT_KEY_CLAIM = {
+    "report-viewer": "share_id",
+    "pptx-capture": "survey_id",
+}
+
+
+def _payload_from_bearer(request: Request) -> Optional[dict]:
     auth = request.headers.get("Authorization", "")
     if not auth.lower().startswith("bearer "):
         return None
@@ -43,32 +53,82 @@ def _username_from_bearer(request: Request) -> Optional[str]:
     if not token or not settings.SECRET_KEY:
         return None
     try:
-        payload = jwt.decode(
+        return jwt.decode(
             token,
             settings.SECRET_KEY,
             algorithms=[settings.ALGORITHM],
+            options={"verify_aud": False},
         )
-        return payload.get("sub")
     except JWTError:
         return None
 
 
+def _username_from_bearer(request: Request) -> Optional[str]:
+    payload = _payload_from_bearer(request)
+    return payload.get("sub") if payload else None
+
+
+def _principal_key(request: Request) -> Optional[str]:
+    """
+    Identify the caller for rate-limiting: a user by name, a service token by
+    the claim that distinguishes one holder from another.
+    """
+    payload = _payload_from_bearer(request)
+    if not payload:
+        return None
+
+    sub = payload.get("sub")
+    if not sub:
+        return None
+
+    claim = _SERVICE_SUBJECT_KEY_CLAIM.get(sub)
+    if claim:
+        scoped = str(payload.get(claim) or "").strip()
+        # Fall back to the IP rather than the shared subject — an unusable
+        # claim must not silently collapse every holder into one bucket.
+        if not scoped:
+            return None
+        return f"{sub}:{scoped}"
+
+    return f"user:{sub}"
+
+
 def api_rate_key(request: Request) -> str:
-    """General API bucket: per authenticated user, else per client IP."""
-    username = _username_from_bearer(request)
-    if username:
-        return f"api:user:{username}"
+    """General API bucket: per authenticated principal, else per client IP."""
+    principal = _principal_key(request)
+    if principal:
+        return f"api:{principal}"
     return f"api:ip:{get_client_address(request)}"
 
 
 def polling_rate_key(request: Request) -> str:
-    """Status polling bucket: per user (or IP) + survey — avoids Docker IP collapse."""
+    """Status polling bucket: per principal (or IP) + survey — avoids Docker IP collapse."""
     survey_id = request.path_params.get("survey_id", "_")
-    username = _username_from_bearer(request)
-    if username:
-        return f"poll:user:{username}:{survey_id}"
+    principal = _principal_key(request)
+    if principal:
+        return f"poll:{principal}:{survey_id}"
     client = get_client_address(request)
     return f"poll:ip:{client}:{survey_id}"
+
+
+def share_unlock_rate_key(request: Request) -> str:
+    """
+    Unlock attempts, per client IP.
+
+    slowapi resolves the key before the request body is parsed, so the share
+    token itself is not available here. Per-link throttling is enforced in the
+    handler via the lockout counters on the share document — which is also the
+    control that survives a spoofed X-Forwarded-For or a distributed attempt.
+    """
+    return f"share:unlock:{get_client_address(request)}"
+
+
+def share_view_rate_key(request: Request) -> str:
+    """Shared-report reads, bucketed per share link."""
+    principal = _principal_key(request)
+    if principal:
+        return f"share:view:{principal}"
+    return f"share:view:ip:{get_client_address(request)}"
 
 
 def _storage_uri() -> str:
@@ -86,6 +146,13 @@ limiter = Limiter(
 )
 
 POLLING_LIMIT = "1200 per hour; 8000 per day"
+
+#: Report share links. Unlock is the brute-force surface, so it is tight; the
+#: read limit only needs to stop a runaway client, since a viewer session is
+#: already bounded by the share's own expiry and view cap.
+SHARE_UNLOCK_LIMIT = "10 per hour; 40 per day"
+SHARE_VIEW_LIMIT = "240 per hour"
+SHARE_PPTX_LIMIT = "1 per hour; 6 per day"
 
 
 async def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded) -> JSONResponse:

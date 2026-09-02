@@ -126,6 +126,16 @@ export default function CreateSurvey({ editSurveyId, initialSurveyData }: Create
                 brands: normalizeBrands(blueprint.brands || []),
                 attributes: blueprint.attributes || {},
                 custom_research_attributes: blueprint.custom_research_attributes || [],
+                // `blueprint` (ResearchBlueprint) has no language field, so it was
+                // falling through to DEFAULT_TASTE_CONFIG.language = 'en' and
+                // silently turning an Arabic survey English on every edit — the
+                // saved schema is then recomposed in English.
+                language:
+                    s.taste_test_config?.language
+                    || s.product_test_config?.language
+                    || s.language
+                    || blueprint.language
+                    || DEFAULT_TASTE_CONFIG.language,
                 internal_brands_data: normalizeBrands(blueprint.internal_brands_data || s.internal_brands_data || []),
                 competitor_brands_data: normalizeBrands(blueprint.competitor_brands_data || s.competitor_brands_data || [])
             };
@@ -623,6 +633,14 @@ export default function CreateSurvey({ editSurveyId, initialSurveyData }: Create
                     ? blueprint.attributes
                     : discoveredAttributes,
                 custom_research_attributes: blueprint.custom_research_attributes || Object.values(discoveredCustomAttrs),
+                // Same trap as edit mode: the blueprint carries no language, so
+                // cloning an Arabic survey used to produce an English one.
+                language:
+                    survey.taste_test_config?.language
+                    || survey.product_test_config?.language
+                    || survey.language
+                    || blueprint.language
+                    || DEFAULT_TASTE_CONFIG.language,
                 internal_brands_data: normalizeBrands(blueprint.internal_brands_data || survey.internal_brands_data || []),
                 competitor_brands_data: normalizeBrands(blueprint.competitor_brands_data || survey.competitor_brands_data || [])
             };

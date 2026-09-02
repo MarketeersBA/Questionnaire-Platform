@@ -1,4 +1,5 @@
-import { motion, type Variants } from 'framer-motion';
+import { useState } from 'react';
+import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 interface WelcomeScreenProps {
@@ -33,59 +34,45 @@ const itemVariants: Variants = {
     visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } },
 };
 
+/** Public path of the welcome animation. */
+const WELCOME_VIDEO_SRC = '/assets/video/survey-welcome.mp4';
+
 /**
- * Hand-built pen-and-paper animation (no external Lottie asset): a document
- * fades in, then a pen glides across three lines, "writing" each one via an
- * animated stroke — reads as "filling out a survey" without a third-party
- * asset dependency or licensing to track.
+ * Looping welcome animation.
+ *
+ * `muted` is required twice over: the source carries an audio track that must
+ * not play, and browsers refuse to autoplay anything unmuted. `playsInline`
+ * keeps iOS from hijacking it into a fullscreen player.
+ *
+ * Respondents who asked their OS to reduce motion get a still frame instead of
+ * a loop, and if the file ever fails to load the block removes itself rather
+ * than leaving a broken placeholder above the greeting.
  */
-function WritingSurveyIllustration() {
-    const lineWidths = [58, 42, 50];
+function WelcomeAnimation() {
+    const prefersReducedMotion = useReducedMotion();
+    const [failed, setFailed] = useState(false);
+
+    if (failed) return null;
 
     return (
-        <motion.svg
-            width="168"
-            height="140"
-            viewBox="0 0 168 140"
-            fill="none"
-            initial={{ opacity: 0, scale: 0.7 }}
+        <motion.div
+            initial={{ opacity: 0, scale: 0.85 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+            className="w-44 h-44 md:w-52 md:h-52 rounded-[2rem] overflow-hidden bg-surface-sunken"
         >
-            <rect x="24" y="10" width="120" height="120" rx="14" className="fill-white dark:fill-slate-800" stroke="currentColor" strokeOpacity="0.12" strokeWidth="2" />
-            <circle cx="84" cy="34" r="6" className="fill-brand-red/70" />
-            {lineWidths.map((w, i) => (
-                <motion.line
-                    key={i}
-                    x1="44"
-                    y1={58 + i * 20}
-                    x2={44 + w}
-                    y2={58 + i * 20}
-                    stroke="currentColor"
-                    strokeOpacity="0.35"
-                    strokeWidth="4"
-                    strokeLinecap="round"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 0.6, delay: 0.6 + i * 0.35, ease: 'easeInOut' }}
-                />
-            ))}
-            <motion.g
-                initial={{ x: 34, y: 52 }}
-                animate={{
-                    x: [34, 44 + lineWidths[0], 34, 44 + lineWidths[1], 34, 44 + lineWidths[2]],
-                    y: [52, 52, 72, 72, 92, 92],
-                }}
-                transition={{ duration: 2.1, delay: 0.55, ease: 'easeInOut', times: [0, 0.28, 0.35, 0.62, 0.7, 1] }}
-            >
-                <path
-                    d="M0 12 L9 1 L12 4 L3 15 L0 16 Z"
-                    className="fill-brand-blue"
-                    stroke="white"
-                    strokeWidth="1"
-                />
-            </motion.g>
-        </motion.svg>
+            <video
+                src={WELCOME_VIDEO_SRC}
+                autoPlay={!prefersReducedMotion}
+                loop={!prefersReducedMotion}
+                muted
+                playsInline
+                preload="auto"
+                aria-hidden="true"
+                onError={() => setFailed(true)}
+                className="w-full h-full object-cover"
+            />
+        </motion.div>
     );
 }
 
@@ -105,7 +92,7 @@ export default function WelcomeScreen({ language, onStart }: WelcomeScreenProps)
         >
             <motion.div variants={containerVariants} initial="hidden" animate="visible" className="flex flex-col items-center gap-6">
                 <motion.div variants={itemVariants}>
-                    <WritingSurveyIllustration />
+                    <WelcomeAnimation />
                 </motion.div>
 
                 <motion.p

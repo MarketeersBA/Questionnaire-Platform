@@ -3,10 +3,7 @@ import { Plus, Sparkles } from 'lucide-react';
 import type { ModuleQuestionRendererProps, ModuleAnswerValue } from '../../types/moduleQuestions';
 import type { QuestionOption } from '../../types/questionModules';
 import OpenEndAnswerInput from '../voice-feedback/OpenEndAnswerInput';
-import {
-    normalizeOpenEndAnswer,
-    updateOpenEndText,
-} from '../../utils/voiceQuestions';
+import { normalizeOpenEndAnswer } from '../../utils/voiceQuestions';
 import { moduleOpenAnswerToText } from '../../utils/aiFollowup';
 import {
     asBrandPipelineCarrier,
@@ -29,6 +26,7 @@ import {
 } from '../../utils/respondentBrandAnswers';
 import BrandAnalyzerGrid from './BrandAnalyzerGrid';
 import BrandSatisfactionLoop from './BrandSatisfactionLoop';
+import HorizontalScaleSlider from '../respondent/HorizontalScaleSlider';
 
 // ── Option-based (SCQ / MCQ) ─────────────────────────────────────────────────
 
@@ -406,6 +404,45 @@ function OpenLoopInput(props: ModuleQuestionRendererProps) {
     );
 }
 
+/**
+ * `linear_scale` — a 1-N slider, configured per question by the module builder.
+ *
+ * The answer is stored as a plain number. Until the respondent touches the
+ * slider there is no answer, so the thumb parks at the midpoint while the
+ * stored value stays undefined; that keeps "untouched" distinguishable from
+ * "deliberately answered with the midpoint" for required-question validation.
+ */
+function LinearScaleInput({
+    question,
+    answer,
+    onChange,
+    language,
+    disabled,
+}: ModuleQuestionRendererProps) {
+    const variant = question.scale_variant ?? 'linear';
+    // JAR anchors are fixed at 1 / 3 / 5, so the range is not author-controlled.
+    const min = variant === 'jar' ? 1 : question.scale_min ?? 1;
+    const max = variant === 'jar' ? 5 : question.scale_max ?? 5;
+    const midpoint = Math.round((min + max) / 2);
+    const value = typeof answer === 'number' ? answer : midpoint;
+
+    return (
+        <div className={disabled ? 'opacity-60 pointer-events-none' : undefined}>
+            <HorizontalScaleSlider
+                value={value}
+                min={min}
+                max={max}
+                onChange={(next) => onChange(next)}
+                language={language}
+                variant={variant}
+                minLabel={question.min_label || undefined}
+                maxLabel={question.max_label || undefined}
+                showValueBadge
+            />
+        </div>
+    );
+}
+
 // ── Main renderer ────────────────────────────────────────────────────────────
 
 export default function ModuleQuestionRenderer(props: ModuleQuestionRendererProps) {
@@ -413,7 +450,7 @@ export default function ModuleQuestionRenderer(props: ModuleQuestionRendererProp
 
     const questionText = getQuestionDisplayText(question, language, placeholders);
 
-    const usesOptions =
+    const hasOptions =
         (question.type === 'scq' || question.type === 'mcq') &&
         (question.options?.length ?? 0) > 0;
 
@@ -422,8 +459,14 @@ export default function ModuleQuestionRenderer(props: ModuleQuestionRendererProp
         (
             question.has_other &&
             (question.type === 'mcq' || question.type === 'scq') &&
-            !usesOptions
+            !hasOptions
         );
+
+    // Exactly one choice list may render. A brand-pipeline question that also
+    // carries `options` used to satisfy both conditions, stacking BrandChoiceList
+    // and OptionChoiceList in the same container — which looked like the page had
+    // been split into two identical halves for the same brand.
+    const usesOptions = hasOptions && !usesBrandList;
 
     return (
         <div className="space-y-4">
@@ -431,7 +474,7 @@ export default function ModuleQuestionRenderer(props: ModuleQuestionRendererProp
                 {questionText}
             </h2>
 
-            {question.type === 'mcq' && usesOptions && (
+            {question.type === 'mcq' && (usesOptions || usesBrandList) && (
                 <div className="flex items-center gap-2 px-3 py-1 bg-primary/5 border border-primary/10 rounded-lg w-fit">
                     <Sparkles className="w-3 h-3 text-primary-soft" />
                     <span className="text-[10px] font-black uppercase tracking-widest text-primary-soft">
@@ -454,6 +497,10 @@ export default function ModuleQuestionRenderer(props: ModuleQuestionRendererProp
 
             {usesOptions && (
                 <OptionChoiceList {...props} />
+            )}
+
+            {question.type === 'linear_scale' && (
+                <LinearScaleInput {...props} />
             )}
 
             {question.type === 'grid' && (

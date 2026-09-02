@@ -6,6 +6,17 @@ export interface QuestionMeta {
     max?: number;
     minLabel?: string;
     maxLabel?: string;
+    /**
+     * One label per scale point. These describe the scale completely — a
+     * centered sensory scale says so by labelling its midpoint "مناسب لى",
+     * while purchase intent labels a top-is-best ladder. Reporting and the
+     * respondent UI both read these rather than inferring from scale length.
+     */
+    pointLabels?: string[];
+    /** Best possible answer: the midpoint when centered, the max otherwise. */
+    idealPoint?: number | null;
+    scaleShape?: 'centered' | 'hedonic' | 'monotonic' | 'bipolar' | 'open_end';
+    instruction?: string;
     bipolarLeft?: string;
     bipolarRight?: string;
     options?: string[];

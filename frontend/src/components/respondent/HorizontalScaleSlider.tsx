@@ -10,6 +10,7 @@ import {
     buildScaleRangeAriaValueText,
     type ScaleAnchorLanguage,
     type ScaleAnchorNumberSeparator,
+    type ScaleAnchorVariant,
 } from '../../utils/scaleAnchorLabels';
 import { scaleValueToPercent, type ScaleRange } from '../../utils/horizontalScaleMath';
 import ScaleAnchorLabels from './ScaleAnchorLabels';
@@ -26,8 +27,13 @@ export interface HorizontalScaleSliderProps {
     max: number;
     onChange: (value: number) => void;
     language: ScaleAnchorLanguage;
+    variant?: ScaleAnchorVariant;
     minLabel?: string;
     maxLabel?: string;
+    /** One label per scale point; renders a labelled point row instead of anchors. */
+    pointLabels?: string[];
+    /** Which point is the best answer (midpoint on a centered scale). */
+    idealPoint?: number | null;
     numberSeparator?: ScaleAnchorNumberSeparator;
     /** `large` uses mobile-optimized sizing; from `md:` falls back to default dimensions. */
     size?: HorizontalScaleSliderSize;
@@ -146,8 +152,11 @@ export default function HorizontalScaleSlider({
     max,
     onChange,
     language,
+    variant = 'linear',
     minLabel,
     maxLabel,
+    pointLabels,
+    idealPoint = null,
     numberSeparator = 'dot',
     size = 'default',
     showValueBadge = true,
@@ -301,11 +310,13 @@ export default function HorizontalScaleSlider({
 
             <ScaleAnchorLabels
                 language={language}
-                variant="linear"
+                variant={variant}
                 scaleMin={min}
                 scaleMax={max}
                 minLabel={minLabel}
                 maxLabel={maxLabel}
+                pointLabels={pointLabels}
+                idealPoint={idealPoint}
                 numberSeparator={numberSeparator}
             />
 
@@ -315,3 +326,4 @@ export default function HorizontalScaleSlider({
         </div>
     );
 }
+

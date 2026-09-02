@@ -4,7 +4,14 @@ export type QuestionModuleId =
     | 'brand_pricing_behavior'
     | 'brand_analyzer';
 
-export type ModuleQuestionType = 'open_single' | 'open_loop' | 'scq' | 'mcq' | 'grid' | 'loop';
+export type ModuleQuestionType =
+    | 'open_single'
+    | 'open_loop'
+    | 'scq'
+    | 'mcq'
+    | 'grid'
+    | 'loop'
+    | 'linear_scale';
 
 export interface ModuleBrandPipeline {
     mode: 'exclude_prior' | 'include_prior';
@@ -34,6 +41,14 @@ export interface ModuleQuestion {
     has_stop?: boolean;
     has_other?: boolean;
     cati_instruction?: string;
+    /** Optional finer breakdown under the owning section's main attribute. */
+    sub_attribute?: string | null;
+    /** linear_scale only; ignored for every other question type. */
+    scale_variant?: 'linear' | 'bipolar' | 'jar';
+    scale_min?: number;
+    scale_max?: number;
+    min_label?: string;
+    max_label?: string;
     questionMeta?: any;
 }
 

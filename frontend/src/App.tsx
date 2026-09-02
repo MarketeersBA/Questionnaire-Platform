@@ -19,6 +19,7 @@ import SurveyResponses from './pages/SurveyResponses';
 import SurveyReport from './pages/SurveyReport';
 import ReportExportFrame from './pages/ReportExportFrame';
 import AdminAITelemetry from './pages/AdminAITelemetry';
+import ModuleBuilder from './pages/ModuleBuilder';
 import MasterLinkRedirect from './pages/MasterLinkRedirect';
 import EditSurvey from './pages/EditSurvey';
 import AdminNotifier from './components/notifications/AdminNotifier';
@@ -139,6 +140,14 @@ function AppContent() {
               }
             />
             <Route
+              path="/module-builder"
+              element={
+                <AdminRoute>
+                  <ModuleBuilder />
+                </AdminRoute>
+              }
+            />
+            <Route
               path="/create-survey"
               element={
                 <PrivateRoute>
@@ -196,6 +205,10 @@ function AppContent() {
             />
             <Route path="/s/:token" element={<PublicSurvey />} />
             <Route path="/m/:surveyId" element={<MasterLinkRedirect />} />
+            {/* Client-facing report. Deliberately outside PrivateRoute — the
+                share token is the credential, and the page renders without any
+                platform navigation. */}
+            <Route path="/r/:shareToken" element={<SurveyReport />} />
           </Routes>
         </AnimatePresence>
       </div>

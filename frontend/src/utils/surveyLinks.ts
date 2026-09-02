@@ -26,3 +26,19 @@ export function getSurveyLink(token: string): string {
 export function getMasterLink(surveyId: string): string {
     return `${getSurveyBaseUrl()}/m/${surveyId}`;
 }
+
+/**
+ * Absolute URL for a report's share link (/r/:token).
+ *
+ * Uses the same base resolution as the survey master link on purpose: in dev it
+ * is always `window.location.origin`, so a link created locally opens locally
+ * even though docker-compose points the production base at the live domain. In
+ * a production build an explicit base wins, falling back to the origin.
+ *
+ * The server also composes a URL, but from deploy-time config that is only
+ * correct in production — which is how a locally created link ended up
+ * pointing at the live site.
+ */
+export function getReportShareLink(token: string): string {
+    return `${getSurveyBaseUrl()}/r/${token}`;
+}

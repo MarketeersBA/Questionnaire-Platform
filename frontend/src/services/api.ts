@@ -1,5 +1,6 @@
 import axios, { type InternalAxiosRequestConfig, AxiosError, type AxiosInstance } from 'axios';
 import { isExportFrameRoute } from '../export/exportFrameContext';
+import { getReportShareLink } from '../utils/surveyLinks';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -100,7 +101,39 @@ function shouldSkipAuthRedirect(config: ApiRequestConfig | undefined): boolean {
   if (config?.skipAuthRedirect) return true;
   const path = window.location.pathname;
   if (path.startsWith('/s/')) return true;
+  // A client reading a shared report has no account, so redirecting them to
+  // the login screen would strand them on a page they can never get past.
+  if (path.startsWith('/r/')) return true;
   return isExportFrameRoute();
+}
+
+/**
+ * Identifier this browser presents when opening a shared report.
+ *
+ * A share link has a seat limit — how many distinct people may ever open it —
+ * and with no login the only durable handle on a visitor is an id their own
+ * browser keeps. The server issues one on the first visit and echoes it back;
+ * we store it so a returning viewer is recognised rather than charged a second
+ * seat. Stored in localStorage (not sessionStorage) precisely so that closing
+ * the tab and coming back tomorrow does not cost the client another seat.
+ */
+const VIEWER_ID_KEY = 'reportViewerId';
+
+export function getReportViewerId(): string | null {
+  try {
+    return localStorage.getItem(VIEWER_ID_KEY);
+  } catch {
+    return null; // private mode with storage disabled
+  }
+}
+
+export function rememberReportViewerId(id: string | undefined | null): void {
+  if (!id) return;
+  try {
+    localStorage.setItem(VIEWER_ID_KEY, id);
+  } catch {
+    /* storage unavailable — the visitor simply spends a seat per visit */
+  }
 }
 
 api.interceptors.request.use((config) => {
@@ -257,6 +290,174 @@ export const analytics = {
         skipAuthRedirect: reportOptions?.exportFrame ?? isExportFrameRoute(),
       } as ApiRequestConfig)
     ).data,
+  /**
+   * Read a report through a client share token — no authentication.
+   * `skipAuthRedirect` stops a 404 bouncing an unauthenticated client to login.
+   */
+  getSharedReport: async (token: string, options?: RequestOptions) => {
+    const viewerId = getReportViewerId();
+    const response = await api.get(`/analytics/public/report/${token}`, {
+      ...options,
+      skipAuthRedirect: true,
+      headers: viewerId ? { 'X-Report-Viewer-Id': viewerId } : undefined,
+    } as ApiRequestConfig);
+    // First visit: the server assigned this browser an id. Keep it, or every
+    // return visit would look like a new person and burn another seat.
+    rememberReportViewerId(response.headers['x-report-viewer-id']);
+    return response.data;
+  },
+  /** Mint (or fetch) the shareable link for a report. Idempotent. */
+  createReportShare: async (surveyId: string, options?: RequestOptions) =>
+    (await api.post(`/analytics/report/${surveyId}/share`, {}, options)).data,
+  /** Revoke every live share link for a report. */
+  revokeReportShare: async (surveyId: string, options?: RequestOptions) =>
+    (await api.delete(`/analytics/report/${surveyId}/share`, options)).data,
+
+  /**
+   * The report's one share link, created on first call.
+   *
+   * Idempotent, like the survey master link: calling it repeatedly returns the
+   * same URL instead of minting a second link that competes with one already
+   * sent to a client.
+   */
+  getShareLink: async (surveyId: string, options?: RequestOptions): Promise<ReportShareLink> =>
+    (await api.get(`/analytics/report/${surveyId}/share-link`, options)).data,
+
+  /** Change the viewer limit or expiry. The URL is unaffected. */
+  updateShareLink: async (
+    surveyId: string,
+    payload: {
+      label?: string;
+      max_viewers?: number | null;
+      expires_at?: string | null;
+      unlimited_expiry?: boolean;
+    },
+    options?: RequestOptions
+  ): Promise<ReportShareLink> =>
+    (await api.patch(`/analytics/report/${surveyId}/share-link`, payload, options)).data,
+
+  /** Issue a new URL and stop the old one working. Limits carry over. */
+  resetShareLink: async (surveyId: string, options?: RequestOptions): Promise<ReportShareLink> =>
+    (await api.post(`/analytics/report/${surveyId}/share-link/reset`, {}, options)).data,
+
+  /** Download the report as PDF (analyst view). */
+  downloadReportPdf: async (surveyId: string, options?: RequestOptions) => {
+    const response = await api.get(`/analytics/report/${surveyId}/download-pdf`, {
+      ...options,
+      responseType: 'blob',
+      // Printing the page in headless Chromium takes longer than a normal call.
+      timeout: 180000,
+    } as ApiRequestConfig);
+    triggerBrowserDownload(
+      response.data,
+      filenameFromResponse(
+        response.headers?.['content-disposition'],
+        `Marketeers_Report_${surveyId}.pdf`
+      ),
+      'application/pdf'
+    );
+  },
+
+  /**
+   * Download the PPTX, building it first if the deck does not exist yet.
+   *
+   * "Export" has to mean a file arrives. Previously PPTX either opened a build
+   * dialog (analyst) or failed with a 409 telling the client to go ask someone
+   * (share link) — neither of which is a download. This resolves the whole
+   * thing: fetch it if it is there, otherwise build it, wait, and fetch it.
+   *
+   * `onProgress` reports a coarse stage so the caller can keep a toast honest
+   * during what may be a couple of minutes of work.
+   */
+  downloadPptxEnsuringBuild: async (
+    target: { surveyId: string } | { shareToken: string },
+    onProgress?: (stage: string, percent?: number) => void
+  ) => {
+    const shared = 'shareToken' in target;
+    const base = shared
+      ? `/analytics/public/report/${target.shareToken}`
+      : `/analytics/report/${target.surveyId}`;
+    const downloadUrl = shared ? `${base}/download` : `${base}/download`;
+    const common = shared ? { skipAuthRedirect: true } : {};
+
+    const fetchFile = async () => {
+      const response = await api.get(downloadUrl, {
+        ...common,
+        responseType: 'blob',
+        timeout: 180000,
+      } as ApiRequestConfig);
+      triggerBrowserDownload(
+        response.data,
+        filenameFromResponse(
+          response.headers?.['content-disposition'],
+          'Marketeers_Report.pptx'
+        ),
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+      );
+    };
+
+    try {
+      onProgress?.('Fetching presentation');
+      await fetchFile();
+      return;
+    } catch (err: any) {
+      // 404/409 mean "no deck yet", which is a thing we can fix. Anything else
+      // is a real fault and must not be masked by starting a build.
+      const status = err?.response?.status;
+      if (status !== 404 && status !== 409) throw err;
+    }
+
+    onProgress?.('Building presentation');
+    await api.post(`${base}/generate-pptx`, {}, common as ApiRequestConfig);
+
+    const statusUrl = shared ? `${base}/pptx-status` : `${base}/status`;
+    const deadline = Date.now() + 10 * 60 * 1000;
+
+    while (Date.now() < deadline) {
+      await new Promise((resolve) => setTimeout(resolve, 4000));
+
+      const { data } = await api.get(statusUrl, common as ApiRequestConfig);
+      const state = String(data?.pptx_status ?? data?.status ?? '').toUpperCase();
+      const percent = data?.pptx_progress ?? data?.progress;
+      onProgress?.(data?.pptx_stage || data?.stage || 'Building presentation', percent);
+
+      if (state === 'READY' || data?.available === true) {
+        onProgress?.('Fetching presentation');
+        await fetchFile();
+        return;
+      }
+      if (state === 'FAILED') {
+        throw new Error('The presentation build failed on the server.');
+      }
+    }
+
+    throw new Error('The presentation is taking unusually long. Try again shortly.');
+  },
+
+  /** Download the report through a share link, as PDF or PPTX. */
+  downloadSharedReport: async (
+    token: string,
+    format: 'pdf' | 'pptx',
+    options?: RequestOptions
+  ) => {
+    const suffix = format === 'pdf' ? 'download-pdf' : 'download';
+    const response = await api.get(`/analytics/public/report/${token}/${suffix}`, {
+      ...options,
+      responseType: 'blob',
+      skipAuthRedirect: true,
+      timeout: 180000,
+    } as ApiRequestConfig);
+    triggerBrowserDownload(
+      response.data,
+      filenameFromResponse(
+        response.headers?.['content-disposition'],
+        `Marketeers_Report.${format}`
+      ),
+      format === 'pdf'
+        ? 'application/pdf'
+        : 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+    );
+  },
   getReportStatus: async (
     surveyId: string,
     options?: RequestOptions
@@ -330,6 +531,58 @@ export interface PptxExportErrorPayload {
   validation_warnings?: string[];
 }
 
+/**
+ * Absolute URL for a share link, built against the host the admin is actually on.
+ *
+ * The server also returns a `url`, but it composes it from a configured public
+ * address — which is right in production and wrong the moment anyone runs the
+ * app anywhere else, handing out a production link from a local session. The
+ * browser already knows the correct origin, so it does the joining.
+ */
+export function shareLinkUrl(share: { path?: string; token?: string }): string {
+  if (share.token) return getReportShareLink(share.token);
+  const path = share.path ?? '';
+  return `${window.location.origin}${path}`;
+}
+
+/**
+ * A shareable report link as the admin table sees it.
+ *
+ * `max_viewers` is the seat limit — how many distinct people may ever open the
+ * link — and null means unlimited. `seats_remaining` is null for the same
+ * reason. `status` is derived server-side so the table and the backend cannot
+ * disagree about whether a link is still usable.
+ */
+export interface ReportShareLink {
+  share_id: string;
+  survey_id: string;
+  label: string | null;
+  /** Path only, e.g. `/r/abc123`. Join with the current origin — see `shareLinkUrl`. */
+  path: string;
+  /** Server-composed absolute URL. Unreliable: built from deploy-time config
+   *  that is wrong outside production. Kept for API consumers, not for the UI. */
+  url: string | null;
+  token: string;
+  status: 'active' | 'unopened' | 'full' | 'expired' | 'revoked';
+  max_viewers: number | null;
+  seats_used: number;
+  seats_remaining: number | null;
+  view_count: number;
+  expires_at: string | null;
+  created_at: string | null;
+  created_by: string | null;
+  revoked_at: string | null;
+  last_viewed_at: string | null;
+  pptx_downloads: number;
+  pdf_downloads: number;
+  viewers: Array<{
+    viewer_id: string;
+    first_seen: string | null;
+    last_seen: string | null;
+    view_count: number;
+  }>;
+}
+
 export interface ReportPptxStatus {
   survey_id: string;
   /** Server-advised poll interval (seconds) — use for adaptive polling. */
@@ -388,6 +641,12 @@ export const masterQuestions = {
   fetchStructural: async (attributes: string[], options?: RequestOptions) => (await api.post('/questions/fetch-structural', attributes, options)).data,
 
   // Taste Test specific (Phase 2)
+  /**
+   * Canonical taste-test attribute library, grouped main -> sub-attributes,
+   * including each question's per-point labels and its ideal point.
+   */
+  getTasteTestLibrary: async (language: 'en' | 'ar' = 'en', options?: RequestOptions) =>
+    (await api.get(`/questions/taste-test/library?language=${language}`, options)).data,
   getTasteTestAttributes: async (options?: RequestOptions) => (await api.get('/questions/taste-test/attributes', options)).data,
   getTasteTestSubAttributes: async (attribute: string, options?: RequestOptions) => (await api.get(`/questions/taste-test/sub-attributes/${encodeURIComponent(attribute)}`, options)).data,
   fetchTasteTest: async (selections: Record<string, string[]>, options?: RequestOptions) => (await api.post('/questions/taste-test/fetch', selections, options)).data,
@@ -423,6 +682,24 @@ export const questionModules = {
   /** Analyst update — creates a new version */
   update: async (moduleId: string, data: import('../types/questionModules').QuestionModuleUpdatePayload, options?: RequestOptions) =>
     (await api.put(`/modules/${moduleId}`, data, options)).data,
+  /** Create a brand-new custom module */
+  create: async (
+    data: {
+      name: string;
+      description?: string;
+      sections: import('../types/questionModules').ModuleSection[];
+    },
+    options?: RequestOptions,
+  ) => (await api.post('/modules/', data, options)).data,
+  /** Parse an uploaded .xlsx into a draft module (never persists) */
+  parseExcel: async (file: File, options?: RequestOptions) => {
+    const form = new FormData();
+    form.append('file', file);
+    return (await api.post('/modules/parse-excel', form, options)).data;
+  },
+  /** Download the import template as a Blob, so auth headers still apply */
+  downloadTemplate: async (options?: RequestOptions) =>
+    (await api.get('/modules/excel-template', { ...options, responseType: 'blob' } as RequestOptions)).data,
 };
 
 export const responses = {

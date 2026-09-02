@@ -1,8 +1,10 @@
-import { useEffect, useState, useCallback } from 'react';
-import { Layout, Users, ShieldCheck, Check, Briefcase, GraduationCap, Layers, Lock, Target, SplitSquareHorizontal, Sparkles, Edit3, ChevronDown, Palette, Tag, Beaker, Zap, Heart, DollarSign, Lightbulb, ShoppingCart, Info, Loader2, CheckCircle2, XCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Layout, Users, ShieldCheck, Check, Briefcase, GraduationCap, Layers, Lock, Target, SplitSquareHorizontal, Sparkles, Edit3, ChevronDown, Palette, Tag, Beaker, Zap, Heart, DollarSign, Lightbulb, ShoppingCart, Info, Loader2, CheckCircle2, XCircle, Wand2, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StepProps, DEFAULT_TASTE_CONFIG, DEFAULT_PRODUCT_TEST_CONFIG } from '../types';
 import { surveys } from '../../../services/api';
+import api from '../../../services/api';
+import { useNavigate } from 'react-router-dom';
 
 export const surveyTypesList = [
     { id: 'taste_test', name: 'Taste Test', desc: 'Product comparison, sensory profiling, and preference mapping.', icon: Beaker, color: 'text-primary-soft', bg: 'bg-primary/10' },
@@ -66,7 +68,7 @@ function LocalQuotaInput({
                 }}
                 className={className}
             />
-            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[8px] text-slate-400 pointer-events-none">{label}</span>
+            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-slate-400 pointer-events-none">{label}</span>
         </div>
     );
 }
@@ -253,12 +255,12 @@ function QuotaPanel({ gateKey, options, sampleCapacity, gate_quotas, locked_quot
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                     <SplitSquareHorizontal className="w-3.5 h-3.5 text-slate-500" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Quota Distribution</span>
+                    <span className="text-sm font-black uppercase tracking-widest text-slate-500">Quota Distribution</span>
                 </div>
                 <button
                     type="button"
                     onClick={applyEqualShare}
-                    className="text-[9px] font-black uppercase tracking-widest text-primary-soft hover:text-primary-soft/70 transition-colors border border-primary/30 px-2 py-1 rounded-lg"
+                    className="text-xs font-black uppercase tracking-widest text-primary-soft hover:text-primary-soft/70 transition-colors border border-primary/30 px-2 py-1 rounded-lg"
                 >
                     ⚖ Equal Share
                 </button>
@@ -270,7 +272,7 @@ function QuotaPanel({ gateKey, options, sampleCapacity, gate_quotas, locked_quot
                     const displayOpt = opt.length > 28 ? opt.slice(0, 28) + '…' : opt;
                     return (
                         <div key={opt} className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-2">
-                            <span className="text-[10px] font-bold text-ink-muted truncate" title={opt}>
+                            <span className="text-sm font-bold text-ink-muted truncate" title={opt}>
                                 {displayOpt}
                             </span>
                             <button
@@ -286,7 +288,7 @@ function QuotaPanel({ gateKey, options, sampleCapacity, gate_quotas, locked_quot
                                 placeholder="—"
                                 disabled={locks[opt]}
                                 onChange={v => updateBucket(opt, 'count', v)}
-                                className={`w-20 bg-surface border-2 rounded-xl px-2 py-1.5 text-[11px] font-black text-center transition-all focus:outline-none ${locks[opt] ? 'border-indigo-500/50 text-indigo-600 dark:text-indigo-400' : 'border-slate-300 dark:border-slate-600 text-ink focus:border-primary'}`}
+                                className={`w-20 bg-surface border-2 rounded-xl px-2 py-1.5 text-base font-black text-center transition-all focus:outline-none ${locks[opt] ? 'border-indigo-500/50 text-indigo-600 dark:text-indigo-400' : 'border-slate-300 dark:border-slate-600 text-ink focus:border-primary'}`}
                             />
                             <LocalQuotaInput
                                 value={bucket.pct}
@@ -294,7 +296,7 @@ function QuotaPanel({ gateKey, options, sampleCapacity, gate_quotas, locked_quot
                                 placeholder="—"
                                 disabled={locks[opt]}
                                 onChange={v => updateBucket(opt, 'pct', v)}
-                                className={`w-20 bg-surface border-2 rounded-xl px-2 py-1.5 text-[11px] font-black text-center transition-all focus:outline-none ${locks[opt] ? 'border-indigo-500/50 text-indigo-600 dark:text-indigo-400' : 'border-slate-300 dark:border-slate-600 text-ink focus:border-primary'}`}
+                                className={`w-20 bg-surface border-2 rounded-xl px-2 py-1.5 text-base font-black text-center transition-all focus:outline-none ${locks[opt] ? 'border-indigo-500/50 text-indigo-600 dark:text-indigo-400' : 'border-slate-300 dark:border-slate-600 text-ink focus:border-primary'}`}
                             />
                         </div>
                     );
@@ -303,7 +305,7 @@ function QuotaPanel({ gateKey, options, sampleCapacity, gate_quotas, locked_quot
 
             {/* Sum progress bar */}
             <div className="space-y-1.5 p-3 rounded-2xl bg-surface-raised border border-slate-200/50 dark:border-slate-800/50 transition-colors">
-                <div className="flex items-center justify-between text-[9px] font-black uppercase tracking-tighter">
+                <div className="flex items-center justify-between text-xs font-black uppercase tracking-tighter">
                     <div className="flex items-center gap-2">
                         <div className={`w-2 h-2 rounded-full ${isComplete ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : isOver ? 'bg-rose-500' : 'bg-primary animate-pulse'}`} />
                         <span className={isOver ? 'text-rose-500' : isComplete ? 'text-emerald-500' : 'text-ink-muted'}>
@@ -329,6 +331,20 @@ function QuotaPanel({ gateKey, options, sampleCapacity, gate_quotas, locked_quot
 
 // ─── Main IdentityStep ───────────────────────────────────────────────────────
 export default function IdentityStep({ formData, setFormData, onOpenClone, draftSurveyId }: StepProps) {
+    const navigate = useNavigate();
+    const [customModules, setCustomModules] = useState<any[]>([]);
+    
+    useEffect(() => {
+        const fetchCustomModules = async () => {
+            try {
+                const res = await api.get('/modules/');
+                setCustomModules(res.data.filter((m: any) => m.module_id.startsWith('custom_')));
+            } catch (err) {
+                console.error('Failed to fetch custom modules', err);
+            }
+        };
+        fetchCustomModules();
+    }, []);
     const cfg = formData.layer1_screening_config;
     const target = formData.sample_capacity || 0;
     const linkCount = formData.links_count || 0;
@@ -337,12 +353,10 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
     const [codeAvailable, setCodeAvailable] = useState<boolean | null>(null);
     const [codeError, setCodeError] = useState<string | null>(null);
 
-    useEffect(() => {
-        if (!formData.survey_code) {
-            const autoCode = 'PJ-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-            setFormData(prev => ({ ...prev, survey_code: autoCode }));
-        }
-    }, []);
+    // The survey code is the analyst's own project reference, so it is typed
+    // rather than generated. Auto-filling a random "PJ-XXXXXX" meant the field
+    // arrived pre-satisfied and most surveys shipped with a meaningless code
+    // nobody could match back to their project.
 
     // Debounced survey code check
     useEffect(() => {
@@ -395,7 +409,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                         <button
                             type="button"
                             onClick={onOpenClone}
-                            className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl hover:shadow-primary/20"
+                            className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl text-sm font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl hover:shadow-primary/20"
                         >
                             <Sparkles className="w-4 h-4 text-primary-soft" />
                             Clone from Archive
@@ -410,7 +424,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                     <div className="space-y-4">
                         <div className="flex items-center gap-2">
                             <Edit3 className="w-3.5 h-3.5 text-primary-soft" />
-                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-muted ml-1 transition-colors">Survey Name</label>
+                            <label className="text-sm font-black uppercase tracking-[0.2em] text-ink-muted ml-1 transition-colors">Survey Name</label>
                         </div>
                         <div className="relative group">
                             <Edit3 className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-primary-soft transition-colors pointer-events-none" />
@@ -427,7 +441,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                     </div>
 
                     <div className="space-y-4">
-                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-muted ml-1 transition-colors flex items-center gap-2">
+                        <label className="text-sm font-black uppercase tracking-[0.2em] text-ink-muted ml-1 transition-colors flex items-center gap-2">
                             <Briefcase className="w-3.5 h-3.5 text-primary-soft" />
                             Primary Industry
                         </label>
@@ -455,7 +469,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                         <div className="flex items-center justify-between ml-1">
                             <div className="flex items-center gap-2">
                                 <Tag className="w-3.5 h-3.5 text-primary-soft" />
-                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-muted transition-colors">
+                                <label className="text-sm font-black uppercase tracking-[0.2em] text-ink-muted transition-colors">
                                     Survey Code
                                 </label>
                             </div>
@@ -463,30 +477,43 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                 {isCheckingCode && (
                                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-1.5">
                                         <Loader2 className="w-3 h-3 text-primary-soft animate-spin" />
-                                        <span className="text-[8px] font-bold text-primary-soft uppercase tracking-tighter">Validating...</span>
+                                        <span className="text-sm font-bold text-primary-soft uppercase tracking-tighter">Validating...</span>
                                     </motion.div>
                                 )}
                                 {!isCheckingCode && codeAvailable === true && (
                                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-1.5">
                                         <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                                        <span className="text-[8px] font-bold text-emerald-500 uppercase tracking-tighter">Unique Code</span>
+                                        <span className="text-sm font-bold text-emerald-500 uppercase tracking-tighter">Unique Code</span>
                                     </motion.div>
                                 )}
                                 {!isCheckingCode && codeAvailable === false && (
                                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-1.5">
                                         <XCircle className="w-3 h-3 text-rose-500" />
-                                        <span className="text-[8px] font-bold text-rose-500 uppercase tracking-tighter">{codeError || 'Taken'}</span>
+                                        <span className="text-sm font-bold text-rose-500 uppercase tracking-tighter">{codeError || 'Taken'}</span>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
                         </div>
                         <div className="relative group">
                             <Tag className={`absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors pointer-events-none ${codeAvailable === false ? 'text-rose-500' : codeAvailable === true ? 'text-emerald-500' : 'text-slate-400 group-focus-within:text-primary-soft'}`} />
-                            <div
-                                className={`w-full bg-surface-raised/50 border-2 rounded-[1.5rem] pl-16 pr-8 py-4 text-ink font-black text-lg shadow-sm flex items-center ${codeAvailable === false ? 'border-rose-500/50' : codeAvailable === true ? 'border-emerald-500/50' : 'border-slate-200 dark:border-slate-700'}`}
-                            >
-                                {formData.survey_code || 'Generating...'}
-                            </div>
+                            {/* Typed by the analyst — this is their own project
+                                reference. It used to be a read-only div showing a
+                                random auto-generated code. */}
+                            <input
+                                type="text"
+                                value={formData.survey_code}
+                                onChange={(e) =>
+                                    setFormData(prev => ({
+                                        ...prev,
+                                        // Uppercased so the uniqueness check is not
+                                        // defeated by casing alone.
+                                        survey_code: e.target.value.toUpperCase().trimStart(),
+                                    }))
+                                }
+                                placeholder="e.g. PJ-2026-CHEESE"
+                                aria-label="Survey code"
+                                className={`w-full bg-surface-raised/50 border-2 rounded-[1.5rem] pl-16 pr-8 py-4 text-ink font-black text-lg shadow-sm outline-none transition-colors placeholder:text-slate-400 placeholder:font-bold ${codeAvailable === false ? 'border-rose-500/50' : codeAvailable === true ? 'border-emerald-500/50' : 'border-slate-200 dark:border-slate-700 focus:border-primary'}`}
+                            />
                         </div>
                     </div>
                 </div>
@@ -495,7 +522,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                 <div className="space-y-6">
                     <div className="flex items-center gap-3">
                         <Beaker className="w-5 h-5 text-primary-soft" />
-                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-muted transition-colors">Survey Type</label>
+                        <label className="text-sm font-black uppercase tracking-[0.2em] text-ink-muted transition-colors">Survey Type</label>
                     </div>
                     <div id="survey-type-section" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                         {surveyTypesList.map((type) => (
@@ -534,7 +561,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                 <div className={`w-10 h-10 rounded-xl ${type.bg} ${type.color} flex items-center justify-center mb-4 transition-transform group-hover:scale-110`}>
                                     <type.icon className="w-5 h-5" />
                                 </div>
-                                <h4 className="text-[10px] font-black uppercase tracking-widest text-ink mb-1">{type.name}</h4>
+                                <h4 className="text-sm font-black uppercase tracking-widest text-ink mb-1">{type.name}</h4>
                                 {formData.survey_type === type.id && (
                                     <div className="absolute top-4 right-4">
                                         <div className="w-4 h-4 rounded-full bg-primary text-white flex items-center justify-center animate-in zoom-in">
@@ -559,35 +586,37 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                             <div className="flex items-center gap-3">
                                 <Target className="w-5 h-5 text-primary-soft" />
                                 <div id="survey-objective-section" className="flex flex-col">
-                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-muted">Business Question</label>
-                                    <span className="text-[9px] text-slate-400 font-bold tracking-tight">Why we conducted the study</span>
+                                    <label className="text-sm font-black uppercase tracking-[0.2em] text-ink-muted">Business Question</label>
+                                    <span className="text-xs text-slate-400 font-bold tracking-tight">Why we conducted the study</span>
                                 </div>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                {surveyObjectives.map((obj) => (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                                {surveyObjectives.map((obj, objIdx) => (
                                     <button
                                         key={obj.id}
                                         type="button"
                                         onClick={() => setFormData(prev => ({ ...prev, survey_objective: obj.id as any }))}
-                                        className={`text-left p-5 rounded-[2rem] border-2 transition-all group relative flex flex-col justify-between h-full ${formData.survey_objective === obj.id
-                                            ? 'border-primary bg-primary/5 dark:bg-primary/10 scale-[1.02] shadow-lg shadow-primary/10'
-                                            : 'border-line/80 dark:border-line/10 bg-white/50 dark:bg-slate-950/20 hover:border-primary/40'
+                                        className={`text-left p-4 rounded-[1.75rem] border-2 transition-all duration-200 group relative flex flex-col h-full min-h-[10.5rem] ${objIdx === surveyObjectives.length - 1 ? 'md:col-span-2' : ''} ${formData.survey_objective === obj.id
+                                            ? 'border-primary bg-primary/5 dark:bg-primary/10 ring-2 ring-primary/30 shadow-lg shadow-primary/10'
+                                            : 'border-line/80 dark:border-line/10 bg-white/50 dark:bg-slate-950/20 hover:border-primary/40 hover:shadow-md hover:shadow-primary/5'
                                             }`}
                                     >
-                                        <div className="flex items-center justify-between mb-4">
-                                            <div className={`w-10 h-10 rounded-2xl ${obj.bg} ${obj.color} flex items-center justify-center transition-transform group-hover:scale-110`}>
+                                        {/* Fixed-height header row keeps every icon on the same baseline */}
+                                        <div className="flex items-start justify-between gap-2 h-10 mb-3">
+                                            <div className={`w-10 h-10 shrink-0 rounded-2xl ${obj.bg} ${obj.color} flex items-center justify-center transition-transform group-hover:scale-110`}>
                                                 <obj.icon className="w-5 h-5" />
                                             </div>
-                                            {formData.survey_objective === obj.id && (
-                                                <div className="w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center animate-in zoom-in">
-                                                    <Check className="w-3 h-3" />
-                                                </div>
-                                            )}
+                                            <div className="w-5 h-5 shrink-0">
+                                                {formData.survey_objective === obj.id && (
+                                                    <div className="w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center animate-in zoom-in">
+                                                        <Check className="w-3 h-3" />
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h4 className="text-[11px] font-black uppercase tracking-widest text-ink mb-1">{obj.name}</h4>
-                                            <p className="text-[9px] text-slate-500 font-bold leading-relaxed">{obj.desc}</p>
-                                        </div>
+                                        {/* Reserved title height so all descriptions start at the same y-position */}
+                                        <h4 className="text-sm font-black uppercase tracking-widest text-ink leading-snug min-h-[2.5rem]">{obj.name}</h4>
+                                        <p className="mt-1 text-xs text-ink-subtle font-bold leading-relaxed">{obj.desc}</p>
                                     </button>
                                 ))}
                             </div>
@@ -615,7 +644,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                         <div className="absolute right-6 top-1/2 -translate-y-1/2">
                                             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-sunken border border-slate-200 dark:border-slate-700">
                                                 <Info className="w-3 h-3 text-slate-400" />
-                                                <span className="text-[8px] font-black uppercase tracking-widest text-slate-500">Required Field</span>
+                                                <span className="text-sm font-black uppercase tracking-widest text-slate-500">Required Field</span>
                                             </div>
                                         </div>
                                     </motion.div>
@@ -632,13 +661,13 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
-                            className="space-y-6 p-8 bg-surface-raised/40 rounded-[2.5rem] border-2 border-line/80 dark:border-line/10"
+                            className="space-y-4 p-5 sm:p-6 bg-surface-raised/40 rounded-[2rem] border-2 border-line/80 dark:border-line/10"
                         >
                             <div className="flex items-center gap-3">
-                                <Sparkles className="w-5 h-5 text-amber-500" />
-                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-muted">Attached Modules</label>
+                                <Sparkles className="w-5 h-5 text-sky-500" />
+                                <label className="text-sm font-black uppercase tracking-[0.2em] text-ink-muted">Attached Modules</label>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 items-stretch">
                                 {/* Purchase Funnel */}
                                 <div
                                     onClick={() => setFormData(prev => ({
@@ -649,22 +678,22 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                             brand_list: prev.purchase_funnel?.brand_list || []
                                         }
                                     }))}
-                                    className={`p-5 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between group ${formData.purchase_funnel?.is_enabled
-                                        ? 'bg-amber-500/10 border-amber-500 text-amber-900 dark:text-amber-100'
-                                        : 'bg-surface border-line/80 dark:border-line/10 hover:border-amber-500/50'
+                                    className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between gap-3 h-full min-h-[5.5rem] group ${formData.purchase_funnel?.is_enabled
+                                        ? 'bg-sky-500/10 border-sky-500 text-sky-900 dark:text-sky-100'
+                                        : 'bg-surface border-line/80 dark:border-line/10 hover:border-sky-500/50'
                                         }`}
                                 >
-                                    <div className="flex items-center gap-4">
-                                        <div className={`p-3 rounded-xl ${formData.purchase_funnel?.is_enabled ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20' : 'bg-surface-sunken text-slate-400 group-hover:text-amber-500'}`}>
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <div className={`p-3 rounded-xl shrink-0 ${formData.purchase_funnel?.is_enabled ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/20' : 'bg-surface-sunken text-slate-400 group-hover:text-sky-500'}`}>
                                             <Sparkles className="w-4 h-4" />
                                         </div>
                                         <div className="flex flex-col text-left">
-                                            <span className="text-[11px] font-black uppercase tracking-widest">Purchase Funnel Module</span>
-                                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-tighter opacity-70">Aided Awareness & Loyalty Tracking</span>
+                                            <span className="text-sm font-black uppercase tracking-widest leading-tight">Purchase Funnel Module</span>
+                                            <span className="text-xs font-black text-ink-subtle uppercase tracking-tighter mt-0.5">Aided Awareness & Loyalty Tracking</span>
                                         </div>
                                     </div>
-                                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${formData.purchase_funnel?.is_enabled
-                                        ? 'bg-amber-500 border-amber-600 text-white'
+                                    <div className={`w-6 h-6 shrink-0 rounded-full border-2 flex items-center justify-center transition-all ${formData.purchase_funnel?.is_enabled
+                                        ? 'bg-sky-500 border-sky-600 text-white'
                                         : 'border-slate-300 dark:border-slate-600'
                                         }`}>
                                         {formData.purchase_funnel?.is_enabled && <Check className="w-3 h-3" />}
@@ -682,21 +711,21 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                             selected_questions: prev.brand_usage?.selected_questions || ['us_q1', 'us_q2', 'us_q3', 'us_q4']
                                         }
                                     }))}
-                                    className={`p-5 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between group ${formData.brand_usage?.is_enabled
+                                    className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between gap-3 h-full min-h-[5.5rem] group ${formData.brand_usage?.is_enabled
                                         ? 'bg-primary/10 border-primary text-primary-soft'
                                         : 'bg-surface border-line/80 dark:border-line/10 hover:border-primary/50'
                                         }`}
                                 >
-                                    <div className="flex items-center gap-4">
-                                        <div className={`p-3 rounded-xl ${formData.brand_usage?.is_enabled ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-surface-sunken text-slate-400 group-hover:text-primary-soft'}`}>
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <div className={`p-3 rounded-xl shrink-0 ${formData.brand_usage?.is_enabled ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-surface-sunken text-slate-400 group-hover:text-primary-soft'}`}>
                                             <Zap className="w-4 h-4" />
                                         </div>
                                         <div className="flex flex-col text-left">
-                                            <span className="text-[11px] font-black uppercase tracking-widest">Brand Usage Module</span>
-                                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-tighter opacity-70">Frequency & Consumption Dynamics</span>
+                                            <span className="text-sm font-black uppercase tracking-widest leading-tight">Brand Usage Module</span>
+                                            <span className="text-xs font-black text-ink-subtle uppercase tracking-tighter mt-0.5">Frequency & Consumption Dynamics</span>
                                         </div>
                                     </div>
-                                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${formData.brand_usage?.is_enabled
+                                    <div className={`w-6 h-6 shrink-0 rounded-full border-2 flex items-center justify-center transition-all ${formData.brand_usage?.is_enabled
                                         ? 'bg-primary border-primary/60 text-white'
                                         : 'border-slate-300 dark:border-slate-600'
                                         }`}>
@@ -715,22 +744,22 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                             selected_questions: prev.brand_pricing_behavior?.selected_questions || ['cb_q1', 'cb_q2', 'cb_q3', 'cb_q4']
                                         }
                                     }))}
-                                    className={`p-5 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between group ${formData.brand_pricing_behavior?.is_enabled
-                                        ? 'bg-indigo-500/10 border-indigo-500 text-indigo-900 dark:text-indigo-100'
-                                        : 'bg-surface border-line/80 dark:border-line/10 hover:border-indigo-500/50'
+                                    className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between gap-3 h-full min-h-[5.5rem] group ${formData.brand_pricing_behavior?.is_enabled
+                                        ? 'bg-sky-500/10 border-sky-500 text-sky-900 dark:text-sky-100'
+                                        : 'bg-surface border-line/80 dark:border-line/10 hover:border-sky-500/50'
                                         }`}
                                 >
-                                    <div className="flex items-center gap-4">
-                                        <div className={`p-3 rounded-xl ${formData.brand_pricing_behavior?.is_enabled ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'bg-surface-sunken text-slate-400 group-hover:text-indigo-500'}`}>
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <div className={`p-3 rounded-xl shrink-0 ${formData.brand_pricing_behavior?.is_enabled ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/20' : 'bg-surface-sunken text-slate-400 group-hover:text-sky-500'}`}>
                                             <DollarSign className="w-4 h-4" />
                                         </div>
                                         <div className="flex flex-col text-left">
-                                            <span className="text-[11px] font-black uppercase tracking-widest">Purchase Behaviour Module</span>
-                                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-tighter opacity-70">Price Sensitivity & Purchase Intent</span>
+                                            <span className="text-sm font-black uppercase tracking-widest leading-tight">Purchase Behaviour Module</span>
+                                            <span className="text-xs font-black text-ink-subtle uppercase tracking-tighter mt-0.5">Price Sensitivity & Purchase Intent</span>
                                         </div>
                                     </div>
-                                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${formData.brand_pricing_behavior?.is_enabled
-                                        ? 'bg-indigo-500 border-indigo-600 text-white'
+                                    <div className={`w-6 h-6 shrink-0 rounded-full border-2 flex items-center justify-center transition-all ${formData.brand_pricing_behavior?.is_enabled
+                                        ? 'bg-sky-500 border-sky-600 text-white'
                                         : 'border-slate-300 dark:border-slate-600'
                                         }`}>
                                         {formData.brand_pricing_behavior?.is_enabled && <Check className="w-3 h-3" />}
@@ -748,25 +777,86 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                             brand_list: prev.brand_analyzer?.brand_list || []
                                         }
                                     }))}
-                                    className={`p-5 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between group ${formData.brand_analyzer?.is_enabled
-                                        ? 'bg-rose-500/10 border-rose-500 text-rose-900 dark:text-rose-100'
-                                        : 'bg-surface border-line/80 dark:border-line/10 hover:border-rose-500/50'
+                                    className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between gap-3 h-full min-h-[5.5rem] group ${formData.brand_analyzer?.is_enabled
+                                        ? 'bg-sky-500/10 border-sky-500 text-sky-900 dark:text-sky-100'
+                                        : 'bg-surface border-line/80 dark:border-line/10 hover:border-sky-500/50'
                                         }`}
                                 >
-                                    <div className="flex items-center gap-4">
-                                        <div className={`p-3 rounded-xl ${formData.brand_analyzer?.is_enabled ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20' : 'bg-surface-sunken text-slate-400 group-hover:text-rose-500'}`}>
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <div className={`p-3 rounded-xl shrink-0 ${formData.brand_analyzer?.is_enabled ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/20' : 'bg-surface-sunken text-slate-400 group-hover:text-sky-500'}`}>
                                             <ShieldCheck className="w-4 h-4" />
                                         </div>
                                         <div className="flex flex-col text-left">
-                                            <span className="text-[11px] font-black uppercase tracking-widest">Brand Analyzer</span>
-                                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-tighter opacity-70">Perception Grid & Satisfaction Loop</span>
+                                            <span className="text-sm font-black uppercase tracking-widest leading-tight">Brand Analyzer</span>
+                                            <span className="text-xs font-black text-ink-subtle uppercase tracking-tighter mt-0.5">Perception Grid & Satisfaction Loop</span>
                                         </div>
                                     </div>
-                                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${formData.brand_analyzer?.is_enabled
-                                        ? 'bg-rose-500 border-rose-600 text-white'
+                                    <div className={`w-6 h-6 shrink-0 rounded-full border-2 flex items-center justify-center transition-all ${formData.brand_analyzer?.is_enabled
+                                        ? 'bg-sky-500 border-sky-600 text-white'
                                         : 'border-slate-300 dark:border-slate-600'
                                         }`}>
                                         {formData.brand_analyzer?.is_enabled && <Check className="w-3 h-3" />}
+                                    </div>
+                                </div>
+
+                                {/* Custom Modules Map */}
+                                {customModules.length > 0 && customModules.map(mod => {
+                                    const isAttached = formData.attached_modules?.includes(mod.module_id);
+                                    return (
+                                        <div
+                                            key={mod.module_id}
+                                            onClick={() => {
+                                                setFormData(prev => {
+                                                    const current = prev.attached_modules ?? [];
+                                                    const next = current.includes(mod.module_id)
+                                                        ? current.filter((id) => id !== mod.module_id)
+                                                        : [...current, mod.module_id];
+                                                    return { ...prev, attached_modules: next };
+                                                });
+                                            }}
+                                            className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between gap-3 h-full min-h-[5.5rem] group ${isAttached
+                                                ? 'bg-slate-800/10 dark:bg-slate-100/10 border-slate-800 dark:border-slate-100 text-slate-900 dark:text-slate-100'
+                                                : 'bg-surface border-line/80 dark:border-line/10 hover:border-slate-500/50'
+                                                }`}
+                                        >
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                <div className={`p-3 rounded-xl shrink-0 ${isAttached ? 'bg-slate-800 dark:bg-slate-100 text-white dark:text-slate-900 shadow-lg' : 'bg-surface-sunken text-slate-400 group-hover:text-slate-700'}`}>
+                                                    <Layers className="w-4 h-4" />
+                                                </div>
+                                                <div className="flex flex-col text-left">
+                                                    <span className="text-sm font-black uppercase tracking-widest leading-tight">{mod.name}</span>
+                                                    <span className="text-xs font-black text-ink-subtle uppercase tracking-tighter mt-0.5">{mod.description || 'Custom Logic Module'}</span>
+                                                </div>
+                                            </div>
+                                            <div className={`w-6 h-6 shrink-0 rounded-full border-2 flex items-center justify-center transition-all ${isAttached
+                                                ? 'bg-slate-800 dark:bg-slate-100 border-slate-900 dark:border-slate-200 text-white dark:text-slate-900'
+                                                : 'border-slate-300 dark:border-slate-600'
+                                                }`}>
+                                                {isAttached && <Check className="w-3 h-3" />}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+
+                                {/* Build Your Own Module — primary call-to-action */}
+                                <div
+                                    onClick={() => navigate('/module-builder')}
+                                    /* Brand gradient: chart blue -> deep blue -> brand red,
+                                       matching the module-builder header mark. */
+                                    className="relative overflow-hidden p-4 rounded-2xl border-2 border-white/20 dark:border-white/10 bg-gradient-to-br from-[#21A0FF] via-[#255E91] to-[#CD393B] shadow-lg shadow-[#255E91]/25 hover:shadow-xl hover:shadow-[#CD393B]/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer flex items-center justify-between gap-3 h-full min-h-[5.5rem] group"
+                                >
+                                    <div className="pointer-events-none absolute -top-10 -right-8 w-32 h-32 rounded-full bg-white/25 blur-2xl opacity-70 group-hover:opacity-100 transition-opacity" />
+                                    <div className="relative flex items-center gap-3 min-w-0">
+                                        <div className="p-3 rounded-xl shrink-0 bg-white/25 text-white ring-1 ring-white/40 shadow-inner backdrop-blur-sm transition-transform group-hover:scale-110 group-hover:rotate-6">
+                                            <Wand2 className="w-4 h-4" />
+                                        </div>
+                                        <div className="flex flex-col text-left min-w-0">
+                                            <span className="text-sm font-black uppercase tracking-widest leading-tight text-white drop-shadow-sm">Build Your Own Module</span>
+                                            <span className="text-xs font-black text-white/85 uppercase tracking-tighter mt-0.5">Design Custom Questions &amp; Logic</span>
+                                        </div>
+                                    </div>
+                                    <div className="relative w-6 h-6 shrink-0 rounded-full bg-white text-[#255E91] flex items-center justify-center shadow-md transition-transform group-hover:scale-110">
+                                        <Plus className="w-3.5 h-3.5" strokeWidth={3} />
                                     </div>
                                 </div>
                             </div>
@@ -780,7 +870,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                         <button
                             type="button"
                             onClick={() => setFormData(prev => ({ ...prev, sample_intelligence: !prev.sample_intelligence }))}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-[9px] font-black uppercase tracking-widest transition-all ${formData.sample_intelligence ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'}`}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${formData.sample_intelligence ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'}`}
                         >
                             <Sparkles className={`w-3 h-3 ${formData.sample_intelligence ? 'animate-pulse' : ''}`} />
                             {formData.sample_intelligence ? 'Intelligence: Active' : 'Manual Mode'}
@@ -790,7 +880,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
                         {/* Sample Capacity */}
                         <div className="space-y-4">
-                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-muted ml-1 transition-colors flex items-center gap-2">
+                            <label className="text-sm font-black uppercase tracking-[0.2em] text-ink-muted ml-1 transition-colors flex items-center gap-2">
                                 <Target className="w-3.5 h-3.5 text-primary-soft" />
                                 Sample Capacity
                             </label>
@@ -829,7 +919,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                             </div>
                             {linkCount > 0 && target > 0 && (
                                 <div className="space-y-1">
-                                    <div className="flex justify-between text-[9px] font-black text-slate-400">
+                                    <div className="flex justify-between text-xs font-black text-slate-400">
                                         <span>{target} Target / {linkCount} Links</span>
                                         <span className={target > linkCount ? 'text-amber-500' : 'text-primary-soft'}>{((target / linkCount) * 100).toFixed(0)}% Fill</span>
                                     </div>
@@ -841,12 +931,12 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                     </div>
                                 </div>
                             )}
-                            <p className="text-[10px] text-slate-500 ml-2">Survey closes when this many qualify. 0 = no cap.</p>
+                            <p className="text-sm text-slate-500 ml-2">Survey closes when this many qualify. 0 = no cap.</p>
                         </div>
 
                         {/* Response Limit (Tokens) */}
                         <div className="space-y-4">
-                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-muted ml-1 transition-colors">Links Number</label>
+                            <label className="text-sm font-black uppercase tracking-[0.2em] text-ink-muted ml-1 transition-colors">Links Number</label>
                             <div className="relative group">
                                 <Users className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-muted group-focus-within:text-primary-soft transition-colors pointer-events-none" />
                                 <input
@@ -866,7 +956,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                     }}
                                 />
                             </div>
-                            <p className="text-[10px] text-slate-500 ml-2">Total unique survey links to distribute</p>
+                            <p className="text-sm text-slate-500 ml-2">Total unique survey links to distribute</p>
                         </div>
                     </div>
                 </div>
@@ -875,7 +965,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                 <div className="space-y-6 pt-6 border-t border-line/80 dark:border-line/10">
                     <div className="flex items-center gap-3">
                         <ShieldCheck className="w-5 h-5 text-emerald-500" />
-                        <div className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-muted">
+                        <div className="text-sm font-black uppercase tracking-[0.2em] text-ink-muted">
                             Layer 1 <span className="text-emerald-500">Demographic Screening</span>
                         </div>
                     </div>
@@ -914,7 +1004,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                                 {field.label}
                                             </span>
                                         </div>
-                                        <span className={`text-[10px] font-black uppercase tracking-tighter ${isActive ? 'text-indigo-600 dark:text-indigo-500' : 'text-ink-muted'}`}>{field.ar}</span>
+                                        <span className={`text-sm font-black uppercase tracking-tighter ${isActive ? 'text-indigo-600 dark:text-indigo-500' : 'text-ink-muted'}`}>{field.ar}</span>
                                     </div>
                                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${isActive
                                         ? 'bg-indigo-500 border-indigo-600 text-white shadow-sm'
@@ -935,7 +1025,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                             className="p-6 rounded-3xl bg-emerald-500/5 border border-emerald-500/10 space-y-4"
                         >
                             <div className="flex items-center justify-between">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-emerald-600/60 block ml-1 text-left">Qualifying Age Ranges — Select All That Apply</label>
+                                <label className="text-sm font-black uppercase tracking-widest text-emerald-600/60 block ml-1 text-left">Qualifying Age Ranges — Select All That Apply</label>
                                 <button
                                     type="button"
                                     onClick={() => setFormData(prev => ({
@@ -945,7 +1035,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                             allowed_age_ranges: ['Under 18', '18-25', '26-35', '36-45', '46-55', '56-65', '65+']
                                         }
                                     }))}
-                                    className="text-[9px] font-black uppercase tracking-widest text-emerald-500 hover:text-emerald-400 transition-colors"
+                                    className="text-xs font-black uppercase tracking-widest text-emerald-500 hover:text-emerald-400 transition-colors"
                                 >
                                     Select All
                                 </button>
@@ -975,7 +1065,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                 })}
                             </div>
                             {(cfg?.allowed_age_ranges || []).length === 0 && (
-                                <p className="text-[10px] text-rose-400 font-bold ml-1">⚠ Select at least one age range</p>
+                                <p className="text-sm text-rose-400 font-bold ml-1">⚠ Select at least one age range</p>
                             )}
                             {(cfg?.allowed_age_ranges || []).length > 0 && (
                                 <QuotaPanel
@@ -997,7 +1087,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                             animate={{ opacity: 1, height: 'auto' }}
                             className="p-6 rounded-3xl bg-blue-500/5 border border-blue-500/10 space-y-4"
                         >
-                            <label className="text-[10px] font-black uppercase tracking-widest text-blue-500/70 block ml-1">
+                            <label className="text-sm font-black uppercase tracking-widest text-blue-500/70 block ml-1">
                                 Qualifying Genders — <span className="text-slate-400 normal-case font-medium">leave empty to allow all</span>
                             </label>
                             <div className="flex flex-wrap gap-2">
@@ -1023,7 +1113,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                 })}
                             </div>
                             {(cfg?.allowed_genders || []).length === 0 && (
-                                <p className="text-[10px] text-slate-400 font-bold ml-1">ℹ All genders qualify (no gender gate)</p>
+                                <p className="text-sm text-slate-400 font-bold ml-1">ℹ All genders qualify (no gender gate)</p>
                             )}
                             {(cfg?.allowed_genders || []).length > 0 && (
                                 <QuotaPanel
@@ -1045,7 +1135,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                             animate={{ opacity: 1, height: 'auto' }}
                             className="p-6 rounded-3xl bg-amber-500/5 border border-amber-500/10 space-y-4"
                         >
-                            <label className="text-[10px] font-black uppercase tracking-widest text-amber-600 block ml-1">Question Format (Respondent Options)</label>
+                            <label className="text-sm font-black uppercase tracking-widest text-amber-600 block ml-1">Question Format (Respondent Options)</label>
                             <div className="flex flex-wrap gap-2 pb-3 border-b border-amber-200/30">
                                 {[
                                     { mode: 'mcq', label: 'Multiple Choice: All Egypt', desc: 'Respondent picks from preset regions' },
@@ -1069,14 +1159,14 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                             className={`px-5 py-2.5 rounded-xl text-xs font-black transition-all border-2 flex flex-col items-start gap-0.5 ${isSelected ? 'bg-amber-500 border-amber-600 text-white shadow-[0_0_12px_rgba(245,158,11,0.3)]' : 'bg-surface border-slate-300 dark:border-slate-600 text-slate-700 hover:border-amber-500'}`}
                                         >
                                             {format.label}
-                                            <span className={`text-[9px] font-medium ${isSelected ? 'text-white/70' : 'text-slate-400'}`}>{format.desc}</span>
+                                            <span className={`text-xs font-medium ${isSelected ? 'text-white/70' : 'text-slate-400'}`}>{format.desc}</span>
                                         </button>
                                     );
                                 })}
                             </div>
                             {(cfg?.area_mode === 'mcq' || !cfg?.area_mode) && (
                                 <>
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-amber-600/60 block ml-1">
+                                    <label className="text-sm font-black uppercase tracking-widest text-amber-600/60 block ml-1">
                                         Qualifying Areas Gate — <span className="text-slate-400 normal-case font-medium">leave empty to allow All Egypt</span>
                                     </label>
                                     <div className="flex flex-wrap gap-2">
@@ -1108,7 +1198,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                         })}
                                     </div>
                                     {(cfg?.allowed_areas || []).filter((x: string) => !x.includes('All Egypt') && !x.includes('From Any Area')).length === 0 && (
-                                        <p className="text-[10px] text-slate-400 font-bold ml-1">ℹ All Egypt areas qualify (no area gate)</p>
+                                        <p className="text-sm text-slate-400 font-bold ml-1">ℹ All Egypt areas qualify (no area gate)</p>
                                     )}
                                     {(cfg?.allowed_areas || []).filter((x: string) => !x.includes('All Egypt')).length > 0 && (
                                         <QuotaPanel
@@ -1134,7 +1224,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                         >
                             <div className="flex items-center gap-2 mb-2">
                                 <GraduationCap className="w-4 h-4 text-emerald-500" />
-                                <label className="text-[10px] font-black uppercase tracking-widest text-emerald-500/70 block ml-1">
+                                <label className="text-sm font-black uppercase tracking-widest text-emerald-500/70 block ml-1">
                                     Qualifying Education Levels — <span className="text-slate-400 normal-case font-medium">leave empty to allow all</span>
                                 </label>
                             </div>
@@ -1167,7 +1257,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                 })}
                             </div>
                             {(cfg?.allowed_education || []).length === 0 && (
-                                <p className="text-[10px] text-slate-400 font-bold ml-1">ℹ All education levels qualify (no education gate)</p>
+                                <p className="text-sm text-slate-400 font-bold ml-1">ℹ All education levels qualify (no education gate)</p>
                             )}
                             {(cfg?.allowed_education || []).length > 0 && (
                                 <QuotaPanel
@@ -1189,7 +1279,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                             animate={{ opacity: 1, height: 'auto' }}
                             className="p-6 rounded-3xl bg-rose-500/5 border border-rose-500/10 space-y-4"
                         >
-                            <label className="text-[10px] font-black uppercase tracking-widest text-rose-500/70 block ml-1">
+                            <label className="text-sm font-black uppercase tracking-widest text-rose-500/70 block ml-1">
                                 Qualifying Marital Status — <span className="text-slate-400 normal-case font-medium">leave empty to allow all</span>
                             </label>
                             <div className="flex flex-wrap gap-2">
@@ -1220,7 +1310,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                 })}
                             </div>
                             {(cfg?.allowed_marital_status || []).length === 0 && (
-                                <p className="text-[10px] text-slate-400 font-bold ml-1">ℹ All marital statuses qualify (no gate)</p>
+                                <p className="text-sm text-slate-400 font-bold ml-1">ℹ All marital statuses qualify (no gate)</p>
                             )}
                             {(cfg?.allowed_marital_status || []).length > 0 && (
                                 <QuotaPanel
@@ -1243,7 +1333,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                             animate={{ opacity: 1, height: 'auto' }}
                             className="p-6 rounded-3xl bg-emerald-500/5 border border-emerald-500/10 space-y-4"
                         >
-                            <label className="text-[10px] font-black uppercase tracking-widest text-emerald-500/70 block ml-1">
+                            <label className="text-sm font-black uppercase tracking-widest text-emerald-500/70 block ml-1">
                                 Qualifying Monthly Income — <span className="text-slate-400 normal-case font-medium">leave empty to allow all</span>
                             </label>
                             <div className="flex flex-wrap gap-2">
@@ -1282,7 +1372,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                             animate={{ opacity: 1, height: 'auto' }}
                             className="p-6 rounded-3xl bg-emerald-500/5 border border-emerald-500/10 space-y-4"
                         >
-                            <label className="text-[10px] font-black uppercase tracking-widest text-emerald-500/70 block ml-1">
+                            <label className="text-sm font-black uppercase tracking-widest text-emerald-500/70 block ml-1">
                                 Qualifying Occupations — <span className="text-slate-400 normal-case font-medium">leave empty to allow all</span>
                             </label>
                             <div className="flex flex-wrap gap-2">
@@ -1324,14 +1414,14 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                             <div className="flex items-center justify-between gap-2 mb-2">
                                 <div className="flex items-center gap-2">
                                     <Layers className="w-4 h-4 text-indigo-500" />
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-indigo-500/70 block ml-1">
+                                    <label className="text-sm font-black uppercase tracking-widest text-indigo-500/70 block ml-1">
                                         Target Social Economic Classes
                                     </label>
                                 </div>
                                 {(cfg?.allowed_ses || []).length > 0 && (
                                     <div className="flex gap-1.5">
                                         {(cfg?.allowed_ses || []).map(cls => (
-                                            <span key={cls} className="px-2 py-0.5 rounded-md bg-indigo-500 text-white text-[8px] font-black tracking-widest uppercase shadow-sm animate-in fade-in zoom-in-95">
+                                            <span key={cls} className="px-2 py-0.5 rounded-md bg-indigo-500 text-white text-sm font-black tracking-widest uppercase shadow-sm animate-in fade-in zoom-in-95">
                                                 {cls}
                                             </span>
                                         ))}
@@ -1360,13 +1450,13 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                             className={`px-5 py-3 rounded-2xl text-xs font-black transition-all border-2 flex flex-col items-start gap-0.5 ${isSelected ? 'bg-indigo-500 border-indigo-600 text-white shadow-lg' : 'bg-surface border-slate-300 dark:border-slate-600 text-slate-700 hover:border-indigo-500'}`}
                                         >
                                             {cls.label}
-                                            <span className={`text-[8px] font-medium ${isSelected ? 'text-white/70' : 'text-slate-400'}`}>{cls.desc}</span>
+                                            <span className={`text-sm font-medium ${isSelected ? 'text-white/70' : 'text-slate-400'}`}>{cls.desc}</span>
                                         </button>
                                     );
                                 })}
                             </div>
                             <div className="p-4 bg-indigo-500/10 rounded-2xl border border-indigo-500/20">
-                                <p className="text-[9px] text-indigo-600 dark:text-indigo-400 font-bold leading-relaxed italic">
+                                <p className="text-xs text-indigo-600 dark:text-indigo-400 font-bold leading-relaxed italic">
                                     ℹ SES formula: total_score = occupation(0-5) + education(1-5) + income(1-5)
                                 </p>
                             </div>
@@ -1387,3 +1477,6 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
         </div>
     );
 }
+
+
+

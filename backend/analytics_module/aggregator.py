@@ -29,7 +29,23 @@ from backend.analytics_module.purchase_intent_detection import (
     filter_purchase_intent_rows,
     purchase_intent_row_mask,
 )
+from backend.analytics_module.scale_semantics import (
+    HEADLINE_LABEL,
+    M_MEAN,
+    M_N,
+    ScaleSpec,
+    compute_metrics,
+    headline_value,
+    resolve_scale_spec,
+    to_prompt_dict,
+)
 from backend.analytics_module.src.BrandAnalyzer import calculations2 as ba_calc
+from backend.analytics_module.stats import (
+    benjamini_hochberg,
+    is_low_base,
+    significance_band,
+    two_proportion_z,
+)
 from backend.models import AttributeSignal
 from backend.utils.module_answer_aliases import (
     DEFAULT_STAGE_ROLES,
@@ -75,6 +91,133 @@ class ReportAggregator:
         
         # Pre-compute brand counts (N) for all charts to use
         self.brand_counts = self.data.evaluations.groupby("brand")["response_id"].nunique().to_dict()
+
+        # Scale semantics, indexed for lookup by whatever key a chart happens to
+        # hold. See `_spec_for`.
+        self._scale_specs = self._index_scale_specs()
+
+    # ──────────────────────────────────────────────────────────────────────
+    #  Scale semantics
+    # ──────────────────────────────────────────────────────────────────────
+
+    def _index_scale_specs(self) -> Dict[str, ScaleSpec]:
+        """
+        Index the attribute registry by every key a chart might hold.
+
+        Charts reach a question by three different routes — its sub-attribute
+        name, its main attribute, or its raw question id — depending on which
+        dataframe they started from. Indexing all three up front means no chart
+        has to know which one it has.
+        """
+        specs: Dict[str, ScaleSpec] = {}
+
+        for entry in self.attribute_registry:
+            if not isinstance(entry, dict):
+                continue
+            spec = resolve_scale_spec(
+                entry,
+                question_id=entry.get("question_id"),
+                source="snapshot",
+            )
+            if not spec.is_known:
+                continue
+
+            for key in (
+                entry.get("question_id"),
+                entry.get("supp_att"),
+                entry.get("en_text"),
+            ):
+                token = str(key or "").strip().lower()
+                if token and token not in specs:
+                    specs[token] = spec
+
+            # The main attribute is a weaker key: several sub-attributes share
+            # it, so only claim it for the question that summarises it.
+            if entry.get("role") == "main":
+                main = str(entry.get("main_att") or "").strip().lower()
+                if main:
+                    specs.setdefault(main, spec)
+
+        if specs:
+            logger.info("[Aggregator] Indexed %d scale specs from registry.", len(specs))
+        else:
+            logger.warning(
+                "[Aggregator] No scale semantics available — charts will report "
+                "an unlabelled scale and the AI will not be given a direction."
+            )
+        return specs
+
+    def _spec_for(
+        self,
+        attribute: Optional[str] = None,
+        metric: Optional[str] = None,
+        question_id: Optional[str] = None,
+    ) -> Optional[ScaleSpec]:
+        """
+        Resolve one question's scale, most specific key first.
+
+        Returns None rather than a default when nothing matches: an unlabelled
+        scale costs the report a directional claim, whereas a guessed one
+        inverts the finding (a 3 is ideal on a sensory scale, lukewarm on a
+        purchase-intent ladder).
+        """
+        for key in (question_id, metric, attribute):
+            token = str(key or "").strip().lower()
+            if token and token in self._scale_specs:
+                return self._scale_specs[token]
+        return None
+
+    def _spec_for_frame(self, df: pd.DataFrame) -> Optional[ScaleSpec]:
+        """Resolve the scale for a slice that is known to be one question."""
+        if df is None or df.empty:
+            return None
+        for column, kwarg in (("question_id", "question_id"), ("metric", "metric"), ("attribute", "attribute")):
+            if column not in df.columns:
+                continue
+            values = df[column].dropna().unique()
+            if len(values) == 1:
+                spec = self._spec_for(**{kwarg: values[0]})
+                if spec:
+                    return spec
+        return None
+
+    def _scale_metadata(
+        self,
+        df: pd.DataFrame,
+        spec: Optional[ScaleSpec],
+        *,
+        extra: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        """
+        Build the `metadata` block a chart hands to the AI layer.
+
+        `scale` is what activates the god prompt's rating-scale contract;
+        `metrics` is the authoritative figure set the model is told to cite
+        rather than compute. Base sizes travel with them so a claim can never
+        be stated more confidently than its sample supports.
+        """
+        base_n_by_brand: Dict[str, int] = {}
+        if df is not None and not df.empty and "brand" in df.columns:
+            base_n_by_brand = {
+                str(brand): int(count)
+                for brand, count in df.groupby("brand")["response_id"].nunique().items()
+            }
+
+        metadata: Dict[str, Any] = {
+            "base_n_by_brand": base_n_by_brand,
+            "low_base": any(is_low_base(n) for n in base_n_by_brand.values())
+            if base_n_by_brand
+            else is_low_base(self.n),
+        }
+
+        scale_block = to_prompt_dict(spec)
+        if scale_block:
+            metadata["scale"] = scale_block
+            metadata["metric_kind"] = spec.headline_label
+
+        if extra:
+            metadata.update(extra)
+        return metadata
 
     def _stage_roles(self) -> Dict[str, str]:
         return self.data.stage_roles or dict(DEFAULT_STAGE_ROLES)
@@ -207,51 +350,135 @@ class ReportAggregator:
     def criteria_table(self) -> Dict[str, Any]:
         """
         Table: Dynamic Multi-Brand Comparison.
-        Returns T2B% for all brands and significance drivers.
+
+        Reports each attribute with the metric its own scale supports — Just
+        Right % for a centered sensory scale, Top-2-Box for a hedonic or
+        monotonic one — plus a real significance test of the gap between the
+        client brand and its top competitor.
+
+        Two measurement bugs are fixed here:
+
+          * The Top-2-Box threshold was `df["value"].max() - 1`, taken across
+            *every* scale in the survey at once. A taste test mixing 1-5 sensory
+            scales with 1-10 hedonic ones produced a threshold of 9, so every
+            1-5 attribute reported 0% T2B. Thresholds now come from each
+            question's own maximum.
+          * T2B was applied to centered scales, where the top two boxes mean
+            "too much" — scoring a product failure as a success.
+
+        The column previously named `significance` held a Pearson correlation
+        with overall liking. That is an *importance* score, and the prompt layer
+        was reading it as a significance test. It keeps its value under the name
+        `importance`; `significance_test` now carries an actual two-proportion
+        test, corrected across the family of attributes.
         """
         df = self.data.scale_evaluations
         if df.empty:
             return {}
 
-        # 1. T2B = Top 2 Box (values 4 and 5 on a 1-5 scale)
-        max_val = df["value"].max()
-        t2b_threshold = max_val - 1 
-
-        df = df.copy()
-        df["is_t2b"] = df["value"] >= t2b_threshold
-
-        t2b_pct = df.groupby(["brand", "attribute"])["is_t2b"].mean() * 100
-        
-        # 2. Significance: correlation of each attribute with "General" overall rating
-        significance = self._compute_significance(df)
+        # Importance: how strongly each attribute tracks overall liking.
+        importance = self._compute_significance(df)
 
         attributes = [a for a in df["attribute"].unique() if a != "General"]
         available_brands = sorted(self.brands)
 
-        rows = []
-        for attr in sorted(attributes):
-            # Compute T2B for every brand
-            brand_scores = {b: round(float(t2b_pct.get((b, attr), 0)), 1) for b in available_brands}
-            sig = significance.get(attr, 0)
+        rows: List[Dict[str, Any]] = []
+        pvals: List[Optional[float]] = []
+        shapes_seen: Set[str] = set()
+        unresolved: List[str] = []
 
-            # Legacy Diffs (defaulting to primary brand vs top competitor)
-            our = brand_scores.get(self.my_brand, 0)
-            comp = brand_scores.get(self.top_competitor, 0) if self.top_competitor else 0
+        for attr in sorted(attributes):
+            attr_df = df[df["attribute"] == attr]
+            spec = self._spec_for_frame(attr_df) or self._spec_for(attribute=attr)
+
+            if spec is None or not spec.is_known:
+                unresolved.append(str(attr))
+            else:
+                shapes_seen.add(spec.shape)
+
+            # Per-brand metrics, each computed against this attribute's own scale.
+            brand_metrics: Dict[str, Dict[str, Any]] = {}
+            brand_scores: Dict[str, float] = {}
+            for brand in available_brands:
+                values = attr_df[attr_df["brand"] == brand]["value"].tolist()
+                metrics = compute_metrics(values, spec)
+                brand_metrics[brand] = metrics
+                score = headline_value(metrics, spec) if spec else metrics.get(M_MEAN)
+                brand_scores[brand] = round(float(score), 1) if score is not None else 0.0
+
+            our = brand_scores.get(self.my_brand, 0.0)
+            comp = brand_scores.get(self.top_competitor, 0.0) if self.top_competitor else 0.0
+
+            # Significance of the client-vs-top-competitor gap. Defined only for
+            # proportion metrics; a mean-based scale would need Welch's t and a
+            # per-respondent series this table does not carry.
+            p_value: Optional[float] = None
+            sig_detail: Optional[Dict[str, Any]] = None
+            if spec and spec.is_known and self.top_competitor and spec.headline_metric != M_MEAN:
+                ours_m = brand_metrics.get(self.my_brand, {})
+                comp_m = brand_metrics.get(self.top_competitor, {})
+                n1 = int(ours_m.get(M_N, 0) or 0)
+                n2 = int(comp_m.get(M_N, 0) or 0)
+                if n1 and n2:
+                    k1 = round(our * n1 / 100.0)
+                    k2 = round(comp * n2 / 100.0)
+                    _, p_value = two_proportion_z(k1, n1, k2, n2)
+                    sig_detail = {
+                        "p": p_value,
+                        "tested_pair": [self.my_brand, self.top_competitor],
+                        "n1": n1,
+                        "n2": n2,
+                        "low_base": is_low_base(n1) or is_low_base(n2),
+                    }
+            pvals.append(p_value)
 
             rows.append({
                 "criteria_name": attr,
-                "significance": round(float(sig), 3),
+                "importance": round(float(importance.get(attr, 0)), 3),
+                # Retained under its original name so existing PPTX builders and
+                # frontend readers keep working; the value is unchanged.
+                "significance": round(float(importance.get(attr, 0)), 3),
+                "metric_kind": spec.headline_label if spec and spec.is_known else "Mean",
+                "scale_shape": spec.shape if spec else "unknown",
                 "brand_scores": brand_scores,
+                "brand_metrics": brand_metrics,
                 "our_brand_t2b": our,   # Legacy support for older frontend/pptx
                 "competitor_t2b": comp, # Legacy support
                 "diff": round(float(our - comp), 1),
+                "significance_test": sig_detail,
             })
 
-        # 2.5 Compute N per brand for statistical significance testing
+        # Correct across the family: this table tests every attribute at once,
+        # so at 30 attributes an uncorrected .05 threshold gives roughly a 79%
+        # chance of at least one spurious "significantly ahead".
+        for row, rejected in zip(rows, benjamini_hochberg(pvals)):
+            test = row.get("significance_test")
+            if not test:
+                continue
+            test["significant"] = bool(rejected)
+            test["band"] = significance_band(test.get("p")) if rejected else "ns"
+
         brand_ns = {b: int(self.brand_counts.get(b, 0)) for b in available_brands}
 
-        # 3. Sort by significance descending (Drivers of likeness)
-        rows.sort(key=lambda x: x["significance"], reverse=True)
+        # Sort by importance descending (drivers of likeness).
+        rows.sort(key=lambda x: x["importance"], reverse=True)
+
+        if unresolved:
+            logger.warning(
+                "[criteria_table] %d/%d attributes have no resolved scale shape "
+                "and fall back to means: %s",
+                len(unresolved),
+                len(attributes),
+                ", ".join(unresolved[:8]),
+            )
+
+        # A single shared column header only makes sense when every attribute
+        # reports the same metric; a mixed table must label per row instead.
+        column_label = (
+            HEADLINE_LABEL.get(next(iter(shapes_seen)), "Score")
+            if len(shapes_seen) == 1
+            else "Score"
+        )
 
         return {
             "chart_id": "criteria_table",
@@ -259,16 +486,43 @@ class ReportAggregator:
             "title": "Criteria — Overall",
             "subtitle": "Drivers of Likeness vs Competitive Performance",
             "data": {
-                 "columns": ["Criteria", "Importance"] + [f"{b} T2B%" for b in available_brands] + ["Diff", "Sig."],
+                "columns": ["Criteria", "Importance"]
+                + [f"{b} {column_label}" for b in available_brands]
+                + ["Diff", "Sig."],
                 "brands": available_brands,
                 "brand_ns": brand_ns,
                 "my_brand": self.my_brand,
                 "top_competitor": self.top_competitor,
-                "rows": [[r["criteria_name"], r["significance"]] + [r["brand_scores"].get(b, 0) for b in available_brands] + [r["diff"]] for r in rows],
+                "column_label": column_label,
+                "mixed_metrics": len(shapes_seen) > 1,
+                "rows": [
+                    [r["criteria_name"], r["importance"]]
+                    + [r["brand_scores"].get(b, 0) for b in available_brands]
+                    + [r["diff"]]
+                    for r in rows
+                ],
                 "raw": rows,
             },
             "brands": available_brands,
             "base_n": self.n,
+            "metadata": self._scale_metadata(
+                df,
+                None,
+                extra={
+                    "metrics": {
+                        r["criteria_name"]: {
+                            "metric_kind": r["metric_kind"],
+                            "by_brand": r["brand_scores"],
+                            "importance": r["importance"],
+                            "diff_vs_top_competitor": r["diff"],
+                            "significance": r.get("significance_test"),
+                        }
+                        for r in rows
+                    },
+                    "metric_kinds": sorted({r["metric_kind"] for r in rows}),
+                    "unresolved_scales": unresolved,
+                },
+            ),
         }
 
     # ──────────────────────────────────────────────────────────────────────
@@ -612,19 +866,29 @@ class ReportAggregator:
 
     def purchase_funnel_chart(self) -> Dict[str, Any]:
         """
-        Interactive multi-series snake line chart logic
-        Total Awareness -> Consideration -> Bought 12M -> Bought 3M -> MOU
+        Interactive multi-series snake line chart: one line per brand across the
+        five funnel stages.
+
+        Only the DISPLAY labels are the marketing-standard funnel wording; the
+        stage keys and the maths behind them are untouched, so existing reports
+        and stage-role configuration keep working:
+
+            total_awareness -> Awareness
+            consideration   -> Consideration
+            bought_12m      -> Trial            (bought within 12 months)
+            bought_3m       -> Repurchase       (bought again within 3 months)
+            mou             -> Most Often Used
         """
         base = self._build_purchase_funnel_stage_base()
         if not base:
             return {}
 
         stage_sequence = [
-            ("total_awareness", "Total Awareness"),
+            ("total_awareness", "Awareness"),
             ("consideration", "Consideration"),
-            ("bought_12m", "Bought 12M"),
-            ("bought_3m", "Bought 3M"),
-            ("mou", "MOU"),
+            ("bought_12m", "Trial"),
+            ("bought_3m", "Repurchase"),
+            ("mou", "Most Often Used"),
         ]
 
         rows = base.get("rows") or []
@@ -647,7 +911,7 @@ class ReportAggregator:
             "chart_id": "purchase_funnel",
             "chart_type": "snake_line",
             "title": "Purchase Funnel",
-            "subtitle": "Total Awareness to MOU progression by brand",
+            "subtitle": "Awareness to Most Often Used progression, by brand",
             "data": {
                 "labels": [label for _, label in stage_sequence],
                 "datasets": datasets,
