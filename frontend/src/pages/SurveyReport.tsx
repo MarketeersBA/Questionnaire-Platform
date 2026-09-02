@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useMemo, useRef, useLayoutEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Download, AlertCircle, RefreshCw, Activity, Database, Sparkles, LayoutPanelLeft, BarChart3, Maximize, ChevronLeft, ChevronRight, X, Sun, Moon, LayoutDashboard, ClipboardList, FileText, ArrowUp, ChevronDown } from 'lucide-react';
-import { analytics } from '../services/api';
+import { Download, AlertCircle, RefreshCw, Activity, Database, Sparkles, LayoutPanelLeft, BarChart3, Maximize, ChevronLeft, ChevronRight, X, Sun, Moon, ArrowUp } from 'lucide-react';
+import { analytics, surveys } from '../services/api';
 import { toast } from 'sonner';
 import { useTheme } from '../context/ThemeContext';
 import { ExecutiveSummary } from '../components/report/ExecutiveSummary';
@@ -21,8 +21,26 @@ import ExportConfigModal from '../components/report/ExportConfigModal';
 import { useReportStatusPoll } from '../hooks/useReportStatusPoll';
 import { useScrollSpy } from '../hooks/useScrollSpy';
 
-// ---------------------------------------------------------------------------
-// 2026 Analytical Journey Messages
+function resolveProjectMeta(source: any) {
+    if (!source) return { category: '', sampleCapacity: 0 };
+    const blueprint = source.blueprint || {};
+    const customs = source.customizations || {};
+    const taste = source.taste_test_config || {};
+    const category = String(
+        source.category ||
+        blueprint.category ||
+        customs.category ||
+        taste.category ||
+        ''
+    ).trim();
+    const sampleCapacity = Number(
+        source.sample_capacity ??
+        source.respondent_target ??
+        0
+    ) || 0;
+    return { category, sampleCapacity };
+}
+
 // ---------------------------------------------------------------------------
 const PROGRESS_MESSAGES = [
     { text: 'Synthesizing Data Fabric...', icon: <Database /> },
@@ -454,6 +472,22 @@ function ReportContent({
 }: ReportContentProps) {
     const { surveyId } = useParams<{ surveyId: string }>();
     const { activeGroupIndex, setActiveGroupIndex, registerChartLocation } = useReport();
+    const [surveyMeta, setSurveyMeta] = useState({ category: '', sampleCapacity: 0 });
+
+    useEffect(() => {
+        if (!surveyId) return;
+        let cancelled = false;
+        surveys.get(surveyId)
+            .then((data) => {
+                if (!cancelled) setSurveyMeta(resolveProjectMeta(data));
+            })
+            .catch(() => {});
+        return () => { cancelled = true; };
+    }, [surveyId]);
+
+    const reportMeta = resolveProjectMeta(report);
+    const projectCategory = reportMeta.category || surveyMeta.category;
+    const sampleCapacity = reportMeta.sampleCapacity || surveyMeta.sampleCapacity;
 
     // AI Cost Dashboard State
     const [isCostModalOpen, setIsCostModalOpen] = useState(false);
@@ -507,7 +541,6 @@ function ReportContent({
 
     // Rail visibility is user-controlled; focus mode hides it regardless.
     const [railOpen, setRailOpen] = useState(true);
-    const [goToOpen, setGoToOpen] = useState(false);
     const railVisible = railOpen && !isFocusMode;
     const wasFocusMode = useRef(false);
     const headerRef = useRef<HTMLElement>(null);
@@ -1005,86 +1038,19 @@ function ReportContent({
                         </div>
                     </div>
 
-                    {/* Platform navigation, collapsed into one group so it does
-                        not compete with the report's own section list. */}
-                    <div className="shrink-0 px-3 pt-3 border-t border-white/[0.07]">
-                        <button
-                            onClick={() => setGoToOpen((v) => !v)}
-                            className="nav-item w-full"
-                            aria-expanded={goToOpen}
-                        >
-                            <span className="shrink-0 w-8 h-8 rounded-lg bg-white/[0.07] grid place-items-center">
-                                <LayoutDashboard className="w-4 h-4" />
-                            </span>
-                            <span className="text-[12.5px] uppercase tracking-[0.06em] truncate flex-1 text-left">
-                                Go to
-                            </span>
-                            <motion.span animate={{ rotate: goToOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                                <ChevronDown className="w-4 h-4 text-white/45" />
-                            </motion.span>
-                        </button>
-
-                        <AnimatePresence initial={false}>
-                            {goToOpen && (
-                                <motion.div
-                                    initial={{ height: 0, opacity: 0 }}
-                                    animate={{ height: 'auto', opacity: 1 }}
-                                    exit={{ height: 0, opacity: 0 }}
-                                    transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-                                    className="overflow-hidden"
-                                >
-                                    <div className="pl-5 pr-1 py-1 space-y-0.5 border-l border-white/10 ml-[22px]">
-                                        {[
-                                            { label: 'Dashboard', icon: LayoutDashboard, to: '/dashboard' },
-                                            { label: 'Surveys', icon: ClipboardList, to: '/surveys' },
-                                            { label: 'Reports', icon: FileText, to: '/surveys/reports' },
-                                        ].map((item) => (
-                                            <button
-                                                key={item.to}
-                                                onClick={() => navigate(item.to)}
-                                                className="nav-item w-full"
-                                            >
-                                                <span className="shrink-0 w-7 h-7 rounded-lg bg-white/[0.07] grid place-items-center">
-                                                    <item.icon className="w-3.5 h-3.5" />
-                                                </span>
-                                                <span className="text-[12px] uppercase tracking-[0.06em] truncate">
-                                                    {item.label}
-                                                </span>
-                                            </button>
-                                        ))}
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                    {/* Project metadata from survey creation */}
+                    <div className="shrink-0 px-5 py-4 border-t border-white/[0.07] space-y-2.5">
+                        <p className="text-[12px] leading-snug text-white/75">
+                            <span className="font-bold text-white">Category</span>
+                            <span className="text-white/35 mx-1.5">·</span>
+                            <span>{projectCategory || '—'}</span>
+                        </p>
+                        <p className="text-[12px] leading-snug text-white/75">
+                            <span className="font-bold text-white">Capacity</span>
+                            <span className="text-white/35 mx-1.5">·</span>
+                            <span>{sampleCapacity > 0 ? `n=${sampleCapacity.toLocaleString()}` : '—'}</span>
+                        </p>
                     </div>
-
-                    {/* Sample size footer — temporarily hidden
-                    {report.base_n > 0 && (
-                        <div className="shrink-0 px-5 py-4 border-t border-white/[0.07]">
-                            <div className="flex items-center justify-between mb-1.5">
-                                <span className="text-[8px] font-black text-white/40 uppercase tracking-[0.25em]">
-                                    Sample
-                                </span>
-                                <Database className="w-3 h-3 text-white/40" />
-                            </div>
-                            <div className="text-2xl font-black font-display text-white leading-none mb-2.5">
-                                N={report.base_n}
-                            </div>
-                            <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
-                                <motion.div
-                                    initial={{ width: 0 }}
-                                    animate={{ width: '100%' }}
-                                    transition={{ duration: 1.4, ease: 'easeOut' }}
-                                    className="h-full rounded-full"
-                                    style={{
-                                        background:
-                                            'linear-gradient(90deg, rgb(var(--c-primary)), rgb(var(--c-accent)))',
-                                    }}
-                                />
-                            </div>
-                        </div>
-                    )}
-                    */}
                 </aside>
 
                 {/* Main Content - Padded to avoid overlap */}

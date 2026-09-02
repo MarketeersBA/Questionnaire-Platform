@@ -78,7 +78,7 @@ export function ExecutiveSummary({
     report?: any,
 }) {
     return (
-        <div className="space-y-10">
+        <div className="space-y-6">
             {summary && (
                 <div className="card-brand p-8 rounded-2xl relative overflow-hidden">
                     {/* Brand spine: blue at the top resolving to red */}

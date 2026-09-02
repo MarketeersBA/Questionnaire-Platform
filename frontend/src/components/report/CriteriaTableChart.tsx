@@ -201,7 +201,7 @@ export function CriteriaTableChart({ data, brands: propBrands, presentationHeigh
             >
                 <div className="overflow-x-auto custom-scrollbar pb-4">
                     <div className="min-w-[1000px]">
-                        <div style={gridStyle} className={`px-8 py-4 text-[10px] font-black uppercase tracking-[0.3em] ${isDark ? 'text-slate-500' : 'text-slate-900'} border-b ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
+                        <div style={gridStyle} className={`px-6 py-2.5 text-[10px] font-black uppercase tracking-[0.3em] ${isDark ? 'text-slate-500' : 'text-slate-900'} border-b ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
                             <div className="col-span-3">Criteria</div>
                             <div className="text-center">Importance</div>
                             {visibleBrands.map((brand) => (
@@ -232,12 +232,12 @@ export function CriteriaTableChart({ data, brands: propBrands, presentationHeigh
                                 const DiffIcon = diffPositive ? ArrowUpRight : currentDiff === 0 ? Minus : ArrowDownRight;
 
                                 return (
-                                    <motion.div layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} key={row.criteria_name} style={gridStyle} className={`group px-8 py-6 items-center transition-all ${isDark ? 'hover:bg-white/[0.04]' : 'hover:bg-slate-100'} ${index % 2 === 0 ? (isDark ? 'bg-white/[0.01]' : 'bg-slate-50') : ''} border-b ${isDark ? 'border-white/5' : 'border-slate-100'}`}>
+                                    <motion.div layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} key={row.criteria_name} style={gridStyle} className={`group px-6 py-2.5 items-center transition-all ${isDark ? 'hover:bg-white/[0.04]' : 'hover:bg-slate-100'} ${index % 2 === 0 ? (isDark ? 'bg-white/[0.01]' : 'bg-slate-50') : ''} border-b ${isDark ? 'border-white/5' : 'border-slate-100'}`}>
                                         <div className="col-span-3 flex flex-col gap-1">
                                             <div className={`font-black ${isDark ? 'text-white' : 'text-slate-900'} text-sm uppercase tracking-tight group-hover:text-primary-soft transition-colors`}>{row.criteria_name}</div>
                                         </div>
 
-                                        <div className={`text-center font-mono text-xs font-black ${sigColor} ${isDark ? 'bg-white/5 border-white/5' : 'bg-slate-100 border-slate-200'} py-1.5 rounded-lg border`}>{row.significance.toFixed(2)}</div>
+                                        <div className={`text-center font-mono text-xs font-black ${sigColor} ${isDark ? 'bg-white/5 border-white/5' : 'bg-slate-100 border-slate-200'} py-1 rounded-lg border`}>{row.significance.toFixed(2)}</div>
 
                                         {visibleBrands.map((brand) => {
                                             const score = findBrandScore(row, brand);
@@ -245,7 +245,7 @@ export function CriteriaTableChart({ data, brands: propBrands, presentationHeigh
                                             const baseColor = COLORS[allBrands.indexOf(brand) % COLORS.length];
 
                                             return (
-                                                <div key={brand} className={`flex items-center gap-3 px-4 ${isReference ? (isDark ? 'bg-white/5 border-white/5' : 'bg-slate-50 border-slate-200') : ''} rounded-xl py-2 border border-transparent`}>
+                                                <div key={brand} className={`flex items-center gap-2 px-3 ${isReference ? (isDark ? 'bg-white/5 border-white/5' : 'bg-slate-50 border-slate-200') : ''} rounded-xl py-1 border border-transparent`}>
                                                     <div className={`flex-1 h-1.5 ${isDark ? 'bg-slate-800/50' : 'bg-slate-200'} rounded-full overflow-hidden`}>
                                                         <motion.div initial={{ width: 0 }} animate={{ width: `${(score / maxT2B) * 100}%` }} transition={{ duration: 1, ease: 'circOut' }} className="h-full rounded-full" style={{ backgroundColor: baseColor }} />
                                                     </div>
@@ -254,14 +254,14 @@ export function CriteriaTableChart({ data, brands: propBrands, presentationHeigh
                                             );
                                         })}
 
-                                        <div className={`flex flex-col items-center justify-center gap-0.5 font-mono text-xs font-black ${diffColor} py-2 rounded-xl group/diff`}>
+                                        <div className={`flex flex-col items-center justify-center gap-0.5 font-mono text-xs font-black ${diffColor} py-1 rounded-xl group/diff`}>
                                             <div className="flex items-center gap-1">
                                                 <DiffIcon className="h-3 w-3" />
                                                 <span>{diffPositive ? '+' : ''}{currentDiff}%</span>
                                             </div>
                                         </div>
 
-                                        <div className={`flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-xl border transition-all relative group/sig ${isSignificant ? 'bg-white/5 border-white/10 border-amber-400/20' : 'bg-transparent border-transparent'}`}>
+                                        <div className={`flex flex-col items-center justify-center gap-0.5 py-1 rounded-xl border transition-all relative group/sig ${isSignificant ? 'bg-white/5 border-white/10 border-amber-400/20' : 'bg-transparent border-transparent'}`}>
                                             {statResult.level > 0 ? (
                                                 <>
                                                     <span className="text-[11px] text-amber-400 leading-none tracking-[0.1em] font-black">{"★".repeat(statResult.level)}</span>

@@ -124,7 +124,8 @@ export function ChartRenderer({
         chartType === 'horizontal_bar' ||
         chartType === 'preference_bar' ||
         chartType === 'driver_ranking' ||
-        chartType === 'profile_chart';
+        chartType === 'profile_chart' ||
+        chartType === 'snake_line';
     let Component = CHART_MAP[chartType] || DataTable;
     let displayTitle = chart.title;
 

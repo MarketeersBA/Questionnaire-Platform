@@ -1224,14 +1224,14 @@ export default function PublicSurvey() {
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -20 }}
-            className="m-auto relative z-10 w-full max-w-2xl bg-surface rounded-none md:rounded-[3rem] p-6 md:p-12 border-0 md:border border-line/80 dark:border-line/10 shadow-none md:shadow-2xl transition-colors min-h-screen md:min-h-0"
+            className="m-auto relative z-10 w-full max-w-2xl bg-surface rounded-none md:rounded-[3rem] p-4 md:p-6 border-0 md:border border-line/80 dark:border-line/10 shadow-none md:shadow-2xl transition-colors min-h-screen md:min-h-0"
           >
             {(() => {
               const isAr = isArabicUi;
               return (
             <div dir={isAr ? 'rtl' : 'ltr'}>
-            <div className="flex flex-col items-center mb-10">
-              <img src="/brand/logo-icon.png" alt="Logo" className="w-20 h-20 mb-4 object-contain brightness-100 dark:brightness-125" />
+            <div className="flex flex-col items-center mb-4">
+              <img src="/brand/logo-icon.png" alt="Logo" className="w-14 h-14 mb-2 object-contain brightness-100 dark:brightness-125" />
               <div className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-subtle">
                 {isAr ? (
                   <>البنية التحتية <span className="text-primary-soft">الآمنة</span></>
@@ -1247,7 +1247,7 @@ export default function PublicSurvey() {
                 {isAr ? 'بروتوكول المشاركة' : 'Participation Protocol'}
               </span>
             </h1>
-            <div className="flex items-center gap-2 mb-8 justify-center flex-wrap">
+            <div className="flex items-center gap-2 mb-3 justify-center flex-wrap">
               <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-primary/10 text-primary-soft border border-primary/10">
                 {isAr ? 'المخطط:' : 'Blueprint:'} {survey?.template_name || (isAr ? 'قياسي' : 'Standard')}
               </span>
@@ -1256,14 +1256,14 @@ export default function PublicSurvey() {
               </span>
             </div>
 
-            <p className="text-ink-muted font-medium leading-relaxed mb-10 pb-8 border-b border-slate-50 dark:border-slate-800 transition-colors text-center">
+            <p className="text-ink-muted font-medium leading-snug mb-4 pb-3 border-b border-slate-50 dark:border-slate-800 transition-colors text-center">
               {isAr
                 ? 'يرجى إكمال أسئلة التأهل التالية. بعد التحقق سيتم توجيهك إلى أداة البحث.'
                 : 'Please complete the following qualification probe. Upon synchronization, you will be redirected to the research instrument.'}
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-10">
-              <div className="space-y-8 px-0 md:px-2">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-6 px-0 md:px-2">
                 {/* Always include Phone for handoff matching */}
                 <div className="space-y-3">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">
@@ -1331,7 +1331,7 @@ export default function PublicSurvey() {
                   const qId = q.id || idx.toString();
                   return (
                     <div key={qId} id={`q-${qId}`} className="space-y-3">
-                      <label className="text-lg md:text-xl font-semibold text-ink ml-1 leading-tight flex flex-col gap-2">
+                      <label className="text-lg md:text-xl font-semibold text-ink ml-1 leading-tight flex flex-col gap-1">
                         <span>{renderCleanText(q.label || q.text)}</span>
                         {/* Multi-answer tip */}
                         {q.type === 'mcq' && q.allow_multiple && (
@@ -1348,7 +1348,7 @@ export default function PublicSurvey() {
                       </label>
                       <div className="relative group">
                         {q.type === 'mcq' ? (
-                          <div className="grid grid-cols-1 gap-2">
+                          <div className="grid grid-cols-1 gap-1.5">
                             {q.options?.map((opt: string) => (
                               <button
                                 key={opt}
@@ -1367,7 +1367,7 @@ export default function PublicSurvey() {
                                     scrollToNextQuestion(qId, survey?.questions || []);
                                   }
                                 }}
-                                className={`w-full p-3 md:p-4 rounded-xl md:rounded-2xl border text-left font-semibold text-xs md:text-sm transition-all ${(q.allow_multiple ? (Array.isArray(answers[qId]) && answers[qId].includes(opt)) : answers[qId] === opt)
+                                className={`w-full p-2.5 md:p-3 rounded-xl md:rounded-2xl border text-left font-semibold text-xs md:text-sm transition-all ${(q.allow_multiple ? (Array.isArray(answers[qId]) && answers[qId].includes(opt)) : answers[qId] === opt)
                                   ? 'bg-primary/10 border-primary text-primary-soft shadow-sm'
                                   : 'bg-slate-50 border-slate-100 text-slate-500 hover:border-slate-300'
                                   }`}
@@ -1390,9 +1390,31 @@ export default function PublicSurvey() {
                             ))}
                           </div>
                         ) : (
-                          <div className="space-y-2 relative">
+                          <div className="space-y-3 relative">
+                            {q.type === 'text' || q.type === 'number' || q.type === 'email' || q.type === 'age' ? (
+                              <input
+                                type={q.type === 'number' ? 'number' : q.type === 'email' ? 'email' : 'text'}
+                                required={q.required}
+                                maxLength={q.type === 'number' ? undefined : 500}
+                                placeholder={q.label}
+                                className="w-full bg-surface-raised border border-slate-200 dark:border-slate-700 rounded-2xl px-6 py-4 text-ink focus:outline-none focus:border-primary/50 transition-all font-bold placeholder:text-slate-300 dark:placeholder:text-slate-600"
+                                value={answers[qId] || ''}
+                                onChange={e => {
+                                  const val = e.target.value;
+                                  setAnswers({ ...answers, [qId]: val });
+                                  if (q.id === 'area' || q.label?.toLowerCase().includes('area')) {
+                                    if (val.length > 1) {
+                                      const filtered = commonCities.filter(c => c.toLowerCase().includes(val.toLowerCase())).slice(0, 5);
+                                      setAreaSuggestions(filtered);
+                                    } else {
+                                      setAreaSuggestions([]);
+                                    }
+                                  }
+                                }}
+                              />
+                            ) : (
                             <textarea
-                              rows={q.type === 'email' ? 1 : 2}
+                              rows={2}
                               required={q.required}
                               maxLength={500}
                               placeholder={q.label}
@@ -1411,7 +1433,8 @@ export default function PublicSurvey() {
                                 }
                               }}
                             />
-                            {q.type !== 'email' && q.type !== 'age' && (
+                            )}
+                            {q.type !== 'email' && q.type !== 'age' && q.type !== 'number' && q.type !== 'text' && (
                               <div className="flex justify-end px-2 mt-1">
                                 <span className={`text-[8px] font-black uppercase tracking-tighter ${(answers[qId]?.length || 0) >= 450 ? 'text-amber-500' : 'text-slate-400'}`}>
                                   {(answers[qId]?.length || 0)} / 500
@@ -1482,7 +1505,7 @@ export default function PublicSurvey() {
               </button>
             </form>
 
-            <div className="mt-10 pt-8 border-t border-slate-50 dark:border-slate-800 flex items-center justify-between transition-colors">
+            <div className="mt-5 pt-4 border-t border-slate-50 dark:border-slate-800 flex items-center justify-between transition-colors">
               <div className="flex items-center gap-2 text-ink-subtle">
                 <ShieldCheck className="w-4 h-4 text-emerald-500" />
                 <span className="text-[10px] font-black uppercase tracking-tighter">

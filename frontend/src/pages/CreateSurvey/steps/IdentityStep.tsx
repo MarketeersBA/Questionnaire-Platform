@@ -66,7 +66,7 @@ function LocalQuotaInput({
                 }}
                 className={className}
             />
-            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[8px] text-slate-400 pointer-events-none">{label}</span>
+            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none">{label}</span>
         </div>
     );
 }
@@ -249,16 +249,16 @@ function QuotaPanel({ gateKey, options, sampleCapacity, gate_quotas, locked_quot
     if (options.length === 0) return null;
 
     return (
-        <div className="mt-4 pt-4 border-t border-slate-200/50 dark:border-slate-700/50 space-y-3">
+        <div className="mt-3 pt-3 border-t border-slate-200/50 dark:border-slate-700/50 space-y-2">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
-                    <SplitSquareHorizontal className="w-3.5 h-3.5 text-slate-500" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Quota Distribution</span>
+                    <SplitSquareHorizontal className="w-4 h-4 text-slate-500" />
+                    <span className="text-xs font-black uppercase tracking-widest text-slate-500">Quota Distribution</span>
                 </div>
                 <button
                     type="button"
                     onClick={applyEqualShare}
-                    className="text-[9px] font-black uppercase tracking-widest text-primary-soft hover:text-primary-soft/70 transition-colors border border-primary/30 px-2 py-1 rounded-lg"
+                    className="text-[10px] font-black uppercase tracking-widest text-primary-soft hover:text-primary-soft/70 transition-colors border border-primary/30 px-2.5 py-1.5 rounded-lg"
                 >
                     ⚖ Equal Share
                 </button>
@@ -270,7 +270,7 @@ function QuotaPanel({ gateKey, options, sampleCapacity, gate_quotas, locked_quot
                     const displayOpt = opt.length > 28 ? opt.slice(0, 28) + '…' : opt;
                     return (
                         <div key={opt} className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-2">
-                            <span className="text-[10px] font-bold text-ink-muted truncate" title={opt}>
+                            <span className="text-xs font-bold text-ink-muted truncate" title={opt}>
                                 {displayOpt}
                             </span>
                             <button
@@ -286,7 +286,7 @@ function QuotaPanel({ gateKey, options, sampleCapacity, gate_quotas, locked_quot
                                 placeholder="—"
                                 disabled={locks[opt]}
                                 onChange={v => updateBucket(opt, 'count', v)}
-                                className={`w-20 bg-surface border-2 rounded-xl px-2 py-1.5 text-[11px] font-black text-center transition-all focus:outline-none ${locks[opt] ? 'border-indigo-500/50 text-indigo-600 dark:text-indigo-400' : 'border-slate-300 dark:border-slate-600 text-ink focus:border-primary'}`}
+                                className={`w-24 bg-surface border-2 rounded-xl px-2.5 py-2 text-sm font-black text-center transition-all focus:outline-none ${locks[opt] ? 'border-indigo-500/50 text-indigo-600 dark:text-indigo-400' : 'border-slate-300 dark:border-slate-600 text-ink focus:border-primary'}`}
                             />
                             <LocalQuotaInput
                                 value={bucket.pct}
@@ -294,7 +294,7 @@ function QuotaPanel({ gateKey, options, sampleCapacity, gate_quotas, locked_quot
                                 placeholder="—"
                                 disabled={locks[opt]}
                                 onChange={v => updateBucket(opt, 'pct', v)}
-                                className={`w-20 bg-surface border-2 rounded-xl px-2 py-1.5 text-[11px] font-black text-center transition-all focus:outline-none ${locks[opt] ? 'border-indigo-500/50 text-indigo-600 dark:text-indigo-400' : 'border-slate-300 dark:border-slate-600 text-ink focus:border-primary'}`}
+                                className={`w-24 bg-surface border-2 rounded-xl px-2.5 py-2 text-sm font-black text-center transition-all focus:outline-none ${locks[opt] ? 'border-indigo-500/50 text-indigo-600 dark:text-indigo-400' : 'border-slate-300 dark:border-slate-600 text-ink focus:border-primary'}`}
                             />
                         </div>
                     );
@@ -302,8 +302,8 @@ function QuotaPanel({ gateKey, options, sampleCapacity, gate_quotas, locked_quot
             </div>
 
             {/* Sum progress bar */}
-            <div className="space-y-1.5 p-3 rounded-2xl bg-surface-raised border border-slate-200/50 dark:border-slate-800/50 transition-colors">
-                <div className="flex items-center justify-between text-[9px] font-black uppercase tracking-tighter">
+            <div className="space-y-1 p-2.5 rounded-2xl bg-surface-raised border border-slate-200/50 dark:border-slate-800/50 transition-colors">
+                <div className="flex items-center justify-between text-[11px] font-black uppercase tracking-tighter">
                     <div className="flex items-center gap-2">
                         <div className={`w-2 h-2 rounded-full ${isComplete ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : isOver ? 'bg-rose-500' : 'bg-primary animate-pulse'}`} />
                         <span className={isOver ? 'text-rose-500' : isComplete ? 'text-emerald-500' : 'text-ink-muted'}>
@@ -380,11 +380,11 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
 
 
     return (
-        <div className="glass-card bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[3rem] p-12 shadow-premium text-left relative overflow-hidden animate-slide-up border-2 border-slate-200 dark:border-slate-700 transition-colors max-w-5xl mx-auto">
-            <div className="absolute top-0 right-0 p-8 opacity-[0.03] dark:opacity-[0.05]">
+        <div className="glass-card bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[3rem] p-8 shadow-premium text-left relative overflow-hidden animate-slide-up border-2 border-slate-200 dark:border-slate-700 transition-colors max-w-5xl mx-auto">
+            <div className="absolute top-0 right-0 p-5 opacity-[0.03] dark:opacity-[0.05]">
                 <Layout className="w-32 h-32 rotate-12" />
             </div>
-            <div className="flex items-center gap-4 mb-10 relative z-10 transition-colors">
+            <div className="flex items-center gap-4 mb-6 relative z-10 transition-colors">
                 <div className="p-3.5 rounded-2xl bg-primary/5 dark:bg-primary/10 text-primary-soft border border-primary/10 dark:border-primary/20 shadow-inner-soft">
                     <Layout className="w-6 h-6" />
                 </div>
@@ -404,10 +404,10 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-10 relative z-10">
+            <div className="grid grid-cols-1 gap-4 relative z-10">
                 {/* Project Identity: Name, Industry, Code */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div className="space-y-3">
                         <div className="flex items-center gap-2">
                             <Edit3 className="w-3.5 h-3.5 text-primary-soft" />
                             <label className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-muted ml-1 transition-colors">Survey Name</label>
@@ -426,7 +426,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                         </div>
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                         <label className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-muted ml-1 transition-colors flex items-center gap-2">
                             <Briefcase className="w-3.5 h-3.5 text-primary-soft" />
                             Primary Industry
@@ -451,7 +451,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                         </div>
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                         <div className="flex items-center justify-between ml-1">
                             <div className="flex items-center gap-2">
                                 <Tag className="w-3.5 h-3.5 text-primary-soft" />
@@ -492,7 +492,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                 </div>
 
                 {/* Survey Type Selector */}
-                <div className="space-y-6">
+                <div className="space-y-5">
                     <div className="flex items-center gap-3">
                         <Beaker className="w-5 h-5 text-primary-soft" />
                         <label className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-muted transition-colors">Survey Type</label>
@@ -552,9 +552,9 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                     {(formData.survey_type === 'taste_test' || formData.survey_type === 'product_test') && (
                         <motion.div
                             initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-                            animate={{ opacity: 1, height: 'auto', marginBottom: 24 }}
+                            animate={{ opacity: 1, height: 'auto', marginBottom: 16 }}
                             exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                            className="space-y-6 overflow-hidden"
+                            className="space-y-5 overflow-hidden"
                         >
                             <div className="flex items-center gap-3">
                                 <Target className="w-5 h-5 text-primary-soft" />
@@ -569,7 +569,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                         key={obj.id}
                                         type="button"
                                         onClick={() => setFormData(prev => ({ ...prev, survey_objective: obj.id as any }))}
-                                        className={`text-left p-5 rounded-[2rem] border-2 transition-all group relative flex flex-col justify-between h-full ${formData.survey_objective === obj.id
+                                        className={`text-left p-5 rounded-[2.5rem] border-2 transition-all group relative flex flex-col justify-between h-full ${formData.survey_objective === obj.id
                                             ? 'border-primary bg-primary/5 dark:bg-primary/10 scale-[1.02] shadow-lg shadow-primary/10'
                                             : 'border-line/80 dark:border-line/10 bg-white/50 dark:bg-slate-950/20 hover:border-primary/40'
                                             }`}
@@ -632,7 +632,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
-                            className="space-y-6 p-8 bg-surface-raised/40 rounded-[2.5rem] border-2 border-line/80 dark:border-line/10"
+                            className="space-y-5 p-5 bg-surface-raised/40 rounded-[2.5rem] border-2 border-line/80 dark:border-line/10"
                         >
                             <div className="flex items-center gap-3">
                                 <Sparkles className="w-5 h-5 text-amber-500" />
@@ -775,7 +775,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                 </AnimatePresence>
 
                 {/* Token + Respondent Target row */}
-                <div className="p-8 bg-primary/5 dark:bg-primary/10 rounded-[2.5rem] border-2 border-primary/20 dark:border-primary/30 space-y-8 relative overflow-hidden">
+                <div className="p-4 bg-primary/5 dark:bg-primary/10 rounded-[2.5rem] border-2 border-primary/20 dark:border-primary/30 space-y-3 relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-4">
                         <button
                             type="button"
@@ -787,9 +787,9 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                         </button>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
+                    <div className="grid grid-cols-1 gap-3 pt-2">
                         {/* Sample Capacity */}
-                        <div className="space-y-4">
+                        <div className="space-y-2">
                             <label className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-muted ml-1 transition-colors flex items-center gap-2">
                                 <Target className="w-3.5 h-3.5 text-primary-soft" />
                                 Sample Capacity
@@ -843,44 +843,19 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                             )}
                             <p className="text-[10px] text-slate-500 ml-2">Survey closes when this many qualify. 0 = no cap.</p>
                         </div>
-
-                        {/* Response Limit (Tokens) */}
-                        <div className="space-y-4">
-                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-muted ml-1 transition-colors">Links Number</label>
-                            <div className="relative group">
-                                <Users className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-muted group-focus-within:text-primary-soft transition-colors pointer-events-none" />
-                                <input
-                                    type="number"
-                                    min="1"
-                                    max="10000"
-                                    placeholder="Provision volume"
-                                    className="w-full bg-surface border-2 border-slate-400 dark:border-slate-600 rounded-[1.5rem] pl-16 pr-8 py-6 text-ink focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-black text-xl shadow-sm placeholder:text-slate-500 dark:placeholder:text-slate-500"
-                                    value={formData.links_count}
-                                    onChange={e => {
-                                        const links = parseInt(e.target.value) || 0;
-                                        setFormData(prev => ({
-                                            ...prev,
-                                            links_count: links,
-                                            sample_capacity: prev.sample_intelligence ? Math.round(links * 0.2) : prev.sample_capacity
-                                        }));
-                                    }}
-                                />
-                            </div>
-                            <p className="text-[10px] text-slate-500 ml-2">Total unique survey links to distribute</p>
-                        </div>
                     </div>
                 </div>
 
                 {/* Layer 1 Screening Configuration */}
-                <div className="space-y-6 pt-6 border-t border-line/80 dark:border-line/10">
-                    <div className="flex items-center gap-3">
+                <div className="space-y-3 pt-4 border-t border-line/80 dark:border-line/10">
+                    <div className="flex items-center gap-2">
                         <ShieldCheck className="w-5 h-5 text-emerald-500" />
                         <div className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-muted">
                             Layer 1 <span className="text-emerald-500">Demographic Screening</span>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {[
                             { id: 'ses_screening', label: 'Social Economic Level', ar: 'المستوى الاقتصادي الاجتماعي', icon: Layers, isSpecial: true }
                         ].map(field => {
@@ -932,7 +907,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                         <motion.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
-                            className="p-6 rounded-3xl bg-emerald-500/5 border border-emerald-500/10 space-y-4"
+                            className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 space-y-2"
                         >
                             <div className="flex items-center justify-between">
                                 <label className="text-[10px] font-black uppercase tracking-widest text-emerald-600/60 block ml-1 text-left">Qualifying Age Ranges — Select All That Apply</label>
@@ -995,7 +970,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                         <motion.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
-                            className="p-6 rounded-3xl bg-blue-500/5 border border-blue-500/10 space-y-4"
+                            className="p-4 rounded-2xl bg-blue-500/5 border border-blue-500/10 space-y-2"
                         >
                             <label className="text-[10px] font-black uppercase tracking-widest text-blue-500/70 block ml-1">
                                 Qualifying Genders — <span className="text-slate-400 normal-case font-medium">leave empty to allow all</span>
@@ -1043,10 +1018,10 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                         <motion.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
-                            className="p-6 rounded-3xl bg-amber-500/5 border border-amber-500/10 space-y-4"
+                            className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/10 space-y-2"
                         >
                             <label className="text-[10px] font-black uppercase tracking-widest text-amber-600 block ml-1">Question Format (Respondent Options)</label>
-                            <div className="flex flex-wrap gap-2 pb-3 border-b border-amber-200/30">
+                            <div className="flex flex-wrap gap-2 pb-2 border-b border-amber-200/30">
                                 {[
                                     { mode: 'mcq', label: 'Multiple Choice: All Egypt', desc: 'Respondent picks from preset regions' },
                                     { mode: 'free_text', label: 'Free Text: Any Area', desc: 'Respondent types area manually (No gate)' }
@@ -1130,9 +1105,9 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                         <motion.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
-                            className="p-6 rounded-3xl bg-purple-500/5 border border-purple-500/10 space-y-4"
+                            className="p-4 rounded-2xl bg-purple-500/5 border border-purple-500/10 space-y-2"
                         >
-                            <div className="flex items-center gap-2 mb-2">
+                            <div className="flex items-center gap-2 mb-1">
                                 <GraduationCap className="w-4 h-4 text-emerald-500" />
                                 <label className="text-[10px] font-black uppercase tracking-widest text-emerald-500/70 block ml-1">
                                     Qualifying Education Levels — <span className="text-slate-400 normal-case font-medium">leave empty to allow all</span>
@@ -1187,7 +1162,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                         <motion.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
-                            className="p-6 rounded-3xl bg-rose-500/5 border border-rose-500/10 space-y-4"
+                            className="p-4 rounded-2xl bg-rose-500/5 border border-rose-500/10 space-y-2"
                         >
                             <label className="text-[10px] font-black uppercase tracking-widest text-rose-500/70 block ml-1">
                                 Qualifying Marital Status — <span className="text-slate-400 normal-case font-medium">leave empty to allow all</span>
@@ -1241,7 +1216,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                         <motion.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
-                            className="p-6 rounded-3xl bg-emerald-500/5 border border-emerald-500/10 space-y-4"
+                            className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 space-y-2"
                         >
                             <label className="text-[10px] font-black uppercase tracking-widest text-emerald-500/70 block ml-1">
                                 Qualifying Monthly Income — <span className="text-slate-400 normal-case font-medium">leave empty to allow all</span>
@@ -1280,7 +1255,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                         <motion.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
-                            className="p-6 rounded-3xl bg-emerald-500/5 border border-emerald-500/10 space-y-4"
+                            className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 space-y-2"
                         >
                             <label className="text-[10px] font-black uppercase tracking-widest text-emerald-500/70 block ml-1">
                                 Qualifying Occupations — <span className="text-slate-400 normal-case font-medium">leave empty to allow all</span>
@@ -1319,9 +1294,9 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                         <motion.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
-                            className="p-6 rounded-3xl bg-indigo-500/5 border border-indigo-500/10 space-y-4"
+                            className="p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/10 space-y-2"
                         >
-                            <div className="flex items-center justify-between gap-2 mb-2">
+                            <div className="flex items-center justify-between gap-2 mb-1">
                                 <div className="flex items-center gap-2">
                                     <Layers className="w-4 h-4 text-indigo-500" />
                                     <label className="text-[10px] font-black uppercase tracking-widest text-indigo-500/70 block ml-1">
@@ -1365,7 +1340,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                     );
                                 })}
                             </div>
-                            <div className="p-4 bg-indigo-500/10 rounded-2xl border border-indigo-500/20">
+                            <div className="p-3 bg-indigo-500/10 rounded-2xl border border-indigo-500/20">
                                 <p className="text-[9px] text-indigo-600 dark:text-indigo-400 font-bold leading-relaxed italic">
                                     ℹ SES formula: total_score = occupation(0-5) + education(1-5) + income(1-5)
                                 </p>

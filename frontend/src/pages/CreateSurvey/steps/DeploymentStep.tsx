@@ -42,8 +42,8 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
     };
 
     return (
-        <div className="space-y-10 text-left animate-slide-up">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 relative z-10">
+        <div className="space-y-6 text-left animate-slide-up">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-6 relative z-10">
                 <div className="flex items-center gap-4 transition-colors">
                     <div className="p-4 rounded-2xl bg-primary/10 text-primary-soft shadow-inner">
                         <Activity className="w-6 h-6" />
@@ -59,7 +59,7 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
             <section className="animate-slide-up">
                 <div className="glass-card bg-slate-50/50 dark:bg-slate-950/40 backdrop-blur-xl rounded-[3rem] border-2 border-line/80 dark:border-line/10 overflow-hidden transition-all shadow-premium">
                     {/* Header */}
-                    <div className="p-10 border-b-2 border-slate-200 dark:border-slate-900 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/50 dark:bg-slate-900/30">
+                    <div className="p-6 border-b-2 border-slate-200 dark:border-slate-900 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/50 dark:bg-slate-900/30">
                         <div className="flex items-center gap-5">
                             <div className={`p-4 rounded-2xl transition-all shadow-lg ${qc.is_enabled ? 'bg-primary text-white shadow-primary/20' : 'bg-slate-200 dark:bg-slate-800 text-slate-400'}`}>
                                 <Activity className="w-6 h-6" />
@@ -72,7 +72,7 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
 
                         <button
                             onClick={() => updateQC({ is_enabled: !qc.is_enabled })}
-                            className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${qc.is_enabled
+                            className={`flex items-center gap-3 px-8 py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${qc.is_enabled
                                 ? 'bg-emerald-500 text-white shadow-xl shadow-emerald-500/30 hover:scale-[1.02]'
                                 : 'bg-surface-sunken text-slate-400 border-2 border-slate-300 dark:border-slate-700'
                                 }`}
@@ -90,9 +90,9 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
                                 exit={{ height: 0, opacity: 0 }}
                                 transition={{ duration: 0.4, ease: "circOut" }}
                             >
-                                <div className="p-10 space-y-12">
+                                <div className="p-6 space-y-6">
                                     {/* Time Constraints Grid */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         {/* Min Time */}
                                         <div className="space-y-6 group">
                                             <div className="flex items-center justify-between px-1">
@@ -207,7 +207,7 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
 
             <section className="animate-slide-up">
                 <div className="glass-card bg-slate-50/50 dark:bg-slate-950/40 backdrop-blur-xl rounded-[3rem] border-2 border-line/80 dark:border-line/10 overflow-hidden transition-all shadow-premium">
-                    <div className="p-10 border-b-2 border-slate-200 dark:border-slate-900 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/50 dark:bg-slate-900/30">
+                    <div className="p-6 border-b-2 border-slate-200 dark:border-slate-900 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/50 dark:bg-slate-900/30">
                         <div className="flex items-center gap-5">
                             <div className={`p-4 rounded-2xl transition-all shadow-lg ${voice.is_enabled ? 'bg-indigo-600 text-white shadow-indigo-600/20' : 'bg-slate-200 dark:bg-slate-800 text-slate-400'}`}>
                                 <Mic className="w-6 h-6" />
@@ -222,7 +222,7 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
                         <button
                             type="button"
                             onClick={() => toggleVoice(!voice.is_enabled)}
-                            className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${voice.is_enabled
+                            className={`flex items-center gap-3 px-8 py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${voice.is_enabled
                                 ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-600/30 hover:scale-[1.02]'
                                 : 'bg-surface-sunken text-slate-400 border-2 border-slate-300 dark:border-slate-700'
                                 }`}
@@ -234,19 +234,19 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
                     <AnimatePresence mode="wait">
                         {voice.is_enabled && (
                             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
-                                <div className="p-10 space-y-8">
+                                <div className="p-6 space-y-5">
                                     <div className="p-6 rounded-3xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800">
                                         <p className="text-sm font-bold text-indigo-900 dark:text-indigo-200">
                                             Respondents can type, record, or do both on the same question.
                                         </p>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                         <div className="space-y-4">
                                             <label className="text-[10px] font-black uppercase tracking-widest">AI Analysis Pipeline</label>
                                             <button
                                                 type="button"
                                                 onClick={() => updateVoice({ ai_analysis_enabled: !voice.ai_analysis_enabled })}
-                                                className={`w-full flex items-center justify-between px-6 py-4 rounded-2xl border-2 ${voice.ai_analysis_enabled ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40' : 'border-slate-200 dark:border-slate-700'}`}
+                                                className={`w-full flex items-center justify-between px-6 py-5 rounded-2xl border-2 ${voice.ai_analysis_enabled ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40' : 'border-slate-200 dark:border-slate-700'}`}
                                             >
                                                 <span className="text-sm font-bold">Run transcription & NLP</span>
                                                 <span className="text-[10px] font-black uppercase">{voice.ai_analysis_enabled ? 'On' : 'Off'}</span>
@@ -257,7 +257,7 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
                                             <select
                                                 value={voice.transcription_language || 'auto'}
                                                 onChange={(e) => updateVoice({ transcription_language: e.target.value as 'auto' | 'en' | 'ar' })}
-                                                className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 rounded-2xl px-6 py-4 text-sm font-bold"
+                                                className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 rounded-2xl px-6 py-5 text-sm font-bold"
                                             >
                                                 <option value="auto">Auto-detect</option>
                                                 <option value="en">English</option>
