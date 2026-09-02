@@ -653,19 +653,23 @@ input[type=number] {
 /* ---------------------------------------------------------------------------
    Print mode — the report as it appears in an exported PDF.
 
-   Applied when the page is loaded with `?print=1`, which is how the server-side
-   PDF renderer requests a paper version. It is a real screen render, not a
-   print-stylesheet: headless Chromium prints the DOM, so anything left visible
-   here ends up in the file. The rules below remove the parts of the app that
-   only make sense in a browser — the fixed navigation rail, floating controls,
-   the export menu that produced this file — and stop cards from being sliced in
-   half across a page break.
+   Applied when the page loads with `?print=1`, which is how the server-side PDF
+   renderer asks for a paper version. It is a real screen render, not a print
+   stylesheet: headless Chromium prints the DOM, so anything left visible here
+   ends up in the file.
+
+   Two problems this solves. The app chrome — fixed rail, sticky toolbar, the
+   export control that produced the file — means nothing on paper and repeated
+   on every page. And the layout is built for a tall scrolling viewport, so
+   charts that size themselves against the window collided with their
+   neighbours once paginated. Everything below either removes chrome or gives
+   each chart a bounded, predictable block that a page break cannot cut through.
 --------------------------------------------------------------------------- */
 .report-print-mode {
   padding-left: 0 !important;
 }
 
-/* App chrome: navigation, floating buttons, and the export control itself. */
+/* App chrome: navigation, floating controls, and the export menu itself. */
 .report-print-mode .brand-rail,
 .report-print-mode [data-export-menu],
 .report-print-mode .focus-mode-overlay,
@@ -673,29 +677,81 @@ input[type=number] {
   display: none !important;
 }
 
-/* The mesh orbs are decorative gradients that turn into muddy blocks on paper
-   and inflate the file size for nothing. */
+/* Decorative gradients turn into muddy blocks on paper and inflate the file. */
 .report-print-mode .bg-mesh {
   display: none !important;
 }
 
-/* A sticky header repeats on every printed page; a static one appears once. */
+/* Nothing may be pinned to a viewport that does not exist on paper: a fixed or
+   sticky element repeats on every page or floats over the content under it. */
+.report-print-mode .fixed,
 .report-print-mode .sticky {
   position: static !important;
 }
 
+/* Viewport-relative heights are meaningless once paginated — a chart sized at
+   80vh overlaps whatever follows it. Let content define its own height. */
+.report-print-mode [class*="h-screen"],
+.report-print-mode [class*="min-h-screen"],
+.report-print-mode [class*="max-h-screen"] {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+}
+
+/* Recharts measures its container. Give every chart a fixed print height so it
+   renders at a known size instead of inheriting a collapsed one. */
+.report-print-mode .recharts-responsive-container {
+  height: 320px !important;
+  min-height: 320px !important;
+}
+
+/* Multi-column grids stack: two charts side by side on a 1600px viewport become
+   two unreadable slivers at A4 width. */
+.report-print-mode .grid {
+  display: block !important;
+}
+.report-print-mode .grid > * {
+  margin-bottom: 1rem;
+}
+
+/* Panels that scroll on screen must show their whole contents on paper —
+   otherwise the export silently truncates a table at its scroll edge. */
+.report-print-mode [class*="overflow-y-auto"],
+.report-print-mode [class*="overflow-auto"],
+.report-print-mode [class*="overflow-hidden"] {
+  overflow: visible !important;
+}
+
+/* Entry animations can be mid-flight when the printer fires, leaving elements
+   part-way through a translate or at zero opacity. */
+.report-print-mode * {
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+  opacity: 1 !important;
+}
+
 @media print {
-  /* Keep a chart and its insight on the same sheet — a chart separated from
-     the sentence explaining it is the main way an exported report loses its
-     meaning. */
+  @page {
+    size: A4 landscape;
+    margin: 12mm 10mm 14mm;
+  }
+
+  /* Keep a chart with the insight that explains it. A chart separated from its
+     sentence is the main way an exported report loses its meaning. */
   section,
   .chart-card,
-  [data-chart-card] {
+  [data-chart-card],
+  .recharts-responsive-container,
+  .panel {
     break-inside: avoid;
     page-break-inside: avoid;
   }
 
-  section {
-    break-after: auto;
+  /* A heading stranded at the foot of a page belongs with what follows it. */
+  h1, h2, h3 {
+    break-after: avoid;
+    page-break-after: avoid;
   }
 }

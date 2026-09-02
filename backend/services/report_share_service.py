@@ -173,6 +173,25 @@ async def create_or_get_share(survey_id: str, username: Optional[str] = None) ->
     return await create_share(survey_id, username=username)
 
 
+async def find_live_share(survey_id: str) -> Optional[Dict[str, Any]]:
+    """
+    The report's usable link, or None.
+
+    Read-only: unlike `get_or_create_master_share` this never creates one, so a
+    caller can ask "is this already shared?" before deciding whether the report
+    is even eligible to be shared.
+    """
+    share = await db.get_collection(COLLECTION).find_one(
+        {"survey_id": survey_id, "revoked_at": None}
+    )
+    if not share:
+        return None
+    expires_at = _as_aware(share.get("expires_at"))
+    if expires_at and expires_at < _now():
+        return None
+    return share
+
+
 async def get_or_create_master_share(
     survey_id: str,
     *,

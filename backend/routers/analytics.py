@@ -333,6 +333,42 @@ class ShareLinkSettings(BaseModel):
     unlimited_expiry: bool = False
 
 
+async def _require_shareable_report(survey_id: str) -> Dict[str, Any]:
+    """
+    Refuse to mint a link for a report a client could not read.
+
+    Nothing used to check this, so a link could be created for a survey with no
+    report at all — or with a report that came out empty — and the failure only
+    surfaced later, on the recipient's screen, as a blank page. Failing here
+    instead puts the problem in front of the person who can fix it, with the
+    reason attached.
+    """
+    report = await db.get_collection("survey_reports").find_one(
+        {"survey_id": survey_id}, sort=[("generated_at", -1)]
+    )
+    if not report:
+        raise HTTPException(
+            409,
+            detail={
+                "code": "no_report",
+                "message": "Generate the report before sharing it.",
+            },
+        )
+    if report.get("status") not in ("ready", "stale"):
+        raise HTTPException(
+            409,
+            detail={
+                "code": "report_not_ready",
+                "message": "The report is still being generated. Try again once it is ready.",
+            },
+        )
+    # An empty report is deliberately NOT blocked here. Sharing one is allowed;
+    # the shared page states plainly that there was not enough data rather than
+    # rendering a blank screen, which is the part that actually needed fixing.
+    # Only the two states a link genuinely cannot serve are refused above.
+    return report
+
+
 @router.get("/report/{survey_id}/share-link")
 async def get_report_share_link(
     survey_id: str,
@@ -346,9 +382,34 @@ async def get_report_share_link(
     this report" is never ambiguous. Safe to call repeatedly; it returns the
     same URL rather than minting another.
     """
+    existing = await report_share_service.find_live_share(survey_id)
+    if existing is None:
+        await _require_shareable_report(survey_id)
+
     share = await report_share_service.get_or_create_master_share(
         survey_id, username=getattr(current_user, "username", None)
     )
+    return report_share_service.to_admin_dict(share, base_url=_share_base_url(request))
+
+
+@router.get("/report/{survey_id}/share-link/peek")
+async def peek_report_share_link(
+    survey_id: str,
+    request: Request,
+    current_user: Annotated[User, Depends(get_current_active_analyst)],
+):
+    """
+    Report the existing link without creating one. Returns null if unshared.
+
+    The list views need this: `GET /share-link` mints a link when none exists,
+    so calling it once per row meant opening the reports grid silently created
+    a share link for every report — writes on a read, and a round trip per row
+    before the page settled. Reading is the common case and it should not
+    change anything.
+    """
+    share = await report_share_service.find_live_share(survey_id)
+    if not share:
+        return None
     return report_share_service.to_admin_dict(share, base_url=_share_base_url(request))
 
 
@@ -577,19 +638,36 @@ async def _render_pdf_or_502(
 
 
 def _pdf_filename(report: Dict[str, Any], survey_id: str) -> str:
-    raw = (report or {}).get("metadata", {}).get("title") or f"report-{survey_id}"
-    safe = re.sub(r"[^A-Za-z0-9._-]+", "-", str(raw)).strip("-") or f"report-{survey_id}"
-    return f"{safe}.pdf"
+    """
+    Name a PDF the way a PPTX is named.
+
+    Both formats now go through `build_export_filename`, so a report downloaded
+    in either arrives as "Project Name - Marketeers Report.ext" rather than the
+    PDF being named after a raw ObjectId while the deck read properly. Arabic
+    project titles survive — Starlette encodes them via RFC 5987.
+    """
+    project = (report or {}).get("project_name") or (report or {}).get("metadata", {}).get("title")
+    return build_export_filename(project or f"Survey Report {survey_id[:8]}", "Marketeers Report", "pdf")
 
 
 async def _require_ready_report(survey_id: str) -> Dict[str, Any]:
+    """
+    The report to export, whatever shape it is in.
+
+    Only two states are refused, and both because there is literally nothing to
+    print: no report document at all, or one still being generated. A report
+    with few charts — or none, because respondents passed screening without
+    completing the evaluation — still exports. It carries the respondent counts,
+    the project metadata and whatever charts exist, and that is a legitimate
+    thing to hand to a client.
+    """
     report = await db.get_collection("survey_reports").find_one(
         {"survey_id": survey_id}, sort=[("generated_at", -1)]
     )
     if not report:
-        raise HTTPException(404, "Report not found.")
-    if report.get("status") not in ("ready", "stale"):
-        raise HTTPException(409, "Report is not ready yet.")
+        raise HTTPException(404, "No report has been generated for this survey yet.")
+    if report.get("status") == "generating":
+        raise HTTPException(409, "The report is still being generated. Try again shortly.")
     return report
 
 

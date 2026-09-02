@@ -5,6 +5,7 @@ import { getMasterLink } from '../utils/surveyLinks';
 import { toast } from 'sonner';
 import { SurveyStateToggle } from '../components/SurveyStateManagement';
 import {
+    Archive,
     Share2,
     Plus,
     Users,
@@ -44,6 +45,10 @@ export default function SurveysPage() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [deletingId, setDeletingId] = useState<string | null>(null);
+    // Archive is the default because it is the reversible one. Permanent has to
+    // be chosen deliberately — it is the only destructive action in this table.
+    const [deleteMode, setDeleteMode] = useState<'archive' | 'permanent'>('archive');
+    const [deleteBusy, setDeleteBusy] = useState(false);
     const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'draft' | 'closed'>('all');
     const [page, setPage] = useState(1);
     const [reportStatuses, setReportStatuses] = useState<Record<string, string>>({});
@@ -64,14 +69,33 @@ export default function SurveysPage() {
         fetchSurveys();
     }, []);
 
-    const handleDelete = async (id: string) => {
+    const handleDelete = async (id: string, permanent: boolean) => {
+        setDeleteBusy(true);
         try {
-            await surveys.delete(id);
-            toast.success('Survey archived successfully');
+            const res = await surveys.delete(id, { permanent });
+            if (permanent) {
+                // Name what went, so a permanent delete is auditable from the
+                // UI and not just a row disappearing.
+                const removed = res?.removed ?? {};
+                const total = Object.values(removed).reduce(
+                    (sum: number, n: any) => sum + Number(n || 0),
+                    0
+                );
+                toast.success(
+                    total > 0
+                        ? `Survey permanently deleted, along with ${total} related record${total === 1 ? '' : 's'}.`
+                        : 'Survey permanently deleted.'
+                );
+            } else {
+                toast.success('Survey archived. It can be restored.');
+            }
             setDeletingId(null);
+            setDeleteMode('archive');
             fetchSurveys();
-        } catch (err) {
-            toast.error('Failed to archive survey');
+        } catch {
+            toast.error(permanent ? 'Failed to delete survey' : 'Failed to archive survey');
+        } finally {
+            setDeleteBusy(false);
         }
     };
 
@@ -251,25 +275,91 @@ export default function SurveysPage() {
                             animate={{ scale: 1, y: 0 }}
                             className="bg-surface rounded-[2.5rem] p-10 max-w-md w-full border border-line/80 dark:border-line/10 shadow-2xl text-center"
                         >
-                            <div className="w-20 h-20 bg-rose-50 dark:bg-rose-950/20 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-rose-100 dark:border-rose-900/30">
-                                <Trash2 className="w-10 h-10 text-rose-500" />
+                            <div
+                                className={`w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-5 border ${
+                                    deleteMode === 'permanent'
+                                        ? 'bg-rose-50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/40'
+                                        : 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/40'
+                                }`}
+                            >
+                                {deleteMode === 'permanent' ? (
+                                    <Trash2 className="w-8 h-8 text-rose-500" />
+                                ) : (
+                                    <Archive className="w-8 h-8 text-amber-500" />
+                                )}
                             </div>
-                            <h3 className="text-2xl font-display font-black mb-3 text-ink">Archive Survey?</h3>
-                            <p className="text-ink-muted font-bold mb-8 leading-relaxed">
-                                This survey will be archived. Associated links remain valid but the survey will no longer appear in the active registry.
-                            </p>
-                            <div className="grid grid-cols-2 gap-4">
+
+                            <h3 className="text-xl font-display font-black mb-2 text-ink">
+                                {deleteMode === 'permanent' ? 'Delete permanently?' : 'Archive this survey?'}
+                            </h3>
+
+                            {/* Mode picker. Both options are always visible rather
+                                than permanent being hidden behind a second
+                                confirmation — the choice is the point, and the
+                                consequences of each are stated next to it. */}
+                            <div className="grid grid-cols-2 gap-2 mt-5 mb-5 text-left">
                                 <button
-                                    onClick={() => setDeletingId(null)}
-                                    className="px-6 py-4 rounded-2xl bg-surface-raised text-ink-muted font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition-all border border-slate-200 dark:border-slate-700"
+                                    onClick={() => setDeleteMode('archive')}
+                                    className={`p-3 rounded-2xl border-2 transition-all ${
+                                        deleteMode === 'archive'
+                                            ? 'border-amber-500 bg-amber-500/[0.07]'
+                                            : 'border-line/80 dark:border-line/10 hover:border-amber-500/40'
+                                    }`}
+                                >
+                                    <span className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-ink">
+                                        <Archive className="w-3.5 h-3.5" /> Archive
+                                    </span>
+                                    <span className="block text-[11px] text-ink-muted mt-1.5 leading-snug">
+                                        Hidden from lists. Responses kept and it can be restored.
+                                    </span>
+                                </button>
+                                <button
+                                    onClick={() => setDeleteMode('permanent')}
+                                    className={`p-3 rounded-2xl border-2 transition-all ${
+                                        deleteMode === 'permanent'
+                                            ? 'border-rose-500 bg-rose-500/[0.07]'
+                                            : 'border-line/80 dark:border-line/10 hover:border-rose-500/40'
+                                    }`}
+                                >
+                                    <span className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-ink">
+                                        <Trash2 className="w-3.5 h-3.5" /> Permanent
+                                    </span>
+                                    <span className="block text-[11px] text-ink-muted mt-1.5 leading-snug">
+                                        Erased from the database. Cannot be undone.
+                                    </span>
+                                </button>
+                            </div>
+
+                            <p className="text-xs text-ink-muted font-medium mb-6 leading-relaxed">
+                                {deleteMode === 'permanent'
+                                    ? 'The survey and everything belonging to it — responses, reports, share links, respondent tokens — will be erased. Any link already sent out stops working.'
+                                    : 'The survey disappears from the registry. Existing links keep working and nothing is lost.'}
+                            </p>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <button
+                                    onClick={() => {
+                                        setDeletingId(null);
+                                        setDeleteMode('archive');
+                                    }}
+                                    className="px-6 py-3.5 rounded-2xl bg-surface-raised text-ink-muted font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition-all border border-slate-200 dark:border-slate-700"
                                 >
                                     Cancel
                                 </button>
                                 <button
-                                    onClick={() => handleDelete(deletingId)}
-                                    className="px-6 py-4 rounded-2xl bg-rose-500 text-white font-black uppercase tracking-widest text-xs shadow-lg shadow-rose-500/20 hover:bg-rose-600 transition-all"
+                                    onClick={() => handleDelete(deletingId, deleteMode === 'permanent')}
+                                    disabled={deleteBusy}
+                                    className={`px-6 py-3.5 rounded-2xl text-white font-black uppercase tracking-widest text-xs shadow-lg transition-all disabled:opacity-60 ${
+                                        deleteMode === 'permanent'
+                                            ? 'bg-rose-600 shadow-rose-600/20 hover:bg-rose-700'
+                                            : 'bg-amber-500 shadow-amber-500/20 hover:bg-amber-600'
+                                    }`}
                                 >
-                                    Archive
+                                    {deleteBusy
+                                        ? 'Working…'
+                                        : deleteMode === 'permanent'
+                                          ? 'Delete Forever'
+                                          : 'Archive'}
                                 </button>
                             </div>
                         </motion.div>
@@ -445,20 +535,62 @@ export default function SurveysPage() {
                                         <td className="px-10 py-7 border-b border-slate-50 dark:border-slate-800/50 text-center">
                                             {(() => {
                                                 const status = reportStatuses[survey._id];
-                                                if (status === 'complete' || status === 'ready') {
+
+                                                /*
+                                                 * Reporting happens in two phases, and the row has to make
+                                                 * both reachable.
+                                                 *
+                                                 * Interim: fieldwork is still running and the analyst wants
+                                                 * an early read. Final: the target has been reached, and the
+                                                 * report needs regenerating over the complete sample.
+                                                 *
+                                                 * The generate control therefore stays on the row *after* a
+                                                 * report exists, beside View and Share, rather than being
+                                                 * replaced by them — otherwise an interim report becomes a
+                                                 * dead end and the final one can only be produced by
+                                                 * opening the report and hunting for Regenerate.
+                                                 */
+                                                const reached = survey.respondent_count || 0;
+                                                const target = survey.sample_capacity || survey.respondent_target || 0;
+                                                const targetMet = target > 0 && reached >= target;
+                                                const hasReport = status === 'complete' || status === 'ready';
+
+                                                if (status === 'generating') {
+                                                    return (
+                                                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 text-white font-black text-[10px] uppercase tracking-wider mx-auto shadow-sm">
+                                                            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                                                            In Progress
+                                                        </div>
+                                                    );
+                                                }
+
+                                                if (hasReport) {
                                                     return (
                                                         <div className="flex items-center justify-center gap-2 whitespace-nowrap">
-                                                            <span className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest bg-emerald-100 dark:bg-emerald-500/20 px-2.5 py-1 rounded-full border border-emerald-500/40 whitespace-nowrap">Ready</span>
+                                                            <span
+                                                                className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border whitespace-nowrap ${
+                                                                    targetMet
+                                                                        ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-500/20 border-emerald-500/40'
+                                                                        : 'text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-500/20 border-amber-500/40'
+                                                                }`}
+                                                                title={
+                                                                    targetMet
+                                                                        ? 'Generated over the full sample'
+                                                                        : `Generated at ${reached} of ${target} responses`
+                                                                }
+                                                            >
+                                                                {targetMet ? 'Final' : 'Interim'}
+                                                            </span>
                                                             <Link
                                                                 to={`/surveys/${survey._id}/report`}
                                                                 className="px-3 py-1.5 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-wider rounded-lg shadow-sm shadow-indigo-600/25 hover:bg-indigo-500 transition-all whitespace-nowrap"
                                                             >
-                                                                View Report
+                                                                View
                                                             </Link>
-                                                            {/* Sharing settings belong next to the report they govern.
-                                                                Kept on this row because this table is where an analyst
-                                                                decides a report is finished — the same moment they
-                                                                decide who may read it and for how long. */}
+                                                            {/* Sharing settings belong next to the report they govern:
+                                                                this table is where an analyst decides a report is
+                                                                ready, which is the same moment they decide who may
+                                                                read it and for how long. */}
                                                             <button
                                                                 onClick={() =>
                                                                     setShareTarget({
@@ -472,23 +604,45 @@ export default function SurveysPage() {
                                                                 <Share2 className="w-3 h-3" />
                                                                 Share
                                                             </button>
+                                                            {/* Phase two. Labelled by what it will produce, not by the
+                                                                mechanism — "Generate Final" tells the analyst the
+                                                                sample is complete; "Refresh Interim" says new
+                                                                responses have arrived since the last run. */}
+                                                            <button
+                                                                onClick={() => handleGenerateReport(survey._id)}
+                                                                className={`px-3 py-1.5 flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all whitespace-nowrap ${
+                                                                    targetMet
+                                                                        ? 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-sm'
+                                                                        : 'bg-surface-raised border border-line/80 dark:border-line/10 text-ink-muted hover:text-primary-soft hover:border-primary/40'
+                                                                }`}
+                                                                title={
+                                                                    targetMet
+                                                                        ? `Regenerate over the full sample of ${reached} responses`
+                                                                        : `Rebuild with the ${reached} responses collected so far`
+                                                                }
+                                                            >
+                                                                <RefreshCw className="w-3 h-3" />
+                                                                {targetMet ? 'Generate Final' : 'Refresh Interim'}
+                                                            </button>
                                                         </div>
                                                     );
                                                 }
-                                                if (status === 'generating') {
-                                                    return (
-                                                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 text-white font-black text-[10px] uppercase tracking-wider mx-auto shadow-sm">
-                                                            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                                                            In Progress
-                                                        </div>
-                                                    );
-                                                }
+
+                                                // No report yet. The label says which phase this run belongs
+                                                // to, so an early read is a deliberate choice rather than
+                                                // something an analyst does without realising the sample is
+                                                // still incomplete.
                                                 return (
                                                     <button
                                                         onClick={() => handleGenerateReport(survey._id)}
-                                                        className="px-3 py-1.5 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-wider rounded-lg hover:bg-indigo-500 transition-all shadow-sm w-full"
+                                                        className="px-3 py-1.5 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-wider rounded-lg hover:bg-indigo-500 transition-all shadow-sm w-full whitespace-nowrap"
+                                                        title={
+                                                            targetMet
+                                                                ? `Generate over the full sample of ${reached} responses`
+                                                                : `Generate an early read from ${reached} of ${target} responses`
+                                                        }
                                                     >
-                                                        Generate Report
+                                                        {targetMet ? 'Generate Report' : 'Generate Interim'}
                                                     </button>
                                                 );
                                             })()}

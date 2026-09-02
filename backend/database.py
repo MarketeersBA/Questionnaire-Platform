@@ -142,6 +142,25 @@ class Database:
                 ("metadata.token", 1),
             ])
 
+            # Report share links. This collection had no indexes at all, so every
+            # link resolution — which happens on each page load of a shared
+            # report — was a full collection scan.
+            shares = self.get_collection("report_shares")
+            # `token` is how a visitor's URL is resolved; unique because two
+            # links must never collide, and partial so documents predating the
+            # field do not block index creation.
+            await shares.create_index(
+                "token",
+                unique=True,
+                partialFilterExpression={"token": {"$exists": True}},
+            )
+            await shares.create_index(
+                "share_id",
+                partialFilterExpression={"share_id": {"$exists": True}},
+            )
+            # The admin lookup: "the live link for this survey".
+            await shares.create_index([("survey_id", 1), ("revoked_at", 1)])
+
             logger.info(
                 "Database indexes ensured for survey_reports, voice_feedbacks, question_modules, "
                 "survey_sessions, packaging_heatmap_aggregates, product_test_media_assets, "

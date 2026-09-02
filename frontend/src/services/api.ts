@@ -231,17 +231,81 @@ export const templates = {
   },
 };
 
+/**
+ * Shared, short-lived result for the survey list.
+ *
+ * Seven components call `surveys.list()`, and several mount together — the
+ * dashboard, the surveys table, the reports grid, the command palette. Each was
+ * issuing its own request for the same ~1 MB payload, so navigating the app
+ * produced a burst of identical fetches that queued behind one another.
+ *
+ * Two mechanisms, deliberately both:
+ *   - an in-flight promise, so simultaneous callers share one request. This is
+ *     exact: nobody can observe stale data because there is only ever one
+ *     answer in flight.
+ *   - a 4-second window afterwards, which covers navigating between pages
+ *     without re-fetching, and is far shorter than the time it takes anyone to
+ *     create or edit a survey and look for it.
+ *
+ * Mutations call `invalidateSurveyList()` so a change is never waited out.
+ */
+const SURVEY_LIST_TTL_MS = 4000;
+let surveyListInFlight: Promise<any> | null = null;
+let surveyListCache: { at: number; data: any } | null = null;
+
+export function invalidateSurveyList(): void {
+  surveyListCache = null;
+  surveyListInFlight = null;
+}
+
 export const surveys = {
-  list: (options?: RequestOptions) => api.get('/surveys/', options).then((res) => res.data),
-  create: (data: any, options?: RequestOptions) => api.post('/surveys/', data, options).then((res) => res.data),
+  /**
+   * All surveys. Deduplicated and briefly cached — see the notes above.
+   *
+   * Pass `{ fresh: true }` after a mutation, or when the caller specifically
+   * needs to see a change it just made.
+   */
+  list: (options?: RequestOptions & { fresh?: boolean }) => {
+    if (options?.fresh) invalidateSurveyList();
+
+    if (surveyListCache && Date.now() - surveyListCache.at < SURVEY_LIST_TTL_MS) {
+      return Promise.resolve(surveyListCache.data);
+    }
+    if (surveyListInFlight) return surveyListInFlight;
+
+    surveyListInFlight = api
+      .get('/surveys/', options)
+      .then((res) => {
+        surveyListCache = { at: Date.now(), data: res.data };
+        return res.data;
+      })
+      .finally(() => {
+        // Cleared either way: a failed request must not wedge every later
+        // caller onto a rejected promise.
+        surveyListInFlight = null;
+      });
+
+    return surveyListInFlight;
+  },
+  create: (data: any, options?: RequestOptions) => api.post('/surveys/', data, options).then((res) => { invalidateSurveyList(); return res.data; }),
   checkCode: (code: string, excludeId?: string | null, options?: RequestOptions) => {
     let url = `/surveys/check-code/${code}`;
     if (excludeId) url += `?exclude_id=${excludeId}`;
     return api.get(url, options).then((res) => res.data);
   },
   get: (id: string, options?: RequestOptions) => api.get(`/surveys/${id}`, options).then((res) => res.data),
-  update: (id: string, data: any, options?: RequestOptions) => api.put(`/surveys/${id}`, data, options).then((res) => res.data),
-  delete: (id: string, options?: RequestOptions) => api.delete(`/surveys/${id}`, options).then((res) => res.data),
+  update: (id: string, data: any, options?: RequestOptions) => api.put(`/surveys/${id}`, data, options).then((res) => { invalidateSurveyList(); return res.data; }),
+  /**
+   * Remove a survey. Archives by default.
+   *
+   * `permanent` erases the survey and everything belonging to it — responses,
+   * reports, share links, respondent tokens, cached insights. Not reversible,
+   * so the caller has to ask for it rather than getting it by default.
+   */
+  delete: (id: string, opts?: { permanent?: boolean }, options?: RequestOptions) =>
+    api
+      .delete(`/surveys/${id}${opts?.permanent ? '?permanent=true' : ''}`, options)
+      .then((res) => { invalidateSurveyList(); return res.data; }),
   stats: (options?: RequestOptions) => api.get('/surveys/stats', options).then((res) => res.data),
 };
 
@@ -322,6 +386,18 @@ export const analytics = {
    */
   getShareLink: async (surveyId: string, options?: RequestOptions): Promise<ReportShareLink> =>
     (await api.get(`/analytics/report/${surveyId}/share-link`, options)).data,
+
+  /**
+   * The existing share link, or null. Never creates one.
+   *
+   * For list views, where `getShareLink`'s create-on-miss behaviour would turn
+   * rendering a grid into one write per row.
+   */
+  peekShareLink: async (
+    surveyId: string,
+    options?: RequestOptions
+  ): Promise<ReportShareLink | null> =>
+    (await api.get(`/analytics/report/${surveyId}/share-link/peek`, options)).data,
 
   /** Change the viewer limit or expiry. The URL is unaffected. */
   updateShareLink: async (

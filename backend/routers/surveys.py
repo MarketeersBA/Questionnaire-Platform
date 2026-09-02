@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from typing import List, Annotated, Optional
+from typing import Any, Dict, List, Annotated, Optional
 from bson import ObjectId
 
 from datetime import datetime, timedelta
@@ -426,49 +426,161 @@ async def create_survey(
 
     return created_survey
 
+#: Heavy fields left out of the survey *list*.
+#:
+#: A survey document carries its whole authored structure — every question,
+#: every brand rotation, every generated respondent token. Across 43 surveys
+#: that was most of the 3.0 MB this endpoint returned, and no list caller reads
+#: any of it: the list views need names, counts and status, while cloning and
+#: editing fetch a single survey by id and get the full document.
+#:
+#: The cost was not the query but serialising and shipping 3 MB on every call,
+#: from several pages at once — which is how this endpoint came to average
+#: nearly a minute under load.
+#:
+#: Only fields that are OPTIONAL on the `Survey` response model may appear
+#: here. `template_snapshot_schema` and `template_snapshot_questions` are
+#: required, so excluding them made every response fail validation with a 500
+#: and the whole UI render as zeroes. Anything added below must be checked
+#: against `Survey.model_fields[...].is_required()` first.
+LIST_PROJECTION = {
+    "template_snapshot_l2": 0,
+    "module_snapshots": 0,
+    "product_test_snapshot": 0,
+    "generated_tokens": 0,
+}
+
+
 @router.get("/", response_model=List[Survey])
 async def list_surveys(
     current_user: Annotated[User, Depends(get_current_user)]
 ):
     surveys_col = db.get_collection("surveys")
-    
+
     # Global Visibility: All roles see all non-deleted surveys
     query = {"is_deleted": {"$ne": True}}
-        
-    surveys_list = await surveys_col.find(query).sort("created_at", -1).to_list(1000)
+
+    surveys_list = (
+        await surveys_col.find(query, LIST_PROJECTION)
+        .sort("created_at", -1)
+        .to_list(1000)
+    )
     return surveys_list
+
+
+#: Everything that belongs to a survey and has to go with it on a permanent
+#: delete. Leaving any of these behind produces orphans that still consume
+#: space and, worse, still resolve: a stray `report_shares` row keeps a client
+#: URL alive after the survey it points at is gone.
+#:
+#: Keyed by collection, valued by the field holding the survey id, because the
+#: schema is not consistent about the name.
+SURVEY_OWNED_COLLECTIONS = {
+    "responses": "survey_id",
+    "survey_responses": "survey_id",
+    "survey_reports": "survey_id",
+    "report_shares": "survey_id",
+    "tokens": "survey_id",
+    "survey_sessions": "survey_id",
+    "ai_insight_cache": "survey_id",
+    "packaging_heatmap_aggregates": "survey_id",
+    "packaging_heatmap_feedback": "survey_id",
+    "product_test_media_assets": "survey_id",
+    "voice_feedbacks": "survey_id",
+    "orphan_submissions": "survey_id",
+}
 
 
 @router.delete("/{survey_id}")
 async def delete_survey(
     survey_id: str,
-    current_user: Annotated[User, Depends(get_current_active_analyst)]
+    current_user: Annotated[User, Depends(get_current_active_analyst)],
+    permanent: bool = False,
 ):
+    """
+    Remove a survey. Archived by default; `permanent=true` erases it.
+
+    Archiving sets `is_deleted` and hides the survey from every list, which is
+    the right default because it is reversible — an archived survey and all its
+    responses can be brought back.
+
+    A permanent delete removes the survey document and everything that belongs
+    to it: responses, reports, share links, respondent tokens, cached AI
+    insights, media. That is not reversible, which is why it has to be asked
+    for explicitly rather than being what the delete button happens to do.
+
+    Related records are removed *before* the survey itself, so an interruption
+    part-way through leaves the survey still present with less data attached —
+    recoverable and visible — rather than a vanished survey with orphaned rows
+    pointing at an id that no longer exists.
+    """
     if not ObjectId.is_valid(survey_id):
         raise HTTPException(status_code=400, detail="Invalid survey ID")
-        
+
     surveys_col = db.get_collection("surveys")
     survey = await surveys_col.find_one({"_id": ObjectId(survey_id)})
-    
+
     if not survey:
         raise HTTPException(status_code=404, detail="Survey not found")
-        
-    # Soft delete
-    await surveys_col.update_one(
-        {"_id": ObjectId(survey_id)},
-        {"$set": {"is_deleted": True}}
+
+    if not permanent:
+        await surveys_col.update_one(
+            {"_id": ObjectId(survey_id)},
+            {"$set": {"is_deleted": True}}
+        )
+        logger.info("Survey %s archived by %s", survey_id, current_user.username)
+        await log_action(
+            user=current_user,
+            action="delete_survey",
+            resource_type="surveys",
+            resource_id=survey_id,
+        )
+        return {
+            "status": "success",
+            "mode": "archived",
+            "message": "Survey archived. It is hidden from lists but can be restored.",
+        }
+
+    deleted: Dict[str, int] = {}
+    for collection_name, field in SURVEY_OWNED_COLLECTIONS.items():
+        try:
+            result = await db.get_collection(collection_name).delete_many(
+                {field: survey_id}
+            )
+            if result.deleted_count:
+                deleted[collection_name] = int(result.deleted_count)
+        except Exception:
+            # One unreachable or absent collection must not abort the delete and
+            # strand the survey half-erased; the survey stays until the end.
+            logger.warning(
+                "Permanent delete: could not clear %s for survey %s",
+                collection_name,
+                survey_id,
+                exc_info=True,
+            )
+
+    await surveys_col.delete_one({"_id": ObjectId(survey_id)})
+
+    logger.info(
+        "Survey %s PERMANENTLY deleted by %s | removed=%s",
+        survey_id,
+        current_user.username,
+        deleted,
     )
-    
-    logger.info(f"Survey {survey_id} soft-deleted by {current_user.username}")
-    
     await log_action(
         user=current_user,
-        action="delete_survey",
+        action="permanently_delete_survey",
         resource_type="surveys",
-        resource_id=survey_id
+        resource_id=survey_id,
+        details={"removed": deleted, "company_name": survey.get("company_name")},
     )
-    
-    return {"status": "success", "message": "Survey removed successfully"}
+
+    return {
+        "status": "success",
+        "mode": "permanent",
+        "message": "Survey and all its data were permanently deleted.",
+        "removed": deleted,
+    }
 
 @router.get("/{survey_id}", response_model=Survey)
 async def get_survey(

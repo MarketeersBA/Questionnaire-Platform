@@ -255,10 +255,20 @@ export default function SurveyReport() {
 
     const fetchReport = useCallback(async () => {
         try {
-            if (!surveyId) return;
+            // `/r/:shareToken` renders this same component for a client with no
+            // account, so the token is an equally valid way to identify the
+            // report. Guarding on `surveyId` alone made the shared route return
+            // before it fetched anything: no request, no error, and the loading
+            // skeleton left on screen forever.
+            if (!surveyId && !shareToken) {
+                setLoading(false);
+                return;
+            }
             setError(null);
 
-            const data = await analytics.getReport(surveyId);
+            const data = shareToken
+                ? await analytics.getSharedReport(shareToken)
+                : await analytics.getReport(surveyId!);
 
             if (data?.status === 'failed') {
                 const msg = data.error_message || 'The report could not be generated at this time.';
@@ -501,6 +511,23 @@ export default function SurveyReport() {
         );
     }
 
+    // A report can be "ready" and still have no charts — most often because
+    // respondents passed screening but never submitted the evaluation layer, so
+    // there are no attribute scores to plot.
+    //
+    // This used to stop the page and show only an explanation. That was wrong:
+    // it withheld everything the report *does* have (respondent counts,
+    // screening data, project metadata, the export buttons) over the absence of
+    // one part. The report now always renders; a banner states what is missing
+    // so nobody mistakes an incomplete report for a complete one.
+    const chartCount =
+        (report?.charts?.length ?? 0) +
+        (report?.sections ?? []).reduce(
+            (sum: number, section: any) => sum + (section?.charts?.length ?? 0),
+            0
+        );
+    const hasNoCharts = Boolean(report) && chartCount === 0;
+
     const hasPptx = report?.pptx_path && report.pptx_path.trim() !== '';
 
     // NEW PIPELINE: Use flat charts[] if available, otherwise fallback to sections
@@ -550,6 +577,7 @@ export default function SurveyReport() {
                 onExportReady={fetchReport}
                 handleExport={handleExport}
                 isPrintMode={isPrintMode}
+                hasNoCharts={hasNoCharts}
             />
         </ReportProvider>
     );
@@ -580,6 +608,7 @@ interface ReportContentProps {
     onExportReady: () => Promise<void>;
     handleExport: (format: ExportFormat) => Promise<void>;
     isPrintMode: boolean;
+    hasNoCharts: boolean;
 }
 
 function ReportContent({
@@ -587,7 +616,7 @@ function ReportContent({
     handleApplySlice, isSlicing, isDark, toggleTheme, handleGenerate,
     hasPptx, charts, strategicCharts, chartGroups, groupNames, hasNewPipeline,
     loading, navigate, isExportModalOpen, setIsExportModalOpen, onExportReady,
-    handleExport, isPrintMode
+    handleExport, isPrintMode, hasNoCharts
 }: ReportContentProps) {
     const { surveyId, shareToken } = useParams<{ surveyId: string; shareToken: string }>();
     // A client viewing via a share link has no account, so account-only chrome
@@ -778,8 +807,9 @@ function ReportContent({
                     className="absolute inset-x-0 bottom-0 h-px pointer-events-none"
                     style={{ background: 'linear-gradient(90deg, rgb(var(--c-primary)), rgb(var(--c-accent)) 55%, transparent)' }}
                 />
-                <div className="max-w-[1600px] mx-auto px-8 flex justify-between items-center">
-                    <div className="flex items-center gap-6">
+                <div className="max-w-[1600px] mx-auto px-8 flex flex-col gap-3">
+                  <div className="flex justify-between items-center gap-6">
+                    <div className="flex items-center gap-6 min-w-0">
                         <button
                             onClick={() => navigate('/surveys')}
                             className="w-11 h-11 grid place-items-center bg-surface border border-primary/20 rounded-2xl hover:border-primary/50 hover:bg-primary/[0.06] hover:text-primary-soft transition-all text-ink-muted group"
@@ -818,7 +848,7 @@ function ReportContent({
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-2.5 shrink-0">
                         <FilterPanel
                             availableFilters={report?.available_filters || {}}
                             brands={report?.brands || report?.brand_list || []}
@@ -876,14 +906,16 @@ function ReportContent({
                         */}
                         <ExportMenu onExport={handleExport} hasPptx={hasPptx} />
                     </div>
+                  </div>
 
-                    {/* Its own row: the URL needs horizontal space, and squeezing
-                        it into the button cluster truncated it to uselessness. */}
-                    {!isSharedView && !isPrintMode && surveyId && (
-                      <div className="flex justify-end mt-3">
-                        <ReportShareBar surveyId={surveyId} />
-                      </div>
-                    )}
+                  {/* Its own row. The URL needs horizontal space, and sharing a
+                      line with the button cluster truncated it to uselessness
+                      and pushed the toolbar past the edge of the header. */}
+                  {!isSharedView && !isPrintMode && surveyId && (
+                    <div className="flex justify-end">
+                      <ReportShareBar surveyId={surveyId} />
+                    </div>
+                  )}
                 </div>
             </header>}
 
@@ -1191,6 +1223,26 @@ function ReportContent({
                 {/* Main Content - Padded to avoid overlap */}
                 <div className={`flex-1 min-w-0 space-y-16 pb-24 transition-all duration-500`}>
                     {/* Executive Summary Section */}
+                    {/* Non-blocking: the report still renders everything it has. This only
+                        names what is absent, so an incomplete report is never mistaken for a
+                        complete one — including by a client reading it through a share link. */}
+                    {hasNoCharts && (
+                      <div className="max-w-[1600px] mx-auto px-8 mb-6">
+                        <div className="flex items-start gap-3 p-4 rounded-2xl bg-amber-500/[0.08] border border-amber-500/30">
+                          <AlertCircle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+                          <div className="min-w-0">
+                            <p className="text-sm font-bold text-ink">No evaluation answers yet</p>
+                            <p className="text-xs text-ink-muted mt-1 leading-relaxed">
+                              {report?.base_n
+                                ? `${report.base_n} respondent${report.base_n === 1 ? '' : 's'} passed screening, but none have submitted the evaluation questions — so there are no attribute scores to chart yet.`
+                                : 'No responses have been submitted yet, so there are no attribute scores to chart.'}
+                              {' '}Everything else below reflects what has been collected so far.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     <section id="summary" className="scroll-mt-40 animate-fade-in">
                         <div className="flex items-center gap-4 mb-6">
                             <div

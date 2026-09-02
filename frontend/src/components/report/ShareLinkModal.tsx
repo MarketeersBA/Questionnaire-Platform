@@ -67,6 +67,7 @@ export function ShareLinkModal({ surveyId, surveyName, isOpen, onClose }: ShareL
     const [loading, setLoading] = useState(true);
     const [resetting, setResetting] = useState(false);
     const [copied, setCopied] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (!isOpen) return;
@@ -83,12 +84,27 @@ export function ShareLinkModal({ surveyId, surveyName, isOpen, onClose }: ShareL
 
         (async () => {
             setLoading(true);
+            setError(null);
             try {
                 // Idempotent: creates the link on first open, returns it after.
                 const link = await analytics.getShareLink(surveyId);
                 if (!cancelled) setShare(link);
-            } catch {
-                if (!cancelled) toast.error('Could not load the share link');
+            } catch (err: any) {
+                if (cancelled) return;
+                const status = err?.response?.status;
+                const detail = err?.response?.data?.detail;
+                // 409 carries the specific reason the report cannot be shared —
+                // not generated, still running, or empty. Passing it through is
+                // the difference between a fixable problem and a dead end.
+                setError(
+                    typeof detail?.message === 'string'
+                        ? detail.message
+                        : status === 404
+                          ? 'This survey no longer exists, so it cannot be shared.'
+                          : status === 403
+                            ? 'You do not have permission to share this report.'
+                            : 'Could not load the share link.'
+                );
             } finally {
                 if (!cancelled) setLoading(false);
             }
@@ -200,9 +216,16 @@ export function ShareLinkModal({ surveyId, surveyName, isOpen, onClose }: ShareL
                         </button>
                     </div>
 
-                    {loading || !share ? (
+                    {loading ? (
                         <div className="flex items-center gap-2 text-sm text-ink-muted p-8">
                             <Loader2 className="h-4 w-4 animate-spin" /> Loading link…
+                        </div>
+                    ) : error || !share ? (
+                        <div className="p-8 text-center">
+                            <AlertTriangle className="h-8 w-8 text-amber-500 mx-auto mb-3" />
+                            <p className="text-sm text-ink-muted">
+                                {error ?? 'Could not load the share link.'}
+                            </p>
                         </div>
                     ) : (
                         <div className="p-5 space-y-5">

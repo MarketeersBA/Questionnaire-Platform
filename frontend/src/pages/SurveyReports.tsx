@@ -72,7 +72,7 @@ export default function SurveyReports() {
             const results = await Promise.all(
                 surveyIds.map(async (id) => {
                     try {
-                        return [id, await analytics.getShareLink(id)] as const;
+                        return [id, await analytics.peekShareLink(id)] as const;
                     } catch {
                         // One unreadable report must not blank the whole grid.
                         return [id, null] as const;
