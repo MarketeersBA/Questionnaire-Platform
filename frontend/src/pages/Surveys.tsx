@@ -635,13 +635,18 @@ export default function SurveysPage() {
                                                 return (
                                                     <button
                                                         onClick={() => handleGenerateReport(survey._id)}
-                                                        className="px-3 py-1.5 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-wider rounded-lg hover:bg-indigo-500 transition-all shadow-sm w-full whitespace-nowrap"
+                                                        // Sized to its label, not to the column. `w-full` stretched it
+                                                        // across the whole cell, which read as a banner rather than a
+                                                        // button and made it far heavier than the controls it sits
+                                                        // beside once a report exists.
+                                                        className="mx-auto inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-wider rounded-lg shadow-sm shadow-indigo-600/25 hover:bg-indigo-500 hover:-translate-y-0.5 active:translate-y-0 transition-all whitespace-nowrap"
                                                         title={
                                                             targetMet
                                                                 ? `Generate over the full sample of ${reached} responses`
                                                                 : `Generate an early read from ${reached} of ${target} responses`
                                                         }
                                                     >
+                                                        <Sparkles className="w-3 h-3" />
                                                         {targetMet ? 'Generate Report' : 'Generate Interim'}
                                                     </button>
                                                 );
