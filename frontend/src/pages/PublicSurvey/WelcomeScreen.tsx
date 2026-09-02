@@ -38,6 +38,16 @@ const itemVariants: Variants = {
 const WELCOME_VIDEO_SRC = '/assets/video/survey-welcome.mp4';
 
 /**
+ * First frame of that animation, 480x480 to match its square container.
+ *
+ * Shown before the video has buffered, and — the reason it exists — as the
+ * still image a respondent sees when their OS asks for reduced motion. Without
+ * a poster, a non-autoplaying `<video>` renders however the browser decides,
+ * which in practice is an empty box.
+ */
+const WELCOME_VIDEO_POSTER = '/assets/video/survey-welcome-poster.png';
+
+/**
  * Looping welcome animation.
  *
  * `muted` is required twice over: the source carries an audio track that must
@@ -63,6 +73,7 @@ function WelcomeAnimation() {
         >
             <video
                 src={WELCOME_VIDEO_SRC}
+                poster={WELCOME_VIDEO_POSTER}
                 autoPlay={!prefersReducedMotion}
                 loop={!prefersReducedMotion}
                 muted
