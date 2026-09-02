@@ -247,12 +247,12 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
         <div className="animate-slide-up">
             <div className="max-w-6xl mx-auto">
                 {/* Pure Architecture Workstation */}
-                <div className="space-y-12">
-                    <div className="space-y-10">
+                <div className="space-y-6">
+                    <div className="space-y-6">
                         <motion.div
                             initial={{ opacity: 0, y: -20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="glass-card bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl rounded-[3rem] p-10 border border-white/20 dark:border-slate-700/50 shadow-premium flex flex-col md:flex-row md:items-center justify-between gap-8"
+                            className="glass-card bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl rounded-[3rem] p-6 border border-white/20 dark:border-slate-700/50 shadow-premium flex flex-col md:flex-row md:items-center justify-between gap-5"
                         >
                             <div className="flex items-center gap-6">
                                 <div className="relative group">
@@ -298,8 +298,8 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                         <div className="relative glass-card bg-slate-900/[0.02] dark:bg-white/[0.02] rounded-[3.5rem] p-4 border border-line/80 dark:border-line/10 overflow-hidden">
                             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-brand-blue/30 to-transparent" />
 
-                            <div className="p-8">
-                                <div className="flex items-center justify-between mb-12">
+                            <div className="p-5">
+                                <div className="flex items-center justify-between mb-6">
                                     <div className="flex items-center gap-3">
                                         <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                                         <h4 className="text-sm font-black uppercase tracking-[0.4em] text-ink">Live Architecture Flow</h4>
@@ -309,7 +309,7 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                     </div>
                                 </div>
 
-                                <div className="flex items-center justify-between relative px-10">
+                                <div className="flex items-center justify-between relative px-6">
                                     {/* The Advanced Flow Line */}
                                     <div className="absolute top-[32px] left-20 right-20 h-[1.5px] bg-slate-200 dark:bg-slate-800">
                                         <motion.div
@@ -389,7 +389,7 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                             </div>
                         </div>
 
-                        <div className="space-y-12 pb-24">
+                        <div className="space-y-6 pb-24">
                             {(() => {
                                 // ─── Module-Specific Rendering (Generic/Protected Modules) ───
                                 const isGenericModule = ['purchase_funnel', 'brand_usage', 'brand_pricing_behavior'].includes(activeLayer);
@@ -404,16 +404,16 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                     const qs = getModuleQuestions(mod);
 
                                     return (
-                                        <section key={activeLayer} className="space-y-10 animate-in fade-in slide-in-from-right-4">
+                                        <section key={activeLayer} className="space-y-6 animate-in fade-in slide-in-from-right-4">
 
-                                            <div className="grid grid-cols-1 gap-8">
+                                            <div className="grid grid-cols-1 gap-5">
                                                 {qs.map((q, idx) => (
                                                     <motion.div
                                                         key={q.question_id}
                                                         initial={{ opacity: 0, x: 20 }}
                                                         animate={{ opacity: 1, x: 0 }}
                                                         transition={{ delay: idx * 0.05 }}
-                                                        className="group relative bg-surface p-10 rounded-[3rem] border-2 border-line/80 dark:border-line/10 transition-all hover:border-primary/40 shadow-sm text-left flex flex-col md:flex-row gap-8 items-start"
+                                                        className="group relative bg-surface p-6 rounded-[3rem] border-2 border-line/80 dark:border-line/10 transition-all hover:border-primary/40 shadow-sm text-left flex flex-col md:flex-row gap-5 items-start"
                                                     >
                                                         <div className="w-14 h-14 shrink-0 flex flex-col items-center justify-center bg-surface-raised rounded-2xl border border-line/80 dark:border-line/10">
                                                             <span className="text-xs font-black text-primary-soft">Q{idx + 1}</span>
@@ -430,7 +430,7 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                                                 </div>
                                                             </div>
 
-                                                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                                                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                                                 <div className="space-y-2">
                                                                     <div className="flex items-center gap-2 mb-2">
                                                                         <div className="w-1.5 h-1.5 rounded-full bg-slate-300" />
@@ -471,9 +471,9 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                             key="premium-view"
                                             initial={{ opacity: 0, x: 20 }}
                                             animate={{ opacity: 1, x: 0 }}
-                                            className="space-y-10"
+                                            className="space-y-6"
                                         >
-                                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-10 glass-card bg-gradient-to-br from-emerald-500/10 to-teal-500/10 rounded-[2.5rem] border-2 border-emerald-500/20 shadow-xl">
+                                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-6 glass-card bg-gradient-to-br from-emerald-500/10 to-teal-500/10 rounded-[2.5rem] border-2 border-emerald-500/20 shadow-xl">
                                                 <div className="flex items-center gap-6">
                                                     <div className="p-5 bg-emerald-500 text-white rounded-3xl shadow-lg shadow-emerald-500/20">
                                                         <Zap className="w-8 h-8" />
@@ -588,13 +588,13 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                     >
                                         {sections.map((section: any, sIdx: number) => (
                                             <Reorder.Item key={section.title || sIdx} value={section} className="relative space-y-6 bg-slate-50/50 dark:bg-slate-900/10 p-6 rounded-[2.5rem] border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-all group/section">
-                                                <div className="absolute -left-8 top-10 opacity-0 group-hover/section:opacity-100 cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-700 hover:text-primary-soft transition-all hidden md:block">
+                                                <div className="absolute -left-8 top-6 opacity-0 group-hover/section:opacity-100 cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-700 hover:text-primary-soft transition-all hidden md:block">
                                                     {activeLayer !== 'product_test' && (
                                                         <GripHorizontal className="w-5 h-5 rotate-90" />
                                                     )}
                                                 </div>
                                                 {activeLayer === 'taste_test' && section.title === 'Before Taste' && (
-                                                    <div className="flex items-center gap-4 px-6 mb-10">
+                                                    <div className="flex items-center gap-4 px-6 mb-6">
                                                         <div className="h-px bg-slate-300 dark:bg-slate-700 flex-1" />
                                                         <span className="text-sm font-black uppercase tracking-[0.3em] text-slate-900 dark:text-200">Respondent Priming</span>
                                                         <div className="h-px bg-slate-300 dark:bg-slate-700 flex-1" />

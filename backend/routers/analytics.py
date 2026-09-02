@@ -158,6 +158,32 @@ async def get_report(
 
     # Convert _id to string for json serialization
     report["_id"] = str(report["_id"])
+
+    # Enrich with project definition fields saved at survey creation time.
+    try:
+        survey_oid = ObjectId(survey_id)
+    except Exception:
+        survey_oid = None
+    if survey_oid is not None:
+        survey = await db.get_collection("surveys").find_one({"_id": survey_oid})
+        if survey:
+            blueprint = survey.get("blueprint") or {}
+            customs = survey.get("customizations") or {}
+            category = ""
+            if isinstance(blueprint, dict):
+                category = (blueprint.get("category") or "").strip()
+            if not category and isinstance(customs, dict):
+                category = (customs.get("category") or "").strip()
+            taste = survey.get("taste_test_config") or {}
+            if not category and isinstance(taste, dict):
+                category = (taste.get("category") or "").strip()
+            report["category"] = category
+            report["sample_capacity"] = (
+                survey.get("sample_capacity")
+                or survey.get("respondent_target")
+                or 0
+            )
+
     return report
 
 

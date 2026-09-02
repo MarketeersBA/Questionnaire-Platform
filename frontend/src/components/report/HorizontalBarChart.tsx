@@ -34,13 +34,12 @@ export function HorizontalBarChart({ data }: { data: any }) {
         return <div className="text-ink-subtle text-center py-10 text-sm font-bold">No data</div>;
     }
 
-    // Tighter than the previous 60px/row + 80px pad, which left a large empty
-    // band under short comparisons.
-    const height = Math.max(220, chartData.length * 46 + 60);
+    // Compact height for short brand lists (e.g. Product Preference with 2 bars).
+    const height = Math.max(160, chartData.length * 40 + 48);
 
     return (
         <ResponsiveContainer width="100%" height={height}>
-            <BarChart data={chartData} layout="vertical" margin={{ top: 8, right: 28, left: 110, bottom: 0 }}>
+            <BarChart data={chartData} layout="vertical" margin={{ top: 4, right: 24, left: 100, bottom: 0 }}>
                 <defs>
                     {/* Brand ramp: blue into red, left to right. */}
                     {dataKeys.map((key: string, idx: number) => (
@@ -67,7 +66,7 @@ export function HorizontalBarChart({ data }: { data: any }) {
                     tick={{ fill: chrome.label, fontSize: 12, fontWeight: 700 }}
                     axisLine={false}
                     tickLine={false}
-                    width={104}
+                    width={96}
                 />
                 <Tooltip
                     cursor={{ fill: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(37,94,145,0.06)' }}
@@ -82,7 +81,7 @@ export function HorizontalBarChart({ data }: { data: any }) {
                 />
                 <Legend
                     wrapperStyle={{
-                        paddingTop: 12,
+                        paddingTop: 8,
                         color: chrome.axis,
                         fontWeight: 700,
                         fontSize: 10,
@@ -96,7 +95,7 @@ export function HorizontalBarChart({ data }: { data: any }) {
                         dataKey={key}
                         fill={`url(#hbar-${idx})`}
                         radius={[0, 8, 8, 0]}
-                        barSize={24}
+                        barSize={22}
                     />
                 ))}
             </BarChart>

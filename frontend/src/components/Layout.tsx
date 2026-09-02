@@ -10,8 +10,8 @@ import {
     Activity,
     Plus,
     ChevronDown,
-    PanelLeftClose,
-    PanelLeftOpen,
+    ChevronLeft,
+    ChevronRight,
     Menu,
     Sun,
     Moon,
@@ -66,6 +66,18 @@ export default function Layout({ children }: LayoutProps) {
     const [sidebarVisible, setSidebarVisible] = useState(true);
     const [surveysOpen, setSurveysOpen] = useState(true);
     const [adminOpen, setAdminOpen] = useState(false);
+    const [username, setUsername] = useState(() => localStorage.getItem('username') || '');
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        auth.me()
+            .then((user) => {
+                setUsername(user.username);
+                localStorage.setItem('username', user.username);
+            })
+            .catch(() => {});
+    }, []);
 
     // Auto-expand Surveys section when on survey-related routes
     useEffect(() => {
@@ -95,6 +107,7 @@ export default function Layout({ children }: LayoutProps) {
             await auth.logout();
             localStorage.removeItem('token');
             localStorage.removeItem('role');
+            localStorage.removeItem('username');
             navigate('/');
         } catch (err) {
             console.error('Logout failed:', err);
@@ -104,11 +117,12 @@ export default function Layout({ children }: LayoutProps) {
     const topNavItems = [
         { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', description: 'Performance overview' },
         { icon: Layers, label: 'Templates', path: '/templates', description: 'Design library' },
+        // Comparative Hub temporarily hidden from the rail.
         // Comparative Hub is a real route (/analytics/compare) that previously had
         // no entry point in the rail — it was only reachable by URL.
-        ...(!isClient
-            ? [{ icon: GitCompare, label: 'Comparative Hub', path: '/analytics/compare', description: 'Cross-survey benchmarking' }]
-            : []),
+        // ...(!isClient
+        //     ? [{ icon: GitCompare, label: 'Comparative Hub', path: '/analytics/compare', description: 'Cross-survey benchmarking' }]
+        //     : []),
     ];
 
     const isSurveyActive = location.pathname.startsWith('/surveys') || location.pathname === '/create-survey';
@@ -144,10 +158,25 @@ export default function Layout({ children }: LayoutProps) {
 
             {/* ── Mini / Expanded Sidebar ── */}
             <aside
-                className={`brand-rail relative z-10 flex flex-col h-screen shrink-0 border-r border-white/5 shadow-xl shadow-black/20 transition-[width,transform,opacity] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${!sidebarVisible ? 'w-0 opacity-0 -translate-x-full overflow-hidden border-none shadow-none' : sidebarOpen ? 'w-72' : 'w-[88px]'
+                className={`brand-rail relative z-20 flex flex-col h-screen shrink-0 border-r border-white/5 shadow-xl shadow-black/20 transition-[width,transform,opacity] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${!sidebarVisible ? 'w-0 opacity-0 -translate-x-full overflow-hidden border-none shadow-none' : sidebarOpen ? 'w-72' : 'w-[88px]'
                     }`}
             >
-                <div className="flex flex-col h-full overflow-y-auto overflow-x-hidden custom-scrollbar">
+                {sidebarVisible && (
+                    <button
+                        type="button"
+                        onClick={() => setSidebarOpen(!sidebarOpen)}
+                        className="absolute top-8 -right-3 z-30 w-6 h-6 rounded-full bg-white dark:bg-slate-800 border border-white/20 dark:border-slate-600 shadow-lg shadow-black/25 flex items-center justify-center text-primary hover:scale-110 hover:bg-primary hover:text-white hover:border-primary active:scale-95 transition-all"
+                        title={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+                        aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+                    >
+                        {sidebarOpen ? (
+                            <ChevronLeft size={14} strokeWidth={2.5} />
+                        ) : (
+                            <ChevronRight size={14} strokeWidth={2.5} />
+                        )}
+                    </button>
+                )}
+                <div className="flex flex-col h-full overflow-y-auto overflow-x-hidden scrollbar-none">
 
                     {/* Logo — centred and sized to fill the rail head rather than
                         sitting small in a large empty block. */}
@@ -155,10 +184,10 @@ export default function Layout({ children }: LayoutProps) {
                         <div className="flex items-center justify-center cursor-pointer group/logo w-full" onClick={() => navigate('/dashboard')} title="Dashboard">
                             <div className="relative flex-shrink-0 grid place-items-center">
                                 <div className="absolute inset-0 bg-primary/25 blur-xl rounded-full scale-75 group-hover/logo:scale-125 transition-transform duration-700 opacity-0 group-hover/logo:opacity-100"></div>
-                                {/* The logo artwork is navy (#08306B), the same
-                                    colour as the rail, so it needs a white plate
-                                    to read at all. Full lockup when expanded,
-                                    icon alone when collapsed. */}
+                                {/* The logo artwork is navy, close to the rail
+                                    (#00265E), so it needs a white plate to read
+                                    at all. Full lockup when expanded, icon alone
+                                    when collapsed. */}
                                 {sidebarOpen ? (
                                     <div className="relative bg-white rounded-2xl px-5 py-4 shadow-lg shadow-black/25 transition-transform duration-500 group-hover/logo:scale-[1.03]">
                                         <img
@@ -181,12 +210,9 @@ export default function Layout({ children }: LayoutProps) {
                     </div>
 
                     {/* Nav */}
-                    <nav className="flex-1 px-4 space-y-1 mt-4">
-                        <div className={`px-4 mb-3 transition-opacity duration-300 ${sidebarOpen ? 'opacity-100' : 'opacity-0 hidden'}`}>
-                        </div>
-
+                    <nav className="flex-1 px-4 space-y-0.5 mt-2">
                         {/* 1. Surveys Section */}
-                        <div className="mt-1">
+                        <div>
                             <button
                                 onClick={() => {
                                     if (sidebarOpen) {
@@ -196,8 +222,8 @@ export default function Layout({ children }: LayoutProps) {
                                     }
                                 }}
                                 title={!sidebarOpen ? 'Surveys' : undefined}
-                                className={`relative flex items-center px-4 py-4 rounded-2xl transition-all duration-300 group
-                                    ${sidebarOpen ? 'w-full gap-3.5' : 'w-[52px] h-[52px] mx-auto justify-center gap-0 px-0'}
+                                className={`relative flex items-center px-4 py-2 rounded-2xl transition-all duration-300 group
+                                    ${sidebarOpen ? 'w-full gap-3' : 'w-11 h-11 mx-auto justify-center gap-0 px-0'}
                                     ${isSurveyActive
                                         ? 'bg-white/10 text-white font-black shadow-[0_4px_12px_-2px_rgba(0,0,0,0.2)] border border-white/10'
                                         : 'text-white/60 font-bold hover:text-white hover:bg-white/5 hover:translate-x-1'
@@ -240,39 +266,39 @@ export default function Layout({ children }: LayoutProps) {
                                         transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
                                         className="overflow-hidden"
                                     >
-                                        <div className="pl-6 pr-2 pb-2 pt-1 space-y-0.5 border-l border-white/10 ml-[26px] mt-1">
+                                        <div className="pl-5 pr-2 pb-1 pt-0.5 space-y-0 border-l border-white/10 ml-[26px] mt-0.5">
                                             <NavLink
                                                 to="/create-survey"
-                                                className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-black transition-all group/sub whitespace-nowrap ${isActive
+                                                className={({ isActive }) => `flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-sm font-black transition-all group/sub whitespace-nowrap ${isActive
                                                     ? 'bg-white/10 text-white shadow-md border border-white/10 translate-x-1'
                                                     : 'text-white/50 hover:text-white hover:bg-white/10 hover:translate-x-1.5'
                                                     }`}
                                             >
-                                                <div className={`w-7 h-7 flex items-center justify-center rounded-lg transition-colors ${location.pathname === '/create-survey' ? 'bg-accent text-white' : 'bg-white/5 text-white/40 group-hover/sub:text-white'}`}>
+                                                <div className={`w-6 h-6 flex items-center justify-center rounded-lg transition-colors ${location.pathname === '/create-survey' ? 'bg-accent text-white' : 'bg-white/5 text-white/40 group-hover/sub:text-white'}`}>
                                                     <Plus size={14} strokeWidth={3} />
                                                 </div>
                                                 <span>Create Survey</span>
                                             </NavLink>
                                             <NavLink
                                                 to="/surveys"
-                                                className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-black transition-all group/sub whitespace-nowrap ${isActive && location.pathname === '/surveys'
+                                                className={({ isActive }) => `flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-sm font-black transition-all group/sub whitespace-nowrap ${isActive && location.pathname === '/surveys'
                                                     ? 'bg-white/10 text-white shadow-md border border-white/10 translate-x-1'
                                                     : 'text-white/50 hover:text-white hover:bg-white/10 hover:translate-x-1.5'
                                                     }`}
                                             >
-                                                <div className={`w-7 h-7 flex items-center justify-center rounded-lg transition-colors ${location.pathname === '/surveys' ? 'bg-accent text-white' : 'bg-white/5 text-white/40 group-hover/sub:text-white'}`}>
+                                                <div className={`w-6 h-6 flex items-center justify-center rounded-lg transition-colors ${location.pathname === '/surveys' ? 'bg-accent text-white' : 'bg-white/5 text-white/40 group-hover/sub:text-white'}`}>
                                                     <ClipboardList size={14} strokeWidth={3} />
                                                 </div>
                                                 <span>All Surveys</span>
                                             </NavLink>
                                             <NavLink
                                                 to="/surveys/reports"
-                                                className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-black transition-all group/sub whitespace-nowrap ${isActive
+                                                className={({ isActive }) => `flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-sm font-black transition-all group/sub whitespace-nowrap ${isActive
                                                     ? 'bg-white/10 text-white shadow-md border border-white/10 translate-x-1'
                                                     : 'text-white/50 hover:text-white hover:bg-white/10 hover:translate-x-1.5'
                                                     }`}
                                             >
-                                                <div className={`w-7 h-7 flex items-center justify-center rounded-lg transition-colors ${location.pathname === '/surveys/reports' ? 'bg-accent text-white' : 'bg-white/5 text-white/40 group-hover/sub:text-white'}`}>
+                                                <div className={`w-6 h-6 flex items-center justify-center rounded-lg transition-colors ${location.pathname === '/surveys/reports' ? 'bg-accent text-white' : 'bg-white/5 text-white/40 group-hover/sub:text-white'}`}>
                                                     <FileText size={14} strokeWidth={3} />
                                                 </div>
                                                 <span>Reports</span>
@@ -292,8 +318,8 @@ export default function Layout({ children }: LayoutProps) {
                                 to={item.path}
                                 title={!sidebarOpen ? item.label : undefined}
                                 className={({ isActive }) => `
-                                    relative flex items-center px-3 py-3 rounded-2xl transition-all duration-300 group
-                                    ${sidebarOpen ? 'w-full gap-3.5' : 'w-[52px] h-[52px] mx-auto justify-center gap-0 px-0'}
+                                    relative flex items-center px-3 py-1.5 rounded-2xl transition-all duration-300 group
+                                    ${sidebarOpen ? 'w-full gap-3' : 'w-11 h-11 mx-auto justify-center gap-0 px-0'}
                                     ${isActive
                                         ? 'bg-white/10 text-white font-black shadow-sm border border-white/10'
                                         : 'text-white/60 font-bold hover:text-white hover:bg-white/5'}
@@ -317,15 +343,15 @@ export default function Layout({ children }: LayoutProps) {
                             </NavLink>
                         ))}
 
-                        {/* ── Administration ──
+                        {/* ── Administration (temporarily hidden from the rail) ──
                             These four routes existed only behind a hover menu in the
                             top-right avatar, which made them effectively undiscoverable.
                             Promoting them here also gives the rail real content instead
-                            of dead space below Templates. */}
+                            of dead space below Templates.
                         {isAdmin && (
-                            <div className="pt-2">
+                            <div className="pt-1">
                                 {sidebarOpen && (
-                                    <div className="px-4 pb-1.5 pt-2 text-[8px] font-black uppercase tracking-[0.28em] text-white/30">
+                                    <div className="px-4 pb-1 pt-1 text-[8px] font-black uppercase tracking-[0.28em] text-white/30">
                                         Administration
                                     </div>
                                 )}
@@ -335,8 +361,8 @@ export default function Layout({ children }: LayoutProps) {
                                         else navigate('/admin/analytics');
                                     }}
                                     title={!sidebarOpen ? 'Administration' : undefined}
-                                    className={`relative flex items-center px-3 py-3 rounded-2xl transition-all duration-300 group
-                                        ${sidebarOpen ? 'w-full gap-3.5' : 'w-[52px] h-[52px] mx-auto justify-center gap-0 px-0'}
+                                    className={`relative flex items-center px-3 py-1.5 rounded-2xl transition-all duration-300 group
+                                        ${sidebarOpen ? 'w-full gap-3' : 'w-11 h-11 mx-auto justify-center gap-0 px-0'}
                                         ${isAdminRoute
                                             ? 'bg-white/10 text-white font-black shadow-sm border border-white/10'
                                             : 'text-white/60 font-bold hover:text-white hover:bg-white/5'}`}
@@ -369,17 +395,17 @@ export default function Layout({ children }: LayoutProps) {
                                             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
                                             className="overflow-hidden"
                                         >
-                                            <div className="pl-6 pr-2 pb-2 pt-1 space-y-0.5 border-l border-white/10 ml-[26px] mt-1">
+                                            <div className="pl-5 pr-2 pb-1 pt-0.5 space-y-0 border-l border-white/10 ml-[26px] mt-0.5">
                                                 {adminItems.map((item) => (
                                                     <NavLink
                                                         key={item.path}
                                                         to={item.path}
-                                                        className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-black transition-all group/sub whitespace-nowrap ${isActive
+                                                        className={({ isActive }) => `flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-sm font-black transition-all group/sub whitespace-nowrap ${isActive
                                                             ? 'bg-white/10 text-white shadow-md border border-white/10 translate-x-1'
                                                             : 'text-white/50 hover:text-white hover:bg-white/10 hover:translate-x-1.5'
                                                             }`}
                                                     >
-                                                        <div className={`w-7 h-7 flex items-center justify-center rounded-lg transition-colors ${location.pathname === item.path ? 'bg-accent text-white' : 'bg-white/5 text-white/40 group-hover/sub:text-white'}`}>
+                                                        <div className={`w-6 h-6 flex items-center justify-center rounded-lg transition-colors ${location.pathname === item.path ? 'bg-accent text-white' : 'bg-white/5 text-white/40 group-hover/sub:text-white'}`}>
                                                             <item.icon size={14} strokeWidth={3} />
                                                         </div>
                                                         <span>{item.label}</span>
@@ -391,26 +417,11 @@ export default function Layout({ children }: LayoutProps) {
                                 </AnimatePresence>
                             </div>
                         )}
+                        */}
                     </nav>
 
-                    {/* Footer Toggle and Logout */}
+                    {/* Footer Logout */}
                     <div className="p-4 mt-auto shrink-0 flex flex-col gap-2">
-                        {/* Sidebar toggle button moved to footer for elegant collapse */}
-                        <button
-                            onClick={() => setSidebarOpen(!sidebarOpen)}
-                            className={`flex items-center py-3 rounded-2xl bg-white/5 text-white/50 hover:text-white hover:bg-white/10 hover:-translate-y-0.5 active:scale-95 transition-all ${sidebarOpen ? 'w-full justify-start px-4 gap-3' : 'w-[52px] h-[52px] justify-center mx-auto gap-0'}`}
-                            title={sidebarOpen ? 'Collapse Sidebar' : 'Expand Sidebar'}
-                        >
-                            <div className="flex-shrink-0">
-                                {sidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
-                            </div>
-                            {sidebarOpen && (
-                                <span className="text-[11px] font-bold whitespace-nowrap">
-                                    Collapse
-                                </span>
-                            )}
-                        </button>
-
                         <button
                             onClick={handleLogout}
                             title={!sidebarOpen ? 'Sign Out' : undefined}
@@ -455,49 +466,19 @@ export default function Layout({ children }: LayoutProps) {
                         <div className="flex items-center gap-4 pl-6 border-l border-line/80 dark:border-line/10">
                             <div className="text-right hidden sm:block">
                                 <p className="text-[11px] font-black text-ink leading-none mb-1">
-                                    Admin Portal
+                                    {username || 'User'}
                                 </p>
                                 <p className="text-[11px] font-black text-ink-muted uppercase tracking-widest">
                                     {(isAdmin || isAnalyst) ? 'Intelligence Hub' : 'Research Portal'}
                                 </p>
                             </div>
 
-                            {/* Admin Quick Menu */}
-                            <div className="relative group/admin">
-                                <button
-                                    onClick={() => isAdmin && navigate('/admin/analytics')}
-                                    className={`relative w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-300 border-2 hover:-translate-y-0.5 active:scale-95 bg-primary border-primary text-white shadow-lg shadow-primary/20 ${isAdmin ? 'hover:scale-105' : ''}`}
-                                >
-                                    <Users size={18} />
-                                    <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-safe border-2 border-surface rounded-full shadow-sm animate-pulse-slow"></div>
-                                </button>
-
-                                {isAdmin && (
-                                    <div className="absolute top-full right-0 mt-3 w-64 opacity-0 invisible group-hover/admin:opacity-100 group-hover/admin:visible transition-all duration-300 translate-y-2 group-hover/admin:translate-y-0 z-[60]">
-                                        <div className="panel !rounded-[1.75rem] overflow-hidden">
-                                            <div className="bg-surface-raised px-6 py-4 border-b border-line/80 dark:border-line/10">
-                                                <p className="text-[11px] font-black text-ink-subtle uppercase tracking-widest">Partner Command Center</p>
-                                            </div>
-                                            <div className="p-3 space-y-1">
-                                                {adminItems.map((item) => (
-                                                    <button
-                                                        key={item.path}
-                                                        onClick={() => navigate(item.path)}
-                                                        className="w-full flex items-center gap-3.5 p-3 rounded-2xl hover:bg-primary/[0.07] hover:-translate-y-0.5 active:scale-95 transition-all group/item text-left"
-                                                    >
-                                                        <div className="w-10 h-10 rounded-xl bg-surface border border-line/80 dark:border-line/10 flex items-center justify-center text-ink-subtle group-hover/item:text-primary-soft group-hover/item:border-primary/30 transition-all shadow-sm">
-                                                            <item.icon size={16} />
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-[12px] font-black text-ink">{item.label}</p>
-                                                            <p className="text-xs font-bold text-ink-subtle">{item.description}</p>
-                                                        </div>
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
+                            <div
+                                className="relative w-11 h-11 rounded-xl flex items-center justify-center border-2 bg-primary border-primary text-white shadow-lg shadow-primary/20"
+                                aria-hidden
+                            >
+                                <Users size={18} />
+                                <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-safe border-2 border-surface rounded-full shadow-sm animate-pulse-slow"></div>
                             </div>
                         </div>
                     </div>

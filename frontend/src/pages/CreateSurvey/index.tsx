@@ -1074,9 +1074,9 @@ export default function CreateSurvey({ editSurveyId, initialSurveyData }: Create
 
     return (
         <div className="relative">
-            <div className="relative z-10 space-y-10">
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 text-left">
-                    <div className="space-y-4">
+            <div className="relative z-10 space-y-6">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 text-left">
+                    <div className="space-y-2">
                         <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-600">
                             Survey <span className="text-primary-soft">{isEditMode ? 'Edit' : 'Setup'}</span>
                         </div>
@@ -1122,7 +1122,7 @@ export default function CreateSurvey({ editSurveyId, initialSurveyData }: Create
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -20 }}
-                                className="space-y-12"
+                                className="space-y-6"
                             >
                                 {currentStep === 1 && (
                                     <IdentityStep
@@ -1153,12 +1153,12 @@ export default function CreateSurvey({ editSurveyId, initialSurveyData }: Create
                                 )}
                                 {currentStep === 4 && <DeploymentStep formData={formData} setFormData={setFormData} />}
 
-                                <div className="space-y-4 pt-10 border-t border-slate-200 dark:border-slate-700 transition-colors">
+                                <div className="space-y-3 pt-6 border-t border-slate-200 dark:border-slate-700 transition-colors">
                                     {currentStep < 4 ? (
                                         <button
                                             type="button"
                                             onClick={nextStep}
-                                            className="group w-full py-5 bg-surface border-2 border-slate-400 dark:border-slate-600 rounded-3xl font-black text-xs uppercase tracking-[0.2em] text-ink flex items-center justify-between px-8 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all shadow-sm focus:outline-none focus:ring-4 focus:ring-primary/20"
+                                            className="group w-full py-5 bg-surface border-2 border-slate-400 dark:border-slate-600 rounded-3xl font-black text-xs uppercase tracking-[0.2em] text-ink flex items-center justify-between px-6 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all shadow-sm focus:outline-none focus:ring-4 focus:ring-primary/20"
                                         >
                                             Continue to {steps[currentStep].name}
                                             <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-primary-soft" />
@@ -1194,7 +1194,7 @@ export default function CreateSurvey({ editSurveyId, initialSurveyData }: Create
                                         <motion.div
                                             initial={{ opacity: 0, scale: 0.95 }}
                                             animate={{ opacity: 1, scale: 1 }}
-                                            className="mt-10 p-6 glass-panel rounded-[2rem] border-slate-200 dark:border-slate-700 bg-white/30 dark:bg-slate-950/20 shadow-inner"
+                                            className="mt-6 p-5 glass-panel rounded-[2rem] border-slate-200 dark:border-slate-700 bg-white/30 dark:bg-slate-950/20 shadow-inner"
                                         >
                                             <p className="text-[9px] font-black uppercase tracking-[0.2em] text-ink-muted mb-3 transition-colors text-left">Project Definition</p>
                                             <p className="text-xs font-black text-ink truncate bg-white/50 dark:bg-slate-900 px-4 py-3 rounded-xl border-2 border-slate-300 dark:border-slate-700 shadow-sm transition-colors text-left">{formData.survey_name}</p>

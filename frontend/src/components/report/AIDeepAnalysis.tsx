@@ -26,7 +26,7 @@ export function AIDeepAnalysis({ analysisPoints }: AIDeepAnalysisProps) {
     const getSentimentColor = (sentiment: string) => {
         const s = sentiment.toLowerCase();
         if (s === 'positive') return 'bg-emerald-500 shadow-emerald-500/50';
-        if (s === 'negative') return 'bg-rose-500 shadow-rose-500/50';
+        if (s === 'negative') return 'bg-primary shadow-primary/40';
         return 'bg-amber-500 shadow-amber-500/50'; // neutral
     };
 
@@ -101,12 +101,6 @@ export function AIDeepAnalysis({ analysisPoints }: AIDeepAnalysisProps) {
                                             Action: {recommendedAction}
                                         </div>
                                     )}
-
-                                    {/* Accent corner hover glow */}
-                                    <div className={`
-                                        absolute -bottom-8 -right-8 w-24 h-24 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500
-                                        ${getSentimentColor(point.sentiment)}
-                                    `} />
                                 </motion.div>
                             );
                             })}

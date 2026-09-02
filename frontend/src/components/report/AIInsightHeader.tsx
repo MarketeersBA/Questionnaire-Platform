@@ -18,7 +18,7 @@ export function AIInsightHeader({ headline }: AIInsightHeaderProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
             className={`
-                relative overflow-hidden mb-4 rounded-xl p-4
+                relative overflow-hidden rounded-xl p-3
                 backdrop-blur-md border border-t-white/10 border-l-white/10
                 flex items-start lg:items-center space-y-2 lg:space-y-0 lg:space-x-4
                 shadow-lg

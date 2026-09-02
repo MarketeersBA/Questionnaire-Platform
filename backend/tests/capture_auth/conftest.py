@@ -98,6 +98,12 @@ def survey_reports_db(monkeypatch):
     def _get_collection(name: str):
         if name == "survey_reports":
             return fake_col
+        if name == "surveys":
+            # The report read now enriches its response with project metadata
+            # (category, sample capacity) from the survey document. These tests
+            # are about auth, not that metadata, so an empty collection is
+            # enough — the endpoint treats a missing survey as "no metadata".
+            return FakeSurveyReportsCollection({})
         raise KeyError(f"Unexpected collection in capture_auth tests: {name}")
 
     monkeypatch.setattr("backend.routers.analytics.db.get_collection", _get_collection)

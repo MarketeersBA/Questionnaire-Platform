@@ -28,18 +28,18 @@ export function ScorecardGrid({ data }: { data: any }) {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-3">
             {profileEntries.length > 0 && (
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                     {profileEntries.map(([key, value]) => (
-                        <div key={key} className="card-brand p-5 rounded-2xl transition-all hover:-translate-y-0.5 hover:border-primary/40 group relative overflow-hidden">
+                        <div key={key} className="card-brand p-4 rounded-2xl transition-all hover:-translate-y-0.5 hover:border-primary/40 group relative overflow-hidden">
                             {/* Soft brand bloom behind the metric */}
                             <div
                                 className="pointer-events-none absolute -top-8 -right-8 w-24 h-24 rounded-full blur-2xl opacity-60 group-hover:opacity-90 transition-opacity"
                                 style={{ background: 'radial-gradient(circle, rgba(231,157,158,0.45) 0%, transparent 72%)' }}
                             />
                             <div className="relative z-10">
-                                <div className="flex items-center gap-2.5 mb-3">
+                                <div className="flex items-center gap-2 mb-2">
                                     <div className="p-1.5 bg-primary/10 rounded-lg">
                                         {getIcon(key)}
                                     </div>
@@ -59,16 +59,16 @@ export function ScorecardGrid({ data }: { data: any }) {
             )}
 
             {strengths.length > 0 && (
-                <div className="space-y-4">
+                <div className="space-y-2">
                     <div className="text-[10px] font-black uppercase tracking-[0.3em] text-ink-subtle flex items-center gap-2">
                         <Star className="h-3 w-3 text-accent-soft" />
                         Top Strengths
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
                         {strengths.map((s: any, i: number) => (
                             <div
                                 key={i}
-                                className="flex items-center justify-between gap-3 p-4 rounded-2xl bg-surface-raised/60 border border-primary/15 dark:border-line/10 hover:border-primary/40 transition-colors"
+                                className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-surface-raised/60 border border-primary/15 dark:border-line/10 hover:border-primary/40 transition-colors"
                             >
                                 <div className="flex items-center gap-3 min-w-0">
                                     <div className="w-8 h-8 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -84,7 +84,7 @@ export function ScorecardGrid({ data }: { data: any }) {
             )}
 
             {showEmptyState && (
-                <div className="py-10 text-center text-ink-subtle font-bold uppercase tracking-widest text-xs bg-surface-sunken rounded-2xl border border-dashed border-primary/20 dark:border-line/10">
+                <div className="py-8 text-center text-ink-subtle font-bold uppercase tracking-widest text-xs bg-surface-sunken rounded-2xl border border-dashed border-primary/20 dark:border-line/10">
                     No Analytical Telemetry Available
                 </div>
             )}

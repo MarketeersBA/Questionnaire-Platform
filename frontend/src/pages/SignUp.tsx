@@ -20,6 +20,7 @@ export default function SignUp() {
       const response = await auth.signup({ username, email, password });
       localStorage.setItem('token', response.access_token);
       localStorage.setItem('role', response.role || 'user');
+      localStorage.setItem('username', username.trim());
       navigate('/dashboard');
     } catch (err) {
       setError('Unable to sign up. Username may already be taken.');

@@ -92,7 +92,7 @@ export function ReportKpiRow({ report }: { report: any }) {
                 sub: formatBrandName(prefLabels[leadIdx]) || '—',
                 icon: Target,
                 series: prefValues.map(clean),
-                tone: 'accent',
+                tone: 'primary',
             });
         }
 

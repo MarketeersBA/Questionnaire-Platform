@@ -46,6 +46,7 @@ export function ChartRenderer({
 }: ChartRendererProps) {
     const containerRef = React.useRef<HTMLDivElement>(null);
     const headerRef = React.useRef<HTMLDivElement>(null);
+    const bodyRef = React.useRef<HTMLDivElement>(null);
     const footerRef = React.useRef<HTMLDivElement>(null);
     const { theme } = useTheme();
     const isDark = theme === 'dark';
@@ -62,24 +63,27 @@ export function ChartRenderer({
 
     const presentationHeight = exportMode ? resolvedExportOptions.height : chartHeight;
 
+    // Measure the chart body from its flex parent so focus mode fills the
+    // overlay without overflowing the focus chrome (title / tabs / dots).
     React.useLayoutEffect(() => {
         if (!isFocusMode || exportMode) return;
 
-        const updateHeight = () => {
-            if (containerRef.current) {
-                const totalH = window.innerHeight - 240; // Total safe viewport
-                const headerH = headerRef.current?.offsetHeight || 0;
-                const footerH = footerRef.current?.offsetHeight || 0;
+        const body = bodyRef.current;
+        if (!body) return;
 
-                // Secure calculation: Viewport - (Static Metadata + Padding Safeties)
-                const safeH = Math.max(300, Math.min(800, totalH - headerH - footerH - 80));
-                setChartHeight(safeH);
-            }
+        const updateHeight = () => {
+            const h = Math.floor(body.clientHeight);
+            if (h > 0) setChartHeight(Math.max(200, h));
         };
 
         updateHeight();
+        const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(updateHeight) : null;
+        ro?.observe(body);
         window.addEventListener('resize', updateHeight);
-        return () => window.removeEventListener('resize', updateHeight);
+        return () => {
+            ro?.disconnect();
+            window.removeEventListener('resize', updateHeight);
+        };
     }, [exportMode, isFocusMode, chart]);
 
     if (!chart) return null;
@@ -115,6 +119,13 @@ export function ChartRenderer({
     };
 
     const chartType = chart.chart_type || 'table';
+    const isCompactCard =
+        chartType === 'scorecard' ||
+        chartType === 'horizontal_bar' ||
+        chartType === 'preference_bar' ||
+        chartType === 'driver_ranking' ||
+        chartType === 'profile_chart' ||
+        chartType === 'snake_line';
     let Component = CHART_MAP[chartType] || DataTable;
     let displayTitle = chart.title;
 
@@ -182,14 +193,14 @@ export function ChartRenderer({
     return (
         <div
             ref={containerRef}
-            className={`panel !rounded-[28px] overflow-hidden relative group transition-all duration-500 ${isFocusMode ? 'p-10 min-h-0 h-[calc(100vh-160px)] flex flex-col' : 'p-8 min-h-[500px]'}`}
+            className={`panel !rounded-[28px] overflow-hidden relative group transition-all duration-500 ${isFocusMode ? 'p-6 md:p-8 min-h-0 h-full flex flex-col' : isCompactCard ? 'p-6' : 'p-8 min-h-[500px]'}`}
         >
             <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-all">
                 <Layout className="h-24 w-24" />
             </div>
 
             {(displayTitle || chart.chart_id) && (
-                <div ref={headerRef} className="mb-8 relative z-10 shrink-0">
+                <div ref={headerRef} className={`${isFocusMode || isCompactCard ? 'mb-3' : 'mb-8'} relative z-10 shrink-0`}>
                     <div className="flex items-center gap-3 mb-2 flex-wrap">
                         <div className="flex items-center gap-3 flex-1 min-w-0">
                             <div className="text-[10px] font-black uppercase tracking-[0.4em] text-primary-soft">
@@ -204,7 +215,7 @@ export function ChartRenderer({
                         <ChartCsvExportButton chart={chart} />
                     </div>
                     {displayTitle && (
-                        <h3 className="text-2xl font-black font-display tracking-tight text-ink">
+                        <h3 className={`${isFocusMode ? 'text-xl' : 'text-2xl'} font-black font-display tracking-tight text-ink`}>
                             {displayTitle}
                         </h3>
                     )}
@@ -217,14 +228,14 @@ export function ChartRenderer({
             )}
 
             {chart.ai_headline && (
-                <div className="mb-4 z-10 relative shrink-0">
+                <div className={`${isCompactCard || isFocusMode ? 'mb-3' : 'mb-4'} z-10 relative shrink-0`}>
                     <AIInsightHeader headline={chart.ai_headline} />
                 </div>
             )}
 
             <div
-                className={`w-full relative z-10 flex flex-col justify-center transition-all duration-500 overflow-hidden ${isFocusMode ? 'flex-1' : 'h-auto min-h-[400px]'}`}
-                style={isFocusMode ? { height: chartHeight } : {}}
+                ref={bodyRef}
+                className={`w-full relative z-10 flex flex-col transition-all duration-500 overflow-hidden ${isFocusMode ? 'flex-1 min-h-0 justify-center' : isCompactCard ? 'h-auto justify-start' : 'h-auto min-h-[400px] justify-center'}`}
             >
                 <AsyncBoundary
                     key={chart.chart_id || displayTitle}
@@ -236,26 +247,26 @@ export function ChartRenderer({
                         brands={chart.brands}
                         metadata={chart.metadata}
                         isFocusMode={isFocusMode}
-                        presentationHeight={chartHeight}
+                        presentationHeight={presentationHeight}
                     />
                 </AsyncBoundary>
             </div>
 
             <div ref={footerRef} className="shrink-0">
                 {chart.footnote && (
-                    <div className="mt-6 text-xs text-slate-600 font-mono">
+                    <div className={`${isFocusMode ? 'mt-3' : 'mt-6'} text-xs text-slate-600 font-mono`}>
                         {chart.footnote}
                     </div>
                 )}
 
                 {chart.insight && !chart.ai_deep_analysis && (
-                    <div className={`mt-6 pt-6 border-t border-line/80 dark:border-line/10 text-sm font-medium leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-900'}`}>
+                    <div className={`${isFocusMode ? 'mt-3 pt-3' : 'mt-6 pt-6'} border-t border-line/80 dark:border-line/10 text-sm font-medium leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-900'}`}>
                         <span className="font-black text-primary-soft">Insight: </span>{chart.insight}
                     </div>
                 )}
 
                 {chart.ai_deep_analysis && chart.ai_deep_analysis.length > 0 && (
-                    <div className="mt-6">
+                    <div className={isFocusMode ? 'mt-3' : 'mt-6'}>
                         <AIDeepAnalysis analysisPoints={chart.ai_deep_analysis} />
                     </div>
                 )}

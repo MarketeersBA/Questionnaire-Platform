@@ -235,10 +235,8 @@ export default function Dashboard() {
                   }}
                 />
                 <defs>
-                  {/* Magnitude ramp built from the two logo colours: quiet months
-                      stay blue, the peak resolves blue -> red. The previous high
-                      stop was gold (#FBC210), which read as off-brand orange. */}
-                  {/* Low volume — brand red, the attention state. */}
+                  {/* Blue-only magnitude ramp — taller months deepen within
+                      the brand blue family, no red stop. */}
                   <linearGradient id="barGradLow" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#E06264" />
                     <stop offset="100%" stopColor="#CD393B" />
@@ -251,6 +249,7 @@ export default function Dashboard() {
                   {/* High volume — full brand blue, the healthy state. */}
                   <linearGradient id="barGradHigh" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#21A0FF" />
+                    <stop offset="55%" stopColor="#2E7BB8" />
                     <stop offset="100%" stopColor="#255E91" />
                   </linearGradient>
                 </defs>

@@ -1,7 +1,7 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef, useLayoutEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { AlertCircle, RefreshCw, Activity, Database, Sparkles, LayoutPanelLeft, BarChart3, Maximize, ChevronLeft, ChevronRight, X, Sun, Moon, LayoutDashboard, ClipboardList, FileText, PanelLeftClose, PanelLeftOpen, ArrowUp, ChevronDown } from 'lucide-react';
-import { analytics } from '../services/api';
+import { AlertCircle, RefreshCw, Activity, Database, Sparkles, LayoutPanelLeft, BarChart3, Maximize, ChevronLeft, ChevronRight, X, Sun, Moon, ArrowUp } from 'lucide-react';
+import { analytics, surveys } from '../services/api';
 import { toast } from 'sonner';
 import { useTheme } from '../context/ThemeContext';
 import { ExecutiveSummary } from '../components/report/ExecutiveSummary';
@@ -23,8 +23,26 @@ import ReportShareBar from '../components/report/ReportShareBar';
 import { useReportStatusPoll } from '../hooks/useReportStatusPoll';
 import { useScrollSpy } from '../hooks/useScrollSpy';
 
-// ---------------------------------------------------------------------------
-// 2026 Analytical Journey Messages
+function resolveProjectMeta(source: any) {
+    if (!source) return { category: '', sampleCapacity: 0 };
+    const blueprint = source.blueprint || {};
+    const customs = source.customizations || {};
+    const taste = source.taste_test_config || {};
+    const category = String(
+        source.category ||
+        blueprint.category ||
+        customs.category ||
+        taste.category ||
+        ''
+    ).trim();
+    const sampleCapacity = Number(
+        source.sample_capacity ??
+        source.respondent_target ??
+        0
+    ) || 0;
+    return { category, sampleCapacity };
+}
+
 // ---------------------------------------------------------------------------
 const PROGRESS_MESSAGES = [
     { text: 'Synthesizing Data Fabric...', icon: <Database /> },
@@ -146,44 +164,6 @@ const buildOrderedCharts = (rawCharts: any[]): any[] => {
     return ordered;
 };
 
-
-/**
- * Identifying facts about the study, pinned to the bottom of the rail.
- *
- * Every field is optional and a missing one is simply omitted — a partially
- * configured survey should show fewer rows, never "undefined".
- */
-function ProjectFacts({ report }: { report: any }) {
-    const meta = report?.survey_context || report?.metadata || {};
-
-    const rows = [
-        { label: 'Category', value: meta.category || report?.category },
-        { label: 'Market', value: meta.market || report?.market },
-        { label: 'Brand', value: meta.target_brand || report?.target_brand },
-        {
-            label: 'Base',
-            value: report?.base_n ? `n = ${report.base_n}` : undefined,
-        },
-    ].filter((r) => Boolean(r.value));
-
-    if (rows.length === 0) return null;
-
-    return (
-        <div className="shrink-0 px-4 py-4 mt-1 border-t border-white/[0.07] space-y-2.5">
-            {rows.map((row) => (
-                <div key={row.label} className="leading-tight">
-                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-white/40">
-                        {row.label}
-                    </p>
-                    <p className="text-[12.5px] font-bold text-white/85 break-words">
-                        {row.value}
-                    </p>
-                </div>
-            ))}
-        </div>
-    );
-}
-
 export default function SurveyReport() {
     // `/r/:shareToken` is the client-facing route; `/surveys/:surveyId/report`
     // is the internal one. Presence of a token is what puts the page into the
@@ -204,6 +184,7 @@ export default function SurveyReport() {
     const [isSlicing, setIsSlicing] = useState(false);
     const [isFocusMode, setIsFocusMode] = useState(false);
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+    const enteredFullscreenRef = useRef(false);
 
     // Move activeGroupIndex to ReportContext
     // const [activeGroupIndex, setActiveGroupIndex] = useState(0);
@@ -211,14 +192,19 @@ export default function SurveyReport() {
     const toggleFocusMode = useCallback(() => {
         if (!isFocusMode) {
             setIsFocusMode(true);
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen();
+            enteredFullscreenRef.current = false;
+            const req = document.documentElement.requestFullscreen?.();
+            if (req && typeof (req as Promise<void>).then === 'function') {
+                (req as Promise<void>)
+                    .then(() => { enteredFullscreenRef.current = true; })
+                    .catch(() => { enteredFullscreenRef.current = false; });
             }
         } else {
             setIsFocusMode(false);
-            if (document.fullscreenElement && document.exitFullscreen) {
-                document.exitFullscreen();
+            if (enteredFullscreenRef.current && document.fullscreenElement) {
+                document.exitFullscreen?.().catch(() => { });
             }
+            enteredFullscreenRef.current = false;
         }
     }, [isFocusMode]);
 
@@ -226,13 +212,17 @@ export default function SurveyReport() {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape' && isFocusMode) {
                 setIsFocusMode(false);
-                if (document.fullscreenElement && document.exitFullscreen) {
-                    document.exitFullscreen();
+                if (enteredFullscreenRef.current && document.fullscreenElement) {
+                    document.exitFullscreen?.().catch(() => { });
                 }
+                enteredFullscreenRef.current = false;
             }
         };
         const handleFullscreenChange = () => {
-            if (!document.fullscreenElement) {
+            // Only tear down focus mode when *our* fullscreen session ends
+            // (Esc / browser UI). Do not close if fullscreen was never granted.
+            if (!document.fullscreenElement && enteredFullscreenRef.current) {
+                enteredFullscreenRef.current = false;
                 setIsFocusMode(false);
             }
         };
@@ -265,12 +255,10 @@ export default function SurveyReport() {
 
     const fetchReport = useCallback(async () => {
         try {
-            if (!surveyId && !shareToken) return;
+            if (!surveyId) return;
             setError(null);
 
-            const data = shareToken
-                ? await analytics.getSharedReport(shareToken)
-                : await analytics.getReport(surveyId!);
+            const data = await analytics.getReport(surveyId);
 
             if (data?.status === 'failed') {
                 const msg = data.error_message || 'The report could not be generated at this time.';
@@ -293,9 +281,8 @@ export default function SurveyReport() {
             }
 
             if (status === 403) {
-                // The share link is full. This is the one failure a visitor can
-                // actually do something about, so it says so rather than
-                // reporting a generic fault.
+                // The share link is full — the one failure a visitor can act on,
+                // so it says so rather than reporting a generic fault.
                 const detail = err.response?.data?.detail;
                 setError(
                     typeof detail?.message === 'string'
@@ -306,10 +293,9 @@ export default function SurveyReport() {
             }
 
             if (status === 404) {
-                // Auto-generating on a miss is an analyst affordance and must
-                // not fire here. On a share link it would call an authenticated
-                // endpoint the visitor cannot use; in print mode it would kick
-                // off a fresh build that the PDF renderer then sits waiting on.
+                // Auto-generating on a miss is an analyst affordance. On a share
+                // link it would call an endpoint the visitor cannot use; in print
+                // mode it would start a build the PDF renderer then waits on.
                 if (shareToken || isPrintMode) {
                     setError(
                         shareToken
@@ -352,8 +338,8 @@ export default function SurveyReport() {
         async (format: ExportFormat) => {
             if (format === 'pptx') {
                 // Export must end in a file. If the deck exists this is a
-                // straight download; if it does not, it is built first and the
-                // toast narrates the wait. Either way the user clicks once.
+                // straight download; if not, it is built first and the toast
+                // narrates the wait. Either way the user clicks once.
                 const pending = toast.loading('Preparing PowerPoint…');
                 try {
                     await analytics.downloadPptxEnsuringBuild(
@@ -379,7 +365,6 @@ export default function SurveyReport() {
                 return;
             }
 
-            // PDF prints the live page server-side, which takes a little while.
             const pending = toast.loading('Preparing PDF — this can take a minute…');
             try {
                 if (shareToken) {
@@ -389,23 +374,24 @@ export default function SurveyReport() {
                 }
                 toast.success('PDF downloaded', { id: pending });
             } catch (err: any) {
-                // PDF failures are usually operational — a browser that was
-                // never installed on the server, a frontend it cannot reach —
-                // and the backend already worked out which. Passing that
-                // through beats "try again", which for these causes is advice
-                // to repeat something that cannot work.
+                // PDF failures are operational — a browser that was never
+                // installed, a frontend the server cannot reach — and the
+                // backend worked out which. Passing that through beats "try
+                // again", which for these causes cannot work.
                 const detail = err?.response?.data?.detail;
-                const message =
+                toast.error(
                     typeof detail?.message === 'string'
                         ? detail.message
                         : err?.code === 'ECONNABORTED'
                           ? 'The PDF took too long to build and the request timed out.'
-                          : 'PDF export failed.';
-                toast.error(message, {
-                    id: pending,
-                    description: typeof detail?.remedy === 'string' ? detail.remedy : undefined,
-                    duration: 10000,
-                });
+                          : 'PDF export failed.',
+                    {
+                        id: pending,
+                        description:
+                            typeof detail?.remedy === 'string' ? detail.remedy : undefined,
+                        duration: 10000,
+                    }
+                );
             }
         },
         [shareToken, surveyId]
@@ -457,10 +443,6 @@ export default function SurveyReport() {
         }
     };
 
-    // A visitor arriving through a share link has no account, so the gating
-    // screens below must not offer them account-only actions.
-    const isSharedView = Boolean(shareToken);
-
     if (loading) return <div className="min-h-screen bg-surface-raised py-12"><ReportSkeleton /></div>;
 
     if (isGenerating) {
@@ -491,22 +473,21 @@ export default function SurveyReport() {
         );
     }
 
+    const isSharedView = Boolean(shareToken);
+
     if (error || (report && report.status === 'failed')) {
-        const message = error || report?.error_message;
         // `data-report-error` is what the PDF renderer watches for. Without it a
-        // report that cannot load looks identical to one still rendering, and
-        // the export sits until its timeout instead of failing in a second.
+        // report that cannot load looks identical to one still rendering, and the
+        // export waits out its timeout instead of failing in a second.
         return (
             <div
-                data-report-error={message || 'unknown'}
+                data-report-error={error || report?.error_message || 'unknown'}
                 className="min-h-screen bg-surface flex flex-col items-center justify-center p-8 text-center"
             >
-                <div className="glass-panel p-12 rounded-[40px] max-w-2xl border border-line/80 dark:border-line/10 shadow-[0_32px_64px_rgba(0,0,0,0.06)] dark:shadow-2xl bg-white dark:bg-transparent">
-                    <AlertCircle className="h-20 w-20 text-brand-accent mx-auto mb-6" />
-                    <h2 className="text-4xl font-black text-ink mb-5 uppercase tracking-tighter italic">
-                        {isSharedView ? 'Report unavailable' : 'Interrupted'}
-                    </h2>
-                    <p className="text-slate-400 text-lg font-medium mb-10 leading-relaxed">{message}</p>
+                <div className="glass-panel p-16 rounded-[40px] max-w-2xl border border-line/80 dark:border-line/10 shadow-[0_32px_64px_rgba(0,0,0,0.06)] dark:shadow-2xl bg-white dark:bg-transparent">
+                    <AlertCircle className="h-24 w-24 text-brand-accent mx-auto mb-8 animate-bounce" />
+                    <h2 className="text-5xl font-black text-ink mb-6 uppercase tracking-tighter italic">Interrupted</h2>
+                    <p className="text-slate-400 text-xl font-medium mb-12 leading-relaxed">{error || report?.error_message}</p>
                     {/* Regenerating is an analyst action against an authenticated
                         endpoint — offering it to a share-link visitor would only
                         produce a second, more confusing failure. */}
@@ -613,6 +594,22 @@ function ReportContent({
     // is removed rather than disabled.
     const isSharedView = Boolean(shareToken);
     const { activeGroupIndex, setActiveGroupIndex, registerChartLocation } = useReport();
+    const [surveyMeta, setSurveyMeta] = useState({ category: '', sampleCapacity: 0 });
+
+    useEffect(() => {
+        if (!surveyId) return;
+        let cancelled = false;
+        surveys.get(surveyId)
+            .then((data) => {
+                if (!cancelled) setSurveyMeta(resolveProjectMeta(data));
+            })
+            .catch(() => {});
+        return () => { cancelled = true; };
+    }, [surveyId]);
+
+    const reportMeta = resolveProjectMeta(report);
+    const projectCategory = reportMeta.category || surveyMeta.category;
+    const sampleCapacity = reportMeta.sampleCapacity || surveyMeta.sampleCapacity;
 
     // AI Cost Dashboard State
     const [isCostModalOpen, setIsCostModalOpen] = useState(false);
@@ -664,12 +661,64 @@ function ReportContent({
         return ids;
     }, [report, groupNames, hasNewPipeline]);
 
-    const activeSectionId = useScrollSpy(sectionIds, 140);
-
     // Rail visibility is user-controlled; focus mode hides it regardless.
     const [railOpen, setRailOpen] = useState(true);
-    const [goToOpen, setGoToOpen] = useState(false);
     const railVisible = railOpen && !isFocusMode;
+    const wasFocusMode = useRef(false);
+    const headerRef = useRef<HTMLElement>(null);
+    const [headerHeight, setHeaderHeight] = useState(96);
+
+    const activeSectionId = useScrollSpy(sectionIds, Math.max(120, headerHeight + 16));
+
+    // Entering focus mode: jump to the section the reader was looking at.
+    useEffect(() => {
+        if (isFocusMode && !wasFocusMode.current) {
+            if (activeSectionId?.startsWith('group-')) {
+                const idx = Number(activeSectionId.slice('group-'.length));
+                if (Number.isInteger(idx) && idx >= 0 && idx < groupNames.length) {
+                    setActiveGroupIndex(idx);
+                }
+            } else if (groupNames.length > 0 && activeGroupIndex >= groupNames.length) {
+                setActiveGroupIndex(0);
+            }
+        }
+        wasFocusMode.current = isFocusMode;
+    }, [isFocusMode, activeSectionId, groupNames, activeGroupIndex, setActiveGroupIndex]);
+
+    // Keep slide index in range if groups change under us.
+    useEffect(() => {
+        if (groupNames.length === 0) return;
+        if (activeGroupIndex > groupNames.length - 1) {
+            setActiveGroupIndex(groupNames.length - 1);
+        }
+    }, [groupNames.length, activeGroupIndex, setActiveGroupIndex]);
+
+    // Arrow keys move between slides while immersed.
+    useEffect(() => {
+        if (!isFocusMode || groupNames.length === 0) return;
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+                e.preventDefault();
+                setActiveGroupIndex((prev: number) => Math.min(groupNames.length - 1, prev + 1));
+            } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                e.preventDefault();
+                setActiveGroupIndex((prev: number) => Math.max(0, prev - 1));
+            }
+        };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [isFocusMode, groupNames.length, setActiveGroupIndex]);
+
+    const focusGroupName = groupNames[Math.min(activeGroupIndex, Math.max(groupNames.length - 1, 0))];
+    const focusCharts = focusGroupName ? chartGroups[focusGroupName] : undefined;
+
+    // Lock page scroll while the immersion overlay owns the viewport.
+    useEffect(() => {
+        if (!isFocusMode) return;
+        const prev = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        return () => { document.body.style.overflow = prev; };
+    }, [isFocusMode]);
 
     // Back-to-top only earns its place once the reader is well down the page.
     const [showToTop, setShowToTop] = useState(false);
@@ -683,10 +732,10 @@ function ReportContent({
     const scrollToTop = () =>
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    // The PDF renderer waits on this attribute before printing. Charts animate
-    // in on mount, so a printer that fired on `load` would capture half-drawn
-    // bars; flipping it a beat after the charts exist is what makes the export
-    // deterministic instead of a race.
+    // The PDF renderer waits on `data-report-ready` before printing. Charts
+    // animate in on mount, so a printer firing on `load` would capture
+    // half-drawn bars; flipping this a beat after the charts exist is what makes
+    // the export deterministic instead of a race.
     const [printReady, setPrintReady] = useState(false);
     useEffect(() => {
         if (!report) return;
@@ -694,30 +743,43 @@ function ReportContent({
         return () => window.clearTimeout(timer);
     }, [report, charts?.length]);
 
+    // Keep a live spacer under the fixed header so content never sits underneath it.
+    useLayoutEffect(() => {
+        const el = headerRef.current;
+        if (!el || isFocusMode) return;
+        const update = () => setHeaderHeight(el.offsetHeight);
+        update();
+        const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(update) : null;
+        ro?.observe(el);
+        window.addEventListener('resize', update);
+        return () => {
+            ro?.disconnect();
+            window.removeEventListener('resize', update);
+        };
+    }, [isFocusMode, report?.project_name, railVisible]);
+
     return (
-        <div
-            data-report-ready={printReady ? 'true' : 'false'}
-            className={`min-h-screen bg-canvas text-ink selection:bg-primary/20 transition-[padding] duration-500 ${
-                isPrintMode ? 'report-print-mode' : railVisible ? 'xl:pl-[17.5rem]' : ''
-            }`}
-        >
+        <div data-report-ready={printReady ? 'true' : 'false'}
+            className={`min-h-screen bg-canvas text-ink selection:bg-primary/20 transition-[padding] duration-500 ${railVisible ? "xl:pl-[17.5rem]" : ""}`}>
             {/* Global Mesh Gradient Background */}
             <div className="bg-mesh">
                 <div className="mesh-orb w-[600px] h-[600px] bg-primary/[0.07] top-0 left-[-10%]"></div>
                 <div className="mesh-orb w-[800px] h-[800px] bg-accent/[0.05] bottom-0 right-[-10%]"></div>
             </div>
 
-            {/* Premium Sticky Header */}
-            {!isPrintMode && <header className={`sticky top-0 z-40 bg-surface/95 backdrop-blur-2xl shadow-[0_1px_0_rgb(var(--c-primary)/0.12),0_8px_24px_-16px_rgb(var(--c-primary)/0.25)] py-5 transition-all duration-700 ${isFocusMode ? '-translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
+            {/* Fixed report chrome — sticky fails under App's overflow-hidden root */}
+            {!isPrintMode && <header
+                ref={headerRef}
+                className={`fixed top-0 right-0 z-50 bg-surface/95 backdrop-blur-2xl shadow-[0_1px_0_rgb(var(--c-primary)/0.12),0_8px_24px_-16px_rgb(var(--c-primary)/0.25)] py-5 transition-[transform,opacity,left] duration-500 ${railVisible ? 'left-0 xl:left-[17.5rem]' : 'left-0'} ${isFocusMode ? '-translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}
+            >
                 {/* Brand underline: the blue-to-red gradient, used here as the
                     header's only rule so light mode reads crisp instead of pale. */}
                 <div
                     className="absolute inset-x-0 bottom-0 h-px pointer-events-none"
                     style={{ background: 'linear-gradient(90deg, rgb(var(--c-primary)), rgb(var(--c-accent)) 55%, transparent)' }}
                 />
-                <div className="max-w-[1600px] mx-auto px-8 flex flex-col gap-3">
-                  <div className="flex justify-between items-center gap-6">
-                    <div className="flex items-center gap-6 min-w-0">
+                <div className="max-w-[1600px] mx-auto px-8 flex justify-between items-center">
+                    <div className="flex items-center gap-6">
                         <button
                             onClick={() => navigate('/surveys')}
                             className="w-11 h-11 grid place-items-center bg-surface border border-primary/20 rounded-2xl hover:border-primary/50 hover:bg-primary/[0.06] hover:text-primary-soft transition-all text-ink-muted group"
@@ -732,7 +794,7 @@ function ReportContent({
                             <Activity className="h-6 w-6 text-white" />
                         </div>
                         <div>
-                            <h1 className="text-xl font-black font-display tracking-tight text-ink truncate max-w-[22rem]" title={report.project_name || 'Strategic Analysis'}>
+                            <h1 className="text-xl font-black font-display tracking-tight text-ink">
                                 {report.project_name || 'Strategic Analysis'}
                             </h1>
                             <div className="flex gap-2 mt-1 flex-wrap">
@@ -756,7 +818,7 @@ function ReportContent({
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2.5 shrink-0">
+                    <div className="flex items-center gap-2.5">
                         <FilterPanel
                             availableFilters={report?.available_filters || {}}
                             brands={report?.brands || report?.brand_list || []}
@@ -765,9 +827,11 @@ function ReportContent({
                             onApply={handleApplySlice}
                             isApplying={isSlicing}
                         />
+                        {/* Focus mode — temporarily hidden from the top bar
                         <button onClick={toggleFocusMode} className="p-3 bg-primary/10 dark:bg-primary/20 text-primary-soft border border-primary/20 dark:border-primary/30 rounded-2xl hover:bg-primary hover:text-white transition-all shadow-sm" title="Enter Focus Mode">
                             <Maximize className="h-5 w-5" />
                         </button>
+                        */}
                         <button
                             onClick={toggleTheme}
                             className="p-3 bg-surface border border-line/80 dark:border-line/10 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-ink-muted group relative overflow-hidden active:scale-90"
@@ -796,7 +860,8 @@ function ReportContent({
                                 <RefreshCw className="h-5 w-5" />
                             </button>
                         )}
-                        {!isSharedView && localStorage.getItem('role') === 'admin' && (
+                        {/* AI cost dashboard — temporarily hidden from the top bar
+                        {localStorage.getItem('role') === 'admin' && (
                             <button
                                 onClick={handleViewAICosts}
                                 className="w-11 h-11 grid place-items-center bg-surface border border-primary/20 rounded-2xl hover:border-primary/50 hover:bg-primary/[0.06] transition-all text-ink-muted hover:text-primary-soft group relative"
@@ -808,30 +873,33 @@ function ReportContent({
                                 )}
                             </button>
                         )}
+                        */}
                         <ExportMenu onExport={handleExport} hasPptx={hasPptx} />
                     </div>
-                  </div>
 
-                  {/* Its own row: the URL needs horizontal space, and squeezing
-                      it into the button cluster truncated it to uselessness. */}
-                  {!isSharedView && !isPrintMode && surveyId && (
-                    <div className="flex justify-end">
-                      <ReportShareBar surveyId={surveyId} />
-                    </div>
-                  )}
+                    {/* Its own row: the URL needs horizontal space, and squeezing
+                        it into the button cluster truncated it to uselessness. */}
+                    {!isSharedView && !isPrintMode && surveyId && (
+                      <div className="flex justify-end mt-3">
+                        <ReportShareBar surveyId={surveyId} />
+                      </div>
+                    )}
                 </div>
             </header>}
 
+            {/* Reserve vertical space so the fixed header does not cover content */}
+            {!isFocusMode && !isPrintMode && <div aria-hidden style={{ height: headerHeight }} />}
+
             {/* Immersive Focus Mode Overlay (Slide Presentation Engine) */}
             {isFocusMode && (
-                <div className="fixed inset-0 z-[100] bg-surface p-8 md:p-12 overflow-hidden flex flex-col animate-fade-in focus-mode-overlay">
-                    <div className="flex justify-between items-center mb-10 shrink-0">
-                        <div className="flex items-center gap-6">
-                            <div className="p-4 bg-primary/10 rounded-2xl border border-primary/20">
-                                <Activity className="h-8 w-8 text-primary-soft" />
+                <div className="fixed inset-0 z-[100] bg-surface p-4 md:p-8 overflow-hidden flex flex-col animate-fade-in focus-mode-overlay">
+                    <div className="flex justify-between items-center mb-4 md:mb-6 shrink-0">
+                        <div className="flex items-center gap-4 md:gap-6 min-w-0">
+                            <div className="p-3 md:p-4 bg-primary/10 rounded-2xl border border-primary/20 shrink-0">
+                                <Activity className="h-6 w-6 md:h-8 md:w-8 text-primary-soft" />
                             </div>
-                            <div>
-                                <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight italic text-ink leading-tight">
+                            <div className="min-w-0">
+                                <h2 className="text-xl md:text-3xl font-black uppercase tracking-tight italic text-ink leading-tight truncate">
                                     {report.project_name}
                                 </h2>
                                 <div className="flex items-center gap-3 mt-1">
@@ -840,16 +908,16 @@ function ReportContent({
                                 </div>
                             </div>
                         </div>
-                        <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-2 px-6 py-3 bg-surface-sunken rounded-2xl border border-line/80 dark:border-line/10 mr-4">
+                        <div className="flex items-center gap-3 md:gap-4 shrink-0">
+                            <div className="flex items-center gap-2 px-4 md:px-6 py-2.5 md:py-3 bg-surface-sunken rounded-2xl border border-line/80 dark:border-line/10">
                                 <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Slide</span>
-                                <span className="text-primary-soft font-black font-mono text-lg">{activeGroupIndex + 1}</span>
+                                <span className="text-primary-soft font-black font-mono text-lg">{Math.min(activeGroupIndex, Math.max(groupNames.length - 1, 0)) + 1}</span>
                                 <span className="text-slate-600 font-bold mx-1">/</span>
                                 <span className="text-slate-500 font-bold font-mono">{groupNames.length}</span>
                             </div>
                             <button
                                 onClick={toggleTheme}
-                                className="p-4 bg-surface-sunken border border-line/80 dark:border-line/10 rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-800 transition-all text-ink-muted relative overflow-hidden active:scale-95"
+                                className="p-3 md:p-4 bg-surface-sunken border border-line/80 dark:border-line/10 rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-800 transition-all text-ink-muted relative overflow-hidden active:scale-95"
                                 title="Toggle Theme"
                             >
                                 <motion.div
@@ -872,65 +940,77 @@ function ReportContent({
                             </button>
                             <button
                                 onClick={toggleFocusMode}
-                                className="p-4 bg-surface-sunken border border-line/80 dark:border-line/10 rounded-3xl hover:bg-rose-500/10 hover:text-rose-500 transition-all text-slate-400"
+                                className="p-3 md:p-4 bg-surface-sunken border border-line/80 dark:border-line/10 rounded-3xl hover:bg-rose-500/10 hover:text-rose-500 transition-all text-slate-400"
+                                title="Exit Focus Mode"
                             >
-                                <X className="h-8 w-8" />
+                                <X className="h-7 w-7 md:h-8 md:w-8" />
                             </button>
                         </div>
                     </div>
 
-                    <div className="flex-1 min-h-0 flex items-center gap-8 relative overflow-hidden group/nav">
+                    <div className="flex-1 min-h-0 flex items-stretch gap-3 md:gap-6 relative">
                         {/* Slide Navigation: Previous */}
                         <button
-                            disabled={activeGroupIndex === 0}
-                            onClick={() => setActiveGroupIndex((prev: any) => prev - 1)}
-                            className={`p-6 rounded-full border bg-surface shadow-2xl transition-all z-20 shrink-0 ${activeGroupIndex === 0 ? 'opacity-0 scale-90 pointer-events-none' : 'opacity-0 group-hover/nav:opacity-100 scale-100 active:scale-90 border-line/80 dark:border-line/10 text-slate-400 hover:text-primary-soft hover:border-primary/30'}`}
+                            disabled={activeGroupIndex <= 0}
+                            onClick={() => setActiveGroupIndex((prev: number) => Math.max(0, prev - 1))}
+                            className={`self-center p-4 md:p-5 rounded-full border bg-surface shadow-xl transition-all z-20 shrink-0 ${activeGroupIndex <= 0 ? 'opacity-0 scale-90 pointer-events-none' : 'opacity-70 hover:opacity-100 active:scale-90 border-line/80 dark:border-line/10 text-slate-400 hover:text-primary-soft hover:border-primary/30'}`}
+                            title="Previous slide"
+                            aria-label="Previous slide"
                         >
-                            <ChevronLeft className="h-10 w-10" />
+                            <ChevronLeft className="h-8 w-8 md:h-10 md:w-10" />
                         </button>
 
-                        <div className="flex-1 h-full min-h-0 relative">
-                            <AnimatePresence mode="wait">
-                                <motion.div
-                                    key={groupNames[activeGroupIndex]}
-                                    initial={{ opacity: 0, x: 50 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -50 }}
-                                    transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-                                    className="h-full flex flex-col pt-4"
-                                >
-                                    <div className="flex items-center gap-6 mb-8 shrink-0">
-                                        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-brand-blue/20 to-transparent" />
-                                        <h3 className={`text-4xl md:text-5xl font-black uppercase tracking-tighter italic ${isDark ? 'text-white' : 'text-slate-900'}`}>{groupNames[activeGroupIndex]}</h3>
-                                        <div className="h-px flex-1 bg-gradient-to-l from-transparent via-brand-blue/20 to-transparent" />
-                                    </div>
-                                    <div className="flex-1 min-h-0">
-                                        <TabbedChartGroup
-                                            groupName={groupNames[activeGroupIndex]}
-                                            charts={chartGroups[groupNames[activeGroupIndex]]}
-                                            isFocusMode={true}
-                                        />
-                                    </div>
-                                </motion.div>
-                            </AnimatePresence>
+                        <div className="flex-1 h-full min-h-0 min-w-0 relative">
+                            {focusCharts && focusGroupName ? (
+                                <AnimatePresence mode="wait">
+                                    <motion.div
+                                        key={focusGroupName}
+                                        initial={{ opacity: 0, x: 40 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: -40 }}
+                                        transition={{ type: 'spring', stiffness: 280, damping: 28 }}
+                                        className="absolute inset-0 flex flex-col"
+                                    >
+                                        <div className="flex items-center gap-4 md:gap-6 mb-3 md:mb-4 shrink-0">
+                                            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-brand-blue/20 to-transparent" />
+                                            <h3 className={`text-2xl md:text-4xl font-black uppercase tracking-tighter italic truncate max-w-[70vw] ${isDark ? 'text-white' : 'text-slate-900'}`}>{focusGroupName}</h3>
+                                            <div className="h-px flex-1 bg-gradient-to-l from-transparent via-brand-blue/20 to-transparent" />
+                                        </div>
+                                        <div className="flex-1 min-h-0">
+                                            <TabbedChartGroup
+                                                groupName={focusGroupName}
+                                                charts={focusCharts}
+                                                isFocusMode={true}
+                                            />
+                                        </div>
+                                    </motion.div>
+                                </AnimatePresence>
+                            ) : (
+                                <div className="h-full grid place-items-center text-ink-subtle font-bold uppercase tracking-widest text-sm">
+                                    No chart groups available
+                                </div>
+                            )}
                         </div>
 
                         {/* Slide Navigation: Next */}
                         <button
-                            disabled={activeGroupIndex === groupNames.length - 1}
-                            onClick={() => setActiveGroupIndex((prev: any) => prev + 1)}
-                            className={`p-6 rounded-full border bg-surface shadow-2xl transition-all z-20 shrink-0 ${activeGroupIndex === groupNames.length - 1 ? 'opacity-0 scale-90 pointer-events-none' : 'opacity-0 group-hover/nav:opacity-100 scale-100 active:scale-90 border-line/80 dark:border-line/10 text-slate-400 hover:text-primary-soft hover:border-primary/30'}`}
+                            disabled={activeGroupIndex >= groupNames.length - 1}
+                            onClick={() => setActiveGroupIndex((prev: number) => Math.min(groupNames.length - 1, prev + 1))}
+                            className={`self-center p-4 md:p-5 rounded-full border bg-surface shadow-xl transition-all z-20 shrink-0 ${activeGroupIndex >= groupNames.length - 1 ? 'opacity-0 scale-90 pointer-events-none' : 'opacity-70 hover:opacity-100 active:scale-90 border-line/80 dark:border-line/10 text-slate-400 hover:text-primary-soft hover:border-primary/30'}`}
+                            title="Next slide"
+                            aria-label="Next slide"
                         >
-                            <ChevronRight className="h-10 w-10" />
+                            <ChevronRight className="h-8 w-8 md:h-10 md:w-10" />
                         </button>
                     </div>
 
-                    <div className="mt-10 shrink-0 flex justify-center gap-3">
+                    <div className="mt-4 md:mt-6 shrink-0 flex justify-center gap-2.5">
                         {groupNames.map((_: any, idx: number) => (
                             <button
                                 key={`nav-dot-${idx}`}
                                 onClick={() => setActiveGroupIndex(idx)}
                                 className={`h-1.5 rounded-full transition-all duration-500 ${idx === activeGroupIndex ? 'w-12 bg-primary shadow-[0_0_10px_rgba(59,130,246,0.5)]' : 'w-3 bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20'}`}
+                                aria-label={`Go to slide ${idx + 1}`}
                             />
                         ))}
                     </div>
@@ -944,6 +1024,17 @@ function ReportContent({
                 <aside
                     className={`fixed left-0 top-0 bottom-0 w-[17.5rem] brand-rail z-50 hidden xl:flex flex-col transition-transform duration-500 ${railVisible ? 'translate-x-0' : 'xl:-translate-x-full pointer-events-none'}`}
                 >
+                    {railVisible && (
+                        <button
+                            type="button"
+                            onClick={() => setRailOpen(false)}
+                            className="absolute top-8 -right-3 z-30 w-6 h-6 rounded-full bg-white dark:bg-slate-800 border border-white/20 dark:border-slate-600 shadow-lg shadow-black/25 flex items-center justify-center text-primary hover:scale-110 hover:bg-primary hover:text-white hover:border-primary active:scale-95 transition-all"
+                            title="Collapse sidebar"
+                            aria-label="Collapse sidebar"
+                        >
+                            <ChevronLeft size={14} strokeWidth={2.5} />
+                        </button>
+                    )}
                     {/* Brand head — same mark and wording as the main rail */}
                     <div className="relative px-5 py-6 border-b border-white/[0.07] shrink-0 overflow-hidden">
                         <div
@@ -975,6 +1066,7 @@ function ReportContent({
                             </div>
                         </div>
 
+                        {/* Sample size + brand count under survey name — temporarily hidden
                         {report.base_n > 0 && (
                             <div className="relative mt-3 flex items-center gap-1.5 text-[10px] font-semibold text-white/50">
                                 <Database className="w-2.5 h-2.5 shrink-0" />
@@ -983,6 +1075,7 @@ function ReportContent({
                                 <span>{(report.brands || report.brand_list)?.length || 0} brands</span>
                             </div>
                         )}
+                        */}
                     </div>
 
                     {/* Section navigation */}
@@ -993,7 +1086,7 @@ function ReportContent({
                         <div className="pointer-events-none absolute inset-x-0 top-0 h-6 z-10 bg-gradient-to-b from-[rgb(var(--c-chrome))] to-transparent" />
                         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-6 z-10 bg-gradient-to-t from-[rgb(var(--c-chrome-deep))] to-transparent" />
 
-                        <div className="h-full overflow-y-auto overflow-x-hidden custom-scrollbar px-3 py-4">
+                        <div className="h-full overflow-y-auto overflow-x-hidden scrollbar-none px-3 py-4">
                         <div className="px-3 pb-2.5 text-[9px] font-black uppercase tracking-[0.3em] text-white/35">
                             Architecture
                         </div>
@@ -1080,108 +1173,19 @@ function ReportContent({
                         </div>
                     </div>
 
-                    {/* Platform navigation. Hidden for a shared client view:
-                        those routes require an account, so they would bounce a
-                        client to the login screen. */}
-                    {!isSharedView && (
-                    <div className="shrink-0 px-3 pt-3 border-t border-white/[0.07]">
-                        <button
-                            onClick={() => setGoToOpen((v) => !v)}
-                            className="nav-item w-full"
-                            aria-expanded={goToOpen}
-                        >
-                            <span className="shrink-0 w-8 h-8 rounded-lg bg-white/[0.07] grid place-items-center">
-                                <LayoutDashboard className="w-4 h-4" />
-                            </span>
-                            <span className="text-[12.5px] uppercase tracking-[0.06em] truncate flex-1 text-left">
-                                Go to
-                            </span>
-                            <motion.span animate={{ rotate: goToOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                                <ChevronDown className="w-4 h-4 text-white/45" />
-                            </motion.span>
-                        </button>
-
-                        <AnimatePresence initial={false}>
-                            {goToOpen && (
-                                <motion.div
-                                    initial={{ height: 0, opacity: 0 }}
-                                    animate={{ height: 'auto', opacity: 1 }}
-                                    exit={{ height: 0, opacity: 0 }}
-                                    transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-                                    className="overflow-hidden"
-                                >
-                                    <div className="pl-5 pr-1 py-1 space-y-0.5 border-l border-white/10 ml-[22px]">
-                                        {[
-                                            { label: 'Dashboard', icon: LayoutDashboard, to: '/dashboard' },
-                                            { label: 'Surveys', icon: ClipboardList, to: '/surveys' },
-                                            { label: 'Reports', icon: FileText, to: '/surveys/reports' },
-                                        ].map((item) => (
-                                            <button
-                                                key={item.to}
-                                                onClick={() => navigate(item.to)}
-                                                className="nav-item w-full"
-                                            >
-                                                <span className="shrink-0 w-7 h-7 rounded-lg bg-white/[0.07] grid place-items-center">
-                                                    <item.icon className="w-3.5 h-3.5" />
-                                                </span>
-                                                <span className="text-[12px] uppercase tracking-[0.06em] truncate">
-                                                    {item.label}
-                                                </span>
-                                            </button>
-                                        ))}
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                    {/* Project metadata from survey creation */}
+                    <div className="shrink-0 px-5 py-4 border-t border-white/[0.07] space-y-2.5">
+                        <p className="text-[12px] leading-snug text-white/75">
+                            <span className="font-bold text-white">Category</span>
+                            <span className="text-white/35 mx-1.5">·</span>
+                            <span>{projectCategory || '—'}</span>
+                        </p>
+                        <p className="text-[12px] leading-snug text-white/75">
+                            <span className="font-bold text-white">Capacity</span>
+                            <span className="text-white/35 mx-1.5">·</span>
+                            <span>{sampleCapacity > 0 ? `n=${sampleCapacity.toLocaleString()}` : '—'}</span>
+                        </p>
                     </div>
-                    )}
-
-                    {/* Study metadata — what a reader needs to interpret the
-                        numbers: what was tested, where, and on what base. */}
-                    <ProjectFacts report={report} />
-
-                    {/* Collapse sits on its own, separated from both groups */}
-                    <div className="shrink-0 px-3 py-3 mt-1 border-t border-white/[0.07]">
-                        <button
-                            onClick={() => setRailOpen(false)}
-                            className="nav-item w-full"
-                            title="Collapse sidebar"
-                        >
-                            <span className="shrink-0 w-8 h-8 rounded-lg bg-white/[0.07] grid place-items-center">
-                                <PanelLeftClose className="w-4 h-4" />
-                            </span>
-                            <span className="text-[12.5px] uppercase tracking-[0.06em] truncate">
-                                Collapse
-                            </span>
-                        </button>
-                    </div>
-
-                    {/* Sample size */}
-                    {report.base_n > 0 && (
-                        <div className="shrink-0 px-5 py-4 border-t border-white/[0.07]">
-                            <div className="flex items-center justify-between mb-1.5">
-                                <span className="text-[8px] font-black text-white/40 uppercase tracking-[0.25em]">
-                                    Sample
-                                </span>
-                                <Database className="w-3 h-3 text-white/40" />
-                            </div>
-                            <div className="text-2xl font-black font-display text-white leading-none mb-2.5">
-                                N={report.base_n}
-                            </div>
-                            <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
-                                <motion.div
-                                    initial={{ width: 0 }}
-                                    animate={{ width: '100%' }}
-                                    transition={{ duration: 1.4, ease: 'easeOut' }}
-                                    className="h-full rounded-full"
-                                    style={{
-                                        background:
-                                            'linear-gradient(90deg, rgb(var(--c-primary)), rgb(var(--c-accent)))',
-                                    }}
-                                />
-                            </div>
-                        </div>
-                    )}
                 </aside>
 
                 {/* Main Content - Padded to avoid overlap */}
@@ -1216,8 +1220,8 @@ function ReportContent({
                     {report.insights?.market_position_report && (
                         <section id="strategic-positioning" className="scroll-mt-40 animate-slide-up">
                             <div className="flex items-center gap-4 mb-12">
-                                <div className="h-1 w-12 bg-emerald-500 rounded-full"></div>
-                                <h2 className="text-3xl font-black uppercase tracking-widest italic text-slate-400">Strategic Intelligence</h2>
+                                <div className="h-1 w-12 bg-primary rounded-full"></div>
+                                <h2 className="text-3xl font-black uppercase tracking-widest italic text-primary-soft">Strategic Intelligence</h2>
                             </div>
                             <MarketPositionSection
                                 data={report.insights.market_position_report}
@@ -1228,9 +1232,9 @@ function ReportContent({
 
                     {hasNewPipeline ? (
                         groupNames.map((group: string, gIdx: number) => (
-                            <section key={group} id={`group-${gIdx}`} className="scroll-mt-40 space-y-16 animate-slide-up" style={{ animationDelay: `${gIdx * 0.1}s` }}>
-                                <div className="flex items-center justify-between border-b border-line/80 dark:border-line/10 pb-8">
-                                    <div className="space-y-2">
+                            <section key={group} id={`group-${gIdx}`} className="scroll-mt-40 space-y-4 animate-slide-up" style={{ animationDelay: `${gIdx * 0.1}s` }}>
+                                <div className="flex items-center justify-between border-b border-line/80 dark:border-line/10 pb-4">
+                                    <div className="space-y-1">
                                         <div className="text-xs font-black text-primary-soft uppercase tracking-[0.4em]">Section — {String(gIdx + 1).padStart(2, '0')}</div>
                                         <h3 className="text-3xl font-black font-display tracking-tight text-ink">{group}</h3>
                                     </div>
@@ -1239,9 +1243,7 @@ function ReportContent({
                                     </div>
                                 </div>
 
-                                <div className="mt-8">
-                                    <TabbedChartGroup groupName={group} charts={chartGroups[group]} isFocusMode={isFocusMode} />
-                                </div>
+                                <TabbedChartGroup groupName={group} charts={chartGroups[group]} isFocusMode={false} />
                             </section>
                         ))
                     ) : (
@@ -1257,7 +1259,7 @@ function ReportContent({
                                 <div className="grid grid-cols-1 gap-12">
                                     {section.charts?.map((chart: any, cIdx: number) => (
                                         <div key={cIdx} className="hover:scale-[1.01] transition-transform duration-500">
-                                            <ChartRenderer chart={chart} isFocusMode={isFocusMode} />
+                                            <ChartRenderer chart={chart} isFocusMode={false} />
                                         </div>
                                     ))}
                                 </div>
@@ -1291,7 +1293,7 @@ function ReportContent({
                             className="hidden xl:grid fixed left-5 top-28 z-50 w-11 h-11 place-items-center rounded-2xl text-white shadow-lg shadow-primary/30 transition-transform hover:scale-105 active:scale-95"
                             style={{ background: 'linear-gradient(135deg, rgb(var(--c-primary)), rgb(var(--c-accent)))' }}
                         >
-                            <PanelLeftOpen className="w-5 h-5" />
+                            <ChevronRight className="w-5 h-5" />
                         </button>
                     )}
 

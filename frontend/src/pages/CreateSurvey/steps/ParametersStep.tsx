@@ -459,7 +459,7 @@ export function ParametersStep({
         };
 
         return (
-        <section className="space-y-6 border-t border-line/80 dark:border-line/10 pt-10" id="ai-moderator-section">
+        <section className="space-y-5 border-t border-line/80 dark:border-line/10 pt-6" id="ai-moderator-section">
             <div className="flex items-center justify-between">
                 <div className="space-y-1">
                     <label className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-ink ml-1">
@@ -490,7 +490,7 @@ export function ParametersStep({
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="grid grid-cols-1 md:grid-cols-3 gap-6 p-8 bg-primary/5 dark:bg-primary/10 border-2 border-primary/20 rounded-[2.5rem]"
+                    className="grid grid-cols-1 md:grid-cols-3 gap-6 p-5 bg-primary/5 dark:bg-primary/10 border-2 border-primary/20 rounded-[2.5rem]"
                 >
                     <div className="space-y-3">
                         <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Moderation Depth</label>
@@ -591,7 +591,7 @@ export function ParametersStep({
                                     initial={{ opacity: 0, height: 0 }}
                                     animate={{ opacity: 1, height: 'auto' }}
                                     exit={{ opacity: 0, height: 0 }}
-                                    className="overflow-hidden space-y-6"
+                                    className="overflow-hidden space-y-5"
                                 >
                                     <div className="space-y-3">
                                         <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">
@@ -760,7 +760,7 @@ export function ParametersStep({
     const renderSharedProtocolsAndBrands = () => (
         <>
             {/* ═══ Testing Protocol ═══ */}
-            <section className="space-y-6 border-t border-line/80 dark:border-line/10 pt-10" id="testing-protocol-section">
+            <section className="space-y-5 border-t border-line/80 dark:border-line/10 pt-6" id="testing-protocol-section">
                 <div className="flex items-center justify-between">
                     <div className="space-y-1">
                         <label className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-ink ml-1">
@@ -782,7 +782,7 @@ export function ParametersStep({
                                 ...prev,
                                 config: { ...(prev.config || DEFAULT_TASTE_CONFIG), testing_protocol: p.id as any }
                             }))}
-                            className={`flex-1 p-6 rounded-[2rem] border-2 transition-all flex flex-col items-center text-center gap-3 relative group ${(formData.config?.testing_protocol || 'branded') === p.id
+                            className={`flex-1 p-6 rounded-[2.5rem] border-2 transition-all flex flex-col items-center text-center gap-3 relative group ${(formData.config?.testing_protocol || 'branded') === p.id
                                 ? 'bg-primary border-primary text-white shadow-xl shadow-primary/20'
                                 : 'bg-surface border-line/80 dark:border-line/10 text-slate-400 hover:border-primary/50'
                                 }`}
@@ -807,7 +807,7 @@ export function ParametersStep({
             </section>
 
             {/* Brands Section */}
-            <section className="space-y-10 border-t border-line/80 dark:border-line/10 pt-10">
+            <section className="space-y-5 border-t border-line/80 dark:border-line/10 pt-6">
                 <div className="flex items-center justify-between" id="brand-architecture-section">
                     <div className="space-y-1">
                         <label className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-ink ml-1">
@@ -818,7 +818,7 @@ export function ParametersStep({
                 </div>
 
                 {/* Managed Brand Tiers & Add Brand */}
-                <section className="space-y-8 bg-slate-50/50 dark:bg-slate-900/50 p-10 rounded-[2.5rem] border-2 border-slate-300 dark:border-slate-700 transition-colors shadow-inner">
+                <section className="space-y-5 bg-slate-50/50 dark:bg-slate-900/50 p-6 rounded-[2.5rem] border-2 border-slate-300 dark:border-slate-700 transition-colors shadow-inner">
                     <div className="flex flex-col gap-6">
                         <div className="flex flex-col md:flex-row gap-6">
                             <div className="flex-1 space-y-4">
@@ -852,7 +852,7 @@ export function ParametersStep({
                                         }
                                     }}
                                     placeholder="Add brand name..."
-                                    className="w-full bg-surface border-2 border-slate-400 dark:border-slate-600 focus:border-primary rounded-2xl px-6 py-4 text-sm font-bold outline-none transition-all dark:text-white shadow-sm"
+                                    className="w-full bg-surface border-2 border-slate-400 dark:border-slate-600 focus:border-primary rounded-2xl px-10 py-7 text-sm font-bold outline-none transition-all dark:text-white shadow-sm"
                                 />
                                 <div className="flex items-center gap-6 px-2">
                                     <button
@@ -888,7 +888,7 @@ export function ParametersStep({
                                     setBrandInput('');
                                     toast.success('Brand added');
                                 }}
-                                className="bg-primary text-white px-10 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all"
+                                className="bg-primary text-white px-6 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all"
                             >
                                 Add Brand
                             </button>
@@ -909,7 +909,7 @@ export function ParametersStep({
                                 <motion.div
                                     key={brand.name}
                                     layout
-                                    className={`flex items-center gap-3 px-6 py-4 rounded-[1.5rem] border-2 shadow-sm group transition-all relative ${isTarget
+                                    className={`flex items-center gap-3 px-10 py-7 rounded-[1.5rem] border-2 shadow-sm group transition-all relative ${isTarget
                                         ? 'bg-amber-50 dark:bg-amber-950/20 border-amber-400 dark:border-amber-500 shadow-amber-200/50'
                                         : brand.role === 'internal'
                                             ? 'bg-primary/10 border-primary/20 text-primary-soft'
@@ -999,7 +999,7 @@ export function ParametersStep({
     );
 
     return (
-        <div className="glass-card bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] p-12 shadow-premium text-left space-y-10 animate-slide-up border-2 border-slate-200 dark:border-slate-700 transition-colors">
+        <div className="glass-card bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-premium text-left space-y-6 animate-slide-up border-2 border-slate-200 dark:border-slate-700 transition-colors">
             <div className="flex items-center gap-4 transition-colors">
                 <div className="p-3.5 rounded-2xl bg-primary/5 dark:bg-primary/10 text-primary-soft border border-primary/10 dark:border-primary/20">
                     <Settings2 className="w-6 h-6" />
@@ -1011,7 +1011,7 @@ export function ParametersStep({
             </div>
 
             {formData.survey_type !== 'taste_test' && formData.survey_type !== 'product_test' && (
-                <div className="p-8 rounded-[2.5rem] bg-amber-50 dark:bg-amber-950/20 border-2 border-amber-200 dark:border-amber-900/50 mb-8 flex items-center justify-between">
+                <div className="p-5 rounded-[2.5rem] bg-amber-50 dark:bg-amber-950/20 border-2 border-amber-200 dark:border-amber-900/50 mb-5 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <div className="p-3 rounded-2xl bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400">
                             <Info className="w-5 h-5" />
@@ -1031,11 +1031,11 @@ export function ParametersStep({
             )}
 
             {(formData.survey_type === 'taste_test' || !formData.survey_type) && (
-                <div className="space-y-12">
+                <div className="space-y-5">
                     {/* Primary Parameters: Category, Protocol, Language */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                         {/* Category */}
-                        <div className="space-y-6 bg-slate-50/50 dark:bg-slate-950/50 p-8 rounded-[2.5rem] border-2 border-line/80 dark:border-line/10 shadow-inner">
+                        <div className="space-y-5 bg-slate-50/50 dark:bg-slate-950/50 p-5 rounded-[2.5rem] border-2 border-line/80 dark:border-line/10 shadow-inner">
                             <div className="flex items-center gap-3 border-b border-line/80 dark:border-line/10 pb-4 mb-2">
                                 <Tag className="w-4 h-4 text-primary-soft" />
                                 <h4 className="text-sm font-black uppercase tracking-widest text-ink">Product Category</h4>
@@ -1058,14 +1058,14 @@ export function ParametersStep({
                                         });
                                     }}
                                     placeholder="e.g. Premium Chocolate"
-                                    className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 focus:border-primary rounded-2xl px-6 py-4 text-sm font-bold outline-none dark:text-white transition-all shadow-sm"
+                                    className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 focus:border-primary rounded-2xl px-10 py-7 text-sm font-bold outline-none dark:text-white transition-all shadow-sm"
                                 />
                             </div>
                         </div>
 
                         {/* Language */}
-                        <div className="space-y-6 bg-slate-50/50 dark:bg-slate-950/50 p-8 rounded-[2.5rem] border-2 border-line/80 dark:border-line/10 shadow-inner">
-                            <label className="text-sm font-black uppercase tracking-widest text-ink ml-1">Survey Language</label>
+                        <div className="space-y-5 bg-slate-50/50 dark:bg-slate-950/50 p-5 rounded-[2.5rem] border-2 border-line/80 dark:border-line/10 shadow-inner">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-ink ml-1">Survey Language</label>
                             <div className="flex gap-2">
                                 {['en', 'ar'].map(lang => (
                                     <button
@@ -1074,7 +1074,7 @@ export function ParametersStep({
                                             ...prev,
                                             config: { ...(prev.config || DEFAULT_TASTE_CONFIG), language: lang as any }
                                         }))}
-                                        className={`flex-1 py-4 rounded-2xl text-sm font-black transition-all border-2 ${formData.config?.language === lang
+                                        className={`flex-1 py-5 rounded-2xl text-sm font-black transition-all border-2 ${formData.config?.language === lang
                                             ? 'bg-primary border-primary text-white shadow-lg'
                                             : 'bg-surface border-slate-400 dark:border-slate-600 text-slate-800 dark:text-slate-300 hover:border-primary'}`}
                                     >
@@ -1088,7 +1088,7 @@ export function ParametersStep({
                     {renderSharedProtocolsAndBrands()}
 
                     {/* ═══ Unified Attribute Engine ═══ */}
-                    <section className="space-y-5 border-t border-line/80 dark:border-line/10 pt-7" id="attribute-engine-section">
+                    <section className="space-y-5 border-t border-line/80 dark:border-line/10 pt-6" id="attribute-engine-section">
                         <div className="space-y-1">
                             <label className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-ink ml-1">
                                 <Sparkles className="w-3.5 h-3.5 text-primary-soft" /> Attribute Engine
@@ -1165,7 +1165,7 @@ export function ParametersStep({
                             Other survey types have no library, so they keep it. */}
                         {formData.survey_type !== 'taste_test' && (<>
                         {/* ── Add New Attribute Box ── */}
-                        <div className="p-6 rounded-[2rem] bg-slate-50/70 dark:bg-slate-950/60 border-2 border-line/80 dark:border-line/10 shadow-inner space-y-4">
+                        <div className="p-6 rounded-[2.5rem] bg-slate-50/70 dark:bg-slate-950/60 border-2 border-line/80 dark:border-line/10 shadow-inner space-y-4">
                             <div className="flex items-center gap-2 mb-1">
                                 <div className="w-1.5 h-1.5 rounded-full bg-primary" />
                                 <span className="text-xs font-black uppercase tracking-widest text-ink">Add New Attribute</span>
@@ -1177,7 +1177,7 @@ export function ParametersStep({
                                     value={newMainAttrInput}
                                     onChange={e => setNewMainAttrInput(e.target.value)}
                                     placeholder="Type a custom main attribute name..."
-                                    className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 focus:border-primary rounded-2xl px-6 py-4 text-sm font-bold outline-none transition-all dark:text-white shadow-sm pr-16"
+                                    className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 focus:border-primary rounded-2xl px-10 py-7 text-sm font-bold outline-none transition-all dark:text-white shadow-sm pr-16"
                                     onKeyPress={(e) => {
                                         if (e.key === 'Enter' && newMainAttrInput.trim()) {
                                             const val = newMainAttrInput.trim();
@@ -1241,7 +1241,7 @@ export function ParametersStep({
                                 initial={{ opacity: 0, height: 0 }}
                                 animate={{ opacity: 1, height: 'auto' }}
                                 exit={{ opacity: 0, height: 0 }}
-                                className="rounded-[2rem] bg-surface border-2 border-primary/20 shadow-lg overflow-hidden"
+                                className="rounded-[2.5rem] bg-surface border-2 border-primary/20 shadow-lg overflow-hidden"
                             >
                                 <div className="p-5 bg-primary/5 dark:bg-primary/10 border-b border-primary/10 flex items-center justify-between">
                                     <div className="flex items-center gap-2">
@@ -1410,7 +1410,7 @@ export function ParametersStep({
                             const customEntries = formData.config?.custom_research_attributes || [];
                             const hasAny = libraryEntries.length > 0 || customEntries.length > 0;
                             if (!hasAny) return (
-                                <div className="py-8 flex flex-col items-center justify-center opacity-40 bg-slate-50/50 dark:bg-slate-950/30 border-2 border-dashed border-line/80 dark:border-line/10 rounded-[2rem]">
+                                <div className="py-8 flex flex-col items-center justify-center opacity-40 bg-slate-50/50 dark:bg-slate-950/30 border-2 border-dashed border-line/80 dark:border-line/10 rounded-[2.5rem]">
                                     <Layers className="w-8 h-8 text-slate-300 mb-3" />
                                     <p className="text-sm font-black uppercase tracking-widest text-slate-400">No attributes added yet</p>
                                     <p className="text-xs text-slate-400 mt-1">Add custom or use the library above</p>
@@ -1700,7 +1700,7 @@ export function ParametersStep({
 
 
                     {/* ─── Purchase Funnel Module ─── */}
-                    <section className="border-t border-line/80 dark:border-line/10 pt-10" id="purchase-funnel-section">
+                    <section className="border-t border-line/80 dark:border-line/10 pt-6" id="purchase-funnel-section">
 
                         {/* Collapsed trigger */}
                         {!pfExpanded ? (
@@ -1721,7 +1721,7 @@ export function ParametersStep({
                             </button>
                         ) : (
                             /* Expanded Panel */
-                            <div className={`p-10 rounded-[2.5rem] border-2 transition-all duration-300 space-y-8 ${pfConfig.is_enabled
+                            <div className={`p-6 rounded-[2.5rem] border-2 transition-all duration-300 space-y-5 ${pfConfig.is_enabled
                                 ? 'bg-primary/5 dark:bg-primary/10 border-primary/30'
                                 : 'bg-slate-50/50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-700'
                                 }`}>
@@ -1808,7 +1808,7 @@ export function ParametersStep({
                                                 }
                                             }}
                                             placeholder="Type brand name and press Enter..."
-                                            className="flex-1 bg-surface border-2 border-slate-300 dark:border-slate-700 focus:border-primary rounded-2xl px-5 py-4 text-sm font-bold outline-none transition-all text-ink placeholder:text-slate-400"
+                                            className="flex-1 bg-surface border-2 border-slate-300 dark:border-slate-700 focus:border-primary rounded-2xl px-5 py-5 text-sm font-bold outline-none transition-all text-ink placeholder:text-slate-400"
                                         />
                                         <button
                                             onClick={() => {
@@ -1821,7 +1821,7 @@ export function ParametersStep({
                                                 setPfBrandInput('');
                                                 toast.success(`Brand "${name}" added to funnel`);
                                             }}
-                                            className="px-6 py-4 bg-primary text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all"
+                                            className="px-10 py-7 bg-primary text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all"
                                         >
                                             <Plus className="w-4 h-4" />
                                         </button>
@@ -1872,7 +1872,7 @@ export function ParametersStep({
                                         value={syncedCategory}
                                         onChange={e => updatePF({ category_name: e.target.value })}
                                         placeholder={formData.config?.category || 'e.g. Carbonated Beverages...'}
-                                        className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 focus:border-primary rounded-2xl px-6 py-4 text-sm font-black text-ink outline-none transition-all placeholder:text-slate-400"
+                                        className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 focus:border-primary rounded-2xl px-10 py-7 text-sm font-black text-ink outline-none transition-all placeholder:text-slate-400"
                                     />
                                 </div>
 
@@ -1900,7 +1900,7 @@ export function ParametersStep({
                     </section>
 
                     {/* ─── Brand Usage Module ─── */}
-                    <section className="border-t border-line/80 dark:border-line/10 pt-10" id="brand-usage-section">
+                    <section className="border-t border-line/80 dark:border-line/10 pt-6" id="brand-usage-section">
                         {!usageExpanded ? (
                             <button
                                 onClick={() => setUsageExpanded(true)}
@@ -1918,7 +1918,7 @@ export function ParametersStep({
                                 <Plus className="w-5 h-5 text-slate-400 group-hover:text-primary-soft transition-colors" />
                             </button>
                         ) : (
-                            <div className={`p-10 rounded-[2.5rem] border-2 transition-all duration-300 space-y-8 ${usageConfig.is_enabled
+                            <div className={`p-6 rounded-[2.5rem] border-2 transition-all duration-300 space-y-5 ${usageConfig.is_enabled
                                 ? 'bg-primary/5 dark:bg-primary/10 border-primary/30'
                                 : 'bg-slate-50/50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-700'
                                 }`}>
@@ -1979,7 +1979,7 @@ export function ParametersStep({
                                                             : [...current, q.id];
                                                         updateUsage({ selected_questions: next });
                                                     }}
-                                                    className={`group/q p-5 rounded-[2rem] border-2 text-left transition-all relative overflow-hidden ${isSelected
+                                                    className={`group/q p-5 rounded-[2.5rem] border-2 text-left transition-all relative overflow-hidden ${isSelected
                                                         ? 'bg-surface border-primary shadow-lg shadow-primary/5'
                                                         : 'bg-slate-50/50 dark:bg-slate-950 border-line/80 dark:border-line/10 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 hover:border-slate-300'
                                                         }`}
@@ -2050,7 +2050,7 @@ export function ParametersStep({
                                             value={usageConfig.target_brand || ''}
                                             onChange={e => updateUsage({ target_brand: e.target.value })}
                                             placeholder="e.g. Wonder Ville Ice Cream"
-                                            className="w-full bg-surface border-2 border-line/80 dark:border-line/10 focus:border-primary rounded-2xl pl-12 pr-6 py-4 text-sm font-black text-ink outline-none transition-all placeholder:text-slate-400/50"
+                                            className="w-full bg-surface border-2 border-line/80 dark:border-line/10 focus:border-primary rounded-2xl pl-12 pr-6 py-5 text-sm font-black text-ink outline-none transition-all placeholder:text-slate-400/50"
                                         />
                                     </div>
                                 </div>
@@ -2078,7 +2078,7 @@ export function ParametersStep({
                     </section>
 
                     {/* ─── Brand Pricing Behavior Module ─── */}
-                    <section className="border-t border-line/80 dark:border-line/10 pt-10" id="brand-pricing-section">
+                    <section className="border-t border-line/80 dark:border-line/10 pt-6" id="brand-pricing-section">
                         {!pricingExpanded ? (
                             <button
                                 onClick={() => setPricingExpanded(true)}
@@ -2096,7 +2096,7 @@ export function ParametersStep({
                                 <Plus className="w-5 h-5 text-slate-400 group-hover:text-primary-soft transition-colors" />
                             </button>
                         ) : (
-                            <div className={`p-10 rounded-[2.5rem] border-2 transition-all duration-300 space-y-8 ${pricingConfig.is_enabled
+                            <div className={`p-6 rounded-[2.5rem] border-2 transition-all duration-300 space-y-5 ${pricingConfig.is_enabled
                                 ? 'bg-primary/5 dark:bg-primary/10 border-primary/30'
                                 : 'bg-slate-50/50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-700'
                                 }`}>
@@ -2157,7 +2157,7 @@ export function ParametersStep({
                                                             : [...current, q.id];
                                                         updatePricing({ selected_questions: next });
                                                     }}
-                                                    className={`group/q p-5 rounded-[2rem] border-2 text-left transition-all relative overflow-hidden ${isSelected
+                                                    className={`group/q p-5 rounded-[2.5rem] border-2 text-left transition-all relative overflow-hidden ${isSelected
                                                         ? 'bg-surface border-indigo-500 shadow-lg shadow-indigo-500/5'
                                                         : 'bg-slate-50/50 dark:bg-slate-950 border-line/80 dark:border-line/10 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 hover:border-slate-300'
                                                         }`}
@@ -2228,7 +2228,7 @@ export function ParametersStep({
                                             value={pricingConfig.target_brand || ''}
                                             onChange={e => updatePricing({ target_brand: e.target.value })}
                                             placeholder="e.g. Wonder Ville Ice Cream"
-                                            className="w-full bg-surface border-2 border-line/80 dark:border-line/10 focus:border-primary rounded-2xl pl-12 pr-6 py-4 text-sm font-black text-ink outline-none transition-all placeholder:text-slate-400/50"
+                                            className="w-full bg-surface border-2 border-line/80 dark:border-line/10 focus:border-primary rounded-2xl pl-12 pr-6 py-5 text-sm font-black text-ink outline-none transition-all placeholder:text-slate-400/50"
                                         />
                                     </div>
                                 </div>
@@ -2256,7 +2256,7 @@ export function ParametersStep({
                     </section>
 
                     {/* ─── Brand Analyzer Module (L7) ─── */}
-                    <section className="border-t border-line/80 dark:border-line/10 pt-10" id="brand-analyzer-section">
+                    <section className="border-t border-line/80 dark:border-line/10 pt-6" id="brand-analyzer-section">
                         {!baExpanded ? (
                             <button
                                 onClick={() => setBaExpanded(true)}
@@ -2274,7 +2274,7 @@ export function ParametersStep({
                                 <Plus className="w-5 h-5 text-slate-400 group-hover:text-primary-soft transition-colors" />
                             </button>
                         ) : (
-                            <div className={`p-10 rounded-[2.5rem] border-2 transition-all duration-300 space-y-8 ${baConfig.is_enabled
+                            <div className={`p-6 rounded-[2.5rem] border-2 transition-all duration-300 space-y-5 ${baConfig.is_enabled
                                 ? 'bg-primary/5 dark:bg-primary/10 border-primary/30'
                                 : 'bg-slate-50/50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-700'
                                 }`}>
@@ -2497,7 +2497,7 @@ export function ParametersStep({
 
                                 {/* Custom Brand Context (Visible if Sync is off) */}
                                 {!baConfig.sync_with_purchase_funnel && (
-                                    <div className="space-y-4 p-8 bg-surface-sunken/50 rounded-[2rem] border-2 border-line/80 dark:border-line/10">
+                                    <div className="space-y-4 p-5 bg-surface-sunken/50 rounded-[2.5rem] border-2 border-line/80 dark:border-line/10">
                                         <div className="flex items-center justify-between mb-4">
                                             <div>
                                                 <h5 className="text-sm font-black uppercase tracking-widest text-ink">Manual Brand Context</h5>
@@ -2558,10 +2558,10 @@ export function ParametersStep({
             )}
 
             {formData.survey_type === 'product_test' && (
-                <div className="space-y-12 animate-slide-up">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="space-y-5 animate-slide-up">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                         {/* Category */}
-                        <div className="space-y-6 bg-slate-50/50 dark:bg-slate-950/50 p-8 rounded-[2.5rem] border-2 border-line/80 dark:border-line/10 shadow-inner">
+                        <div className="space-y-5 bg-slate-50/50 dark:bg-slate-950/50 p-5 rounded-[2.5rem] border-2 border-line/80 dark:border-line/10 shadow-inner">
                             <div className="flex items-center gap-3 border-b border-line/80 dark:border-line/10 pb-4 mb-2">
                                 <Tag className="w-4 h-4 text-primary-soft" />
                                 <h4 className="text-sm font-black uppercase tracking-widest text-ink">Product Category</h4>
@@ -2583,13 +2583,13 @@ export function ParametersStep({
                                         });
                                     }}
                                     placeholder="e.g. Cleansing Foam"
-                                    className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 focus:border-primary rounded-2xl px-6 py-4 text-sm font-bold outline-none dark:text-white transition-all shadow-sm"
+                                    className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 focus:border-primary rounded-2xl px-10 py-7 text-sm font-bold outline-none dark:text-white transition-all shadow-sm"
                                 />
                             </div>
                         </div>
 
                         {/* Language */}
-                        <div className="space-y-6 bg-slate-50/50 dark:bg-slate-950/50 p-8 rounded-[2.5rem] border-2 border-line/80 dark:border-line/10 shadow-inner">
+                        <div className="space-y-5 bg-slate-50/50 dark:bg-slate-950/50 p-5 rounded-[2.5rem] border-2 border-line/80 dark:border-line/10 shadow-inner">
                             <div className="flex items-center gap-3 border-b border-line/80 dark:border-line/10 pb-4 mb-2">
                                 <Layers className="w-4 h-4 text-primary-soft" />
                                 <h4 className="text-sm font-black uppercase tracking-widest text-ink">Survey Language</h4>
@@ -2611,7 +2611,7 @@ export function ParametersStep({
                                                     };
                                                 });
                                             }}
-                                            className={`flex-1 py-4 rounded-2xl text-sm font-black transition-all border-2 ${(formData.product_test_config?.language || formData.config?.language || 'en') === lang
+                                            className={`flex-1 py-5 rounded-2xl text-sm font-black transition-all border-2 ${(formData.product_test_config?.language || formData.config?.language || 'en') === lang
                                                 ? 'bg-primary border-primary text-white shadow-lg'
                                                 : 'bg-surface border-slate-400 dark:border-slate-600 text-slate-800 dark:text-slate-350 hover:border-primary'}`}
                                         >
@@ -2630,8 +2630,8 @@ export function ParametersStep({
                     {renderSmartFollowupSection()}
 
                     {/* Product Test Integration Core Component */}
-                    <div className="border-t border-line/80 dark:border-line/10 pt-10">
-                        <div className="p-10 rounded-[2.5rem] border-4 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/10 space-y-8">
+                    <div className="border-t border-line/80 dark:border-line/10 pt-6">
+                        <div className="p-6 rounded-[2.5rem] border-4 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/10 space-y-5">
                             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                                 <div className="flex items-center gap-5 text-left">
                                     <div className="p-4 rounded-2.5xl bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
@@ -2645,7 +2645,7 @@ export function ParametersStep({
                                 <button
                                     type="button"
                                     onClick={() => setIsPtModalOpen(true)}
-                                    className="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-xl shadow-emerald-500/25 hover:scale-[1.02] active:scale-95 transition-all text-center"
+                                    className="px-8 py-5 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-xl shadow-emerald-500/25 hover:scale-[1.02] active:scale-95 transition-all text-center"
                                 >
                                     {formData.product_test_config?.selected_attributes?.length ? 'Modify Configuration' : 'Configure Test Attributes'}
                                 </button>
@@ -2653,7 +2653,7 @@ export function ParametersStep({
 
                             {/* Status of Configuration Details */}
                             {formData.product_test_config?.selected_attributes?.length ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left bg-surface p-8 rounded-3xl border-2 border-line/80 dark:border-line/10 shadow-sm transition-colors">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-left bg-surface p-5 rounded-3xl border-2 border-line/80 dark:border-line/10 shadow-sm transition-colors">
                                     <div className="space-y-4">
                                         <div className="flex items-center gap-3">
                                             <span className="text-sm font-black uppercase tracking-wider text-slate-400">Active Sensory Attributes</span>
@@ -2688,7 +2688,7 @@ export function ParametersStep({
                                     </div>
                                 </div>
                             ) : (
-                                <div className="p-8 bg-amber-500/5 rounded-3xl border border-amber-500/15 text-center">
+                                <div className="p-5 bg-amber-500/5 rounded-3xl border border-amber-500/15 text-center">
                                     <p className="text-xs font-black uppercase tracking-widest text-amber-600 dark:text-amber-400">No Custom Attributes Configured</p>
                                     <p className="text-sm text-slate-550 dark:text-slate-400 mt-2 font-medium">Fixed questions will still appear in the blueprint. Open the modal to add optional attributes and package evaluation.</p>
                                 </div>
@@ -2703,7 +2703,7 @@ export function ParametersStep({
                                 return (
                                     <div
                                         id="trial-media-capture-status"
-                                        className="text-left bg-surface p-6 md:p-8 rounded-3xl border-2 border-line/80 dark:border-line/10 shadow-sm transition-colors"
+                                        className="text-left bg-surface p-6 md:p-5 rounded-3xl border-2 border-line/80 dark:border-line/10 shadow-sm transition-colors"
                                     >
                                         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                                             <div className="flex items-center gap-3">
@@ -2800,7 +2800,7 @@ export function ParametersStep({
             )}
 
             {formData.survey_type !== 'taste_test' && formData.survey_type !== 'product_test' && formData.survey_type !== '' && (
-                <div className="p-20 flex flex-col items-center justify-center text-center space-y-6 bg-surface-raised/40 rounded-[3rem] border border-dashed border-line/80 dark:border-line/10 transition-colors">
+                <div className="p-6 flex flex-col items-center justify-center text-center space-y-5 bg-surface-raised/40 rounded-[2.5rem] border border-dashed border-line/80 dark:border-line/10 transition-colors">
                     <div className="w-16 h-16 rounded-full bg-slate-200 dark:bg-slate-900 flex items-center justify-center text-slate-400 dark:text-slate-700 transition-colors">
                         <Settings2 className="w-8 h-8" />
                     </div>

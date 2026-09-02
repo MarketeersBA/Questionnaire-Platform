@@ -131,13 +131,11 @@
     --c-surface-raised: 248 250 252;
     --c-surface-sunken: 241 245 249;
 
-    /* Chrome — the navy rail/sidebar, constant across themes */
-    /* Sidebar navy, sampled from the logo artwork itself (#08306B).
-       Identical in light and dark mode: the rail carries the brand, so it must
-       not drift with the theme. Both stops are the same value so the rail
-       renders as a flat, exact colour rather than a gradient approximation. */
-    --c-chrome: 8 48 107;
-    --c-chrome-deep: 8 48 107;
+    /* Chrome — the navy rail/sidebar */
+    /* Light mode: brand navy (#00265E). Dark mode overrides to a deeper
+       navy so the rail fits the near-black canvas. */
+    --c-chrome: 0 38 94;
+    --c-chrome-deep: 0 38 94;
     --c-chrome-ink: 255 255 255;
 
     /* Ink */
@@ -167,9 +165,10 @@
     --c-surface-raised: 20 30 52;
     --c-surface-sunken: 7 14 30;
 
-    /* Unchanged from light mode on purpose — see the note above. */
-    --c-chrome: 8 48 107;
-    --c-chrome-deep: 8 48 107;
+    /* Dark-mode rail: deeper navy so it sits with the near-black canvas
+       instead of the brighter light-mode chrome (#00265E). */
+    --c-chrome: 7 21 39;
+    --c-chrome-deep: 7 21 39;
 
     --c-ink: 241 245 249;
     --c-ink-muted: 148 163 184;
@@ -511,6 +510,18 @@
 }
 
 /* ─── Premium UI Polish ─────────────────────────────────────────────────── */
+
+/* Hide scrollbar while keeping overflow scroll (Firefox + Chromium/WebKit). */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
 
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;

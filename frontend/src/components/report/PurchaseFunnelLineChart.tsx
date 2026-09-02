@@ -121,9 +121,9 @@ export function PurchaseFunnelLineChart({ data, isFocusMode, presentationHeight 
     };
 
     return (
-        <div className="w-full h-full flex flex-col pt-4">
-            <ResponsiveContainer width="100%" height={isFocusMode ? ((presentationHeight || 800) - 240) : 400}>
-                <LineChart data={chartData} margin={{ top: 20, right: 80, left: 20, bottom: 20 }}>
+        <div className="w-full h-full flex flex-col pt-1">
+            <ResponsiveContainer width="100%" height={isFocusMode ? ((presentationHeight || 800) - 200) : 280}>
+                <LineChart data={chartData} margin={{ top: 8, right: 24, left: 8, bottom: 8 }}>
                     {/* Horizontal grid lines for cleaner design */}
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? '#1e293b' : '#cbd5e1'} strokeOpacity={0.8} />
                     <XAxis
@@ -132,10 +132,11 @@ export function PurchaseFunnelLineChart({ data, isFocusMode, presentationHeight 
                         axisLine={{ stroke: isDark ? '#334155' : '#94a3b8', strokeWidth: 2 }}
                         tickLine={false}
                         interval={0}
-                        padding={{ left: 30, right: 30 }}
+                        padding={{ left: 16, right: 16 }}
                     />
                     <YAxis
-                        domain={[0, 100]} // Constrain Y-axis from 0 to 100%
+                        domain={[0, 100]}
+                        ticks={[0, 25, 50, 75, 100]}
                         tickFormatter={formatter}
                         tick={{ fill: isDark ? '#94a3b8' : '#000000', fontSize: 12, fontWeight: 800 }}
                         axisLine={false}
@@ -183,7 +184,7 @@ export function PurchaseFunnelLineChart({ data, isFocusMode, presentationHeight 
             </ResponsiveContainer>
 
             {/* Legend Area - Auto-height with scrolling as fallback */}
-            <div className={`mt-8 shrink-0 overflow-y-auto custom-scrollbar scrollbar-slim px-4 pb-4`} style={{ maxHeight: isFocusMode ? '200px' : 'none' }}>
+            <div className={`mt-4 shrink-0 overflow-y-auto custom-scrollbar scrollbar-slim px-2 pb-2`} style={{ maxHeight: isFocusMode ? '160px' : 'none' }}>
                 {renderLegend()}
             </div>
         </div>
