@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Plus, Sparkles } from 'lucide-react';
 import type { ModuleQuestionRendererProps, ModuleAnswerValue } from '../../types/moduleQuestions';
 import type { QuestionOption } from '../../types/questionModules';
@@ -43,21 +43,10 @@ function SpecifyCommitField({
     onChange: (value: ModuleAnswerValue) => void;
     language: 'en' | 'ar';
 }) {
-    const committed = getSpecifyOtherTextForOption(answer, optionValue, isMcq);
-    const [draft, setDraft] = useState(committed);
-
-    useEffect(() => {
-        setDraft(committed);
-    }, [committed, optionValue]);
-
-    const commit = () => {
-        const trimmed = draft.trim();
-        if (!trimmed) return;
-        onChange(updateSpecifyOtherText(answer, optionValue, trimmed, isMcq));
-    };
+    const value = getSpecifyOtherTextForOption(answer, optionValue, isMcq);
 
     return (
-        <div className="space-y-2 p-3 bg-surface rounded-xl border border-slate-200 dark:border-slate-700">
+        <div className="p-3 bg-surface rounded-xl border border-slate-200 dark:border-slate-700">
             <input
                 type="text"
                 required
@@ -69,34 +58,17 @@ function SpecifyCommitField({
                         ? 'يرجى التحديد...'
                         : 'Please specify...'
                 }
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-                onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        commit();
+                value={value}
+                onChange={(e) =>
+                    onChange(updateSpecifyOtherText(answer, optionValue, e.target.value, isMcq))
+                }
+                onBlur={(e) => {
+                    const trimmed = e.target.value.trim();
+                    if (trimmed !== e.target.value) {
+                        onChange(updateSpecifyOtherText(answer, optionValue, trimmed, isMcq));
                     }
                 }}
             />
-            <div className="flex items-center justify-between gap-2">
-                {committed ? (
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
-                        {language === 'ar' ? `تمت الإضافة: ${committed}` : `Added: ${committed}`}
-                    </span>
-                ) : (
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                        {language === 'ar' ? 'اضغط إضافة لحفظ التوضيح' : 'Press Add to save your detail'}
-                    </span>
-                )}
-                <button
-                    type="button"
-                    onClick={commit}
-                    disabled={!draft.trim()}
-                    className="text-[10px] font-black uppercase text-primary-soft px-3 py-1 disabled:opacity-40"
-                >
-                    {language === 'ar' ? 'إضافة' : 'Add'}
-                </button>
-            </div>
         </div>
     );
 }
@@ -388,29 +360,21 @@ function OpenLoopInput(props: ModuleQuestionRendererProps) {
                 type="button"
                 disabled={disabled}
                 onClick={() => onChange([...rows, ''])}
-                className="text-[10px] font-black uppercase tracking-widest text-primary-soft flex items-center gap-2"
+                className="text-base md:text-lg font-bold text-primary-soft flex items-center gap-2 py-1 hover:opacity-80 transition-opacity disabled:opacity-50"
             >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-5 h-5" strokeWidth={2.5} />
                 {language === 'ar' ? 'إضافة ماركة أخرى' : 'Add another brand'}
             </button>
-            {question.has_stop && (
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                    {language === 'ar'
-                        ? 'يمكن للمستجيب التوقف عند عدم معرفة المزيد'
-                        : 'Respondent may stop when no more brands are known'}
-                </p>
-            )}
         </div>
     );
 }
 
 /**
- * `linear_scale` — a 1-N slider, configured per question by the module builder.
+ * `linear_scale` — a 1-N numbered scale, configured per question by the module builder.
  *
- * The answer is stored as a plain number. Until the respondent touches the
- * slider there is no answer, so the thumb parks at the midpoint while the
- * stored value stays undefined; that keeps "untouched" distinguishable from
- * "deliberately answered with the midpoint" for required-question validation.
+ * The answer is stored as a plain number. Until the respondent taps a number
+ * there is no answer (nothing selected), so required-question validation can
+ * distinguish "untouched" from a deliberate midpoint choice.
  */
 function LinearScaleInput({
     question,
@@ -423,8 +387,7 @@ function LinearScaleInput({
     // JAR anchors are fixed at 1 / 3 / 5, so the range is not author-controlled.
     const min = variant === 'jar' ? 1 : question.scale_min ?? 1;
     const max = variant === 'jar' ? 5 : question.scale_max ?? 5;
-    const midpoint = Math.round((min + max) / 2);
-    const value = typeof answer === 'number' ? answer : midpoint;
+    const value = typeof answer === 'number' ? answer : null;
 
     return (
         <div className={disabled ? 'opacity-60 pointer-events-none' : undefined}>
@@ -437,7 +400,6 @@ function LinearScaleInput({
                 variant={variant}
                 minLabel={question.min_label || undefined}
                 maxLabel={question.max_label || undefined}
-                showValueBadge
             />
         </div>
     );

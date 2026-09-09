@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, Loader2, Quote, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader2, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import type { ConfigurableModuleId } from '../../types/surveyFlow';
 import type { ModuleAnswersMap, ModuleBrandContext } from '../../types/moduleQuestions';
@@ -17,36 +17,6 @@ import {
     type VoiceCaptureConfig,
     isVoiceEnabledForModuleOpenQuestion,
 } from '../../utils/voiceQuestions';
-
-const MODULE_COPY: Record<
-    ConfigurableModuleId,
-    { journeyEn: string; journeyAr: string; hintEn: (category: string) => string; hintAr: (category: string) => string }
-> = {
-    purchase_funnel: {
-        journeyEn: 'Purchase Journey',
-        journeyAr: 'رحلة الشراء',
-        hintEn: (c) => `Please answer based on your awareness and experience with ${c}.`,
-        hintAr: (c) => `يرجى الإجابة بناءً على تجربتك مع ${c}.`,
-    },
-    brand_usage: {
-        journeyEn: 'Usage Habits',
-        journeyAr: 'عادات الاستخدام',
-        hintEn: (c) => `Tell us how you typically use ${c}.`,
-        hintAr: (c) => `أخبرنا كيف تستخدم ${c} عادةً.`,
-    },
-    brand_pricing_behavior: {
-        journeyEn: 'Pricing & Purchase',
-        journeyAr: 'التسعير والشراء',
-        hintEn: (c) => `Share how you budget, stock, and buy ${c}.`,
-        hintAr: (c) => `شاركنا كيف تخطط وتشتري ${c}.`,
-    },
-    brand_analyzer: {
-        journeyEn: 'Brand Intelligence',
-        journeyAr: 'ذكاء العلامة التجارية',
-        hintEn: (c) => `Help us measure the strength and perception of brands in ${c}.`,
-        hintAr: (c) => `ساعدنا في قياس قوة وتصور العلامات التجارية في ${c}.`,
-    },
-};
 
 export interface ConfigurableModuleStepProps {
     moduleId: ConfigurableModuleId;
@@ -93,7 +63,6 @@ export default function ConfigurableModuleStep({
     );
     const currentQuestion = questions[stepIndex] ?? null;
     const totalSteps = questions.length;
-    const copy = MODULE_COPY[moduleId];
     const showVoice = isVoiceEnabledForModuleOpenQuestion(voiceCapture);
     const canGoBack = stepIndex > 0 || allowCrossPhaseBack;
 
@@ -219,21 +188,6 @@ export default function ConfigurableModuleStep({
                         className="h-full bg-primary transition-all duration-500"
                         style={{ width: `${((stepIndex + 1) / totalSteps) * 100}%` }}
                     />
-                </div>
-            </div>
-
-            <div className="relative p-8 bg-surface-raised/80 rounded-[2.5rem] border border-line/80 dark:border-line/10 overflow-hidden shadow-sm">
-                <div className="absolute top-[-20%] right-[-5%] opacity-10 pointer-events-none">
-                    <Quote className="w-40 h-40 text-primary-soft" />
-                </div>
-                <div className="relative z-10 flex flex-col gap-4">
-                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary-soft/60">
-                        <Sparkles className="w-3 h-3" />
-                        {language === 'ar' ? copy.journeyAr : copy.journeyEn}
-                    </div>
-                    <p className="text-lg md:text-xl font-display font-light italic text-ink-muted leading-relaxed border-l-4 border-primary/30 pl-6">
-                        {language === 'ar' ? copy.hintAr(category) : copy.hintEn(category)}
-                    </p>
                 </div>
             </div>
 

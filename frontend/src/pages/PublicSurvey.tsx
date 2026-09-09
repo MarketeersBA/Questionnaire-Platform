@@ -67,6 +67,7 @@ import { collectTasteTestFollowUpScopeIds } from '../utils/followUpNavigationSaf
 import { normalizePublicSurveyAiFollowup } from '../utils/aiFollowupConfig';
 import { localizeTasteTestSectionTitle } from '../utils/tasteTestAttributeLabels';
 import { useSurveyDirection } from '../hooks/useSurveyDirection';
+import { pickBilingualDisplayText } from '../utils/bilingualDisplayText';
 import WelcomeScreen from './PublicSurvey/WelcomeScreen';
 
 export default function PublicSurvey() {
@@ -489,7 +490,9 @@ export default function PublicSurvey() {
       for (const q of questions) {
         const qId = q.id || '';
         if (q.required && !answers[qId]) {
-          toast.error(survey?.language === 'ar' ? `يرجى الإجابة على: ${renderCleanText(q.label || q.text)}` : `Please answer: ${renderCleanText(q.label || q.text)}`);
+          toast.error(survey?.language === 'ar'
+            ? `يرجى الإجابة على: ${pickBilingualDisplayText(renderCleanText(q.label || q.text), 'ar')}`
+            : `Please answer: ${pickBilingualDisplayText(renderCleanText(q.label || q.text), 'en')}`);
           scrollToError(`q-${qId}`);
           return;
         }
@@ -1077,7 +1080,11 @@ export default function PublicSurvey() {
                                           )}
                                         </div>
                                         <AnimatePresence>
-                                          {l2Answers[uniqueKey] && effectiveType !== 'open-ended' && effectiveType !== 'text' && (
+                                          {l2Answers[uniqueKey] &&
+                                            effectiveType !== 'open-ended' &&
+                                            effectiveType !== 'text' &&
+                                            effectiveType !== 'scale' &&
+                                            effectiveType !== 'bipolar' && (
                                             <motion.div
                                               initial={{ opacity: 0, scale: 0.5, x: 12 }}
                                               animate={{ opacity: 1, scale: 1, x: 0 }}
@@ -1097,7 +1104,13 @@ export default function PublicSurvey() {
                                       {effectiveType === 'scale' ? (
                                         <div className="pt-1 px-0.5">
                                           <HorizontalScaleSlider
-                                            value={Number(l2Answers[uniqueKey]) || 1}
+                                            value={
+                                              l2Answers[uniqueKey] === undefined ||
+                                              l2Answers[uniqueKey] === null ||
+                                              l2Answers[uniqueKey] === ''
+                                                ? null
+                                                : Number(l2Answers[uniqueKey])
+                                            }
                                             max={scaleMax}
                                             onChange={(nextValue) => {
                                               setL2Answers({ ...l2Answers, [uniqueKey]: nextValue });
@@ -1274,7 +1287,7 @@ export default function PublicSurvey() {
 
             <p className="text-ink-muted font-medium leading-snug mb-4 pb-3 border-b border-slate-50 dark:border-slate-800 transition-colors text-center">
               {isAr
-                ? 'يرجى إكمال أسئلة التأهل التالية. بعد التحقق سيتم توجيهك إلى أداة البحث.'
+                ? 'يرجى إكمال أسئلة التأهل التالية. بعد التحقق سيتم توجيهك إلى اسئلة البحث.'
                 : 'Please complete the following qualification probe. Upon synchronization, you will be redirected to the research instrument.'}
             </p>
 
@@ -1348,7 +1361,7 @@ export default function PublicSurvey() {
                   return (
                     <div key={qId} id={`q-${qId}`} className="space-y-3">
                       <label className="text-lg md:text-xl font-semibold text-ink ml-1 leading-tight flex flex-col gap-1">
-                        <span>{renderCleanText(q.label || q.text)}</span>
+                        <span>{pickBilingualDisplayText(renderCleanText(q.label || q.text), isAr ? 'ar' : 'en')}</span>
                         {/* Multi-answer tip */}
                         {q.type === 'mcq' && q.allow_multiple && (
                           <span className="text-[11px] font-bold text-primary-soft/70 italic lowercase">
@@ -1388,7 +1401,7 @@ export default function PublicSurvey() {
                                   : 'bg-slate-50 border-slate-100 text-slate-500 hover:border-slate-300'
                                   }`}
                               >
-                                {opt}
+                                {pickBilingualDisplayText(opt, isAr ? 'ar' : 'en')}
                               </button>
                             ))}
                           </div>
@@ -1412,7 +1425,7 @@ export default function PublicSurvey() {
                                 type={q.type === 'number' ? 'number' : q.type === 'email' ? 'email' : 'text'}
                                 required={q.required}
                                 maxLength={q.type === 'number' ? undefined : 500}
-                                placeholder={q.label}
+                                placeholder={pickBilingualDisplayText(q.label || '', isAr ? 'ar' : 'en')}
                                 className="w-full bg-surface-raised border border-slate-200 dark:border-slate-700 rounded-2xl px-6 py-4 text-ink focus:outline-none focus:border-primary/50 transition-all font-bold placeholder:text-slate-300 dark:placeholder:text-slate-600"
                                 value={answers[qId] || ''}
                                 onChange={e => {
@@ -1433,7 +1446,7 @@ export default function PublicSurvey() {
                               rows={2}
                               required={q.required}
                               maxLength={500}
-                              placeholder={q.label}
+                              placeholder={pickBilingualDisplayText(q.label || '', isAr ? 'ar' : 'en')}
                               className="w-full bg-surface-raised border border-slate-200 dark:border-slate-700 rounded-2xl px-6 py-4 text-ink focus:outline-none focus:border-primary/50 transition-all font-bold placeholder:text-slate-300 dark:placeholder:text-slate-600 resize-none"
                               value={answers[qId] || ''}
                               onChange={e => {
@@ -1494,7 +1507,7 @@ export default function PublicSurvey() {
                                     onClick={() => setAnswers({ ...answers, [qId]: suggestion })}
                                     className="text-[10px] font-bold px-3 py-1.5 rounded-full bg-surface-raised border border-slate-200 dark:border-slate-700 text-ink-muted hover:bg-primary/5 dark:hover:bg-primary/10 hover:border-primary/20 dark:hover:border-primary/40 hover:text-primary-soft transition-all"
                                   >
-                                    {suggestion}
+                                    {pickBilingualDisplayText(suggestion, isAr ? 'ar' : 'en')}
                                   </button>
                                 ))}
                               </div>

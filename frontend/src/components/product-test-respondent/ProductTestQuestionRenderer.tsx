@@ -121,17 +121,12 @@ export default function ProductTestQuestionRenderer({
                         </span>
                     )}
                 </div>
-                {question.type === 'scale' && value != null && value !== '' && (
-                    <div className="shrink-0 px-2.5 py-1 bg-primary text-white rounded-lg font-black text-sm min-w-[2rem] text-center shadow-md">
-                        {String(value)}
-                    </div>
-                )}
             </div>
 
             {question.type === 'scale' ? (
                 <div className="pt-1">
                     <HorizontalScaleSlider
-                        value={Number(value) || 1}
+                        value={value == null || value === '' ? null : Number(value)}
                         max={scaleMax}
                         onChange={(nextValue) => onChange(nextValue)}
                         language={language}
