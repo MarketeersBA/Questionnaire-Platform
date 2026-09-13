@@ -24,6 +24,8 @@ from backend.voice_feedback.upload_handler import save_voice_upload
 from backend.voice_feedback.smart_followup import smart_followup_engine
 from backend.voice_feedback.followup_context import FollowUpEngineContext
 from backend.voice_feedback.followup_turn_persistence import (
+    count_issued_probes,
+    load_all_followup_turns,
     load_followup_previous_turns,
     persist_followup_turn,
 )
@@ -771,7 +773,34 @@ async def handle_ai_followup(token: str, request: FollowUpRequest):
         )
 
     max_rounds = category_ai_cfg.get("max_rounds") or ai_cfg.get("max_rounds", 2)
-    if request.current_round > max_rounds:
+
+    # The round the respondent is actually on, counted from probes already
+    # issued — not taken from the client.
+    #
+    # The client tracks a round number too, but that state is ephemeral:
+    # dismissing the panel deletes it and navigating between brands wipes it,
+    # after which it restarts at 1. Trusting it meant the cap never tripped and
+    # respondents were probed indefinitely; it also meant the history lookup
+    # (`round < 1`) matched nothing, so the engine forgot what it had asked and
+    # repeated itself.
+    #
+    # `max` of the two, so a client that has legitimately advanced further than
+    # the stored count — a probe issued but not yet persisted — still counts.
+    issued_probes = await count_issued_probes(
+        db, token=token, question_id=request.question_id
+    )
+    effective_round = max(int(request.current_round or 1), issued_probes + 1)
+
+    if effective_round > max_rounds:
+        logger.info(
+            "[AI-Followup] Capped at %s round(s) for token=%s question=%s "
+            "(client sent round %s, %s probe(s) already issued)",
+            max_rounds,
+            token,
+            request.question_id,
+            request.current_round,
+            issued_probes,
+        )
         return _reject_followup(
             token=token,
             question_id=request.question_id,
@@ -779,16 +808,18 @@ async def handle_ai_followup(token: str, request: FollowUpRequest):
             reasoning=f"Maximum follow-up rounds ({max_rounds}) exceeded.",
             respondent_surface=request.respondent_surface,
             source=request.source,
-            current_round=request.current_round,
+            current_round=effective_round,
         )
 
     custom_instructions = request.custom_instructions or ai_cfg.get("custom_instructions", "")
 
-    previous_turns = await load_followup_previous_turns(
+    # Everything asked and answered so far, so the engine can see what it has
+    # already covered. Previously filtered by the client's round, which returned
+    # nothing once that counter had reset.
+    previous_turns = await load_all_followup_turns(
         db,
         token=token,
         question_id=request.question_id,
-        before_round=request.current_round,
     )
 
     engine_context = FollowUpEngineContext.from_survey_request(
@@ -796,7 +827,7 @@ async def handle_ai_followup(token: str, request: FollowUpRequest):
         survey_id=str(survey_id),
         token=token,
         question_id=request.question_id,
-        current_round=request.current_round,
+        current_round=effective_round,
         source=request.source,
         question_text=request.question_text,
         answer_text=request.answer_text,
@@ -810,7 +841,9 @@ async def handle_ai_followup(token: str, request: FollowUpRequest):
 
     result = await smart_followup_engine.evaluate_and_followup(context=engine_context)
 
-    if result.get("action") == "probe" and request.current_round > max_rounds:
+    # Second gate: the engine may still choose to probe, but it does not get to
+    # exceed the configured number of questions.
+    if result.get("action") == "probe" and effective_round >= max_rounds + 1:
         result = build_followup_complete_response(
             rejection_code=FollowUpRejectionCode.MAX_ROUNDS_EXCEEDED,
             reasoning=f"Maximum follow-up rounds ({max_rounds}) exceeded.",
@@ -823,7 +856,7 @@ async def handle_ai_followup(token: str, request: FollowUpRequest):
         survey_id=survey_id,
         token=token,
         question_id=request.question_id,
-        current_round=request.current_round,
+        current_round=effective_round,
         answer_text=request.answer_text,
         followup_text=result.get("followup_text"),
         action=result.get("action"),

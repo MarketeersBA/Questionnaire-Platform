@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Annotated, Optional
 from bson import ObjectId
 
 from datetime import datetime, timedelta
-from backend.models import Survey, SurveyCreate, User, SurveyUpdate
+from backend.models import Survey, SurveyListItem, SurveyCreate, User, SurveyUpdate
 from backend.database import db
 from backend.routers.auth import get_current_user, get_current_active_analyst
 from backend.utils.logging_utils import logger
@@ -438,12 +438,14 @@ async def create_survey(
 #: from several pages at once — which is how this endpoint came to average
 #: nearly a minute under load.
 #:
-#: Only fields that are OPTIONAL on the `Survey` response model may appear
-#: here. `template_snapshot_schema` and `template_snapshot_questions` are
-#: required, so excluding them made every response fail validation with a 500
-#: and the whole UI render as zeroes. Anything added below must be checked
-#: against `Survey.model_fields[...].is_required()` first.
+#: Safe to exclude anything here because the route responds with
+#: `SurveyListItem`, which requires no field and preserves whatever the
+#: projection lets through. Against the full `Survey` model this was not true:
+#: excluding a required field made every response fail validation, the endpoint
+#: returned 500, and the whole dashboard rendered as zeroes.
 LIST_PROJECTION = {
+    "template_snapshot_schema": 0,
+    "template_snapshot_questions": 0,
     "template_snapshot_l2": 0,
     "module_snapshots": 0,
     "product_test_snapshot": 0,
@@ -451,7 +453,7 @@ LIST_PROJECTION = {
 }
 
 
-@router.get("/", response_model=List[Survey])
+@router.get("/", response_model=List[SurveyListItem])
 async def list_surveys(
     current_user: Annotated[User, Depends(get_current_user)]
 ):

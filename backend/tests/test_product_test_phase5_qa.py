@@ -94,6 +94,10 @@ def _mock_db(survey):
     voice_col.find_one = AsyncMock(return_value=None)
     voice_col.update_one = AsyncMock()
     voice_col.insert_one = AsyncMock()
+    # No prior probes: this test starts a fresh conversation. Set explicitly
+    # because AsyncMock would otherwise return a MagicMock, which the endpoint
+    # cannot compare against the round cap.
+    voice_col.count_documents = AsyncMock(return_value=0)
 
     def get_collection(name):
         return {

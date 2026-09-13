@@ -390,6 +390,46 @@ class SurveyUpdate(BaseModel):
     ai_followup: Optional[AiFollowupConfig] = None
 
 
+class SurveyListItem(MongoBaseModel):
+    """
+    A survey as the *list* endpoints return it.
+
+    Separate from :class:`Survey` because that model requires the full authored
+    structure — `template_snapshot_schema`, `template_snapshot_questions` — and
+    a required field cannot be projected away. Keeping them made `GET /surveys/`
+    an 885 KB response, which the Vite dev proxy took 3-6 seconds to relay on
+    top of the ~1s the API itself needed. List views never read them; the
+    editors that do fetch one survey by id and get the whole document.
+
+    `extra="allow"` is deliberate. The fields below are the ones list views are
+    known to read, but anything else the projection lets through is preserved
+    and serialised rather than silently dropped — so trimming the payload can
+    never quietly remove a field some page depends on. What actually reaches the
+    client is decided by the projection in the router, not by this list.
+    """
+
+    model_config = ConfigDict(
+        populate_by_name=True,
+        arbitrary_types_allowed=True,
+        extra="allow",
+        json_encoders={ObjectId: str},
+    )
+
+    company_name: Optional[str] = None
+    title: Optional[str] = None
+    survey_code: Optional[str] = None
+    type: Optional[str] = None
+    status: Optional[str] = None
+    created_at: Optional[datetime] = None
+    created_by: Optional[str] = None
+    is_deleted: Optional[bool] = None
+    respondent_count: Optional[int] = None
+    respondent_target: Optional[int] = None
+    sample_capacity: Optional[int] = None
+    link_count: Optional[int] = None
+    links_count: Optional[int] = None
+
+
 class Survey(SurveyBase, MongoBaseModel):
     created_at: datetime = Field(default_factory=datetime.utcnow)
 

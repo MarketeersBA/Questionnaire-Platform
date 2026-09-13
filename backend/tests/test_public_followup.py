@@ -113,6 +113,13 @@ def _mock_db(*, survey, voice_doc=None, history_docs=None):
     voice_col.find_one = AsyncMock(return_value=voice_doc)
     voice_col.update_one = AsyncMock()
     voice_col.insert_one = AsyncMock()
+    # The endpoint now counts probes already issued rather than trusting the
+    # round the client reports, so the double has to answer this. Derived from
+    # the same history these tests already set up, so a test that seeds two
+    # turns really is on round three.
+    voice_col.count_documents = AsyncMock(
+        return_value=sum(1 for d in (history_docs or []) if d.get("followup_text"))
+    )
 
     def get_collection(name):
         return {

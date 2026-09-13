@@ -60,6 +60,59 @@ async def persist_followup_turn(
     )
 
 
+async def count_issued_probes(db, *, token: str, question_id: str) -> int:
+    """
+    How many AI follow-up questions this respondent has already been asked here.
+
+    The authoritative round counter. The client also tracks a round number and
+    sends it, but that state is ephemeral: dismissing a panel deletes it, and
+    navigating between brands or questions wipes it, after which the client
+    restarts at round 1. A server that trusts that number stops enforcing any
+    limit at all — which is how respondents ended up in an endless probe loop.
+
+    Counts *issued probes* rather than stored rows on purpose. A row exists for
+    every evaluated answer, including ones the engine declined to probe on, and
+    those must not consume a round. A row with `followup_text` is precisely one
+    question the respondent was actually asked.
+    """
+    return await db.get_collection("voice_feedbacks").count_documents(
+        {
+            "token": token,
+            "question_id": question_id,
+            "followup_text": {"$nin": [None, ""]},
+        }
+    )
+
+
+async def load_all_followup_turns(
+    db,
+    *,
+    token: str,
+    question_id: str,
+) -> list[dict[str, str]]:
+    """
+    The whole conversation so far, ordered.
+
+    Unlike :func:`load_followup_previous_turns` this does not filter on a round
+    number supplied by the caller. When the client's round had reset to 1, that
+    filter (`round < 1`) matched nothing and the engine was handed an empty
+    history — so it had no idea what it had already asked and asked it again.
+    """
+    cursor = db.get_collection("voice_feedbacks").find(
+        {"token": token, "question_id": question_id}
+    ).sort("created_at", 1)
+
+    turns: list[dict[str, str]] = []
+    async for doc in cursor:
+        user_msg = doc.get("transcript") or doc.get("answer_text")
+        if user_msg:
+            turns.append({"role": "user", "content": user_msg})
+        ai_msg = doc.get("followup_text")
+        if ai_msg:
+            turns.append({"role": "assistant", "content": ai_msg})
+    return turns
+
+
 async def load_followup_previous_turns(
     db,
     *,
