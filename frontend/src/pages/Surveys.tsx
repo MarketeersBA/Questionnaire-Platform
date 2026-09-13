@@ -18,7 +18,6 @@ import {
     Sparkles,
     Layers,
     Tag,
-    User,
     ChevronLeft,
     ChevronRight,
     Pencil,
@@ -40,7 +39,7 @@ type TokenSummary = {
 
 const EMPTY_SUMMARY: TokenSummary = { unused: 0, passed: 0, failed: 0, submitted: 0, total: 0 };
 
-export default function SurveysPage() {
+export default function SurveysPage({ embedded = false }: { embedded?: boolean }) {
     const [surveyList, setSurveyList] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
@@ -238,7 +237,8 @@ export default function SurveysPage() {
     };
 
     if (loading) return (
-        <div className="space-y-10 pb-20 animate-pulse">
+        <div className={`${embedded ? 'space-y-6' : 'space-y-10 pb-20'} animate-pulse`}>
+            {!embedded && (
             <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8">
                 <div className="space-y-4 w-full max-w-xl">
                     <div className="h-8 w-40 bg-slate-200/50 dark:bg-slate-800/50 rounded-lg"></div>
@@ -250,17 +250,18 @@ export default function SurveysPage() {
                     <div className="h-12 w-44 bg-slate-200/50 dark:bg-slate-800/50 rounded-2xl"></div>
                 </div>
             </div>
+            )}
             <div className="flex gap-2">
                 {[1, 2, 3, 4].map(i => (
                     <div key={i} className="h-10 w-24 bg-slate-200/50 dark:bg-slate-800/50 rounded-xl"></div>
                 ))}
             </div>
-            <div className="h-[600px] bg-white/40 dark:bg-slate-900/40 border border-white/20 dark:border-slate-800/20 rounded-[3rem] w-full"></div>
+            <div className={`h-[600px] bg-white/40 dark:bg-slate-900/40 border border-white/20 dark:border-slate-800/20 ${embedded ? 'rounded-[2rem]' : 'rounded-[3rem]'} w-full`}></div>
         </div>
     );
 
     return (
-        <div className="space-y-10 pb-20">
+        <div className={embedded ? 'space-y-6' : 'space-y-10 pb-20'}>
             {/* Delete Confirmation Modal */}
             <AnimatePresence>
                 {deletingId && (
@@ -368,8 +369,17 @@ export default function SurveysPage() {
             </AnimatePresence>
 
             {/* Header */}
-            <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8">
+            <div className={`flex flex-col ${embedded ? 'lg:flex-row lg:items-center' : 'xl:flex-row xl:items-end'} justify-between gap-6`}>
                 <div>
+                    {embedded ? (
+                        <>
+                            <h3 className="text-xl font-black font-display text-ink">All Surveys</h3>
+                            <p className="text-[10px] font-bold text-ink-muted uppercase tracking-widest mt-0.5">
+                                Research registry
+                            </p>
+                        </>
+                    ) : (
+                        <>
                     <div className="flex items-center gap-3 mb-4">
                         <div className="p-2 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary-soft border border-primary/10 dark:border-primary/30">
                             <ClipboardList className="w-5 h-5" />
@@ -384,6 +394,8 @@ export default function SurveysPage() {
                     <p className="mt-4 text-slate-800 dark:text-slate-300 max-w-xl font-bold leading-relaxed">
                         All active and archived research deployments. Manage survey lifecycle, access tokens, and analytics.
                     </p>
+                        </>
+                    )}
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4">
                     <div className="relative group">
@@ -434,8 +446,8 @@ export default function SurveysPage() {
                     <table className="w-full border-collapse">
                         <thead>
                             <tr className="text-left text-[10px] font-black text-ink-muted uppercase tracking-[0.2em] bg-surface-sunken/80">
-                                <th className="px-10 py-6 border-b border-slate-200 dark:border-slate-700">Company Domain</th>
                                 <th className="px-10 py-6 border-b border-slate-200 dark:border-slate-700 text-center">Project Code</th>
+                                <th className="px-10 py-6 border-b border-slate-200 dark:border-slate-700">Company Domain</th>
                                 <th className="px-10 py-6 border-b border-slate-200 dark:border-slate-700 text-center">Lifecycle</th>
                                 <th className="px-10 py-6 border-b border-slate-200 dark:border-slate-700">Creator</th>
                                 <th className="px-10 py-6 border-b border-slate-200 dark:border-slate-700">Target Progress</th>
@@ -456,25 +468,20 @@ export default function SurveysPage() {
                                         transition={{ delay: idx * 0.04 }}
                                         className="group hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors"
                                     >
-                                        <td className="px-10 py-7 border-b border-slate-50 dark:border-slate-800/50">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 bg-surface-sunken rounded-2xl flex items-center justify-center border border-slate-300 dark:border-slate-700 group-hover:border-primary/30 group-hover:bg-primary/5 transition-all font-display font-black text-ink-muted group-hover:text-primary-soft text-base">
-                                                    {(survey.company_name || survey.name || 'U').charAt(0).toUpperCase()}
-                                                </div>
-                                                <div>
-                                                    <div className="font-black text-base text-ink group-hover:text-primary-soft transition-colors">
-                                                        {survey.company_name || survey.name || 'Untitled Survey'}
-                                                    </div>
-                                                    <div className="text-[10px] font-bold text-ink-subtle uppercase tracking-widest flex items-center gap-1">
-                                                        ID: {survey._id.slice(-6).toUpperCase()}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
                                         <td className="px-10 py-7 border-b border-line/80 dark:border-line/10 text-center">
                                             <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-surface-sunken rounded-lg border border-slate-200 dark:border-slate-700">
                                                 <Tag className="w-3 h-3 text-primary-soft" />
                                                 <span className="text-[10px] font-black text-ink-muted uppercase tracking-wider">{survey.survey_code || 'N/A'}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-10 py-7 border-b border-slate-50 dark:border-slate-800/50">
+                                            <div>
+                                                <div className="font-black text-base text-ink group-hover:text-primary-soft transition-colors">
+                                                    {survey.company_name || survey.name || 'Untitled Survey'}
+                                                </div>
+                                                <div className="text-[10px] font-bold text-ink-subtle uppercase tracking-widest flex items-center gap-1">
+                                                    ID: {survey._id.slice(-6).toUpperCase()}
+                                                </div>
                                             </div>
                                         </td>
                                         <td className="px-10 py-7 border-b border-line/80 dark:border-line/10 text-center border-x shadow-inner">
@@ -488,14 +495,9 @@ export default function SurveysPage() {
                                             </div>
                                         </td>
                                         <td className="px-10 py-7 border-b border-line/80 dark:border-line/10">
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary-soft border border-primary/10">
-                                                    <User size={14} />
-                                                </div>
-                                                <div className="flex flex-col">
-                                                    <span className="text-[10px] font-black text-ink uppercase truncate max-w-[80px]">{survey.created_by || 'system'}</span>
-                                                    <span className="text-[7px] font-bold text-slate-400 uppercase tracking-tighter">Analyst</span>
-                                                </div>
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] font-black text-ink uppercase truncate max-w-[80px]">{survey.created_by || 'system'}</span>
+                                                <span className="text-[7px] font-bold text-slate-400 uppercase tracking-tighter">Analyst</span>
                                             </div>
                                         </td>
 
@@ -567,20 +569,6 @@ export default function SurveysPage() {
                                                 if (hasReport) {
                                                     return (
                                                         <div className="flex items-center justify-center gap-2 whitespace-nowrap">
-                                                            <span
-                                                                className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border whitespace-nowrap ${
-                                                                    targetMet
-                                                                        ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-500/20 border-emerald-500/40'
-                                                                        : 'text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-500/20 border-amber-500/40'
-                                                                }`}
-                                                                title={
-                                                                    targetMet
-                                                                        ? 'Generated over the full sample'
-                                                                        : `Generated at ${reached} of ${target} responses`
-                                                                }
-                                                            >
-                                                                {targetMet ? 'Final' : 'Interim'}
-                                                            </span>
                                                             <Link
                                                                 to={`/surveys/${survey._id}/report`}
                                                                 className="px-3 py-1.5 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-wider rounded-lg shadow-sm shadow-indigo-600/25 hover:bg-indigo-500 transition-all whitespace-nowrap"
@@ -603,26 +591,6 @@ export default function SurveysPage() {
                                                             >
                                                                 <Share2 className="w-3 h-3" />
                                                                 Share
-                                                            </button>
-                                                            {/* Phase two. Labelled by what it will produce, not by the
-                                                                mechanism — "Generate Final" tells the analyst the
-                                                                sample is complete; "Refresh Interim" says new
-                                                                responses have arrived since the last run. */}
-                                                            <button
-                                                                onClick={() => handleGenerateReport(survey._id)}
-                                                                className={`px-3 py-1.5 flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all whitespace-nowrap ${
-                                                                    targetMet
-                                                                        ? 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-sm'
-                                                                        : 'bg-surface-raised border border-line/80 dark:border-line/10 text-ink-muted hover:text-primary-soft hover:border-primary/40'
-                                                                }`}
-                                                                title={
-                                                                    targetMet
-                                                                        ? `Regenerate over the full sample of ${reached} responses`
-                                                                        : `Rebuild with the ${reached} responses collected so far`
-                                                                }
-                                                            >
-                                                                <RefreshCw className="w-3 h-3" />
-                                                                {targetMet ? 'Generate Final' : 'Refresh Interim'}
                                                             </button>
                                                         </div>
                                                     );

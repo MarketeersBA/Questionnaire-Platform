@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { useScrollSpy } from '../hooks/useScrollSpy';
 import {
     LayoutDashboard,
-    FileText,
     LogOut,
-    ClipboardList,
     Users,
     Database,
     Activity,
-    Plus,
     ChevronDown,
     ChevronLeft,
     ChevronRight,
@@ -17,7 +15,6 @@ import {
     Moon,
     Zap,
     Layers,
-    GitCompare,
     ShieldCheck
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -64,7 +61,6 @@ export default function Layout({ children }: LayoutProps) {
 
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [sidebarVisible, setSidebarVisible] = useState(true);
-    const [surveysOpen, setSurveysOpen] = useState(true);
     const [adminOpen, setAdminOpen] = useState(false);
     const [username, setUsername] = useState(() => localStorage.getItem('username') || '');
 
@@ -79,17 +75,9 @@ export default function Layout({ children }: LayoutProps) {
             .catch(() => {});
     }, []);
 
-    // Auto-expand Surveys section when on survey-related routes
-    useEffect(() => {
-        if (sidebarOpen && (location.pathname.startsWith('/surveys') || location.pathname === '/create-survey')) {
-            setSurveysOpen(true);
-        }
-    }, [location.pathname, sidebarOpen]);
-
-    // Force close survey dropdown if sidebar closes to prevent layout bugs
+    // Force close admin dropdown if sidebar closes to prevent layout bugs
     useEffect(() => {
         if (!sidebarOpen) {
-            setSurveysOpen(false);
             setAdminOpen(false);
         }
     }, [sidebarOpen]);
@@ -116,7 +104,6 @@ export default function Layout({ children }: LayoutProps) {
 
     const topNavItems = [
         { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', description: 'Performance overview' },
-        { icon: Layers, label: 'Templates', path: '/templates', description: 'Design library' },
         // Comparative Hub temporarily hidden from the rail.
         // Comparative Hub is a real route (/analytics/compare) that previously had
         // no entry point in the rail — it was only reachable by URL.
@@ -125,12 +112,37 @@ export default function Layout({ children }: LayoutProps) {
         //     : []),
     ];
 
-    const isSurveyActive = location.pathname.startsWith('/surveys') || location.pathname === '/create-survey';
     const isAdminRoute = location.pathname.startsWith('/admin') || location.pathname === '/user-management';
+    const isDashboard = location.pathname === '/dashboard';
+
+    const DASH_SECTIONS = [
+        { id: 'dash-overview', label: 'Overview' },
+        { id: 'all-surveys', label: 'All Surveys' },
+    ];
+
+    const spyDashSection = useScrollSpy(
+        isDashboard ? DASH_SECTIONS.map((s) => s.id) : [],
+        80,
+        'main-content',   // the overflow-y-auto scroll container in Layout
+    );
+    // Click override so the highlight updates immediately on tab press,
+    // before the smooth scroll finishes and the spy catches up.
+    const [clickedDashSection, setClickedDashSection] = useState<string | null>(null);
+    useEffect(() => {
+        if (!isDashboard) {
+            setClickedDashSection(null);
+            return;
+        }
+        if (!clickedDashSection) return;
+        const t = window.setTimeout(() => setClickedDashSection(null), 700);
+        return () => window.clearTimeout(t);
+    }, [isDashboard, clickedDashSection]);
+    const activeDashSection = isDashboard
+        ? (clickedDashSection ?? spyDashSection ?? 'dash-overview')
+        : null;
 
     const pageTitle = () => {
         if (location.pathname === '/dashboard') return 'Dashboard';
-        if (location.pathname === '/surveys') return 'Surveys';
         if (location.pathname === '/create-survey') return 'Create Survey';
         if (location.pathname === '/templates') return 'Templates';
         if (location.pathname === '/analytics/compare') return 'Comparative Hub';
@@ -211,110 +223,9 @@ export default function Layout({ children }: LayoutProps) {
 
                     {/* Nav */}
                     <nav className="flex-1 px-4 space-y-0.5 mt-2">
-                        {/* 1. Surveys Section */}
-                        <div>
-                            <button
-                                onClick={() => {
-                                    if (sidebarOpen) {
-                                        setSurveysOpen(prev => !prev);
-                                    } else {
-                                        navigate('/surveys');
-                                    }
-                                }}
-                                title={!sidebarOpen ? 'Surveys' : undefined}
-                                className={`relative flex items-center px-4 py-2 rounded-2xl transition-all duration-300 group
-                                    ${sidebarOpen ? 'w-full gap-3' : 'w-11 h-11 mx-auto justify-center gap-0 px-0'}
-                                    ${isSurveyActive
-                                        ? 'bg-white/10 text-white font-black shadow-[0_4px_12px_-2px_rgba(0,0,0,0.2)] border border-white/10'
-                                        : 'text-white/60 font-bold hover:text-white hover:bg-white/5 hover:translate-x-1'
-                                    }`}
-                            >
-                                {isSurveyActive && sidebarOpen && (
-                                    <div className="absolute -left-1 w-1.5 h-7 bg-accent rounded-full shadow-[0_0_12px_rgba(var(--brand-accent-rgb),0.5)]" />
-                                )}
-                                <div className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 flex-shrink-0 ${isSurveyActive
-                                    ? 'bg-accent text-white shadow-lg shadow-accent/30'
-                                    : 'bg-white/5 group-hover:bg-white/10 text-white/50 group-hover:text-white group-hover:shadow-sm'
-                                    }`}>
-                                    <ClipboardList size={20} strokeWidth={isSurveyActive ? 2.5 : 2} />
-                                </div>
-                                {sidebarOpen && (
-                                    <div className="flex flex-col flex-1 text-left min-w-0">
-                                        <span className="text-base font-bold tracking-tight whitespace-nowrap">
-                                            Surveys
-                                        </span>
-                                        <span className={`text-[12px] font-medium line-clamp-1 ${isSurveyActive ? 'text-white/60' : 'text-white/40'}`}>
-                                            Research Command
-                                        </span>
-                                    </div>
-                                )}
-
-                                {sidebarOpen && (
-                                    <motion.div animate={{ rotate: surveysOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                                        <ChevronDown size={16} className={`transition-colors ${isSurveyActive ? 'text-white' : 'text-white/40'}`} />
-                                    </motion.div>
-                                )}
-                            </button>
-
-                            <AnimatePresence initial={false}>
-                                {sidebarOpen && surveysOpen && (
-                                    <motion.div
-                                        key="surveys-sub"
-                                        initial={{ height: 0, opacity: 0 }}
-                                        animate={{ height: 'auto', opacity: 1 }}
-                                        exit={{ height: 0, opacity: 0 }}
-                                        transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-                                        className="overflow-hidden"
-                                    >
-                                        <div className="pl-5 pr-2 pb-1 pt-0.5 space-y-0 border-l border-white/10 ml-[26px] mt-0.5">
-                                            <NavLink
-                                                to="/create-survey"
-                                                className={({ isActive }) => `flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-sm font-black transition-all group/sub whitespace-nowrap ${isActive
-                                                    ? 'bg-white/10 text-white shadow-md border border-white/10 translate-x-1'
-                                                    : 'text-white/50 hover:text-white hover:bg-white/10 hover:translate-x-1.5'
-                                                    }`}
-                                            >
-                                                <div className={`w-6 h-6 flex items-center justify-center rounded-lg transition-colors ${location.pathname === '/create-survey' ? 'bg-accent text-white' : 'bg-white/5 text-white/40 group-hover/sub:text-white'}`}>
-                                                    <Plus size={14} strokeWidth={3} />
-                                                </div>
-                                                <span>Create Survey</span>
-                                            </NavLink>
-                                            <NavLink
-                                                to="/surveys"
-                                                className={({ isActive }) => `flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-sm font-black transition-all group/sub whitespace-nowrap ${isActive && location.pathname === '/surveys'
-                                                    ? 'bg-white/10 text-white shadow-md border border-white/10 translate-x-1'
-                                                    : 'text-white/50 hover:text-white hover:bg-white/10 hover:translate-x-1.5'
-                                                    }`}
-                                            >
-                                                <div className={`w-6 h-6 flex items-center justify-center rounded-lg transition-colors ${location.pathname === '/surveys' ? 'bg-accent text-white' : 'bg-white/5 text-white/40 group-hover/sub:text-white'}`}>
-                                                    <ClipboardList size={14} strokeWidth={3} />
-                                                </div>
-                                                <span>All Surveys</span>
-                                            </NavLink>
-                                            <NavLink
-                                                to="/surveys/reports"
-                                                className={({ isActive }) => `flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-sm font-black transition-all group/sub whitespace-nowrap ${isActive
-                                                    ? 'bg-white/10 text-white shadow-md border border-white/10 translate-x-1'
-                                                    : 'text-white/50 hover:text-white hover:bg-white/10 hover:translate-x-1.5'
-                                                    }`}
-                                            >
-                                                <div className={`w-6 h-6 flex items-center justify-center rounded-lg transition-colors ${location.pathname === '/surveys/reports' ? 'bg-accent text-white' : 'bg-white/5 text-white/40 group-hover/sub:text-white'}`}>
-                                                    <FileText size={14} strokeWidth={3} />
-                                                </div>
-                                                <span>Reports</span>
-                                            </NavLink>
-
-
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </div>
-
-                        {/* 2, 3, 4 Sections */}
                         {topNavItems.map((item) => (
+                            <React.Fragment key={item.path}>
                             <NavLink
-                                key={item.path}
                                 to={item.path}
                                 title={!sidebarOpen ? item.label : undefined}
                                 className={({ isActive }) => `
@@ -341,13 +252,50 @@ export default function Layout({ children }: LayoutProps) {
                                     </>
                                 )}
                             </NavLink>
+
+                            {/* Dashboard scroll-spy sub-items — only when on /dashboard */}
+                            {item.path === '/dashboard' && isDashboard && sidebarOpen && (
+                                <AnimatePresence>
+                                    <motion.div
+                                        key="dash-sub"
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        transition={{ duration: 0.25, ease: 'easeInOut' }}
+                                        className="ml-[52px] mt-1 flex flex-col gap-1 overflow-hidden"
+                                    >
+                                        {DASH_SECTIONS.map((sec) => {
+                                            const isSecActive = activeDashSection === sec.id;
+                                            return (
+                                                <button
+                                                    key={sec.id}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setClickedDashSection(sec.id);
+                                                        document.getElementById(sec.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                                    }}
+                                                    className={`text-left text-[13px] font-semibold px-3 py-2 rounded-xl transition-all duration-200 whitespace-nowrap flex items-center gap-2
+                                                        ${isSecActive
+                                                            ? 'text-white bg-white/10 border border-white/10'
+                                                            : 'text-white/50 hover:text-white/80 hover:bg-white/5'
+                                                        }`}
+                                                >
+                                                    <span className={`w-2 h-2 rounded-full shrink-0 transition-all duration-200 ${isSecActive ? 'bg-accent scale-125' : 'bg-white/20'}`} />
+                                                    {sec.label}
+                                                </button>
+                                            );
+                                        })}
+                                    </motion.div>
+                                </AnimatePresence>
+                            )}
+                            </React.Fragment>
                         ))}
 
                         {/* ── Administration (temporarily hidden from the rail) ──
                             These four routes existed only behind a hover menu in the
                             top-right avatar, which made them effectively undiscoverable.
                             Promoting them here also gives the rail real content instead
-                            of dead space below Templates.
+                            of dead space below Dashboard.
                         {isAdmin && (
                             <div className="pt-1">
                                 {sidebarOpen && (

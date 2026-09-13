@@ -1,55 +1,99 @@
 import { useEffect, useState } from 'react';
 
 /**
- * Track which of the given element ids is currently the "active" section.
+ * Track which of the given element ids is currently the "active" section
+ * inside a scrollable container (defaults to the viewport).
  *
- * Uses IntersectionObserver and picks the entry closest to the top of the
- * viewport among those currently intersecting, which behaves correctly when
- * several short sections are on screen at once — a plain "first intersecting"
- * rule flickers in that case.
+ * Uses a scroll listener rather than IntersectionObserver so it works
+ * correctly with nested overflow containers and with content that mounts
+ * after the hook (e.g. a loading skeleton that later becomes real sections).
  *
- * @param ids       Element ids to watch, in document order.
- * @param topOffset Height of any sticky header, so a section counts as active
- *                  once it clears the chrome rather than the viewport edge.
+ * @param ids        Element ids to watch, in document order.
+ * @param topOffset  Height of any sticky header (px).
+ * @param rootId     Optional id of the scrollable container. Pass this when
+ *                   scrolling happens inside a custom overflow-y-auto div.
  */
-export function useScrollSpy(ids: string[], topOffset = 120): string | null {
-    const [activeId, setActiveId] = useState<string | null>(null);
+export function useScrollSpy(
+    ids: string[],
+    topOffset = 80,
+    rootId?: string,
+): string | null {
+    const [activeId, setActiveId] = useState<string | null>(ids[0] ?? null);
 
     useEffect(() => {
-        if (!ids.length || typeof IntersectionObserver === 'undefined') return;
+        if (!ids.length) {
+            setActiveId(null);
+            return;
+        }
 
-        const visible = new Map<string, number>();
+        // Seed with the first section so something is highlighted immediately.
+        setActiveId(ids[0]);
 
-        const observer = new IntersectionObserver(
-            (entries) => {
-                entries.forEach((entry) => {
-                    if (entry.isIntersecting) {
-                        visible.set(entry.target.id, entry.boundingClientRect.top);
-                    } else {
-                        visible.delete(entry.target.id);
+        const getRoot = (): HTMLElement | null => {
+            if (rootId) return document.getElementById(rootId);
+            // App shell scrolls inside #main-content, not the window.
+            return document.getElementById('main-content');
+        };
+
+        const pickActive = () => {
+            const root = getRoot();
+            const rootTop = root ? root.getBoundingClientRect().top : 0;
+            const probe = rootTop + topOffset;
+
+            let bestId: string | null = null;
+            let bestDist = Number.POSITIVE_INFINITY;
+
+            for (const id of ids) {
+                const el = document.getElementById(id);
+                if (!el) continue;
+                const top = el.getBoundingClientRect().top;
+                // Prefer the section whose top has crossed (or nearly crossed)
+                // the probe line and is closest to it.
+                const dist = probe - top;
+                if (dist >= -8 && dist < bestDist) {
+                    bestDist = dist;
+                    bestId = id;
+                }
+            }
+
+            // Nothing has crossed the probe yet — stay on the first section.
+            if (!bestId) {
+                for (const id of ids) {
+                    if (document.getElementById(id)) {
+                        bestId = id;
+                        break;
                     }
-                });
+                }
+            }
 
-                if (!visible.size) return;
-                // Closest to the top edge of the content area wins.
-                const best = Array.from(visible.entries()).sort(
-                    (a, b) => Math.abs(a[1] - topOffset) - Math.abs(b[1] - topOffset),
-                )[0];
-                if (best) setActiveId(best[0]);
-            },
-            {
-                rootMargin: `-${topOffset}px 0px -55% 0px`,
-                threshold: [0, 0.15, 0.5],
-            },
-        );
+            if (bestId) setActiveId(bestId);
+        };
 
-        const nodes = ids
-            .map((id) => document.getElementById(id))
-            .filter((n): n is HTMLElement => Boolean(n));
+        const root = getRoot();
+        const scrollTarget: HTMLElement | Window = root ?? window;
 
-        nodes.forEach((n) => observer.observe(n));
-        return () => observer.disconnect();
-    }, [ids.join('|'), topOffset]);
+        scrollTarget.addEventListener('scroll', pickActive, { passive: true });
+        window.addEventListener('resize', pickActive);
+
+        // Dashboard (and similar pages) may mount section nodes after a loading
+        // skeleton. Re-run when the scroll container's children change.
+        let observer: MutationObserver | null = null;
+        if (root && typeof MutationObserver !== 'undefined') {
+            observer = new MutationObserver(pickActive);
+            observer.observe(root, { childList: true, subtree: true });
+        }
+
+        pickActive();
+        const timers = [50, 200, 600].map((ms) => window.setTimeout(pickActive, ms));
+
+        return () => {
+            scrollTarget.removeEventListener('scroll', pickActive);
+            window.removeEventListener('resize', pickActive);
+            observer?.disconnect();
+            timers.forEach((t) => window.clearTimeout(t));
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [ids.join('|'), topOffset, rootId]);
 
     return activeId;
 }

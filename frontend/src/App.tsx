@@ -13,7 +13,6 @@ import UserManagement from './pages/UserManagement';
 import PlatformAnalytics from './pages/PlatformAnalytics';
 import ComparisonAnalytics from './pages/Admin/ComparisonAnalytics';
 import AttributeBankManager from './pages/Admin/AttributeBankManager';
-import SurveysPage from './pages/Surveys';
 import SurveyReports from './pages/SurveyReports';
 import SurveyResponses from './pages/SurveyResponses';
 import SurveyReport from './pages/SurveyReport';
@@ -85,11 +84,7 @@ function AppContent() {
             />
             <Route
               path="/surveys"
-              element={
-                <PrivateRoute>
-                  <SurveysPage />
-                </PrivateRoute>
-              }
+              element={<Navigate to="/dashboard#all-surveys" replace />}
             />
             <Route
               path="/surveys/reports"
