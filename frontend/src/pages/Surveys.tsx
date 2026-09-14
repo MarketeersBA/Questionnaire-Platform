@@ -9,12 +9,11 @@ import {
     Share2,
     Plus,
     Users,
-    TrendingUp,
+    BarChart3,
     Trash2,
     Search,
     ClipboardList,
     CheckCircle2,
-    Eye,
     Sparkles,
     Layers,
     Tag,
@@ -22,7 +21,8 @@ import {
     ChevronRight,
     Pencil,
     RefreshCw,
-    Clock
+    Clock,
+    Copy,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ShareLinkModal from '../components/report/ShareLinkModal';
@@ -39,7 +39,7 @@ type TokenSummary = {
 
 const EMPTY_SUMMARY: TokenSummary = { unused: 0, passed: 0, failed: 0, submitted: 0, total: 0 };
 
-export default function SurveysPage({ embedded = false }: { embedded?: boolean }) {
+export default function SurveysPage() {
     const [surveyList, setSurveyList] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
@@ -237,8 +237,7 @@ export default function SurveysPage({ embedded = false }: { embedded?: boolean }
     };
 
     if (loading) return (
-        <div className={`${embedded ? 'space-y-6' : 'space-y-10 pb-20'} animate-pulse`}>
-            {!embedded && (
+        <div className="space-y-10 pb-20 animate-pulse">
             <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8">
                 <div className="space-y-4 w-full max-w-xl">
                     <div className="h-8 w-40 bg-slate-200/50 dark:bg-slate-800/50 rounded-lg"></div>
@@ -250,18 +249,17 @@ export default function SurveysPage({ embedded = false }: { embedded?: boolean }
                     <div className="h-12 w-44 bg-slate-200/50 dark:bg-slate-800/50 rounded-2xl"></div>
                 </div>
             </div>
-            )}
             <div className="flex gap-2">
                 {[1, 2, 3, 4].map(i => (
                     <div key={i} className="h-10 w-24 bg-slate-200/50 dark:bg-slate-800/50 rounded-xl"></div>
                 ))}
             </div>
-            <div className={`h-[600px] bg-white/40 dark:bg-slate-900/40 border border-white/20 dark:border-slate-800/20 ${embedded ? 'rounded-[2rem]' : 'rounded-[3rem]'} w-full`}></div>
+            <div className="h-[600px] bg-white/40 dark:bg-slate-900/40 border border-white/20 dark:border-slate-800/20 rounded-[3rem] w-full"></div>
         </div>
     );
 
     return (
-        <div className={embedded ? 'space-y-6' : 'space-y-10 pb-20'}>
+        <div className="space-y-10 pb-20">
             {/* Delete Confirmation Modal */}
             <AnimatePresence>
                 {deletingId && (
@@ -369,17 +367,8 @@ export default function SurveysPage({ embedded = false }: { embedded?: boolean }
             </AnimatePresence>
 
             {/* Header */}
-            <div className={`flex flex-col ${embedded ? 'lg:flex-row lg:items-center' : 'xl:flex-row xl:items-end'} justify-between gap-6`}>
+            <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8">
                 <div>
-                    {embedded ? (
-                        <>
-                            <h3 className="text-xl font-black font-display text-ink">All Surveys</h3>
-                            <p className="text-[10px] font-bold text-ink-muted uppercase tracking-widest mt-0.5">
-                                Research registry
-                            </p>
-                        </>
-                    ) : (
-                        <>
                     <div className="flex items-center gap-3 mb-4">
                         <div className="p-2 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary-soft border border-primary/10 dark:border-primary/30">
                             <ClipboardList className="w-5 h-5" />
@@ -394,8 +383,6 @@ export default function SurveysPage({ embedded = false }: { embedded?: boolean }
                     <p className="mt-4 text-slate-800 dark:text-slate-300 max-w-xl font-bold leading-relaxed">
                         All active and archived research deployments. Manage survey lifecycle, access tokens, and analytics.
                     </p>
-                        </>
-                    )}
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4">
                     <div className="relative group">
@@ -441,22 +428,22 @@ export default function SurveysPage({ embedded = false }: { embedded?: boolean }
             </div>
 
             {/* Surveys Table */}
-            <div className="bg-surface/50 rounded-[3rem] border border-line/80 dark:border-line/10 overflow-hidden shadow-premium relative transition-colors">
+            <div className="bg-surface/50 rounded-[2rem] border border-line/80 dark:border-line/10 overflow-hidden shadow-premium relative transition-colors">
                 <div className="overflow-x-auto">
                     <table className="w-full border-collapse">
                         <thead>
-                            <tr className="text-left text-[10px] font-black text-ink-muted uppercase tracking-[0.2em] bg-surface-sunken/80">
-                                <th className="px-10 py-6 border-b border-slate-200 dark:border-slate-700 text-center">Project Code</th>
-                                <th className="px-10 py-6 border-b border-slate-200 dark:border-slate-700">Company Domain</th>
-                                <th className="px-10 py-6 border-b border-slate-200 dark:border-slate-700 text-center">Lifecycle</th>
-                                <th className="px-10 py-6 border-b border-slate-200 dark:border-slate-700">Creator</th>
-                                <th className="px-10 py-6 border-b border-slate-200 dark:border-slate-700">Target Progress</th>
-                                <th className="px-10 py-6 border-b border-slate-200 dark:border-slate-700">Service Status</th>
-                                <th className="px-10 py-6 border-b border-slate-200 dark:border-slate-700 text-center">Report Pipeline</th>
-                                <th className="px-10 py-6 border-b border-slate-200 dark:border-slate-700 text-right">Operations</th>
+                            <tr className="text-left text-[11px] font-black text-ink-muted uppercase tracking-[0.18em] bg-surface-sunken/80">
+                                <th className="px-5 py-3.5 border-b border-slate-200 dark:border-slate-700 text-center">Project Code</th>
+                                <th className="px-5 py-3.5 border-b border-slate-200 dark:border-slate-700">Survey Name</th>
+                                <th className="px-5 py-3.5 border-b border-slate-200 dark:border-slate-700 text-center">Start Date</th>
+                                <th className="px-5 py-3.5 border-b border-slate-200 dark:border-slate-700">Creator</th>
+                                <th className="px-5 py-3.5 border-b border-slate-200 dark:border-slate-700">Service Status</th>
+                                <th className="px-5 py-3.5 border-b border-slate-200 dark:border-slate-700">Target Progress</th>
+                                <th className="px-5 py-3.5 border-b border-slate-200 dark:border-slate-700 text-center">Report Pipeline</th>
+                                <th className="px-5 py-3.5 border-b border-slate-200 dark:border-slate-700 text-right">Operations</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-50">
+                        <tbody className="divide-y divide-line/80 dark:divide-line/10">
                             <AnimatePresence mode="popLayout">
                                 {paginatedSurveys.map((survey: any, idx: number) => (
                                     <motion.tr
@@ -468,42 +455,54 @@ export default function SurveysPage({ embedded = false }: { embedded?: boolean }
                                         transition={{ delay: idx * 0.04 }}
                                         className="group hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors"
                                     >
-                                        <td className="px-10 py-7 border-b border-line/80 dark:border-line/10 text-center">
+                                        <td className="px-5 py-4 border-b border-line/80 dark:border-line/10 text-center">
                                             <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-surface-sunken rounded-lg border border-slate-200 dark:border-slate-700">
                                                 <Tag className="w-3 h-3 text-primary-soft" />
-                                                <span className="text-[10px] font-black text-ink-muted uppercase tracking-wider">{survey.survey_code || 'N/A'}</span>
+                                                <span className="text-xs font-black text-ink-muted uppercase tracking-wider">{survey.survey_code || 'N/A'}</span>
                                             </div>
                                         </td>
-                                        <td className="px-10 py-7 border-b border-slate-50 dark:border-slate-800/50">
+                                        <td className="px-5 py-4 border-b border-line/80 dark:border-line/10">
                                             <div>
                                                 <div className="font-black text-base text-ink group-hover:text-primary-soft transition-colors">
                                                     {survey.company_name || survey.name || 'Untitled Survey'}
                                                 </div>
-                                                <div className="text-[10px] font-bold text-ink-subtle uppercase tracking-widest flex items-center gap-1">
+                                                <div className="text-[11px] font-bold text-ink-subtle uppercase tracking-widest flex items-center gap-1">
                                                     ID: {survey._id.slice(-6).toUpperCase()}
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-10 py-7 border-b border-line/80 dark:border-line/10 text-center border-x shadow-inner">
+                                        <td className="px-5 py-4 border-b border-line/80 dark:border-line/10 text-center">
                                             <div className="inline-flex flex-col items-center">
-                                                <div className="text-[11px] font-black text-ink leading-none">
+                                                <div className="text-xs font-black text-ink leading-none">
                                                     {new Date(survey.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                                                 </div>
-                                                <div className="text-[8px] font-black text-ink-subtle uppercase tracking-widest mt-1">
+                                                <div className="text-[10px] font-black text-ink-subtle uppercase tracking-widest mt-1">
                                                     {new Date(survey.created_at).getFullYear()}
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-10 py-7 border-b border-line/80 dark:border-line/10">
+                                        <td className="px-5 py-4 border-b border-line/80 dark:border-line/10">
                                             <div className="flex flex-col">
-                                                <span className="text-[10px] font-black text-ink uppercase truncate max-w-[80px]">{survey.created_by || 'system'}</span>
-                                                <span className="text-[7px] font-bold text-slate-400 uppercase tracking-tighter">Analyst</span>
+                                                <span className="text-xs font-black text-ink uppercase truncate max-w-[120px]">{survey.created_by || 'system'}</span>
+                                                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Analyst</span>
                                             </div>
                                         </td>
 
-                                        <td className="px-10 py-7 border-b border-line/80 dark:border-line/10">
-                                            <div className="flex flex-col gap-3 min-w-[200px]">
-                                                <div className="flex items-center justify-between gap-4">
+                                        <td className="px-5 py-4 border-b border-line/80 dark:border-line/10">
+                                            <SurveyStateToggle
+                                                currentStatus={survey.status}
+                                                onTransition={async (newStatus) => {
+                                                    await surveys.update(survey._id, { status: newStatus });
+                                                    fetchSurveys();
+                                                }}
+                                            />
+                                        </td>
+                                        <td className="px-5 py-4 border-b border-line/80 dark:border-line/10">
+                                            {String(survey.status || '').toLowerCase() === 'draft' ? (
+                                                <span className="text-[10px] font-bold text-ink-subtle uppercase tracking-widest">—</span>
+                                            ) : (
+                                            <div className="flex flex-col gap-2 min-w-[160px]">
+                                                <div className="flex items-center justify-between gap-3">
                                                     <div className="flex items-baseline gap-1.5">
                                                         <span className="text-xl font-black text-ink leading-none">
                                                             {survey.respondent_count || 0}
@@ -512,7 +511,7 @@ export default function SurveysPage({ embedded = false }: { embedded?: boolean }
                                                     </div>
                                                     <span className="text-xs font-bold text-primary-soft uppercase tracking-wide">Target: {survey.sample_capacity || 0}</span>
                                                 </div>
-                                                <div className="w-full h-3 bg-surface-sunken rounded-full overflow-hidden border border-slate-200/50 dark:border-slate-700/50 shadow-inner">
+                                                <div className="w-full h-2 bg-surface-sunken rounded-full overflow-hidden border border-slate-200/50 dark:border-slate-700/50 shadow-inner">
                                                     <motion.div
                                                         initial={{ width: 0 }}
                                                         animate={{ width: `${survey.sample_capacity ? Math.min(100, Math.round((survey.respondent_count || 0) / survey.sample_capacity * 100)) : 0}%` }}
@@ -524,17 +523,9 @@ export default function SurveysPage({ embedded = false }: { embedded?: boolean }
                                                 </div>
 
                                             </div>
+                                            )}
                                         </td>
-                                        <td className="px-10 py-7 border-b border-slate-50 dark:border-slate-800/50">
-                                            <SurveyStateToggle
-                                                currentStatus={survey.status}
-                                                onTransition={async (newStatus) => {
-                                                    await surveys.update(survey._id, { status: newStatus });
-                                                    fetchSurveys();
-                                                }}
-                                            />
-                                        </td>
-                                        <td className="px-10 py-7 border-b border-slate-50 dark:border-slate-800/50 text-center">
+                                        <td className="px-5 py-4 border-b border-line/80 dark:border-line/10 text-center">
                                             {(() => {
                                                 const status = reportStatuses[survey._id];
 
@@ -571,14 +562,10 @@ export default function SurveysPage({ embedded = false }: { embedded?: boolean }
                                                         <div className="flex items-center justify-center gap-2 whitespace-nowrap">
                                                             <Link
                                                                 to={`/surveys/${survey._id}/report`}
-                                                                className="px-3 py-1.5 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-wider rounded-lg shadow-sm shadow-indigo-600/25 hover:bg-indigo-500 transition-all whitespace-nowrap"
+                                                                className="px-3 py-1.5 bg-indigo-600 text-white text-[11px] font-black uppercase tracking-wider rounded-lg shadow-sm shadow-indigo-600/25 hover:bg-indigo-500 transition-all whitespace-nowrap"
                                                             >
                                                                 View
                                                             </Link>
-                                                            {/* Sharing settings belong next to the report they govern:
-                                                                this table is where an analyst decides a report is
-                                                                ready, which is the same moment they decide who may
-                                                                read it and for how long. */}
                                                             <button
                                                                 onClick={() =>
                                                                     setShareTarget({
@@ -586,7 +573,7 @@ export default function SurveysPage({ embedded = false }: { embedded?: boolean }
                                                                         name: survey.company_name || survey.title || 'Report',
                                                                     })
                                                                 }
-                                                                className="px-3 py-1.5 flex items-center gap-1.5 bg-surface-raised border border-primary/25 text-primary-soft text-[10px] font-black uppercase tracking-wider rounded-lg hover:bg-primary hover:text-white hover:border-primary transition-all whitespace-nowrap"
+                                                                className="px-3 py-1.5 flex items-center gap-1.5 bg-surface-raised border border-primary/25 text-primary-soft text-[11px] font-black uppercase tracking-wider rounded-lg hover:bg-primary hover:text-white hover:border-primary transition-all whitespace-nowrap"
                                                                 title="Set how many people may open this report and when the link expires"
                                                             >
                                                                 <Share2 className="w-3 h-3" />
@@ -596,18 +583,17 @@ export default function SurveysPage({ embedded = false }: { embedded?: boolean }
                                                     );
                                                 }
 
-                                                // No report yet. The label says which phase this run belongs
-                                                // to, so an early read is a deliberate choice rather than
-                                                // something an analyst does without realising the sample is
-                                                // still incomplete.
+                                                // No report yet — drafts cannot generate reports.
+                                                if (String(survey.status || '').toLowerCase() === 'draft') {
+                                                    return (
+                                                        <span className="text-[10px] font-bold text-ink-subtle uppercase tracking-widest">—</span>
+                                                    );
+                                                }
+
                                                 return (
                                                     <button
                                                         onClick={() => handleGenerateReport(survey._id)}
-                                                        // Sized to its label, not to the column. `w-full` stretched it
-                                                        // across the whole cell, which read as a banner rather than a
-                                                        // button and made it far heavier than the controls it sits
-                                                        // beside once a report exists.
-                                                        className="mx-auto inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-wider rounded-lg shadow-sm shadow-indigo-600/25 hover:bg-indigo-500 hover:-translate-y-0.5 active:translate-y-0 transition-all whitespace-nowrap"
+                                                        className="mx-auto inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-[11px] font-black uppercase tracking-wider rounded-lg shadow-sm shadow-indigo-600/25 hover:bg-indigo-500 hover:-translate-y-0.5 active:translate-y-0 transition-all whitespace-nowrap"
                                                         title={
                                                             targetMet
                                                                 ? `Generate over the full sample of ${reached} responses`
@@ -620,45 +606,45 @@ export default function SurveysPage({ embedded = false }: { embedded?: boolean }
                                                 );
                                             })()}
                                         </td>
-                                        <td className="px-10 py-7 border-b border-slate-50 dark:border-slate-800/50">
-                                            <div className="flex justify-end gap-2 pr-2">
+                                        <td className="px-5 py-4 border-b border-line/80 dark:border-line/10">
+                                            <div className="flex justify-end items-center gap-1.5">
                                                 <Link
                                                     to={`/surveys/${survey._id}/responses`}
-                                                    className="p-3 rounded-xl bg-violet-500/10 text-violet-500 hover:bg-violet-500/20 transition-all border border-violet-500/10 active:scale-95"
+                                                    className="p-2 rounded-lg bg-violet-500/10 text-violet-500 hover:bg-violet-500/20 transition-all border border-violet-500/10 active:scale-95"
                                                     title="Responses"
                                                 >
-                                                    <Eye className="w-4 h-4" />
+                                                    <Users className="w-3.5 h-3.5" />
                                                 </Link>
                                                 <button
                                                     onClick={() => copyMasterLink(survey._id)}
-                                                    className="p-3 rounded-xl bg-primary/10 text-primary-soft hover:bg-primary/20 transition-all border border-primary/10 active:scale-95"
+                                                    className="p-2 rounded-lg bg-primary/10 text-primary-soft hover:bg-primary/20 transition-all border border-primary/10 active:scale-95"
                                                     title="Copy Master Link"
                                                 >
-                                                    <Users className="w-4 h-4" />
+                                                    <Copy className="w-3.5 h-3.5" />
                                                 </button>
                                                 <Link
                                                     to={`/analytics/${survey._id}`}
-                                                    className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 transition-all border border-emerald-500/10 active:scale-95"
+                                                    className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 transition-all border border-emerald-500/10 active:scale-95"
                                                     title="Analytics"
                                                 >
-                                                    <TrendingUp className="w-4 h-4" />
+                                                    <BarChart3 className="w-3.5 h-3.5" />
                                                 </Link>
                                                 {survey.status !== 'closed' && (
                                                     <Link
                                                         to={`/surveys/${survey._id}/edit`}
-                                                        className="p-3 rounded-xl bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 transition-all border border-amber-500/10 active:scale-95"
+                                                        className="p-2 rounded-lg bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 transition-all border border-amber-500/10 active:scale-95"
                                                         title="Edit Survey"
                                                     >
-                                                        <Pencil className="w-4 h-4" />
+                                                        <Pencil className="w-3.5 h-3.5" />
                                                     </Link>
                                                 )}
-                                                <div className="w-[1px] h-10 bg-surface-sunken mx-1"></div>
+                                                <div className="w-px h-6 bg-surface-sunken mx-0.5"></div>
                                                 <button
                                                     onClick={() => setDeletingId(survey._id)}
-                                                    className="p-3 rounded-xl bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 transition-all border border-rose-500/10 active:scale-95"
+                                                    className="p-2 rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 transition-all border border-rose-500/10 active:scale-95"
                                                     title="Archive"
                                                 >
-                                                    <Trash2 className="w-4 h-4" />
+                                                    <Trash2 className="w-3.5 h-3.5" />
                                                 </button>
                                             </div>
                                         </td>
@@ -695,7 +681,7 @@ export default function SurveysPage({ embedded = false }: { embedded?: boolean }
                     </table>
                 </div>
                 {filteredSurveys.length > 0 && (
-                    <div className="flex items-center justify-between gap-4 px-10 py-6 border-t border-line/80 dark:border-line/10 bg-slate-50/50 dark:bg-slate-800/20">
+                    <div className="flex items-center justify-between gap-4 px-5 py-4 border-t border-line/80 dark:border-line/10 bg-slate-50/50 dark:bg-slate-800/20">
                         <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">
                             Showing {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filteredSurveys.length)} of {filteredSurveys.length}
                         </span>
