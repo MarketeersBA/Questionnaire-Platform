@@ -247,17 +247,17 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
         <div className="animate-slide-up">
             <div className="max-w-6xl mx-auto">
                 {/* Pure Architecture Workstation */}
-                <div className="space-y-6">
-                    <div className="space-y-6">
+                <div className="space-y-4">
+                    <div className="space-y-4">
                         <motion.div
                             initial={{ opacity: 0, y: -20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="glass-card bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl rounded-[3rem] p-6 border border-white/20 dark:border-slate-700/50 shadow-premium flex flex-col md:flex-row md:items-center justify-between gap-5"
+                            className="glass-card bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl rounded-[3rem] p-5 border border-white/20 dark:border-slate-700/50 shadow-premium flex flex-col md:flex-row md:items-center justify-between gap-4"
                         >
-                            <div className="flex items-center gap-6">
+                            <div className="flex items-center gap-4">
                                 <div className="relative group">
                                     <div className="absolute inset-0 bg-brand-accent/20 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-500" />
-                                    <div className="relative p-5 rounded-3xl bg-gradient-to-br from-brand-accent to-brand-glow text-white shadow-xl shadow-brand-accent/20">
+                                    <div className="relative p-4 rounded-3xl bg-gradient-to-br from-brand-accent to-brand-glow text-white shadow-xl shadow-brand-accent/20">
                                         <Zap className="w-7 h-7" />
                                     </div>
                                 </div>
@@ -271,7 +271,7 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-4 px-6 py-4 bg-slate-900/5 dark:bg-white/5 rounded-2xl border border-black/5 dark:border-white/5">
+                            <div className="flex items-center gap-4 px-5 py-3 bg-slate-900/5 dark:bg-white/5 rounded-2xl border border-black/5 dark:border-white/5">
                                 <div className="text-right">
                                     <p className="text-sm font-black uppercase tracking-widest text-slate-400">Total Logic Phases</p>
                                     <p className="text-xl font-display font-black text-ink">{moduleSeq.length + 1}</p>
@@ -299,7 +299,7 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-brand-blue/30 to-transparent" />
 
                             <div className="p-5">
-                                <div className="flex items-center justify-between mb-6">
+                                <div className="flex items-center justify-between mb-4">
                                     <div className="flex items-center gap-3">
                                         <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                                         <h4 className="text-sm font-black uppercase tracking-[0.4em] text-ink">Live Architecture Flow</h4>
@@ -321,7 +321,7 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                     </div>
 
                                     <div className="flex items-center justify-between w-full relative">
-                                        <div className="relative z-10 flex flex-col items-center gap-6 group/node">
+                                        <div className="relative z-10 flex flex-col items-center gap-4 group/node">
                                             <button
                                                 onClick={() => setActiveLayer('screening')}
                                                 className={`w-16 h-16 rounded-[1.5rem] flex flex-col items-center justify-center transition-all duration-500 relative ${activeLayer === 'screening'
@@ -356,7 +356,7 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                                     <Reorder.Item
                                                         key={modId}
                                                         value={modId}
-                                                        className="relative z-10 flex flex-col items-center gap-6 group/node cursor-grab active:cursor-grabbing"
+                                                        className="relative z-10 flex flex-col items-center gap-4 group/node cursor-grab active:cursor-grabbing"
                                                     >
                                                         <button
                                                             onClick={() => setActiveLayer(modId)}
@@ -389,7 +389,7 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                             </div>
                         </div>
 
-                        <div className="space-y-6 pb-24">
+                        <div className="space-y-4 pb-16">
                             {(() => {
                                 // ─── Module-Specific Rendering (Generic/Protected Modules) ───
                                 const isGenericModule = ['purchase_funnel', 'brand_usage', 'brand_pricing_behavior'].includes(activeLayer);
@@ -404,22 +404,22 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                     const qs = getModuleQuestions(mod);
 
                                     return (
-                                        <section key={activeLayer} className="space-y-6 animate-in fade-in slide-in-from-right-4">
+                                        <section key={activeLayer} className="space-y-4 animate-in fade-in slide-in-from-right-4">
 
-                                            <div className="grid grid-cols-1 gap-5">
+                                            <div className="grid grid-cols-1 gap-4">
                                                 {qs.map((q, idx) => (
                                                     <motion.div
                                                         key={q.question_id}
                                                         initial={{ opacity: 0, x: 20 }}
                                                         animate={{ opacity: 1, x: 0 }}
                                                         transition={{ delay: idx * 0.05 }}
-                                                        className="group relative bg-surface p-6 rounded-[3rem] border-2 border-line/80 dark:border-line/10 transition-all hover:border-primary/40 shadow-sm text-left flex flex-col md:flex-row gap-5 items-start"
+                                                        className="group relative bg-surface p-5 rounded-[3rem] border-2 border-line/80 dark:border-line/10 transition-all hover:border-primary/40 shadow-sm text-left flex flex-col md:flex-row gap-4 items-start"
                                                     >
                                                         <div className="w-14 h-14 shrink-0 flex flex-col items-center justify-center bg-surface-raised rounded-2xl border border-line/80 dark:border-line/10">
                                                             <span className="text-xs font-black text-primary-soft">Q{idx + 1}</span>
                                                         </div>
 
-                                                        <div className="flex-1 space-y-6">
+                                                        <div className="flex-1 space-y-4">
                                                             <div className="flex items-center gap-3">
                                                                 <span className="text-sm font-black text-primary-soft uppercase tracking-widest px-4 py-1.5 bg-primary/5 rounded-full border border-primary/15">
                                                                     {q.sectionTitle}
@@ -430,7 +430,7 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                                                 </div>
                                                             </div>
 
-                                                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                                                 <div className="space-y-2">
                                                                     <div className="flex items-center gap-2 mb-2">
                                                                         <div className="w-1.5 h-1.5 rounded-full bg-slate-300" />
@@ -440,7 +440,7 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                                                         {formatModuleQuestionText(q.en_text, { product: focusLabel, category: focusLabel })}
                                                                     </p>
                                                                 </div>
-                                                                <div className="space-y-2 text-right border-t lg:border-t-0 lg:border-l border-line/80 dark:border-line/10 pt-6 lg:pt-0 lg:pl-10">
+                                                                <div className="space-y-2 text-right border-t lg:border-t-0 lg:border-l border-line/80 dark:border-line/10 pt-4 lg:pt-0 lg:pl-6">
                                                                     <div className="flex items-center justify-end gap-2 mb-2">
                                                                         <p className="text-sm font-black text-slate-400 uppercase tracking-[0.3em]">المحتوى البحثي العربي</p>
                                                                         <div className="w-1.5 h-1.5 rounded-full bg-primary" />
@@ -452,7 +452,7 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                                             </div>
                                                         </div>
 
-                                                        <div className="absolute top-6 right-6 flex items-center gap-2">
+                                                        <div className="absolute top-4 right-4 flex items-center gap-2">
                                                             <div className="p-2 bg-surface-raised rounded-xl border border-line/80 dark:border-line/10">
                                                                 <Shield className="w-4 h-4 text-slate-300" />
                                                             </div>
@@ -471,11 +471,11 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                             key="premium-view"
                                             initial={{ opacity: 0, x: 20 }}
                                             animate={{ opacity: 1, x: 0 }}
-                                            className="space-y-6"
+                                            className="space-y-4"
                                         >
-                                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-6 glass-card bg-gradient-to-br from-emerald-500/10 to-teal-500/10 rounded-[2.5rem] border-2 border-emerald-500/20 shadow-xl">
-                                                <div className="flex items-center gap-6">
-                                                    <div className="p-5 bg-emerald-500 text-white rounded-3xl shadow-lg shadow-emerald-500/20">
+                                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 glass-card bg-gradient-to-br from-emerald-500/10 to-teal-500/10 rounded-[2.5rem] border-2 border-emerald-500/20 shadow-xl">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="p-4 bg-emerald-500 text-white rounded-3xl shadow-lg shadow-emerald-500/20">
                                                         <Zap className="w-8 h-8" />
                                                     </div>
                                                     <div className="text-left">
@@ -490,7 +490,7 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                                 <button
                                                     onClick={handleAddCustomRatingL3}
                                                     disabled={customRatingsCount >= 3}
-                                                    className={`flex items-center gap-3 px-8 py-4 rounded-2xl text-sm font-black uppercase tracking-[0.2em] transition-all duration-300 ${customRatingsCount >= 3
+                                                    className={`flex items-center gap-3 px-6 py-3.5 rounded-2xl text-sm font-black uppercase tracking-[0.2em] transition-all duration-300 ${customRatingsCount >= 3
                                                         ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
                                                         : 'bg-emerald-500 text-white shadow-[0_15px_30px_rgba(16,185,129,0.3)] hover:scale-105 active:scale-95'
                                                         }`}
@@ -500,7 +500,7 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                                 </button>
                                             </div>
 
-                                            <div className="space-y-6">
+                                            <div className="space-y-4">
                                                 {(formData.schema.layer3_structure?.sections?.[0]?.questions || []).map((q: any, qIdx: number) => (
                                                     <QuestionBlock
                                                         key={q.id || qIdx}
@@ -584,23 +584,23 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                                 return { ...prev, schema: newSchema };
                                             });
                                         }}
-                                        className="space-y-16"
+                                        className="space-y-10"
                                     >
                                         {sections.map((section: any, sIdx: number) => (
-                                            <Reorder.Item key={section.title || sIdx} value={section} className="relative space-y-6 bg-slate-50/50 dark:bg-slate-900/10 p-6 rounded-[2.5rem] border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-all group/section">
+                                            <Reorder.Item key={section.title || sIdx} value={section} className="relative space-y-4 bg-slate-50/50 dark:bg-slate-900/10 p-5 rounded-[2.5rem] border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-all group/section">
                                                 <div className="absolute -left-8 top-6 opacity-0 group-hover/section:opacity-100 cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-700 hover:text-primary-soft transition-all hidden md:block">
                                                     {activeLayer !== 'product_test' && (
                                                         <GripHorizontal className="w-5 h-5 rotate-90" />
                                                     )}
                                                 </div>
                                                 {activeLayer === 'taste_test' && section.title === 'Before Taste' && (
-                                                    <div className="flex items-center gap-4 px-6 mb-6">
+                                                    <div className="flex items-center gap-4 px-6 mb-4">
                                                         <div className="h-px bg-slate-300 dark:bg-slate-700 flex-1" />
                                                         <span className="text-sm font-black uppercase tracking-[0.3em] text-slate-900 dark:text-200">Respondent Priming</span>
                                                         <div className="h-px bg-slate-300 dark:bg-slate-700 flex-1" />
                                                     </div>
                                                 )}
-                                                <div className="flex items-center justify-between px-8 py-3 bg-surface/50 rounded-2xl border border-line/80 dark:border-line/10 shadow-sm">
+                                                <div className="flex items-center justify-between px-6 py-3 bg-surface/50 rounded-2xl border border-line/80 dark:border-line/10 shadow-sm">
                                                     <h4 className="text-sm font-black uppercase tracking-[0.3em] text-primary-soft flex items-center gap-3 text-left flex-wrap">
                                                         <div className="w-1.5 h-1.5 rounded-full bg-primary" />
                                                         {section.title}
@@ -632,7 +632,7 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
                                                     )}
                                                 </div>
                                                 {section.isInstruction ? (
-                                                    <div className="mx-6 p-6 rounded-2xl bg-primary/5 border-2 border-primary/30 flex items-start gap-4 shadow-inner">
+                                                    <div className="mx-5 p-5 rounded-2xl bg-primary/5 border-2 border-primary/30 flex items-start gap-4 shadow-inner">
                                                         <div className="p-3 bg-primary/10 text-primary-soft rounded-xl shrink-0">
                                                             <Info className="w-5 h-5" />
                                                         </div>

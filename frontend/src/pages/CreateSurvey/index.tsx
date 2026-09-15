@@ -48,6 +48,23 @@ import { CloneSurveyModal } from './components/CloneSurveyModal';
 import { getSurveyLink } from '../../utils/surveyLinks';
 import { DEFAULT_VOICE_CAPTURE } from './types';
 import { useCreateSurveyPersistence } from '../../hooks/useCreateSurveyPersistence';
+
+const LEGACY_OBJECTIVE_IDS = new Set([
+    'taste_new_product',
+    'product_preference',
+    'sensory_evaluation',
+    'price_sensitivity',
+    'improvement_insights',
+    'purchase_intent',
+    'other',
+]);
+
+/** Free-text business question; strip old choice-card enum ids. */
+function resolveBusinessQuestion(objective?: string | null, other?: string | null): string {
+    if (objective === 'other') return (other || '').trim();
+    if (!objective || LEGACY_OBJECTIVE_IDS.has(objective)) return '';
+    return objective;
+}
 import { flushPendingPackagingHeatmapUploads, type PackagingHeatmapPendingFiles } from '../../utils/packagingHeatmapConfig';
 
 
@@ -145,8 +162,8 @@ export default function CreateSurvey({ editSurveyId, initialSurveyData }: Create
                 survey_name: s.company_name || s.name || '',
                 survey_code: s.survey_code || '',
                 survey_type: s.type || '',
-                survey_objective: s.survey_objective || '',
-                survey_objective_other: s.survey_objective_other || '',
+                survey_objective: resolveBusinessQuestion(s.survey_objective, s.survey_objective_other),
+                survey_objective_other: '',
                 industry: s.industry || '',
                 links_count: s.links_count || s.link_count || 1000,
                 sample_capacity: s.sample_capacity || 200,
@@ -187,7 +204,14 @@ export default function CreateSurvey({ editSurveyId, initialSurveyData }: Create
     useEffect(() => {
         if (isEditMode) return;
         if (draft && !hasRestored) {
-            setFormData(draft.formData);
+            setFormData({
+                ...draft.formData,
+                survey_objective: resolveBusinessQuestion(
+                    draft.formData.survey_objective,
+                    draft.formData.survey_objective_other,
+                ),
+                survey_objective_other: '',
+            });
             setCurrentStep(draft.currentStep);
             setHasRestored(true);
             toast.info('Progress restored from draft', {
@@ -282,9 +306,9 @@ export default function CreateSurvey({ editSurveyId, initialSurveyData }: Create
                 options: [
                     'Postgraduate (Masters / PhD) / دراسات عليا (ماجستير / دكتوراه)',
                     'University / College degree / مؤهل جامعي',
-                    'Secondary (Thanaweyya) / ثانوي (ثانوية عامة)',
+                    'Secondary / ثانوي',
                     'Primary / Preparatory / ابتدائي / إعدادي',
-                    'Reads & writes / Illiterate / يقرأ ويكتب / أمي'
+                    'Uneducated / غير متعلم'
                 ],
                 required: true,
                 correct_answer: cfg.allowed_education && cfg.allowed_education.length > 0 ? cfg.allowed_education : null,
@@ -315,9 +339,17 @@ export default function CreateSurvey({ editSurveyId, initialSurveyData }: Create
                 id: 'family_income',
                 label: 'Family Monthly Income / الدخل الشهري للأسرة',
                 text: 'Family Monthly Income / الدخل الشهري للأسرة',
-                type: 'number',
+                type: 'mcq',
+                options: [
+                    'Below 4,000 EGP / أقل من ٤٠٠٠ جنيه',
+                    '4,001 - 6,000 EGP / ٤٠٠١ - ٦٠٠٠ جنيه',
+                    '6,001 - 12,000 EGP / ٦٠٠١ - ١٢٠٠٠ جنيه',
+                    '12,001 - 40,000 EGP / ١٢٠٠١ - ٤٠٠٠٠ جنيه',
+                    'Above 40,000 EGP / أكثر من ٤٠٠٠٠ جنيه'
+                ],
                 required: true,
-                questionMeta: { nature: 'fixed', inputType: 'numeric' }
+                correct_answer: cfg.allowed_income && cfg.allowed_income.length > 0 ? cfg.allowed_income : null,
+                questionMeta: { nature: 'fixed' }
             });
         }
         if (cfg.marital_status) {
@@ -665,7 +697,7 @@ export default function CreateSurvey({ editSurveyId, initialSurveyData }: Create
                 survey_name: survey.company_name || survey.name || '',
                 survey_code: '', // Force user to enter a new unique code
                 survey_type: typeValue as any,
-                survey_objective: survey.survey_objective || '',
+                survey_objective: resolveBusinessQuestion(survey.survey_objective, survey.survey_objective_other),
                 industry: survey.industry || '',
                 links_count: survey.links_count || survey.link_count || 1000,
                 sample_capacity: survey.sample_capacity || survey.respondent_target || 200,
@@ -768,14 +800,14 @@ export default function CreateSurvey({ editSurveyId, initialSurveyData }: Create
                 return;
             }
             const needsSurveyObjective = formData.survey_type === 'taste_test' || formData.survey_type === 'product_test';
-            if (needsSurveyObjective && !formData.survey_objective) {
-                toast.error('Select a survey objective before proceeding');
+            if (needsSurveyObjective && !formData.survey_objective?.trim()) {
+                toast.error('Enter a business question before proceeding');
                 scrollToError('survey-objective-section');
                 return;
             }
-            if (needsSurveyObjective && formData.survey_objective === 'other' && !formData.survey_objective_other?.trim()) {
-                toast.error('Please specify your survey objective');
-                scrollToError('survey-objective-section');
+            if (needsSurveyObjective && !formData.config?.category?.trim()) {
+                toast.error('Product category is required');
+                scrollToError('config-category-input');
                 return;
             }
         }

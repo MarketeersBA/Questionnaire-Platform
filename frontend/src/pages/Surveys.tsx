@@ -39,7 +39,7 @@ type TokenSummary = {
 
 const EMPTY_SUMMARY: TokenSummary = { unused: 0, passed: 0, failed: 0, submitted: 0, total: 0 };
 
-export default function SurveysPage() {
+export default function SurveysPage({ embedded = false }: { embedded?: boolean }) {
     const [surveyList, setSurveyList] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
@@ -259,7 +259,7 @@ export default function SurveysPage() {
     );
 
     return (
-        <div className="space-y-10 pb-20">
+        <div className={embedded ? 'space-y-6' : 'space-y-10 pb-20'}>
             {/* Delete Confirmation Modal */}
             <AnimatePresence>
                 {deletingId && (
@@ -367,64 +367,76 @@ export default function SurveysPage() {
             </AnimatePresence>
 
             {/* Header */}
-            <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8">
-                <div>
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary-soft border border-primary/10 dark:border-primary/30">
-                            <ClipboardList className="w-5 h-5" />
+            <div>
+                {embedded ? (
+                    <>
+                        <h3 className="text-xl font-black font-display text-ink">All Surveys</h3>
+                        <p className="text-[10px] font-bold text-ink-muted uppercase tracking-widest mt-0.5">
+                            Research registry
+                        </p>
+                    </>
+                ) : (
+                    <>
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="p-2 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary-soft border border-primary/10 dark:border-primary/30">
+                                <ClipboardList className="w-5 h-5" />
+                            </div>
+                            <div className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-muted font-display">
+                                Research <span className="text-primary-soft">Registry</span>
+                            </div>
                         </div>
-                        <div className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-muted font-display">
-                            Research <span className="text-primary-soft">Registry</span>
-                        </div>
-                    </div>
-                    <h1 className="text-5xl font-display font-black tracking-tight leading-none text-ink">
-                        Surveys
-                    </h1>
-                    <p className="mt-4 text-slate-800 dark:text-slate-300 max-w-xl font-bold leading-relaxed">
-                        All active and archived research deployments. Manage survey lifecycle, access tokens, and analytics.
-                    </p>
+                        <h1 className="text-5xl font-display font-black tracking-tight leading-none text-ink">
+                            Surveys
+                        </h1>
+                        <p className="mt-4 text-slate-800 dark:text-slate-300 max-w-xl font-bold leading-relaxed">
+                            All active and archived research deployments. Manage survey lifecycle, access tokens, and analytics.
+                        </p>
+                    </>
+                )}
+            </div>
+
+            {/* Filters + search + create — one toolbar row */}
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                <div className="flex items-center gap-1.5 bg-surface border border-line/80 dark:border-line/10 rounded-xl p-1 w-fit shadow-sm overflow-x-auto">
+                    {(['all', 'active', 'draft', 'closed'] as const).map((status) => (
+                        <button
+                            key={status}
+                            onClick={() => {
+                                setFilterStatus(status);
+                                setPage(1);
+                            }}
+                            className={`px-3.5 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${filterStatus === status
+                                ? 'bg-primary text-white shadow-md shadow-primary/20'
+                                : 'text-ink-muted hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'
+                                }`}
+                        >
+                            {status} <span className="opacity-60 ml-1">({counts[status]})</span>
+                        </button>
+                    ))}
                 </div>
-                <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="relative group">
-                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-primary-soft transition-colors" />
+
+                <div className="flex items-center gap-2 w-full lg:w-auto">
+                    <label className="relative flex items-center flex-1 lg:w-64 min-w-0 bg-surface border border-line/80 dark:border-line/15 rounded-xl shadow-sm focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/15 transition-all">
+                        <Search className="absolute left-3 w-3.5 h-3.5 text-ink-subtle pointer-events-none" />
                         <input
-                            type="text"
-                            placeholder="Search surveys..."
+                            type="search"
+                            placeholder="Find by name or code…"
                             value={searchQuery}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                 setSearchQuery(e.target.value);
                                 setPage(1);
                             }}
-                            className="w-full sm:w-64 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md border border-line/80 dark:border-line/10 rounded-2xl pl-12 pr-6 py-4 text-ink font-bold focus:outline-none focus:bg-white dark:focus:bg-slate-800 focus:border-primary/50 focus:ring-4 focus:ring-primary/30 transition-all shadow-sm"
+                            className="w-full bg-transparent pl-9 pr-3 py-2.5 text-sm font-semibold text-ink placeholder:text-ink-subtle/80 placeholder:font-medium focus:outline-none"
                         />
-                    </div>
+                    </label>
                     <Link
                         to="/create-survey"
-                        className="btn-premium flex items-center justify-center gap-3 group shadow-xl shadow-primary/20 font-black tracking-widest uppercase text-xs hover:-translate-y-0.5 active:scale-95 transition-all"
+                        className="shrink-0 inline-flex items-center gap-1.5 h-[42px] px-4 rounded-xl bg-accent text-white text-[10px] font-black uppercase tracking-widest hover:bg-accent/90 active:scale-[0.98] transition-all shadow-sm"
                     >
-                        <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-500" />
-                        Create Survey
+                        <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
+                        New
                     </Link>
                 </div>
-            </div>
-
-            {/* Filter Tabs */}
-            <div className="flex items-center gap-2 bg-surface border border-line/80 dark:border-line/10 rounded-2xl p-2 w-fit shadow-sm">
-                {(['all', 'active', 'draft', 'closed'] as const).map((status) => (
-                    <button
-                        key={status}
-                        onClick={() => {
-                            setFilterStatus(status);
-                            setPage(1);
-                        }}
-                        className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filterStatus === status
-                            ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                            : 'text-ink-muted hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'
-                            }`}
-                    >
-                        {status} <span className="opacity-60 ml-1">({counts[status]})</span>
-                    </button>
-                ))}
             </div>
 
             {/* Surveys Table */}

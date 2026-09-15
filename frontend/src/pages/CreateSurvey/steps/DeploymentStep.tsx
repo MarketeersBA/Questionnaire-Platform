@@ -42,8 +42,8 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
     };
 
     return (
-        <div className="space-y-6 text-left animate-slide-up">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-6 relative z-10">
+        <div className="space-y-4 text-left animate-slide-up">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 relative z-10">
                 <div className="flex items-center gap-4 transition-colors">
                     <div className="p-4 rounded-2xl bg-primary/10 text-primary-soft shadow-inner">
                         <Activity className="w-6 h-6" />
@@ -59,8 +59,8 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
             <section className="animate-slide-up">
                 <div className="glass-card bg-slate-50/50 dark:bg-slate-950/40 backdrop-blur-xl rounded-[3rem] border-2 border-line/80 dark:border-line/10 overflow-hidden transition-all shadow-premium">
                     {/* Header */}
-                    <div className="p-6 border-b-2 border-slate-200 dark:border-slate-900 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/50 dark:bg-slate-900/30">
-                        <div className="flex items-center gap-5">
+                    <div className="p-5 border-b-2 border-slate-200 dark:border-slate-900 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/50 dark:bg-slate-900/30">
+                        <div className="flex items-center gap-4">
                             <div className={`p-4 rounded-2xl transition-all shadow-lg ${qc.is_enabled ? 'bg-primary text-white shadow-primary/20' : 'bg-slate-200 dark:bg-slate-800 text-slate-400'}`}>
                                 <Activity className="w-6 h-6" />
                             </div>
@@ -72,7 +72,7 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
 
                         <button
                             onClick={() => updateQC({ is_enabled: !qc.is_enabled })}
-                            className={`flex items-center gap-3 px-8 py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${qc.is_enabled
+                            className={`flex items-center gap-3 px-6 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${qc.is_enabled
                                 ? 'bg-emerald-500 text-white shadow-xl shadow-emerald-500/30 hover:scale-[1.02]'
                                 : 'bg-surface-sunken text-slate-400 border-2 border-slate-300 dark:border-slate-700'
                                 }`}
@@ -90,11 +90,11 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
                                 exit={{ height: 0, opacity: 0 }}
                                 transition={{ duration: 0.4, ease: "circOut" }}
                             >
-                                <div className="p-6 space-y-6">
+                                <div className="p-5 space-y-4">
                                     {/* Time Constraints Grid */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {/* Min Time */}
-                                        <div className="space-y-6 group">
+                                        <div className="space-y-4 group">
                                             <div className="flex items-center justify-between px-1">
                                                 <div className="flex items-center gap-2">
                                                     <Clock className="w-3.5 h-3.5 text-primary-soft" />
@@ -108,11 +108,11 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
                                                     min={0}
                                                     value={secondsToMinutes(qc.min_time_seconds)}
                                                     onChange={e => updateQC({ min_time_seconds: minutesToSeconds(parseInt(e.target.value, 10) || 0) })}
-                                                    className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 focus:border-primary rounded-2xl px-6 py-5 text-ink font-black text-lg outline-none transition-all shadow-sm group-hover:border-slate-400 dark:group-hover:border-slate-600"
+                                                    className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 focus:border-primary rounded-2xl px-6 py-3.5 text-ink font-black text-lg outline-none transition-all shadow-sm group-hover:border-slate-400 dark:group-hover:border-slate-600"
                                                 />
                                                 <div className="absolute right-6 top-1/2 -translate-y-1/2 text-sm font-black text-slate-400 uppercase tracking-widest pointer-events-none">Minutes</div>
                                             </div>
-                                            <div className="p-5 rounded-2xl bg-slate-100/50 dark:bg-slate-900/50 border border-line/80 dark:border-line/10 space-y-3">
+                                            <div className="p-4 rounded-2xl bg-slate-100/50 dark:bg-slate-900/50 border border-line/80 dark:border-line/10 space-y-3">
                                                 <div className="flex items-center gap-2 text-xs font-black text-rose-500 uppercase tracking-widest">
                                                     <Ban className="w-3 h-3" /> Rejection Payload (Before Min)
                                                 </div>
@@ -141,7 +141,7 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
                                         </div>
 
                                         {/* Max Time */}
-                                        <div className="space-y-6 group">
+                                        <div className="space-y-4 group">
                                             <div className="flex items-center justify-between px-1">
                                                 <div className="flex items-center gap-2">
                                                     <Timer className="w-3.5 h-3.5 text-brand-cyan" />
@@ -155,11 +155,11 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
                                                     min={0}
                                                     value={secondsToMinutes(qc.max_time_seconds)}
                                                     onChange={e => updateQC({ max_time_seconds: minutesToSeconds(parseInt(e.target.value, 10) || 0) })}
-                                                    className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 focus:border-brand-cyan rounded-2xl px-6 py-5 text-ink font-black text-lg outline-none transition-all shadow-sm group-hover:border-slate-400 dark:group-hover:border-slate-600"
+                                                    className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 focus:border-brand-cyan rounded-2xl px-6 py-3.5 text-ink font-black text-lg outline-none transition-all shadow-sm group-hover:border-slate-400 dark:group-hover:border-slate-600"
                                                 />
                                                 <div className="absolute right-6 top-1/2 -translate-y-1/2 text-sm font-black text-slate-400 uppercase tracking-widest pointer-events-none">Minutes</div>
                                             </div>
-                                            <div className="p-5 rounded-2xl bg-slate-100/50 dark:bg-slate-900/50 border border-line/80 dark:border-line/10 space-y-3">
+                                            <div className="p-4 rounded-2xl bg-slate-100/50 dark:bg-slate-900/50 border border-line/80 dark:border-line/10 space-y-3">
                                                 <div className="flex items-center gap-2 text-xs font-black text-amber-500 uppercase tracking-widest">
                                                     <AlertCircle className="w-3 h-3" /> Rejection Payload (After Max)
                                                 </div>
@@ -189,7 +189,7 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
                                     </div>
 
                                     {/* System Blueprint Notice */}
-                                    <div className="flex items-center gap-4 p-6 bg-blue-50 dark:bg-blue-500/10 border-2 border-blue-500/20 rounded-3xl animate-pulse-subtle">
+                                    <div className="flex items-center gap-4 p-5 bg-blue-50 dark:bg-blue-500/10 border-2 border-blue-500/20 rounded-3xl animate-pulse-subtle">
                                         <div className="p-3 rounded-xl bg-blue-500 text-white shadow-lg">
                                             <ShieldCheck className="w-4 h-4" />
                                         </div>
@@ -207,8 +207,8 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
 
             <section className="animate-slide-up">
                 <div className="glass-card bg-slate-50/50 dark:bg-slate-950/40 backdrop-blur-xl rounded-[3rem] border-2 border-line/80 dark:border-line/10 overflow-hidden transition-all shadow-premium">
-                    <div className="p-6 border-b-2 border-slate-200 dark:border-slate-900 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/50 dark:bg-slate-900/30">
-                        <div className="flex items-center gap-5">
+                    <div className="p-5 border-b-2 border-slate-200 dark:border-slate-900 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/50 dark:bg-slate-900/30">
+                        <div className="flex items-center gap-4">
                             <div className={`p-4 rounded-2xl transition-all shadow-lg ${voice.is_enabled ? 'bg-indigo-600 text-white shadow-indigo-600/20' : 'bg-slate-200 dark:bg-slate-800 text-slate-400'}`}>
                                 <Mic className="w-6 h-6" />
                             </div>
@@ -222,7 +222,7 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
                         <button
                             type="button"
                             onClick={() => toggleVoice(!voice.is_enabled)}
-                            className={`flex items-center gap-3 px-8 py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${voice.is_enabled
+                            className={`flex items-center gap-3 px-6 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${voice.is_enabled
                                 ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-600/30 hover:scale-[1.02]'
                                 : 'bg-surface-sunken text-slate-400 border-2 border-slate-300 dark:border-slate-700'
                                 }`}
@@ -234,19 +234,19 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
                     <AnimatePresence mode="wait">
                         {voice.is_enabled && (
                             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
-                                <div className="p-6 space-y-5">
-                                    <div className="p-6 rounded-3xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800">
+                                <div className="p-5 space-y-4">
+                                    <div className="p-5 rounded-3xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800">
                                         <p className="text-sm font-bold text-indigo-900 dark:text-indigo-200">
                                             Respondents can type, record, or do both on the same question.
                                         </p>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="space-y-4">
                                             <label className="text-sm font-black uppercase tracking-widest">AI Analysis Pipeline</label>
                                             <button
                                                 type="button"
                                                 onClick={() => updateVoice({ ai_analysis_enabled: !voice.ai_analysis_enabled })}
-                                                className={`w-full flex items-center justify-between px-6 py-5 rounded-2xl border-2 ${voice.ai_analysis_enabled ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40' : 'border-slate-200 dark:border-slate-700'}`}
+                                                className={`w-full flex items-center justify-between px-6 py-3.5 rounded-2xl border-2 ${voice.ai_analysis_enabled ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40' : 'border-slate-200 dark:border-slate-700'}`}
                                             >
                                                 <span className="text-sm font-bold">Run transcription & NLP</span>
                                                 <span className="text-sm font-black uppercase">{voice.ai_analysis_enabled ? 'On' : 'Off'}</span>
@@ -257,7 +257,7 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
                                             <select
                                                 value={voice.transcription_language || 'auto'}
                                                 onChange={(e) => updateVoice({ transcription_language: e.target.value as 'auto' | 'en' | 'ar' })}
-                                                className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 rounded-2xl px-6 py-5 text-sm font-bold"
+                                                className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 rounded-2xl px-6 py-3.5 text-sm font-bold"
                                             >
                                                 <option value="auto">Auto-detect</option>
                                                 <option value="en">English</option>

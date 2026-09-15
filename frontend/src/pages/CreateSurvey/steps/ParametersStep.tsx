@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Settings2, Tag, Layers, Palette, EyeOff, X, Info, Sparkles, Plus, ShieldCheck, Search, ChevronDown, ChevronUp, Trash2, PlusCircle, ArrowUp, ArrowDown, MoveVertical, BarChart3, Wallet, Check, Zap, Box } from 'lucide-react';
+import { Settings2, Tag, Layers, Palette, EyeOff, X, Info, Sparkles, Plus, ShieldCheck, Search, ChevronDown, ChevronUp, Trash2, PlusCircle, ArrowUp, ArrowDown, MoveVertical, BarChart3, Wallet, Check, Zap, Box, Globe } from 'lucide-react';
 import { StepProps, DEFAULT_TASTE_CONFIG, DEFAULT_PRODUCT_TEST_CONFIG, DEFAULT_AI_FOLLOWUP } from '../types';
 import TasteAttributeLibraryPanel from '../components/TasteAttributeLibraryPanel';
 import {
@@ -29,6 +29,123 @@ import {
     normalizeTrialMediaCapture,
     withNormalizedTrialMediaCapture,
 } from '../../../utils/trialMediaCaptureConfig';
+
+const LANGUAGE_OPTIONS: { value: 'en' | 'ar'; label: string; hint: string }[] = [
+    { value: 'en', label: 'English', hint: 'EN' },
+    { value: 'ar', label: 'Arabic', hint: 'العربية' },
+];
+
+function SurveyLanguageMenu({
+    value,
+    onChange,
+    id,
+}: {
+    value: 'en' | 'ar';
+    onChange: (lang: 'en' | 'ar') => void;
+    id?: string;
+}) {
+    const [open, setOpen] = useState(false);
+    const rootRef = useRef<HTMLDivElement>(null);
+    const selected = LANGUAGE_OPTIONS.find(o => o.value === value) || LANGUAGE_OPTIONS[0];
+
+    useEffect(() => {
+        if (!open) return;
+        const onDocClick = (e: MouseEvent) => {
+            if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+        };
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setOpen(false);
+        };
+        document.addEventListener('mousedown', onDocClick);
+        document.addEventListener('keydown', onKey);
+        return () => {
+            document.removeEventListener('mousedown', onDocClick);
+            document.removeEventListener('keydown', onKey);
+        };
+    }, [open]);
+
+    return (
+        <div className="max-w-sm space-y-3" ref={rootRef}>
+            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-muted ml-1 flex items-center gap-2">
+                <Globe className="w-3.5 h-3.5 text-primary-soft" />
+                Survey Language
+            </label>
+            <div className="relative">
+                <button
+                    id={id}
+                    type="button"
+                    aria-haspopup="listbox"
+                    aria-expanded={open}
+                    onClick={() => setOpen(o => !o)}
+                    className={`w-full flex items-center gap-3 bg-surface border-2 rounded-[1.5rem] pl-5 pr-4 py-3.5 text-left shadow-sm transition-all ${
+                        open
+                            ? 'border-primary ring-4 ring-primary/10'
+                            : 'border-slate-300 dark:border-slate-600 hover:border-primary/50'
+                    }`}
+                >
+                    <span className="w-9 h-9 rounded-xl bg-primary/10 text-primary-soft grid place-items-center text-[11px] font-black tracking-widest shrink-0">
+                        {selected.hint.slice(0, 2).toUpperCase() === 'EN' ? 'EN' : 'ع'}
+                    </span>
+                    <span className="flex-1 min-w-0">
+                        <span className="block text-base font-black text-ink leading-tight">{selected.label}</span>
+                        <span className="block text-[11px] font-bold text-ink-muted mt-0.5">{selected.hint}</span>
+                    </span>
+                    <span className={`w-8 h-8 rounded-xl grid place-items-center transition-all ${open ? 'bg-primary text-white rotate-180' : 'bg-primary/10 text-primary-soft'}`}>
+                        <ChevronDown className="w-4 h-4" />
+                    </span>
+                </button>
+
+                <AnimatePresence>
+                    {open && (
+                        <motion.ul
+                            role="listbox"
+                            initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -4, scale: 0.98 }}
+                            transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
+                            className="absolute z-40 left-0 right-0 mt-2 p-1.5 rounded-2xl border border-line/80 dark:border-line/15 bg-surface shadow-xl shadow-black/10 dark:shadow-black/40 overflow-hidden"
+                        >
+                            {LANGUAGE_OPTIONS.map(opt => {
+                                const isActive = opt.value === value;
+                                return (
+                                    <li key={opt.value} role="option" aria-selected={isActive}>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                onChange(opt.value);
+                                                setOpen(false);
+                                            }}
+                                            className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left transition-all ${
+                                                isActive
+                                                    ? 'bg-primary/10 text-primary-soft'
+                                                    : 'text-ink hover:bg-slate-100 dark:hover:bg-slate-800/80'
+                                            }`}
+                                        >
+                                            <span className={`w-9 h-9 rounded-xl grid place-items-center text-[11px] font-black tracking-widest shrink-0 ${
+                                                isActive
+                                                    ? 'bg-primary text-white'
+                                                    : 'bg-surface-sunken text-ink-muted border border-line/60 dark:border-line/20'
+                                            }`}>
+                                                {opt.value === 'en' ? 'EN' : 'ع'}
+                                            </span>
+                                            <span className="flex-1 min-w-0">
+                                                <span className="block text-sm font-black leading-tight">{opt.label}</span>
+                                                <span className={`block text-[11px] font-bold mt-0.5 ${isActive ? 'text-primary-soft/80' : 'text-ink-muted'}`}>
+                                                    {opt.hint}
+                                                </span>
+                                            </span>
+                                            {isActive && <Check className="w-4 h-4 text-primary-soft shrink-0" strokeWidth={3} />}
+                                        </button>
+                                    </li>
+                                );
+                            })}
+                        </motion.ul>
+                    )}
+                </AnimatePresence>
+            </div>
+        </div>
+    );
+}
 
 export function ParametersStep({
     formData,
@@ -1032,58 +1149,14 @@ export function ParametersStep({
 
             {(formData.survey_type === 'taste_test' || !formData.survey_type) && (
                 <div className="space-y-5">
-                    {/* Primary Parameters: Category, Protocol, Language */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                        {/* Category */}
-                        <div className="space-y-5 bg-slate-50/50 dark:bg-slate-950/50 p-5 rounded-[2.5rem] border-2 border-line/80 dark:border-line/10 shadow-inner">
-                            <div className="flex items-center gap-3 border-b border-line/80 dark:border-line/10 pb-4 mb-2">
-                                <Tag className="w-4 h-4 text-primary-soft" />
-                                <h4 className="text-sm font-black uppercase tracking-widest text-ink">Product Category</h4>
-                            </div>
-                            <div className="space-y-4">
-                                <label className="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Survey Category</label>
-                                <input
-                                    id="config-category-input"
-                                    type="text"
-                                    value={formData.config?.category || ''}
-                                    onChange={e => {
-                                        const val = e.target.value;
-                                        setFormData(prev => {
-                                            const baseConfig = prev.config || DEFAULT_TASTE_CONFIG;
-                                            return {
-                                                ...prev,
-                                                config: { ...baseConfig, category: val },
-                                                purchase_funnel: prev.purchase_funnel ? { ...prev.purchase_funnel, category_name: val } : { is_enabled: false, category_name: val, brand_list: [] }
-                                            };
-                                        });
-                                    }}
-                                    placeholder="e.g. Premium Chocolate"
-                                    className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 focus:border-primary rounded-2xl px-10 py-7 text-sm font-bold outline-none dark:text-white transition-all shadow-sm"
-                                />
-                            </div>
-                        </div>
-
-                        {/* Language */}
-                        <div className="space-y-5 bg-slate-50/50 dark:bg-slate-950/50 p-5 rounded-[2.5rem] border-2 border-line/80 dark:border-line/10 shadow-inner">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-ink ml-1">Survey Language</label>
-                            <div className="flex gap-2">
-                                {['en', 'ar'].map(lang => (
-                                    <button
-                                        key={lang}
-                                        onClick={() => setFormData(prev => ({
-                                            ...prev,
-                                            config: { ...(prev.config || DEFAULT_TASTE_CONFIG), language: lang as any }
-                                        }))}
-                                        className={`flex-1 py-5 rounded-2xl text-sm font-black transition-all border-2 ${formData.config?.language === lang
-                                            ? 'bg-primary border-primary text-white shadow-lg'
-                                            : 'bg-surface border-slate-400 dark:border-slate-600 text-slate-800 dark:text-slate-300 hover:border-primary'}`}
-                                    >
-                                        {lang.toUpperCase() === 'EN' ? 'English' : 'Arabic'}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
+                    <SurveyLanguageMenu
+                        id="survey-language-select"
+                        value={(formData.config?.language as 'en' | 'ar') || 'en'}
+                        onChange={lang => setFormData(prev => ({
+                            ...prev,
+                            config: { ...(prev.config || DEFAULT_TASTE_CONFIG), language: lang },
+                        }))}
+                    />
 
                     {renderSharedProtocolsAndBrands()}
 
@@ -2559,69 +2632,18 @@ export function ParametersStep({
 
             {formData.survey_type === 'product_test' && (
                 <div className="space-y-5 animate-slide-up">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                        {/* Category */}
-                        <div className="space-y-5 bg-slate-50/50 dark:bg-slate-950/50 p-5 rounded-[2.5rem] border-2 border-line/80 dark:border-line/10 shadow-inner">
-                            <div className="flex items-center gap-3 border-b border-line/80 dark:border-line/10 pb-4 mb-2">
-                                <Tag className="w-4 h-4 text-primary-soft" />
-                                <h4 className="text-sm font-black uppercase tracking-widest text-ink">Product Category</h4>
-                            </div>
-                            <div className="space-y-4">
-                                <label className="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Survey Category</label>
-                                <input
-                                    id="config-category-input"
-                                    type="text"
-                                    value={formData.config?.category || ''}
-                                    onChange={e => {
-                                        const val = e.target.value;
-                                        setFormData(prev => {
-                                            const baseConfig = prev.config || DEFAULT_TASTE_CONFIG;
-                                            return {
-                                                ...prev,
-                                                config: { ...baseConfig, category: val }
-                                            };
-                                        });
-                                    }}
-                                    placeholder="e.g. Cleansing Foam"
-                                    className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 focus:border-primary rounded-2xl px-10 py-7 text-sm font-bold outline-none dark:text-white transition-all shadow-sm"
-                                />
-                            </div>
-                        </div>
-
-                        {/* Language */}
-                        <div className="space-y-5 bg-slate-50/50 dark:bg-slate-950/50 p-5 rounded-[2.5rem] border-2 border-line/80 dark:border-line/10 shadow-inner">
-                            <div className="flex items-center gap-3 border-b border-line/80 dark:border-line/10 pb-4 mb-2">
-                                <Layers className="w-4 h-4 text-primary-soft" />
-                                <h4 className="text-sm font-black uppercase tracking-widest text-ink">Survey Language</h4>
-                            </div>
-                            <div className="space-y-4">
-                                <label className="text-[9.5px] font-black uppercase tracking-widest text-slate-500 ml-1">Translation Locale</label>
-                                <div className="flex gap-2">
-                                    {['en', 'ar'].map(lang => (
-                                        <button
-                                            key={lang}
-                                            type="button"
-                                            onClick={() => {
-                                                setFormData(prev => {
-                                                    const ptConfig = prev.product_test_config || { ...DEFAULT_PRODUCT_TEST_CONFIG, language: lang as 'en' | 'ar' };
-                                                    return {
-                                                        ...prev,
-                                                        config: { ...(prev.config || DEFAULT_TASTE_CONFIG), language: lang as any },
-                                                        product_test_config: { ...ptConfig, language: lang as any }
-                                                    };
-                                                });
-                                            }}
-                                            className={`flex-1 py-5 rounded-2xl text-sm font-black transition-all border-2 ${(formData.product_test_config?.language || formData.config?.language || 'en') === lang
-                                                ? 'bg-primary border-primary text-white shadow-lg'
-                                                : 'bg-surface border-slate-400 dark:border-slate-600 text-slate-800 dark:text-slate-350 hover:border-primary'}`}
-                                        >
-                                            {lang.toUpperCase() === 'EN' ? 'English' : 'Arabic / العربية'}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <SurveyLanguageMenu
+                        id="survey-language-select-product"
+                        value={(formData.product_test_config?.language || formData.config?.language || 'en') as 'en' | 'ar'}
+                        onChange={lang => setFormData(prev => {
+                            const ptConfig = prev.product_test_config || { ...DEFAULT_PRODUCT_TEST_CONFIG, language: lang };
+                            return {
+                                ...prev,
+                                config: { ...(prev.config || DEFAULT_TASTE_CONFIG), language: lang },
+                                product_test_config: { ...ptConfig, language: lang },
+                            };
+                        })}
+                    />
 
                     {/* ═══ Brand Architecture (shared) ═══ */}
                     {renderSharedProtocolsAndBrands()}

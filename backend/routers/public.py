@@ -256,9 +256,9 @@ async def get_survey_by_token(token: str):
          "options": [
              "Postgraduate (Masters / PhD) / دراسات عليا (ماجستير / دكتوراه)",
              "University / College degree / مؤهل جامعي",
-             "Secondary (Thanaweyya) / ثانوي (ثانوية عامة)",
+             "Secondary / ثانوي",
              "Primary / Preparatory / ابتدائي / إعدادي",
-             "Reads & writes / Illiterate / يقرأ ويكتب / أمي"
+             "Uneducated / غير متعلم"
          ], "required": False},
         {"id": "marital_status", "label": "Marital Status / الحالة الاجتماعية", "type": "mcq",
          "options": ["Single / أعزب", "Married / متزوج", "Divorced / مطلق", "Widowed / أرمل"],

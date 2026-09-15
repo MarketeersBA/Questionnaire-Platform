@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Layout, Users, ShieldCheck, Check, Briefcase, GraduationCap, Layers, Lock, Target, SplitSquareHorizontal, Sparkles, Edit3, ChevronDown, Palette, Tag, Beaker, Zap, Heart, DollarSign, Lightbulb, ShoppingCart, Info, Loader2, CheckCircle2, XCircle, Wand2, Plus } from 'lucide-react';
+import { Layout, ShieldCheck, Check, Briefcase, GraduationCap, Layers, Lock, Target, SplitSquareHorizontal, Sparkles, Edit3, ChevronDown, Palette, Tag, Beaker, Zap, DollarSign, Loader2, CheckCircle2, XCircle, Wand2, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StepProps, DEFAULT_TASTE_CONFIG, DEFAULT_PRODUCT_TEST_CONFIG } from '../types';
 import { surveys } from '../../../services/api';
@@ -9,19 +9,7 @@ import { useNavigate } from 'react-router-dom';
 export const surveyTypesList = [
     { id: 'taste_test', name: 'Taste Test', desc: 'Product comparison, sensory profiling, and preference mapping.', icon: Beaker, color: 'text-primary-soft', bg: 'bg-primary/10' },
     { id: 'product_test', name: 'Product Test', desc: 'In-home use tests (IHUT) and performance evaluation.', icon: Palette, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { id: 'brand_awareness', name: 'Brand Awareness', desc: 'NPS, brand recall, and market positioning tracking.', icon: Tag, color: 'text-brand-accent', bg: 'bg-brand-accent/10' },
-    { id: 'usage_attitude', name: 'Usage & Attitude', desc: 'Consumer habits, pain points, and purchase drivers.', icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' },
     { id: 'concept_test', name: 'Concept Test', desc: 'Validate new ideas, packaging, or messaging.', icon: Sparkles, color: 'text-amber-500', bg: 'bg-amber-50' }
-];
-
-export const surveyObjectives = [
-    { id: 'taste_new_product', name: 'Taste New Product', desc: 'Evaluating a new recipe or formulation.', icon: Zap, color: 'text-amber-500', bg: 'bg-amber-50' },
-    { id: 'product_preference', name: 'Product Preference', desc: 'Comparing multiple products to find the winner.', icon: Heart, color: 'text-rose-500', bg: 'bg-rose-50' },
-    { id: 'sensory_evaluation', name: 'Sensory Evaluation', desc: 'Detailed profiling of taste, texture, and aroma.', icon: Beaker, color: 'text-primary-soft', bg: 'bg-primary/10' },
-    { id: 'price_sensitivity', name: 'Price Sensitivity', desc: 'Finding the optimal price point and value.', icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { id: 'improvement_insights', name: 'Improvement Insights', desc: 'Identifying specific areas to enhance.', icon: Lightbulb, color: 'text-amber-600', bg: 'bg-amber-100/50' },
-    { id: 'purchase_intent', name: 'Purchase Intent', desc: 'Likelihood of buying after the experience.', icon: ShoppingCart, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-    { id: 'other', name: 'Other', desc: 'Define your specific research question.', icon: Edit3, color: 'text-slate-500', bg: 'bg-slate-100' }
 ];
 
 // ─── Local Input Component for Smarter Typing ──────────────────────────────
@@ -419,36 +407,82 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
             </div>
 
             <div className="grid grid-cols-1 gap-4 relative z-10">
-                {/* Project Identity: Name, Industry, Code */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    <div className="space-y-3">
-                        <div className="flex items-center gap-2">
-                            <Edit3 className="w-3.5 h-3.5 text-primary-soft" />
-                            <label className="text-sm font-black uppercase tracking-[0.2em] text-ink-muted ml-1 transition-colors">Survey Name</label>
-                        </div>
+                {/* Project Identity: Code, Name, Industry, Category */}
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 items-start">
+                    <div className="space-y-2">
+                        <label className="text-[11px] font-black uppercase tracking-[0.16em] text-ink-muted flex items-center gap-2">
+                            <Tag className="w-3.5 h-3.5 text-primary-soft shrink-0" />
+                            Survey Code
+                        </label>
                         <div className="relative group">
-                            <Edit3 className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-primary-soft transition-colors pointer-events-none" />
+                            <Tag className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors pointer-events-none ${codeAvailable === false ? 'text-rose-500' : codeAvailable === true ? 'text-emerald-500' : 'text-slate-400 group-focus-within:text-primary-soft'}`} />
+                            <input
+                                type="text"
+                                value={formData.survey_code}
+                                onChange={(e) =>
+                                    setFormData(prev => ({
+                                        ...prev,
+                                        survey_code: e.target.value.toUpperCase().trimStart(),
+                                    }))
+                                }
+                                placeholder="e.g. PJ-2026-CHEESE"
+                                aria-label="Survey code"
+                                className={`w-full bg-surface border-2 rounded-2xl pl-11 pr-4 py-3.5 text-sm font-bold text-ink shadow-sm outline-none transition-all placeholder:text-slate-400 placeholder:font-medium focus:ring-4 focus:ring-primary/10 ${codeAvailable === false ? 'border-rose-500/50 focus:border-rose-500' : codeAvailable === true ? 'border-emerald-500/50 focus:border-emerald-500' : 'border-slate-300 dark:border-slate-600 focus:border-primary'}`}
+                            />
+                        </div>
+                        <div className="h-5 flex items-center">
+                            <AnimatePresence mode="wait">
+                                {isCheckingCode && (
+                                    <motion.div key="checking" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-1.5">
+                                        <Loader2 className="w-3 h-3 text-primary-soft animate-spin" />
+                                        <span className="text-[10px] font-bold text-primary-soft uppercase tracking-wider">Validating…</span>
+                                    </motion.div>
+                                )}
+                                {!isCheckingCode && codeAvailable === true && (
+                                    <motion.div key="ok" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-1.5">
+                                        <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                                        <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Unique Code</span>
+                                    </motion.div>
+                                )}
+                                {!isCheckingCode && codeAvailable === false && (
+                                    <motion.div key="bad" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-1.5">
+                                        <XCircle className="w-3 h-3 text-rose-500" />
+                                        <span className="text-[10px] font-bold text-rose-500 uppercase tracking-wider">{codeError || 'Taken'}</span>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-[11px] font-black uppercase tracking-[0.16em] text-ink-muted flex items-center gap-2">
+                            <Edit3 className="w-3.5 h-3.5 text-primary-soft shrink-0" />
+                            Survey Name
+                        </label>
+                        <div className="relative group">
+                            <Edit3 className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-primary-soft transition-colors pointer-events-none" />
                             <input
                                 id="survey-name-input"
                                 type="text"
                                 placeholder="e.g. Q1 Beverage Audit"
-                                className="w-full bg-surface border-2 border-slate-400 dark:border-slate-600 rounded-[1.5rem] pl-16 pr-8 py-4 text-ink focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-black placeholder:text-slate-500 text-lg shadow-sm"
+                                className="w-full bg-surface border-2 border-slate-300 dark:border-slate-600 rounded-2xl pl-11 pr-4 py-3.5 text-sm font-bold text-ink shadow-sm outline-none transition-all placeholder:text-slate-400 placeholder:font-medium focus:border-primary focus:ring-4 focus:ring-primary/10"
                                 value={formData.survey_name}
                                 onChange={e => setFormData(prev => ({ ...prev, survey_name: e.target.value }))}
                                 required
                             />
                         </div>
+                        <div className="h-5" aria-hidden />
                     </div>
 
-                    <div className="space-y-3">
-                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-muted ml-1 transition-colors flex items-center gap-2">
-                            <Briefcase className="w-3.5 h-3.5 text-primary-soft" />
+                    <div className="space-y-2">
+                        <label className="text-[11px] font-black uppercase tracking-[0.16em] text-ink-muted flex items-center gap-2">
+                            <Briefcase className="w-3.5 h-3.5 text-primary-soft shrink-0" />
                             Primary Industry
                         </label>
                         <div className="relative group">
                             <select
                                 id="survey-industry-input"
-                                className="w-full bg-surface border-2 border-slate-400 dark:border-slate-600 rounded-[1.5rem] px-8 py-4 text-ink focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-black text-lg shadow-sm appearance-none cursor-pointer"
+                                className="w-full bg-surface border-2 border-slate-300 dark:border-slate-600 rounded-2xl px-4 pr-11 py-3.5 text-sm font-bold text-ink shadow-sm outline-none transition-all appearance-none cursor-pointer focus:border-primary focus:ring-4 focus:ring-primary/10"
                                 value={formData.industry || ''}
                                 onChange={e => setFormData(prev => ({ ...prev, industry: e.target.value }))}
                             >
@@ -461,60 +495,40 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                 <option value="Technology">Technology</option>
                                 <option value="Other">Other</option>
                             </select>
-                            <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
+                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                         </div>
+                        <div className="h-5" aria-hidden />
                     </div>
 
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between ml-1">
-                            <div className="flex items-center gap-2">
-                                <Tag className="w-3.5 h-3.5 text-primary-soft" />
-                                <label className="text-sm font-black uppercase tracking-[0.2em] text-ink-muted transition-colors">
-                                    Survey Code
-                                </label>
-                            </div>
-                            <AnimatePresence mode="wait">
-                                {isCheckingCode && (
-                                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-1.5">
-                                        <Loader2 className="w-3 h-3 text-primary-soft animate-spin" />
-                                        <span className="text-sm font-bold text-primary-soft uppercase tracking-tighter">Validating...</span>
-                                    </motion.div>
-                                )}
-                                {!isCheckingCode && codeAvailable === true && (
-                                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-1.5">
-                                        <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                                        <span className="text-sm font-bold text-emerald-500 uppercase tracking-tighter">Unique Code</span>
-                                    </motion.div>
-                                )}
-                                {!isCheckingCode && codeAvailable === false && (
-                                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-1.5">
-                                        <XCircle className="w-3 h-3 text-rose-500" />
-                                        <span className="text-sm font-bold text-rose-500 uppercase tracking-tighter">{codeError || 'Taken'}</span>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </div>
+                    <div className="space-y-2">
+                        <label className="text-[11px] font-black uppercase tracking-[0.16em] text-ink-muted flex items-center gap-2">
+                            <Tag className="w-3.5 h-3.5 text-primary-soft shrink-0" />
+                            Product Category
+                        </label>
                         <div className="relative group">
-                            <Tag className={`absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors pointer-events-none ${codeAvailable === false ? 'text-rose-500' : codeAvailable === true ? 'text-emerald-500' : 'text-slate-400 group-focus-within:text-primary-soft'}`} />
-                            {/* Typed by the analyst — this is their own project
-                                reference. It used to be a read-only div showing a
-                                random auto-generated code. */}
+                            <Tag className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-primary-soft transition-colors pointer-events-none" />
                             <input
+                                id="config-category-input"
                                 type="text"
-                                value={formData.survey_code}
-                                onChange={(e) =>
-                                    setFormData(prev => ({
-                                        ...prev,
-                                        // Uppercased so the uniqueness check is not
-                                        // defeated by casing alone.
-                                        survey_code: e.target.value.toUpperCase().trimStart(),
-                                    }))
-                                }
-                                placeholder="e.g. PJ-2026-CHEESE"
-                                aria-label="Survey code"
-                                className={`w-full bg-surface-raised/50 border-2 rounded-[1.5rem] pl-16 pr-8 py-4 text-ink font-black text-lg shadow-sm outline-none transition-colors placeholder:text-slate-400 placeholder:font-bold ${codeAvailable === false ? 'border-rose-500/50' : codeAvailable === true ? 'border-emerald-500/50' : 'border-slate-200 dark:border-slate-700 focus:border-primary'}`}
+                                placeholder="e.g. Premium Chocolate"
+                                className="w-full bg-surface border-2 border-slate-300 dark:border-slate-600 rounded-2xl pl-11 pr-4 py-3.5 text-sm font-bold text-ink shadow-sm outline-none transition-all placeholder:text-slate-400 placeholder:font-medium focus:border-primary focus:ring-4 focus:ring-primary/10"
+                                value={formData.config?.category || ''}
+                                onChange={e => {
+                                    const val = e.target.value;
+                                    setFormData(prev => {
+                                        const baseConfig = prev.config || DEFAULT_TASTE_CONFIG;
+                                        return {
+                                            ...prev,
+                                            config: { ...baseConfig, category: val },
+                                            purchase_funnel: prev.purchase_funnel
+                                                ? { ...prev.purchase_funnel, category_name: val }
+                                                : { is_enabled: false, category_name: val, brand_list: [] },
+                                        };
+                                    });
+                                }}
                             />
                         </div>
+                        <div className="h-5" aria-hidden />
                     </div>
                 </div>
 
@@ -524,7 +538,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                         <Beaker className="w-5 h-5 text-primary-soft" />
                         <label className="text-sm font-black uppercase tracking-[0.2em] text-ink-muted transition-colors">Survey Type</label>
                     </div>
-                    <div id="survey-type-section" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div id="survey-type-section" className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {surveyTypesList.map((type) => (
                             <button
                                 key={type.id}
@@ -590,66 +604,20 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                     <span className="text-xs text-slate-400 font-bold tracking-tight">Why we conducted the study</span>
                                 </div>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                                {surveyObjectives.map((obj, objIdx) => (
-                                    <button
-                                        key={obj.id}
-                                        type="button"
-                                        onClick={() => setFormData(prev => ({ ...prev, survey_objective: obj.id as any }))}
-                                        className={`text-left p-5 rounded-[2.5rem] border-2 transition-all group relative flex flex-col justify-between h-full ${formData.survey_objective === obj.id
-                                            ? 'border-primary bg-primary/5 dark:bg-primary/10 scale-[1.02] shadow-lg shadow-primary/10'
-                                            : 'border-line/80 dark:border-line/10 bg-white/50 dark:bg-slate-950/20 hover:border-primary/40'
-                                            }`}
-                                    >
-                                        {/* Fixed-height header row keeps every icon on the same baseline */}
-                                        <div className="flex items-start justify-between gap-2 h-10 mb-3">
-                                            <div className={`w-10 h-10 shrink-0 rounded-2xl ${obj.bg} ${obj.color} flex items-center justify-center transition-transform group-hover:scale-110`}>
-                                                <obj.icon className="w-5 h-5" />
-                                            </div>
-                                            <div className="w-5 h-5 shrink-0">
-                                                {formData.survey_objective === obj.id && (
-                                                    <div className="w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center animate-in zoom-in">
-                                                        <Check className="w-3 h-3" />
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                        {/* Reserved title height so all descriptions start at the same y-position */}
-                                        <h4 className="text-sm font-black uppercase tracking-widest text-ink leading-snug min-h-[2.5rem]">{obj.name}</h4>
-                                        <p className="mt-1 text-xs text-ink-subtle font-bold leading-relaxed">{obj.desc}</p>
-                                    </button>
-                                ))}
+                            <div className="relative group">
+                                <textarea
+                                    id="survey-objective-input"
+                                    rows={1}
+                                    placeholder="Describe the business question or research objective..."
+                                    className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 rounded-2xl px-5 py-3 text-ink focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-bold text-sm shadow-sm resize-none h-12"
+                                    value={formData.survey_objective || ''}
+                                    onChange={e => setFormData(prev => ({
+                                        ...prev,
+                                        survey_objective: e.target.value,
+                                        survey_objective_other: '',
+                                    }))}
+                                />
                             </div>
-
-                            {/* Conditional "Other" Input */}
-                            <AnimatePresence>
-                                {formData.survey_objective === 'other' && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: -10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -10 }}
-                                        className="relative group mt-4"
-                                    >
-                                        <div className="absolute left-6 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none">
-                                            <Edit3 className="w-5 h-5 text-slate-400 group-focus-within:text-primary-soft transition-colors" />
-                                            <div className="h-4 w-[2px] bg-slate-200 dark:bg-slate-700" />
-                                        </div>
-                                        <input
-                                            type="text"
-                                            placeholder="Specify your business objective or research question..."
-                                            className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 rounded-[1.5rem] pl-16 pr-8 py-5 text-ink focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-black text-sm shadow-inner-soft"
-                                            value={formData.survey_objective_other || ''}
-                                            onChange={e => setFormData(prev => ({ ...prev, survey_objective_other: e.target.value }))}
-                                        />
-                                        <div className="absolute right-6 top-1/2 -translate-y-1/2">
-                                            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-sunken border border-slate-200 dark:border-slate-700">
-                                                <Info className="w-3 h-3 text-slate-400" />
-                                                <span className="text-sm font-black uppercase tracking-widest text-slate-500">Required Field</span>
-                                            </div>
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -865,75 +833,70 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                 </AnimatePresence>
 
                 {/* Token + Respondent Target row */}
-                <div className="p-4 bg-primary/5 dark:bg-primary/10 rounded-[2.5rem] border-2 border-primary/20 dark:border-primary/30 space-y-3 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-4">
+                <div className="p-3 bg-primary/5 dark:bg-primary/10 rounded-2xl border border-primary/20 dark:border-primary/30 space-y-2 relative overflow-hidden">
+                    <div className="flex items-center justify-between gap-3">
+                        <label className="text-[10px] font-black uppercase tracking-[0.16em] text-ink-muted flex items-center gap-2">
+                            <Target className="w-3.5 h-3.5 text-primary-soft" />
+                            Sample Size
+                        </label>
                         <button
                             type="button"
                             onClick={() => setFormData(prev => ({ ...prev, sample_intelligence: !prev.sample_intelligence }))}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${formData.sample_intelligence ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'}`}
+                            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${formData.sample_intelligence ? 'bg-primary text-white shadow-sm shadow-primary/30' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'}`}
                         >
                             <Sparkles className={`w-3 h-3 ${formData.sample_intelligence ? 'animate-pulse' : ''}`} />
                             {formData.sample_intelligence ? 'Intelligence: Active' : 'Manual Mode'}
                         </button>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-3 pt-2">
-                        {/* Sample Capacity */}
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-muted ml-1 transition-colors flex items-center gap-2">
-                                <Target className="w-3.5 h-3.5 text-primary-soft" />
-                                Sample Capacity
-                            </label>
-                            <div className="relative group">
-                                <Target className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-soft/60 group-focus-within:text-primary-soft transition-colors pointer-events-none" />
-                                <input
-                                    type="number"
-                                    min="0"
-                                    max={formData.links_count || 10000}
-                                    placeholder="e.g. 200"
-                                    className="w-full bg-surface border-2 border-primary/30 dark:border-primary/40 rounded-[1.5rem] pl-16 pr-8 py-6 text-ink focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-black text-xl shadow-sm placeholder:text-slate-500 dark:placeholder:text-slate-500"
-                                    value={formData.sample_capacity || ''}
-                                    onChange={e => {
-                                        const val = parseInt(e.target.value) || 0;
-                                        setFormData(prev => {
-                                            const newLinks = prev.sample_intelligence ? Math.round(val / 0.2) : prev.links_count;
-                                            const updatedQuotas: typeof prev.gate_quotas = {};
-                                            Object.entries(prev.gate_quotas || {}).forEach(([gk, gate]) => {
-                                                updatedQuotas[gk] = {};
-                                                Object.entries(gate).forEach(([opt, bucket]) => {
-                                                    const newCount = (bucket.pct !== null && val > 0)
-                                                        ? Math.round((bucket.pct / 100) * val)
-                                                        : bucket.count;
-                                                    updatedQuotas[gk][opt] = { count: newCount, pct: bucket.pct };
-                                                });
-                                            });
-                                            return {
-                                                ...prev,
-                                                sample_capacity: val,
-                                                links_count: newLinks,
-                                                gate_quotas: updatedQuotas
-                                            };
+                    <div className="relative group">
+                        <Target className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-soft/60 group-focus-within:text-primary-soft transition-colors pointer-events-none" />
+                        <input
+                            type="number"
+                            min="0"
+                            max={formData.links_count || 10000}
+                            placeholder="e.g. 200"
+                            className="w-full bg-surface border border-primary/30 dark:border-primary/40 rounded-xl pl-10 pr-4 py-2.5 text-ink focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all font-black text-base shadow-sm placeholder:text-slate-400"
+                            value={formData.sample_capacity || ''}
+                            onChange={e => {
+                                const val = parseInt(e.target.value) || 0;
+                                setFormData(prev => {
+                                    const newLinks = prev.sample_intelligence ? Math.round(val / 0.2) : prev.links_count;
+                                    const updatedQuotas: typeof prev.gate_quotas = {};
+                                    Object.entries(prev.gate_quotas || {}).forEach(([gk, gate]) => {
+                                        updatedQuotas[gk] = {};
+                                        Object.entries(gate).forEach(([opt, bucket]) => {
+                                            const newCount = (bucket.pct !== null && val > 0)
+                                                ? Math.round((bucket.pct / 100) * val)
+                                                : bucket.count;
+                                            updatedQuotas[gk][opt] = { count: newCount, pct: bucket.pct };
                                         });
-                                    }}
+                                    });
+                                    return {
+                                        ...prev,
+                                        sample_capacity: val,
+                                        links_count: newLinks,
+                                        gate_quotas: updatedQuotas
+                                    };
+                                });
+                            }}
+                        />
+                    </div>
+                    {linkCount > 0 && target > 0 && (
+                        <div className="space-y-1">
+                            <div className="flex justify-between text-[10px] font-bold text-slate-400">
+                                <span>{target} Target</span>
+                                <span className={target > linkCount ? 'text-amber-500' : 'text-primary-soft'}>{((target / linkCount) * 100).toFixed(0)}% Fill</span>
+                            </div>
+                            <div className="h-1 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                <div
+                                    className={`h-full rounded-full transition-all duration-500 ${target > linkCount ? 'bg-amber-500' : 'bg-primary'}`}
+                                    style={{ width: `${Math.min(100, (target / linkCount) * 100)}%` }}
                                 />
                             </div>
-                            {linkCount > 0 && target > 0 && (
-                                <div className="space-y-1">
-                                    <div className="flex justify-between text-xs font-black text-slate-400">
-                                        <span>{target} Target / {linkCount} Links</span>
-                                        <span className={target > linkCount ? 'text-amber-500' : 'text-primary-soft'}>{((target / linkCount) * 100).toFixed(0)}% Fill</span>
-                                    </div>
-                                    <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                                        <div
-                                            className={`h-full rounded-full transition-all duration-500 ${target > linkCount ? 'bg-amber-500' : 'bg-primary'}`}
-                                            style={{ width: `${Math.min(100, (target / linkCount) * 100)}%` }}
-                                        />
-                                    </div>
-                                </div>
-                            )}
-                            <p className="text-sm text-slate-500 ml-2">Survey closes when this many qualify. 0 = no cap.</p>
                         </div>
-                    </div>
+                    )}
+                    <p className="text-[11px] text-slate-500">Survey closes when this many qualify. 0 = no cap.</p>
                 </div>
 
                 {/* Layer 1 Screening Configuration */}
@@ -1110,82 +1073,56 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                             animate={{ opacity: 1, height: 'auto' }}
                             className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/10 space-y-2"
                         >
-                            <label className="text-[10px] font-black uppercase tracking-widest text-amber-600 block ml-1">Question Format (Respondent Options)</label>
-                            <div className="flex flex-wrap gap-2 pb-2 border-b border-amber-200/30">
+                            <label className="text-sm font-black uppercase tracking-widest text-amber-600/60 block ml-1">
+                                Qualifying Areas Gate — <span className="text-slate-400 normal-case font-medium">leave empty to allow All Egypt</span>
+                            </label>
+                            <div className="flex flex-wrap gap-2">
                                 {[
-                                    { mode: 'mcq', label: 'Multiple Choice: All Egypt', desc: 'Respondent picks from preset regions' },
-                                    { mode: 'free_text', label: 'Free Text: Any Area', desc: 'Respondent types area manually (No gate)' }
-                                ].map(format => {
-                                    const isSelected = cfg?.area_mode === format.mode || (!cfg?.area_mode && format.mode === 'mcq');
+                                    { en: 'Cairo', ar: 'القاهرة' },
+                                    { en: 'Giza', ar: 'الجيزة' },
+                                    { en: 'Delta', ar: 'الدلتا' },
+                                    { en: 'Upper Egypt', ar: 'صعيد مصر' },
+                                    { en: 'Alexandria', ar: 'الإسكندرية' }
+                                ].map(a => {
+                                    const val = `${a.en} / ${a.ar}`;
+                                    const currentAreas = (cfg?.allowed_areas || []).filter((x: string) => !x.includes('All Egypt') && !x.includes('From Any Area'));
+                                    const isSelected = currentAreas.includes(val);
                                     return (
                                         <button
-                                            key={format.mode}
+                                            key={val}
                                             type="button"
                                             onClick={() => {
-                                                setFormData(prev => ({
-                                                    ...prev,
-                                                    layer1_screening_config: {
-                                                        ...prev.layer1_screening_config!,
-                                                        area_mode: format.mode as 'mcq' | 'free_text',
-                                                        allowed_areas: format.mode === 'free_text' ? [] : prev.layer1_screening_config?.allowed_areas || []
-                                                    }
-                                                }));
+                                                setFormData(prev => {
+                                                    const updated = isSelected ? currentAreas.filter((x: string) => x !== val) : [...currentAreas, val];
+                                                    return {
+                                                        ...prev,
+                                                        layer1_screening_config: {
+                                                            ...prev.layer1_screening_config!,
+                                                            area_mode: 'mcq',
+                                                            allowed_areas: updated,
+                                                        },
+                                                    };
+                                                });
                                             }}
-                                            className={`px-5 py-2.5 rounded-xl text-xs font-black transition-all border-2 flex flex-col items-start gap-0.5 ${isSelected ? 'bg-amber-500 border-amber-600 text-white shadow-[0_0_12px_rgba(245,158,11,0.3)]' : 'bg-surface border-slate-300 dark:border-slate-600 text-slate-700 hover:border-amber-500'}`}
+                                            className={`px-4 py-2 rounded-xl text-xs font-black transition-all border-2 ${isSelected ? 'bg-amber-500 border-amber-600 text-white shadow-[0_0_12px_rgba(245,158,11,0.3)]' : 'bg-surface border-slate-300 dark:border-slate-600 text-slate-700 hover:border-amber-500'}`}
                                         >
-                                            {format.label}
-                                            <span className={`text-xs font-medium ${isSelected ? 'text-white/70' : 'text-slate-400'}`}>{format.desc}</span>
+                                            {a.en} / {a.ar}
                                         </button>
                                     );
                                 })}
                             </div>
-                            {(cfg?.area_mode === 'mcq' || !cfg?.area_mode) && (
-                                <>
-                                    <label className="text-sm font-black uppercase tracking-widest text-amber-600/60 block ml-1">
-                                        Qualifying Areas Gate — <span className="text-slate-400 normal-case font-medium">leave empty to allow All Egypt</span>
-                                    </label>
-                                    <div className="flex flex-wrap gap-2">
-                                        {[
-                                            { en: 'Cairo', ar: 'القاهرة' },
-                                            { en: 'Giza', ar: 'الجيزة' },
-                                            { en: 'Delta', ar: 'الدلتا' },
-                                            { en: 'Upper Egypt', ar: 'صعيد مصر' },
-                                            { en: 'Alexandria', ar: 'الإسكندرية' }
-                                        ].map(a => {
-                                            const val = `${a.en} / ${a.ar}`;
-                                            const currentAreas = (cfg?.allowed_areas || []).filter((x: string) => !x.includes('All Egypt') && !x.includes('From Any Area'));
-                                            const isSelected = currentAreas.includes(val);
-                                            return (
-                                                <button
-                                                    key={val}
-                                                    type="button"
-                                                    onClick={() => {
-                                                        setFormData(prev => {
-                                                            const updated = isSelected ? currentAreas.filter((x: string) => x !== val) : [...currentAreas, val];
-                                                            return { ...prev, layer1_screening_config: { ...prev.layer1_screening_config!, allowed_areas: updated } };
-                                                        });
-                                                    }}
-                                                    className={`px-4 py-2 rounded-xl text-xs font-black transition-all border-2 ${isSelected ? 'bg-amber-500 border-amber-600 text-white shadow-[0_0_12px_rgba(245,158,11,0.3)]' : 'bg-surface border-slate-300 dark:border-slate-600 text-slate-700 hover:border-amber-500'}`}
-                                                >
-                                                    {a.en} / {a.ar}
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                    {(cfg?.allowed_areas || []).filter((x: string) => !x.includes('All Egypt') && !x.includes('From Any Area')).length === 0 && (
-                                        <p className="text-sm text-slate-400 font-bold ml-1">ℹ All Egypt areas qualify (no area gate)</p>
-                                    )}
-                                    {(cfg?.allowed_areas || []).filter((x: string) => !x.includes('All Egypt')).length > 0 && (
-                                        <QuotaPanel
-                                            gateKey="location"
-                                            options={(cfg?.allowed_areas || []).filter((x: string) => !x.includes('All Egypt'))}
-                                            sampleCapacity={target}
-                                            gate_quotas={formData.gate_quotas || {}}
-                                            locked_quotas={formData.locked_quotas || {}}
-                                            setFormData={setFormData}
-                                        />
-                                    )}
-                                </>
+                            {(cfg?.allowed_areas || []).filter((x: string) => !x.includes('All Egypt') && !x.includes('From Any Area')).length === 0 && (
+                                <p className="text-sm text-slate-400 font-bold ml-1">ℹ All Egypt areas qualify (no area gate)</p>
+                            )}
+                            {(cfg?.allowed_areas || []).filter((x: string) => !x.includes('All Egypt')).length > 0 && (
+                                <QuotaPanel
+                                    gateKey="location"
+                                    options={(cfg?.allowed_areas || []).filter((x: string) => !x.includes('All Egypt'))}
+                                    sampleCapacity={target}
+                                    gate_quotas={formData.gate_quotas || {}}
+                                    locked_quotas={formData.locked_quotas || {}}
+                                    setFormData={setFormData}
+                                />
                             )}
                         </motion.div>
                     )}
@@ -1209,7 +1146,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                     { en: 'University', ar: 'جامعي' },
                                     { en: 'Secondary', ar: 'ثانوي' },
                                     { en: 'Primary / Preparatory', ar: 'ابتدائي / إعدادي' },
-                                    { en: 'Reads & writes / Illiterate', ar: 'يقرأ ويكتب / أمي' },
+                                    { en: 'Uneducated', ar: 'غير متعلم' },
                                 ].map(e => {
                                     const val = `${e.en} / ${e.ar}`;
                                     const isSelected = (cfg?.allowed_education || []).includes(val);
@@ -1313,26 +1250,31 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                             </label>
                             <div className="flex flex-wrap gap-2">
                                 {[
-                                    'Less than 5k', '5k - 10k', '10k - 20k', '20k - 35k', '35k - 50k', '50k+'
+                                    { en: 'Below 4,000 EGP', ar: 'أقل من ٤٠٠٠ جنيه' },
+                                    { en: '4,001 - 6,000 EGP', ar: '٤٠٠١ - ٦٠٠٠ جنيه' },
+                                    { en: '6,001 - 12,000 EGP', ar: '٦٠٠١ - ١٢٠٠٠ جنيه' },
+                                    { en: '12,001 - 40,000 EGP', ar: '١٢٠٠١ - ٤٠٠٠٠ جنيه' },
+                                    { en: 'Above 40,000 EGP', ar: 'أكثر من ٤٠٠٠٠ جنيه' },
                                 ].map(inc => {
+                                    const val = `${inc.en} / ${inc.ar}`;
                                     //@ts-ignore
-                                    const isSelected = (cfg?.allowed_income || []).includes(inc);
+                                    const isSelected = (cfg?.allowed_income || []).includes(val);
                                     return (
                                         <button
-                                            key={inc}
+                                            key={val}
                                             type="button"
                                             onClick={() => {
                                                 setFormData(prev => {
                                                     const config = prev.layer1_screening_config || {};
                                                     //@ts-ignore
                                                     const current = config.allowed_income || [];
-                                                    const updated = isSelected ? current.filter((x: string) => x !== inc) : [...current, inc];
+                                                    const updated = isSelected ? current.filter((x: string) => x !== val) : [...current, val];
                                                     return { ...prev, layer1_screening_config: { ...config, allowed_income: updated } };
                                                 });
                                             }}
                                             className={`px-4 py-2 rounded-xl text-xs font-black transition-all border-2 ${isSelected ? 'bg-emerald-500 border-emerald-600 text-white shadow-lg' : 'bg-surface border-slate-300 dark:border-slate-600 text-slate-700 hover:border-emerald-500'}`}
                                         >
-                                            {inc}
+                                            {inc.en} / {inc.ar}
                                         </button>
                                     );
                                 })}
@@ -1352,26 +1294,50 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                             </label>
                             <div className="flex flex-wrap gap-2">
                                 {[
-                                    'Professional / Managerial', 'Employee / White Collar', 'Blue Collar / Worker', 'Student', 'Housewife', 'Unemployed'
+                                    {
+                                        en: 'CEO / GM / Large company owner / Senior government official',
+                                        ar: 'مدير تنفيذي / مدير عام / صاحب شركة كبيرة / مسؤول حكومي رفيع',
+                                    },
+                                    {
+                                        en: 'Company manager / High-skill professional (doctor, engineer) / Trader / Small business owner / University professor',
+                                        ar: 'مدير شركة / مهني عالي المهارة (طبيب، مهندس) / تاجر / صاحب مشروع صغير / أستاذ جامعي',
+                                    },
+                                    {
+                                        en: 'Mid-level admin / Government mid-level / Small shop owner / Technician / Secondary school teacher',
+                                        ar: 'إداري متوسط / موظف حكومي متوسط / صاحب محل صغير / فني / مدرس ثانوي',
+                                    },
+                                    {
+                                        en: 'Supervisor / Clerk / Bank employee / Low-grade government employee / Primary school teacher',
+                                        ar: 'مشرف / كاتب / موظف بنك / موظف حكومي درجة منخفضة / مدرس ابتدائي',
+                                    },
+                                    {
+                                        en: 'Skilled labor (carpenter, electrician, plumber, salesman, cook, waiter)',
+                                        ar: 'عامل ماهر (نجار، كهربائي، سباك، بائع، طباخ، نادل)',
+                                    },
+                                    {
+                                        en: 'Unskilled labor / Unemployed / Servant / Street vendor',
+                                        ar: 'عامل غير ماهر / عاطل عن العمل / خادم / بائع متجول',
+                                    },
                                 ].map(occ => {
+                                    const val = `${occ.en} / ${occ.ar}`;
                                     //@ts-ignore
-                                    const isSelected = (cfg?.allowed_occupations || []).includes(occ);
+                                    const isSelected = (cfg?.allowed_occupations || []).includes(val);
                                     return (
                                         <button
-                                            key={occ}
+                                            key={val}
                                             type="button"
                                             onClick={() => {
                                                 setFormData(prev => {
                                                     const config = prev.layer1_screening_config || {};
                                                     //@ts-ignore
                                                     const current = config.allowed_occupations || [];
-                                                    const updated = isSelected ? current.filter((x: string) => x !== occ) : [...current, occ];
+                                                    const updated = isSelected ? current.filter((x: string) => x !== val) : [...current, val];
                                                     return { ...prev, layer1_screening_config: { ...config, allowed_occupations: updated } };
                                                 });
                                             }}
-                                            className={`px-4 py-2 rounded-xl text-xs font-black transition-all border-2 ${isSelected ? 'bg-emerald-500 border-emerald-600 text-white shadow-lg' : 'bg-surface border-slate-300 dark:border-slate-600 text-slate-700 hover:border-emerald-500'}`}
+                                            className={`px-4 py-2 rounded-xl text-xs font-black transition-all border-2 text-left ${isSelected ? 'bg-emerald-500 border-emerald-600 text-white shadow-lg' : 'bg-surface border-slate-300 dark:border-slate-600 text-slate-700 hover:border-emerald-500'}`}
                                         >
-                                            {occ}
+                                            {occ.en} / {occ.ar}
                                         </button>
                                     );
                                 })}

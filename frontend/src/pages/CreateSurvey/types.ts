@@ -128,7 +128,7 @@ export interface SurveyFormData {
     };
     voice_capture?: VoiceCaptureConfig;
     industry?: string;
-    survey_objective?: 'taste_new_product' | 'product_preference' | 'sensory_evaluation' | 'price_sensitivity' | 'improvement_insights' | 'purchase_intent' | 'other' | '';
+    survey_objective?: string;
     survey_objective_other?: string;
     sec_classes?: string[];
     locked_quotas?: Record<string, Record<string, boolean>>;
