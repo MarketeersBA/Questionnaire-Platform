@@ -877,17 +877,17 @@ export function ParametersStep({
     const renderSharedProtocolsAndBrands = () => (
         <>
             {/* ═══ Testing Protocol ═══ */}
-            <section className="space-y-5 border-t border-line/80 dark:border-line/10 pt-6" id="testing-protocol-section">
+            <section className="space-y-3 border-t border-line/80 dark:border-line/10 pt-5" id="testing-protocol-section">
                 <div className="flex items-center justify-between">
-                    <div className="space-y-1">
+                    <div className="space-y-0.5">
                         <label className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-ink ml-1">
                             <ShieldCheck className="w-3.5 h-3.5 text-primary-soft" /> Testing Protocol / بروتوكول الاختبار
                         </label>
-                        <p className="text-sm text-slate-800 dark:text-slate-300 font-black ml-1 uppercase tracking-tighter">Choose between branded evaluation or blind testing with product codes.</p>
+                        <p className="text-xs text-slate-800 dark:text-slate-300 font-bold ml-1 uppercase tracking-tight">Choose between branded evaluation or blind testing with product codes.</p>
                     </div>
                 </div>
 
-                <div className="flex gap-4">
+                <div className="flex gap-2.5">
                     {[
                         { id: 'branded', label: 'Branded Test', icon: Palette, desc: 'Visible brand names' },
                         { id: 'blind', label: 'Blind Test', icon: EyeOff, desc: 'Uses masked product codes' }
@@ -899,21 +899,21 @@ export function ParametersStep({
                                 ...prev,
                                 config: { ...(prev.config || DEFAULT_TASTE_CONFIG), testing_protocol: p.id as any }
                             }))}
-                            className={`flex-1 p-6 rounded-[2.5rem] border-2 transition-all flex flex-col items-center text-center gap-3 relative group ${(formData.config?.testing_protocol || 'branded') === p.id
-                                ? 'bg-primary border-primary text-white shadow-xl shadow-primary/20'
+                            className={`flex-1 px-3 py-3 rounded-xl border transition-all flex flex-row items-center text-left gap-2.5 relative group ${(formData.config?.testing_protocol || 'branded') === p.id
+                                ? 'bg-primary border-primary text-white shadow-md shadow-primary/20'
                                 : 'bg-surface border-line/80 dark:border-line/10 text-slate-400 hover:border-primary/50'
                                 }`}
                         >
-                            <div className={`p-3 rounded-2xl ${(formData.config?.testing_protocol || 'branded') === p.id ? 'bg-white/20' : 'bg-surface-raised text-slate-400 group-hover:text-primary-soft'}`}>
-                                <p.icon size={20} />
+                            <div className={`p-1.5 rounded-lg shrink-0 ${(formData.config?.testing_protocol || 'branded') === p.id ? 'bg-white/20' : 'bg-surface-raised text-slate-400 group-hover:text-primary-soft'}`}>
+                                <p.icon size={16} />
                             </div>
-                            <div>
-                                <span className="text-xs font-black uppercase tracking-widest block">{p.label}</span>
-                                <span className="text-sm font-bold uppercase tracking-widest opacity-60 mt-0.5 block">{p.desc}</span>
+                            <div className="min-w-0 flex-1 pr-4">
+                                <span className="text-xs font-black uppercase tracking-wider block truncate">{p.label}</span>
+                                <span className="text-[11px] font-bold uppercase tracking-tight opacity-60 mt-0.5 block truncate">{p.desc}</span>
                             </div>
                             {(formData.config?.testing_protocol || 'branded') === p.id && (
-                                <div className="absolute top-4 right-4">
-                                    <div className="w-3 h-3 bg-white rounded-full flex items-center justify-center p-0.5">
+                                <div className="absolute top-2.5 right-2.5">
+                                    <div className="w-2.5 h-2.5 bg-white rounded-full flex items-center justify-center p-0.5">
                                         <div className="w-full h-full bg-primary rounded-full" />
                                     </div>
                                 </div>
@@ -935,10 +935,10 @@ export function ParametersStep({
                 </div>
 
                 {/* Managed Brand Tiers & Add Brand */}
-                <section className="space-y-5 bg-slate-50/50 dark:bg-slate-900/50 p-6 rounded-[2.5rem] border-2 border-slate-300 dark:border-slate-700 transition-colors shadow-inner">
-                    <div className="flex flex-col gap-6">
-                        <div className="flex flex-col md:flex-row gap-6">
-                            <div className="flex-1 space-y-4">
+                <section className="space-y-3 bg-slate-50/50 dark:bg-slate-900/50 p-3.5 rounded-2xl border border-slate-300 dark:border-slate-700 transition-colors shadow-inner">
+                    <div className="flex flex-col gap-3">
+                        <div className="flex flex-col md:flex-row gap-2.5 items-stretch">
+                            <div className="flex-1 space-y-2">
                                 <input
                                     type="text"
                                     value={brandInput}
@@ -969,15 +969,15 @@ export function ParametersStep({
                                         }
                                     }}
                                     placeholder="Add brand name..."
-                                    className="w-full bg-surface border-2 border-slate-400 dark:border-slate-600 focus:border-primary rounded-2xl px-10 py-7 text-sm font-bold outline-none transition-all dark:text-white shadow-sm"
+                                    className="w-full bg-surface border border-slate-400 dark:border-slate-600 focus:border-primary rounded-xl px-3.5 py-2.5 text-sm font-bold outline-none transition-all dark:text-white shadow-sm"
                                 />
-                                <div className="flex items-center gap-6 px-2">
+                                <div className="flex items-center gap-4 px-1">
                                     <button
                                         onClick={() => setBrandRole(brandRole === 'internal' ? 'competitor' : 'internal')}
-                                        className={`flex items-center gap-2 text-sm font-black uppercase tracking-widest transition-all ${brandRole === 'internal' ? 'text-primary-soft' : 'text-ink'}`}
+                                        className={`flex items-center gap-2 text-[11px] font-black uppercase tracking-widest transition-all ${brandRole === 'internal' ? 'text-primary-soft' : 'text-ink'}`}
                                     >
-                                        <div className={`w-10 h-5 rounded-full relative transition-all ${brandRole === 'internal' ? 'bg-primary/20' : 'bg-slate-300 dark:bg-slate-700'}`}>
-                                            <div className={`absolute top-1 w-3 h-3 rounded-full transition-all ${brandRole === 'internal' ? 'right-1 bg-primary' : 'left-1 bg-slate-900 dark:bg-slate-100'}`} />
+                                        <div className={`w-8 h-4 rounded-full relative transition-all ${brandRole === 'internal' ? 'bg-primary/20' : 'bg-slate-300 dark:bg-slate-700'}`}>
+                                            <div className={`absolute top-0.5 w-3 h-3 rounded-full transition-all ${brandRole === 'internal' ? 'right-0.5 bg-primary' : 'left-0.5 bg-slate-900 dark:bg-slate-100'}`} />
                                         </div>
                                         Internal
                                     </button>
@@ -1005,7 +1005,7 @@ export function ParametersStep({
                                     setBrandInput('');
                                     toast.success('Brand added');
                                 }}
-                                className="bg-primary text-white px-6 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all"
+                                className="bg-primary text-white px-4 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest shadow-md shadow-primary/25 hover:scale-[1.02] active:scale-95 transition-all md:self-start"
                             >
                                 Add Brand
                             </button>

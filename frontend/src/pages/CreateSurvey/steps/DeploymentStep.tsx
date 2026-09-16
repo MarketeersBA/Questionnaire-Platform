@@ -42,39 +42,39 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
     };
 
     return (
-        <div className="space-y-4 text-left animate-slide-up">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 relative z-10">
-                <div className="flex items-center gap-4 transition-colors">
-                    <div className="p-4 rounded-2xl bg-primary/10 text-primary-soft shadow-inner">
-                        <Activity className="w-6 h-6" />
+        <div className="space-y-3.5 text-left animate-slide-up">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3 relative z-10">
+                <div className="flex items-center gap-3 transition-colors">
+                    <div className="p-3 rounded-xl bg-primary/10 text-primary-soft shadow-inner">
+                        <Activity className="w-5 h-5" />
                     </div>
                     <div>
-                        <h3 className="text-2xl font-display font-black text-ink line-height-tight transition-colors">Quality <span className="text-primary-soft">Control</span></h3>
-                        <p className="text-sm text-ink font-black uppercase tracking-widest transition-colors leading-relaxed">Enforcement & Reliability Nodes</p>
+                        <h3 className="text-xl font-display font-black text-ink leading-tight transition-colors">Quality <span className="text-primary-soft">Control</span></h3>
+                        <p className="text-xs text-ink font-black uppercase tracking-widest transition-colors">Enforcement & Reliability Nodes</p>
                     </div>
                 </div>
             </div>
 
             {/* Survey Quality Control Module */}
             <section className="animate-slide-up">
-                <div className="glass-card bg-slate-50/50 dark:bg-slate-950/40 backdrop-blur-xl rounded-[3rem] border-2 border-line/80 dark:border-line/10 overflow-hidden transition-all shadow-premium">
+                <div className="glass-card bg-slate-50/50 dark:bg-slate-950/40 backdrop-blur-xl rounded-3xl border border-line/80 dark:border-line/10 overflow-hidden transition-all shadow-sm">
                     {/* Header */}
-                    <div className="p-5 border-b-2 border-slate-200 dark:border-slate-900 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/50 dark:bg-slate-900/30">
-                        <div className="flex items-center gap-4">
-                            <div className={`p-4 rounded-2xl transition-all shadow-lg ${qc.is_enabled ? 'bg-primary text-white shadow-primary/20' : 'bg-slate-200 dark:bg-slate-800 text-slate-400'}`}>
-                                <Activity className="w-6 h-6" />
+                    <div className="p-4 border-b border-slate-200 dark:border-slate-900 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white/50 dark:bg-slate-900/30">
+                        <div className="flex items-center gap-3 min-w-0">
+                            <div className={`p-3 rounded-xl shrink-0 transition-all shadow-md ${qc.is_enabled ? 'bg-primary text-white shadow-primary/20' : 'bg-slate-200 dark:bg-slate-800 text-slate-400'}`}>
+                                <Activity className="w-5 h-5" />
                             </div>
-                            <div>
-                                <h4 className="text-xl font-display font-black text-ink uppercase tracking-tight">Survey Quality Control</h4>
-                                <p className="text-sm text-slate-500 font-bold uppercase tracking-widest mt-1 italic opacity-80">Enforce performance nodes to ensure respondent cognitive focus.</p>
+                            <div className="min-w-0">
+                                <h4 className="text-base font-display font-black text-ink uppercase tracking-tight">Survey Quality Control</h4>
+                                <p className="text-xs text-slate-500 font-bold uppercase tracking-wide mt-0.5 opacity-80">Enforce performance nodes to ensure respondent cognitive focus.</p>
                             </div>
                         </div>
 
                         <button
                             onClick={() => updateQC({ is_enabled: !qc.is_enabled })}
-                            className={`flex items-center gap-3 px-6 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${qc.is_enabled
-                                ? 'bg-emerald-500 text-white shadow-xl shadow-emerald-500/30 hover:scale-[1.02]'
-                                : 'bg-surface-sunken text-slate-400 border-2 border-slate-300 dark:border-slate-700'
+                            className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shrink-0 ${qc.is_enabled
+                                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 hover:scale-[1.02]'
+                                : 'bg-surface-sunken text-slate-400 border border-slate-300 dark:border-slate-700'
                                 }`}
                         >
                             <Zap className={`w-3.5 h-3.5 ${qc.is_enabled ? 'animate-pulse' : ''}`} />
@@ -90,17 +90,17 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
                                 exit={{ height: 0, opacity: 0 }}
                                 transition={{ duration: 0.4, ease: "circOut" }}
                             >
-                                <div className="p-5 space-y-4">
+                                <div className="p-4 space-y-3.5">
                                     {/* Time Constraints Grid */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                                         {/* Min Time */}
-                                        <div className="space-y-4 group">
-                                            <div className="flex items-center justify-between px-1">
+                                        <div className="space-y-3 group">
+                                            <div className="flex items-center justify-between px-0.5">
                                                 <div className="flex items-center gap-2">
                                                     <Clock className="w-3.5 h-3.5 text-primary-soft" />
-                                                    <label className="text-sm font-black uppercase tracking-widest text-ink">Minimum Duration</label>
+                                                    <label className="text-xs font-black uppercase tracking-widest text-ink">Minimum Duration</label>
                                                 </div>
-                                                <span className="text-sm font-black text-primary-soft bg-primary/10 px-3 py-1 rounded-full uppercase">Cognitive Guard</span>
+                                                <span className="text-[10px] font-black text-primary-soft bg-primary/10 px-2.5 py-0.5 rounded-full uppercase">Cognitive Guard</span>
                                             </div>
                                             <div className="relative">
                                                 <input
@@ -108,31 +108,31 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
                                                     min={0}
                                                     value={secondsToMinutes(qc.min_time_seconds)}
                                                     onChange={e => updateQC({ min_time_seconds: minutesToSeconds(parseInt(e.target.value, 10) || 0) })}
-                                                    className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 focus:border-primary rounded-2xl px-6 py-3.5 text-ink font-black text-lg outline-none transition-all shadow-sm group-hover:border-slate-400 dark:group-hover:border-slate-600"
+                                                    className="w-full bg-surface border border-slate-300 dark:border-slate-700 focus:border-primary rounded-xl px-4 py-2.5 text-ink font-black text-base outline-none transition-all shadow-sm group-hover:border-slate-400 dark:group-hover:border-slate-600"
                                                 />
-                                                <div className="absolute right-6 top-1/2 -translate-y-1/2 text-sm font-black text-slate-400 uppercase tracking-widest pointer-events-none">Minutes</div>
+                                                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black text-slate-400 uppercase tracking-widest pointer-events-none">Minutes</div>
                                             </div>
-                                            <div className="p-4 rounded-2xl bg-slate-100/50 dark:bg-slate-900/50 border border-line/80 dark:border-line/10 space-y-3">
-                                                <div className="flex items-center gap-2 text-xs font-black text-rose-500 uppercase tracking-widest">
+                                            <div className="p-3 rounded-xl bg-slate-100/50 dark:bg-slate-900/50 border border-line/80 dark:border-line/10 space-y-2">
+                                                <div className="flex items-center gap-2 text-[10px] font-black text-rose-500 uppercase tracking-widest">
                                                     <Ban className="w-3 h-3" /> Rejection Payload (Before Min)
                                                 </div>
-                                                <div className="space-y-2">
+                                                <div className="space-y-1.5">
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-sm font-black text-slate-400 uppercase w-4">EN</span>
+                                                        <span className="text-xs font-black text-slate-400 uppercase w-4">EN</span>
                                                         <input
                                                             value={qc.min_time_message_en}
                                                             onChange={e => updateQC({ min_time_message_en: e.target.value })}
-                                                            className="flex-1 bg-transparent border-none outline-none text-base font-bold text-ink-muted italic"
+                                                            className="flex-1 bg-transparent border-none outline-none text-sm font-bold text-ink-muted italic"
                                                             placeholder="English message..."
                                                         />
                                                     </div>
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-sm font-black text-slate-400 uppercase w-4 text-right">AR</span>
+                                                        <span className="text-xs font-black text-slate-400 uppercase w-4 text-right">AR</span>
                                                         <input
                                                             dir="rtl"
                                                             value={qc.min_time_message_ar}
                                                             onChange={e => updateQC({ min_time_message_ar: e.target.value })}
-                                                            className="flex-1 bg-transparent border-none outline-none text-base font-bold text-ink-muted italic text-right font-arabic"
+                                                            className="flex-1 bg-transparent border-none outline-none text-sm font-bold text-ink-muted italic text-right font-arabic"
                                                             placeholder="Arabic message..."
                                                         />
                                                     </div>
@@ -141,13 +141,13 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
                                         </div>
 
                                         {/* Max Time */}
-                                        <div className="space-y-4 group">
-                                            <div className="flex items-center justify-between px-1">
+                                        <div className="space-y-3 group">
+                                            <div className="flex items-center justify-between px-0.5">
                                                 <div className="flex items-center gap-2">
                                                     <Timer className="w-3.5 h-3.5 text-brand-cyan" />
-                                                    <label className="text-sm font-black uppercase tracking-widest text-ink">Maximum Duration</label>
+                                                    <label className="text-xs font-black uppercase tracking-widest text-ink">Maximum Duration</label>
                                                 </div>
-                                                <span className="text-sm font-black text-brand-cyan bg-brand-cyan/10 px-3 py-1 rounded-full uppercase">Runtime Limit</span>
+                                                <span className="text-[10px] font-black text-brand-cyan bg-brand-cyan/10 px-2.5 py-0.5 rounded-full uppercase">Runtime Limit</span>
                                             </div>
                                             <div className="relative">
                                                 <input
@@ -155,31 +155,31 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
                                                     min={0}
                                                     value={secondsToMinutes(qc.max_time_seconds)}
                                                     onChange={e => updateQC({ max_time_seconds: minutesToSeconds(parseInt(e.target.value, 10) || 0) })}
-                                                    className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 focus:border-brand-cyan rounded-2xl px-6 py-3.5 text-ink font-black text-lg outline-none transition-all shadow-sm group-hover:border-slate-400 dark:group-hover:border-slate-600"
+                                                    className="w-full bg-surface border border-slate-300 dark:border-slate-700 focus:border-brand-cyan rounded-xl px-4 py-2.5 text-ink font-black text-base outline-none transition-all shadow-sm group-hover:border-slate-400 dark:group-hover:border-slate-600"
                                                 />
-                                                <div className="absolute right-6 top-1/2 -translate-y-1/2 text-sm font-black text-slate-400 uppercase tracking-widest pointer-events-none">Minutes</div>
+                                                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black text-slate-400 uppercase tracking-widest pointer-events-none">Minutes</div>
                                             </div>
-                                            <div className="p-4 rounded-2xl bg-slate-100/50 dark:bg-slate-900/50 border border-line/80 dark:border-line/10 space-y-3">
-                                                <div className="flex items-center gap-2 text-xs font-black text-amber-500 uppercase tracking-widest">
+                                            <div className="p-3 rounded-xl bg-slate-100/50 dark:bg-slate-900/50 border border-line/80 dark:border-line/10 space-y-2">
+                                                <div className="flex items-center gap-2 text-[10px] font-black text-amber-500 uppercase tracking-widest">
                                                     <AlertCircle className="w-3 h-3" /> Rejection Payload (After Max)
                                                 </div>
-                                                <div className="space-y-2">
+                                                <div className="space-y-1.5">
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-sm font-black text-slate-400 uppercase w-4">EN</span>
+                                                        <span className="text-xs font-black text-slate-400 uppercase w-4">EN</span>
                                                         <input
                                                             value={qc.max_time_message_en}
                                                             onChange={e => updateQC({ max_time_message_en: e.target.value })}
-                                                            className="flex-1 bg-transparent border-none outline-none text-base font-bold text-ink-muted italic"
+                                                            className="flex-1 bg-transparent border-none outline-none text-sm font-bold text-ink-muted italic"
                                                             placeholder="English message..."
                                                         />
                                                     </div>
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-sm font-black text-slate-400 uppercase w-4 text-right">AR</span>
+                                                        <span className="text-xs font-black text-slate-400 uppercase w-4 text-right">AR</span>
                                                         <input
                                                             dir="rtl"
                                                             value={qc.max_time_message_ar}
                                                             onChange={e => updateQC({ max_time_message_ar: e.target.value })}
-                                                            className="flex-1 bg-transparent border-none outline-none text-base font-bold text-ink-muted italic text-right font-arabic"
+                                                            className="flex-1 bg-transparent border-none outline-none text-sm font-bold text-ink-muted italic text-right font-arabic"
                                                             placeholder="Arabic message..."
                                                         />
                                                     </div>
@@ -189,13 +189,13 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
                                     </div>
 
                                     {/* System Blueprint Notice */}
-                                    <div className="flex items-center gap-4 p-5 bg-blue-50 dark:bg-blue-500/10 border-2 border-blue-500/20 rounded-3xl animate-pulse-subtle">
-                                        <div className="p-3 rounded-xl bg-blue-500 text-white shadow-lg">
+                                    <div className="flex items-center gap-3 p-3.5 bg-blue-50 dark:bg-blue-500/10 border border-blue-500/20 rounded-2xl">
+                                        <div className="p-2 rounded-lg bg-blue-500 text-white shadow-sm shrink-0">
                                             <ShieldCheck className="w-4 h-4" />
                                         </div>
                                         <div>
-                                            <p className="text-sm font-black text-blue-900 dark:text-blue-200 uppercase tracking-widest">Automatic Enforcement Node</p>
-                                            <p className="text-xs text-blue-700 dark:text-blue-400 font-bold mt-0.5">The backend protocol will automatically nullify any results outside these variance nodes upon webhooks receipt.</p>
+                                            <p className="text-xs font-black text-blue-900 dark:text-blue-200 uppercase tracking-widest">Automatic Enforcement Node</p>
+                                            <p className="text-[11px] text-blue-700 dark:text-blue-400 font-bold mt-0.5">The backend protocol will automatically nullify any results outside these variance nodes upon webhooks receipt.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -206,15 +206,15 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
             </section>
 
             <section className="animate-slide-up">
-                <div className="glass-card bg-slate-50/50 dark:bg-slate-950/40 backdrop-blur-xl rounded-[3rem] border-2 border-line/80 dark:border-line/10 overflow-hidden transition-all shadow-premium">
-                    <div className="p-5 border-b-2 border-slate-200 dark:border-slate-900 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/50 dark:bg-slate-900/30">
-                        <div className="flex items-center gap-4">
-                            <div className={`p-4 rounded-2xl transition-all shadow-lg ${voice.is_enabled ? 'bg-indigo-600 text-white shadow-indigo-600/20' : 'bg-slate-200 dark:bg-slate-800 text-slate-400'}`}>
-                                <Mic className="w-6 h-6" />
+                <div className="glass-card bg-slate-50/50 dark:bg-slate-950/40 backdrop-blur-xl rounded-3xl border border-line/80 dark:border-line/10 overflow-hidden transition-all shadow-sm">
+                    <div className="p-4 border-b border-slate-200 dark:border-slate-900 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white/50 dark:bg-slate-900/30">
+                        <div className="flex items-center gap-3 min-w-0">
+                            <div className={`p-3 rounded-xl shrink-0 transition-all shadow-md ${voice.is_enabled ? 'bg-indigo-600 text-white shadow-indigo-600/20' : 'bg-slate-200 dark:bg-slate-800 text-slate-400'}`}>
+                                <Mic className="w-5 h-5" />
                             </div>
-                            <div>
-                                <h4 className="text-xl font-display font-black text-ink uppercase tracking-tight">AI Voice Analysis</h4>
-                                <p className="text-sm text-slate-500 font-bold uppercase tracking-widest mt-1 italic opacity-80">
+                            <div className="min-w-0">
+                                <h4 className="text-base font-display font-black text-ink uppercase tracking-tight">AI Voice Analysis</h4>
+                                <p className="text-xs text-slate-500 font-bold uppercase tracking-wide mt-0.5 opacity-80">
                                     After Taste open-ended brand questions — text plus optional voice recording.
                                 </p>
                             </div>
@@ -222,9 +222,9 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
                         <button
                             type="button"
                             onClick={() => toggleVoice(!voice.is_enabled)}
-                            className={`flex items-center gap-3 px-6 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${voice.is_enabled
-                                ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-600/30 hover:scale-[1.02]'
-                                : 'bg-surface-sunken text-slate-400 border-2 border-slate-300 dark:border-slate-700'
+                            className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shrink-0 ${voice.is_enabled
+                                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 hover:scale-[1.02]'
+                                : 'bg-surface-sunken text-slate-400 border border-slate-300 dark:border-slate-700'
                                 }`}
                         >
                             <Mic className="w-3.5 h-3.5" />
@@ -234,30 +234,30 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
                     <AnimatePresence mode="wait">
                         {voice.is_enabled && (
                             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
-                                <div className="p-5 space-y-4">
-                                    <div className="p-5 rounded-3xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800">
+                                <div className="p-4 space-y-3.5">
+                                    <div className="p-3.5 rounded-2xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800">
                                         <p className="text-sm font-bold text-indigo-900 dark:text-indigo-200">
                                             Respondents can type, record, or do both on the same question.
                                         </p>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="space-y-4">
-                                            <label className="text-sm font-black uppercase tracking-widest">AI Analysis Pipeline</label>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                                        <div className="space-y-2.5">
+                                            <label className="text-xs font-black uppercase tracking-widest">AI Analysis Pipeline</label>
                                             <button
                                                 type="button"
                                                 onClick={() => updateVoice({ ai_analysis_enabled: !voice.ai_analysis_enabled })}
-                                                className={`w-full flex items-center justify-between px-6 py-3.5 rounded-2xl border-2 ${voice.ai_analysis_enabled ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40' : 'border-slate-200 dark:border-slate-700'}`}
+                                                className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl border ${voice.ai_analysis_enabled ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40' : 'border-slate-200 dark:border-slate-700'}`}
                                             >
                                                 <span className="text-sm font-bold">Run transcription & NLP</span>
-                                                <span className="text-sm font-black uppercase">{voice.ai_analysis_enabled ? 'On' : 'Off'}</span>
+                                                <span className="text-xs font-black uppercase">{voice.ai_analysis_enabled ? 'On' : 'Off'}</span>
                                             </button>
                                         </div>
-                                        <div className="space-y-4">
-                                            <label className="text-sm font-black uppercase tracking-widest">Transcription Language</label>
+                                        <div className="space-y-2.5">
+                                            <label className="text-xs font-black uppercase tracking-widest">Transcription Language</label>
                                             <select
                                                 value={voice.transcription_language || 'auto'}
                                                 onChange={(e) => updateVoice({ transcription_language: e.target.value as 'auto' | 'en' | 'ar' })}
-                                                className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 rounded-2xl px-6 py-3.5 text-sm font-bold"
+                                                className="w-full bg-surface border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold"
                                             >
                                                 <option value="auto">Auto-detect</option>
                                                 <option value="en">English</option>
@@ -274,4 +274,3 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
         </div>
     );
 }
-

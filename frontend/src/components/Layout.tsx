@@ -8,8 +8,6 @@ import {
     Database,
     Activity,
     ChevronDown,
-    ChevronLeft,
-    ChevronRight,
     Menu,
     Sun,
     Moon,
@@ -59,7 +57,7 @@ export default function Layout({ children }: LayoutProps) {
     const isAnalyst = role === 'analyst';
     const isClient = role === 'client';
 
-    const [sidebarOpen, setSidebarOpen] = useState(true);
+    const sidebarOpen = true;
     const [sidebarVisible, setSidebarVisible] = useState(true);
     const [adminOpen, setAdminOpen] = useState(false);
     const [username, setUsername] = useState(() => localStorage.getItem('username') || '');
@@ -75,18 +73,11 @@ export default function Layout({ children }: LayoutProps) {
             .catch(() => {});
     }, []);
 
-    // Force close admin dropdown if sidebar closes to prevent layout bugs
-    useEffect(() => {
-        if (!sidebarOpen) {
-            setAdminOpen(false);
-        }
-    }, [sidebarOpen]);
-
     // Keep the Administration group open while inside an admin route.
     useEffect(() => {
         const inAdmin = location.pathname.startsWith('/admin') || location.pathname === '/user-management';
-        if (sidebarOpen && inAdmin) setAdminOpen(true);
-    }, [location.pathname, sidebarOpen]);
+        if (inAdmin) setAdminOpen(true);
+    }, [location.pathname]);
 
 
 
@@ -173,21 +164,6 @@ export default function Layout({ children }: LayoutProps) {
                 className={`brand-rail relative z-20 flex flex-col h-screen shrink-0 border-r border-white/5 shadow-xl shadow-black/20 transition-[width,transform,opacity] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${!sidebarVisible ? 'w-0 opacity-0 -translate-x-full overflow-hidden border-none shadow-none' : sidebarOpen ? 'w-72' : 'w-[88px]'
                     }`}
             >
-                {sidebarVisible && (
-                    <button
-                        type="button"
-                        onClick={() => setSidebarOpen(!sidebarOpen)}
-                        className="absolute top-8 -right-3 z-30 w-6 h-6 rounded-full bg-white dark:bg-slate-800 border border-white/20 dark:border-slate-600 shadow-lg shadow-black/25 flex items-center justify-center text-primary hover:scale-110 hover:bg-primary hover:text-white hover:border-primary active:scale-95 transition-all"
-                        title={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-                        aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-                    >
-                        {sidebarOpen ? (
-                            <ChevronLeft size={14} strokeWidth={2.5} />
-                        ) : (
-                            <ChevronRight size={14} strokeWidth={2.5} />
-                        )}
-                    </button>
-                )}
                 <div className="flex flex-col h-full overflow-y-auto overflow-x-hidden scrollbar-none">
 
                     {/* Logo — centred and sized to fill the rail head rather than

@@ -1185,12 +1185,12 @@ export default function CreateSurvey({ editSurveyId, initialSurveyData }: Create
                                 )}
                                 {currentStep === 4 && <DeploymentStep formData={formData} setFormData={setFormData} />}
 
-                                <div className="space-y-3 pt-6 border-t border-slate-200 dark:border-slate-700 transition-colors">
+                                <div className="space-y-2.5 pt-5 border-t border-slate-200 dark:border-slate-700 transition-colors">
                                     {currentStep < 4 ? (
                                         <button
                                             type="button"
                                             onClick={nextStep}
-                                            className="group w-full py-5 bg-surface border-2 border-slate-400 dark:border-slate-600 rounded-3xl font-black text-xs uppercase tracking-[0.2em] text-ink flex items-center justify-between px-6 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all shadow-sm focus:outline-none focus:ring-4 focus:ring-primary/20"
+                                            className="group w-full py-4 bg-surface border border-slate-400 dark:border-slate-600 rounded-2xl font-black text-xs uppercase tracking-[0.2em] text-ink flex items-center justify-between px-5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all shadow-sm focus:outline-none focus:ring-4 focus:ring-primary/20"
                                         >
                                             Continue to {steps[currentStep].name}
                                             <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-primary-soft" />
@@ -1199,12 +1199,12 @@ export default function CreateSurvey({ editSurveyId, initialSurveyData }: Create
                                         <button
                                             onClick={handleSubmit}
                                             disabled={loading}
-                                            className="group w-full py-6 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-[2rem] font-black text-xs uppercase tracking-[0.2em] text-white flex items-center justify-center gap-4 hover:shadow-lg hover:shadow-emerald-500/20 hover:scale-[1.01] transition-all disabled:opacity-50"
+                                            className="group w-full py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-2xl font-black text-xs uppercase tracking-[0.2em] text-white flex items-center justify-center gap-3 hover:shadow-lg hover:shadow-emerald-500/20 hover:scale-[1.01] transition-all disabled:opacity-50"
                                         >
-                                            {loading ? <Sparkles className="w-6 h-6 animate-spin" /> : (
+                                            {loading ? <Sparkles className="w-5 h-5 animate-spin" /> : (
                                                 <>
                                                     {isEditMode ? 'Save Changes' : 'Deploy Survey'}
-                                                    <Check className="w-6 h-6 animate-in zoom-in" />
+                                                    <Check className="w-5 h-5 animate-in zoom-in" />
                                                 </>
                                             )}
                                         </button>

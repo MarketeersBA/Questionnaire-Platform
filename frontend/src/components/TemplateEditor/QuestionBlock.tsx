@@ -64,21 +64,21 @@ export default function QuestionBlock({ question, showGatekeeper = true, readOnl
             exit={{ opacity: 0, scale: 0.95 }}
             className="group relative"
         >
-            <div className="glass-card rounded-[2.5rem] p-8 shadow-premium hover:shadow-premium-blue transition-all duration-500 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-2 border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div className="glass-card rounded-2xl p-4 shadow-premium hover:shadow-premium-blue transition-all duration-500 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
                 {/* Visual Accent */}
                 <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${config.bg} ${config.color.replace('text-', 'bg-')} shadow-[0_0_15px_rgba(var(--brand-glow-rgb),0.3)]`} />
 
-                <div className="flex gap-8">
+                <div className="flex gap-3">
                     {/* Reorder Handle */}
-                    <div className="hidden md:flex flex-col items-center gap-2 pt-2">
-                        <div className="cursor-grab active:cursor-grabbing p-2 rounded-xl hover:bg-white/5 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-500 hover:text-white dark:hover:text-slate-300 transition-all opacity-0 group-hover:opacity-100">
+                    <div className="hidden md:flex flex-col items-center gap-2 pt-1">
+                        <div className="cursor-grab active:cursor-grabbing p-1.5 rounded-xl hover:bg-white/5 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-500 hover:text-white dark:hover:text-slate-300 transition-all opacity-0 group-hover:opacity-100">
                             <GripVertical className="w-5 h-5" />
                         </div>
                     </div>
 
-                    <div className="flex-1 space-y-8">
+                    <div className="flex-1 space-y-2.5">
                         {/* Question Header */}
-                        <div className="space-y-4">
+                        <div className="space-y-1.5">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <div className={`px-3 py-1 rounded-full ${config.bg} ${config.color} text-[10px] font-black uppercase tracking-widest border-2 ${config.border.replace('/20', '/40')} flex items-center gap-1.5 shadow-sm`}>
@@ -122,8 +122,8 @@ export default function QuestionBlock({ question, showGatekeeper = true, readOnl
                                 )}
                             </div>
 
-                            <div className="relative group/input min-h-[4rem] flex font-display font-black text-2xl text-ink transition-colors">
-                                <div className="absolute inset-0 z-0 pointer-events-none whitespace-pre-wrap py-2">
+                            <div className="relative group/input min-h-0 flex font-display font-black text-2xl text-ink transition-colors">
+                                <div className="absolute inset-0 z-0 pointer-events-none whitespace-pre-wrap py-1">
                                     {renderHighlightedText(
                                         language === 'ar'
                                             ? (question.ar_text || question.label || question.text || '')
@@ -145,15 +145,15 @@ export default function QuestionBlock({ question, showGatekeeper = true, readOnl
                                     placeholder="Enter your question here..."
                                     rows={1}
                                     style={{ height: 'auto' }}
-                                    className={`w-full bg-transparent text-2xl font-display font-black text-transparent caret-brand-blue border-b-2 border-transparent focus:border-primary transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 relative z-10 resize-none overflow-hidden ${readOnly ? 'cursor-default' : ''}`}
+                                    className={`w-full bg-transparent text-2xl font-display font-black text-transparent caret-brand-blue border-b-2 border-transparent focus:border-primary transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 relative z-10 resize-none overflow-hidden leading-snug py-1 ${readOnly ? 'cursor-default' : ''}`}
                                 />
                             </div>
                         </div>
 
                         {/* Question Content */}
-                        <div className="flex flex-col xl:flex-row gap-10">
+                        <div className="flex flex-col xl:flex-row xl:items-start gap-4">
                             {/* Controls / Options */}
-                            <div className="flex-1 space-y-6 min-w-0">
+                            <div className="flex-1 space-y-2.5 min-w-0">
                                 <AnimatePresence mode="wait">
                                     {qType === 'text' ? (
                                         <motion.div
@@ -343,21 +343,21 @@ export default function QuestionBlock({ question, showGatekeeper = true, readOnl
                                             key="options"
                                             initial={{ opacity: 0, x: -10 }}
                                             animate={{ opacity: 1, x: 0 }}
-                                            className="space-y-6"
+                                            className="space-y-2"
                                         >
                                             {showGatekeeper && !question.questionMeta?.masterType?.includes("Multiple Choice") && (
-                                                <div className="flex items-center justify-between px-4 bg-surface-sunken py-4 rounded-xl border-2 border-slate-300 dark:border-slate-700 shadow-inner-soft">
-                                                    <div className="flex items-center gap-3 text-left">
-                                                        <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
-                                                            <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                                                <div className="flex items-center justify-between px-3 bg-surface-sunken py-2 rounded-xl border border-slate-300 dark:border-slate-700 shadow-inner-soft">
+                                                    <div className="flex items-center gap-2.5 text-left">
+                                                        <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                                                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
                                                         </div>
                                                         <div>
-                                                            <div className="text-[10px] font-black uppercase tracking-widest text-ink leading-none mb-1">Gatekeeper Protocol</div>
+                                                            <div className="text-[10px] font-black uppercase tracking-widest text-ink leading-none mb-0.5">Gatekeeper Protocol</div>
                                                             <div className="text-[9px] text-slate-800 dark:text-slate-300 font-black">Select the required answer for qualification</div>
                                                         </div>
                                                     </div>
                                                     {question.correct_answer && (
-                                                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border-2 border-emerald-500 shadow-sm">
+                                                        <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500 shadow-sm">
                                                             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                                                             <span className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">
                                                                 {Array.isArray(question.correct_answer) ? `${question.correct_answer.length} Gates Active` : 'Logic Active'}
@@ -422,11 +422,11 @@ export default function QuestionBlock({ question, showGatekeeper = true, readOnl
                                                 </div>
                                             )}
 
-                                            <div className="space-y-4">
+                                            <div className="space-y-2">
                                                 {(question.options || []).map((opt: string, i: number) => (
-                                                    <div key={i} className="flex items-center gap-4 group/option">
-                                                        <div className="flex-1 space-y-3">
-                                                            <div className="flex items-center gap-3">
+                                                    <div key={i} className="flex items-center gap-2 group/option">
+                                                        <div className="flex-1 space-y-2">
+                                                            <div className="flex items-center gap-2">
                                                                 <button
                                                                     type="button"
                                                                     disabled={!showGatekeeper}
@@ -456,15 +456,15 @@ export default function QuestionBlock({ question, showGatekeeper = true, readOnl
 
                                                                         onUpdate({ ...question, correct_answer: nextCorrect });
                                                                     }}
-                                                                    className={`w-14 h-14 rounded-2xl border flex flex-col items-center justify-center transition-all duration-500 relative overflow-hidden ${showGatekeeper
+                                                                    className={`w-10 h-10 shrink-0 rounded-xl border flex flex-col items-center justify-center transition-all duration-500 relative overflow-hidden ${showGatekeeper
                                                                         ? ((Array.isArray(question.correct_answer) ? question.correct_answer.includes(opt) : question.correct_answer === opt) && opt !== ''
                                                                             ? 'bg-emerald-500 border-emerald-500 text-white shadow-premium'
                                                                             : 'bg-surface border-line/80 dark:border-line/10 text-ink-subtle hover:border-emerald-500/50 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 group/gatekeeper cursor-pointer')
                                                                         : 'bg-surface-raised border-line/80 dark:border-line/10 text-slate-300 dark:text-slate-700 cursor-default'
                                                                         }`}
                                                                 >
-                                                                    <div className="flex flex-col items-center gap-1">
-                                                                        {(Array.isArray(question.correct_answer) ? question.correct_answer.includes(opt) : question.correct_answer === opt) && opt !== '' ? <ShieldCheck className="w-6 h-6" /> : <span className="text-sm font-black">{i + 1}</span>}
+                                                                    <div className="flex flex-col items-center">
+                                                                        {(Array.isArray(question.correct_answer) ? question.correct_answer.includes(opt) : question.correct_answer === opt) && opt !== '' ? <ShieldCheck className="w-4 h-4" /> : <span className="text-sm font-black">{i + 1}</span>}
                                                                     </div>
                                                                 </button>
 
@@ -490,8 +490,8 @@ export default function QuestionBlock({ question, showGatekeeper = true, readOnl
                                                                             onUpdate({ ...question, options: newOpts, correct_answer: nextCorrect });
                                                                         }}
                                                                         readOnly={readOnly}
-                                                                        className={`w-full bg-surface border-2 rounded-[1.25rem] px-6 py-5 text-sm font-black outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600 shadow-sm ${(Array.isArray(question.correct_answer) ? question.correct_answer.includes(opt) : question.correct_answer === opt) && opt !== ''
-                                                                            ? 'border-emerald-500 ring-4 ring-emerald-500/10'
+                                                                        className={`w-full bg-surface border rounded-xl px-4 py-2.5 text-sm font-black outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600 shadow-sm ${(Array.isArray(question.correct_answer) ? question.correct_answer.includes(opt) : question.correct_answer === opt) && opt !== ''
+                                                                            ? 'border-emerald-500 ring-2 ring-emerald-500/10'
                                                                             : 'border-slate-300 dark:border-slate-700 focus:border-primary'
                                                                             } ${readOnly ? 'cursor-default' : ''}`}
                                                                         placeholder={`Option Value...`}
@@ -502,9 +502,9 @@ export default function QuestionBlock({ question, showGatekeeper = true, readOnl
                                                                     <button
                                                                         type="button"
                                                                         onClick={() => onUpdate({ ...question, options: (question.options || []).filter((_: any, idx: number) => idx !== i) })}
-                                                                        className="p-4 text-slate-400 hover:text-rose-400 hover:bg-rose-400/5 rounded-2xl transition-all opacity-0 group-hover/option:opacity-100"
+                                                                        className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-400/5 rounded-xl transition-all opacity-0 group-hover/option:opacity-100"
                                                                     >
-                                                                        <Trash2 className="w-5 h-5" />
+                                                                        <Trash2 className="w-4 h-4" />
                                                                     </button>
                                                                 )}
                                                             </div>
@@ -515,7 +515,7 @@ export default function QuestionBlock({ question, showGatekeeper = true, readOnl
                                                     <button
                                                         type="button"
                                                         onClick={() => onUpdate({ ...question, options: [...(question.options || []), ''] })}
-                                                        className="w-full py-4 rounded-2xl border-2 border-slate-300 dark:border-slate-700 hover:border-primary bg-surface text-[10px] font-black uppercase text-ink hover:text-primary-soft flex items-center justify-center gap-3 transition-all shadow-sm"
+                                                        className="w-full py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 hover:border-primary bg-surface text-[10px] font-black uppercase text-ink hover:text-primary-soft flex items-center justify-center gap-2 transition-all shadow-sm"
                                                     >
                                                         <Plus className="w-4 h-4" />
                                                         Add Option
@@ -528,10 +528,10 @@ export default function QuestionBlock({ question, showGatekeeper = true, readOnl
                             </div>
 
                             {/* Configuration */}
-                            <div className="xl:w-64 space-y-6 shrink-0 border-l-2 border-line/80 dark:border-line/10 pl-8">
-                                <div className="space-y-4 text-left">
+                            <div className="xl:w-56 space-y-2 shrink-0 border-l border-line/80 dark:border-line/10 pl-4">
+                                <div className="space-y-1.5 text-left">
                                     <label className="text-[10px] font-black uppercase tracking-widest text-ink ml-1">Behavior Mode</label>
-                                    <div className="grid grid-cols-1 gap-2">
+                                    <div className="grid grid-cols-1 gap-1">
                                         {Object.entries(TYPE_CONFIG).map(([key, cfg]: [string, any]) => (
                                             <button
                                                 key={key}
@@ -548,13 +548,10 @@ export default function QuestionBlock({ question, showGatekeeper = true, readOnl
                                                     }
                                                     onUpdate({ ...question, ...update });
                                                 }}
-                                                className={`flex items-center gap-3 px-4 py-3 rounded-2xl border-2 transition-all text-left group/btn ${readOnly ? 'cursor-default' : ''} ${qType === key
-                                                    ? `${cfg.bg} ${cfg.border.replace('/20', '/40')} shadow-lg shadow-primary/10`
+                                                className={`flex items-center gap-2 px-3 py-2 rounded-xl border transition-all text-left group/btn ${readOnly ? 'cursor-default' : ''} ${qType === key
+                                                    ? `${cfg.bg} ${cfg.border.replace('/20', '/40')} shadow-sm shadow-primary/10`
                                                     : 'bg-surface border-line/80 dark:border-line/10 hover:border-slate-400 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-900'}`}
                                             >
-                                                <div className={`p-2 rounded-xl transition-colors ${qType === key ? cfg.bg : 'bg-surface-sunken'}`}>
-                                                    <cfg.icon className={`w-4 h-4 ${qType === key ? cfg.color : 'text-slate-400 group-hover/btn:text-slate-600'}`} />
-                                                </div>
                                                 <div className="flex-1 min-w-0">
                                                     <div className={`text-[10px] font-black uppercase tracking-widest truncate ${qType === key ? 'text-ink' : 'text-slate-800 dark:text-slate-200'}`}>{cfg.label}</div>
                                                     <div className={`text-[8px] font-bold truncate ${qType === key ? 'text-ink-muted' : 'text-slate-500'}`}>
@@ -564,7 +561,7 @@ export default function QuestionBlock({ question, showGatekeeper = true, readOnl
                                                                     key === 'number' ? 'Numeric Value' : 'Free Form'}
                                                     </div>
                                                 </div>
-                                                {qType === key && <CheckCircle2 className={`w-4 h-4 ${cfg.color}`} />}
+                                                {qType === key && <CheckCircle2 className={`w-3.5 h-3.5 shrink-0 ${cfg.color}`} />}
                                             </button>
                                         ))}
                                     </div>
