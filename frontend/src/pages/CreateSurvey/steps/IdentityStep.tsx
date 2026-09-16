@@ -1,16 +1,63 @@
 import { useEffect, useState } from 'react';
-import { Layout, ShieldCheck, Check, Briefcase, GraduationCap, Layers, Lock, Target, SplitSquareHorizontal, Sparkles, Edit3, ChevronDown, Palette, Tag, Beaker, Zap, DollarSign, Loader2, CheckCircle2, XCircle, Wand2, Plus } from 'lucide-react';
+import { Layout, ShieldCheck, Check, Briefcase, GraduationCap, Layers, Lock, Target, SplitSquareHorizontal, Sparkles, Edit3, ChevronDown, Palette, Tag, Beaker, Zap, DollarSign, Loader2, CheckCircle2, XCircle, Wand2, Plus, Package, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StepProps, DEFAULT_TASTE_CONFIG, DEFAULT_PRODUCT_TEST_CONFIG } from '../types';
 import { surveys } from '../../../services/api';
 import api from '../../../services/api';
 import { useNavigate } from 'react-router-dom';
 
+/**
+ * Study types offered at creation.
+ *
+ * Every entry here maps to a composer branch that actually builds questions.
+ * `concept_test` was removed: it was a card with no branch in
+ * `orchestration_service.compose_survey_schema`, so choosing it produced a
+ * survey with a screening layer and nothing to answer.
+ *
+ * `usage_attitude` is new to the UI but not to the backend — it composes from
+ * the purchase-funnel, brand-usage and brand-pricing modules, which are already
+ * seeded and already handled by the composer. It needs no evaluation module,
+ * which is what distinguishes it from the three product studies.
+ *
+ * `pack_test` runs the product-test composer with its packaging bank and
+ * heatmap surface, so its id stays `product_test` with a package focus rather
+ * than becoming a fourth type the backend would not recognise.
+ */
 export const surveyTypesList = [
-    { id: 'taste_test', name: 'Taste Test', desc: 'Product comparison, sensory profiling, and preference mapping.', icon: Beaker, color: 'text-primary-soft', bg: 'bg-primary/10' },
-    { id: 'product_test', name: 'Product Test', desc: 'In-home use tests (IHUT) and performance evaluation.', icon: Palette, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { id: 'concept_test', name: 'Concept Test', desc: 'Validate new ideas, packaging, or messaging.', icon: Sparkles, color: 'text-amber-500', bg: 'bg-amber-50' }
+    {
+        id: 'taste_test',
+        name: 'Taste Test',
+        desc: 'Sensory profiling and preference mapping across brands.',
+        icon: Beaker,
+        color: 'text-primary-soft',
+        bg: 'bg-primary/10',
+    },
+    {
+        id: 'product_test',
+        name: 'Product Placement',
+        desc: 'In-home use tests (IHUT) and performance evaluation.',
+        icon: Palette,
+        color: 'text-emerald-600',
+        bg: 'bg-emerald-50',
+    },
+    {
+        id: 'pack_test',
+        name: 'Pack Testing',
+        desc: 'Packaging evaluation with click heatmaps on the design.',
+        icon: Package,
+        color: 'text-violet-600',
+        bg: 'bg-violet-50',
+    },
+    {
+        id: 'usage_attitude',
+        name: 'Usage & Attitude',
+        desc: 'Awareness funnel, usage habits and pricing behaviour.',
+        icon: Users,
+        color: 'text-sky-600',
+        bg: 'bg-sky-50',
+    },
 ];
+
 
 // ─── Local Input Component for Smarter Typing ──────────────────────────────
 function LocalQuotaInput({

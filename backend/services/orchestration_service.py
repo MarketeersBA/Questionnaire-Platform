@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Dict, List, Optional
 from datetime import datetime
 from backend.database import db
@@ -6,6 +7,8 @@ from backend.utils.taste_test_question_ids import build_module_metadata, resolve
 import random
 import string
 import re
+
+logger = logging.getLogger(__name__)
 
 # Arabic labels for taste-test main attributes shown in respondent section titles.
 TASTE_ATTRIBUTE_AR: Dict[str, str] = {
@@ -209,7 +212,37 @@ class OrchestrationService:
                 if not competitor_brands and tt_config.get("competitive_brands"):
                     competitor_brands = tt_config["competitive_brands"]
                 
-                all_brands = [b for b in internal_brands + competitor_brands if b]
+                # Deduplicated, case- and whitespace-insensitively, preserving order.
+                #
+                # The client brand routinely appears in both lists: an analyst
+                # names it as the own brand and then also lists it among the
+                # brands being tested, which is a reasonable thing to do. Without
+                # this, the Layer 2 loop built a full set of sensory sections for
+                # it twice, so the respondent was asked every attribute question
+                # about the same product a second time — appearance, aroma,
+                # taste, texture, the lot — and simply gave up.
+                #
+                # Internal order is kept ahead of competitors so the client brand
+                # is still evaluated first where the design calls for it.
+                all_brands: list[str] = []
+                seen_brands: set[str] = set()
+                for brand in internal_brands + competitor_brands:
+                    if not brand:
+                        continue
+                    key = str(brand).strip().casefold()
+                    if not key or key in seen_brands:
+                        continue
+                    seen_brands.add(key)
+                    all_brands.append(brand)
+
+                if len(all_brands) < len([b for b in internal_brands + competitor_brands if b]):
+                    logger.info(
+                        "[Orchestration] Collapsed duplicate brands for survey composition: "
+                        "internal=%s competitors=%s -> %s",
+                        internal_brands,
+                        competitor_brands,
+                        all_brands,
+                    )
 
                 # L1
                 l1_questions = [

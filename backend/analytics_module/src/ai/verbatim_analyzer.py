@@ -14,6 +14,39 @@ from backend.analytics_module.src.ai.schemas import get_response_format
 
 logger = logging.getLogger(__name__)
 
+def _normalise_sentiment(raw):
+    """
+    Turn the model's sentiment counts into counts plus percentages, or None.
+
+    Percentages are computed here rather than asked for, so they always agree
+    with the counts they came from. A model asked directly for percentages will
+    return three numbers summing to 100 whether or not it counted anything.
+
+    Returns None when the field is missing or the counts are all zero — there is
+    no honest split to draw in that case, and a chart that says "no data" is
+    worth more than one showing an invented balance.
+    """
+    if not isinstance(raw, dict):
+        return None
+
+    try:
+        counts = {k: max(0, int(raw.get(k) or 0)) for k in ("positive", "negative", "neutral")}
+    except (TypeError, ValueError):
+        return None
+
+    total = sum(counts.values())
+    if total == 0:
+        return None
+
+    return {
+        **counts,
+        "total": total,
+        "positive_pct": round(100 * counts["positive"] / total, 1),
+        "negative_pct": round(100 * counts["negative"] / total, 1),
+        "neutral_pct": round(100 * counts["neutral"] / total, 1),
+    }
+
+
 class VerbatimAnalyzer:
     def __init__(
         self,
@@ -146,7 +179,15 @@ class VerbatimAnalyzer:
                             "quote": i.get("quote", "")
                         } for i in raw.get("insights", [])
                     ],
-                    "sentiment": raw.get("meta", {}).get("sentiment", {"positive": 33, "negative": 33, "neutral": 34})
+                    # Absent rather than invented.
+                    #
+                    # This used to default to {33, 33, 34} when the model
+                    # returned nothing — and it always returned nothing, because
+                    # the strict response schema did not declare the field. Every
+                    # report showed that even split as if it were measured.
+                    # `None` lets the chart say it has no sentiment data, which
+                    # is the truth, instead of showing a constant.
+                    "sentiment": _normalise_sentiment(raw.get("meta", {}).get("sentiment"))
                 }
 
             result = await AIGuard.wrap_call_async(component_key, _call_api, dedup_key=dedup_key, survey_id=self.survey_id)

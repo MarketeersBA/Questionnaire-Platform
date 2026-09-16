@@ -72,7 +72,25 @@ export function resolveModuleSequence(formData: SurveyFormData): string[] {
     // Ensure the core evaluation module for this survey type is present in the sequence.
     // Without this, a product_test survey using a taste_test-default sequence would
     // never trigger the product_test composer branch.
-    const coreModule = formData.survey_type === 'product_test' ? 'product_test' : 'taste_test';
+    // Which evaluation module this study type needs composed.
+    //
+    // `pack_test` is a product test focused on packaging — same composer branch,
+    // same bank plus the packaging questions and heatmap surface — so it maps to
+    // `product_test` rather than becoming a module the backend cannot build.
+    //
+    // `usage_attitude` has no evaluation module at all: it is the funnel, usage
+    // and pricing modules, which are selected independently. Forcing a taste or
+    // product module into it would add a sensory battery to a study that never
+    // puts a product in anyone's hands.
+    const coreModule =
+        formData.survey_type === 'product_test' || formData.survey_type === 'pack_test'
+            ? 'product_test'
+            : formData.survey_type === 'usage_attitude'
+              ? null
+              : 'taste_test';
+    if (coreModule === null) {
+        return [...raw];
+    }
     if (!raw.includes(coreModule)) {
         // Insert right after 'screening' (position 1) or at the front
         const idx = raw.indexOf('screening');
@@ -93,6 +111,7 @@ export function isSurveyModuleEnabled(modId: string, formData: SurveyFormData): 
                 || (formData.config?.module_sequence || []).includes('taste_test');
         case 'product_test':
             return formData.survey_type === 'product_test'
+                || formData.survey_type === 'pack_test'
                 || (formData.config?.module_sequence || formData.module_sequence || []).includes('product_test');
         case 'purchase_funnel':
             return Boolean(formData.purchase_funnel?.is_enabled);

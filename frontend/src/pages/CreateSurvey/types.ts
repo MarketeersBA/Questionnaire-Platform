@@ -55,7 +55,15 @@ export interface GateQuotas {
 export interface SurveyFormData {
     survey_name: string;
     survey_code: string;
-    survey_type: 'taste_test' | 'product_test' | 'brand_awareness' | 'usage_attitude' | 'concept_test' | '';
+    /**
+     * Study type. Each value maps to a composer branch that builds real
+     * questions — `brand_awareness` and `concept_test` were removed because
+     * neither had one, so choosing them produced a survey with nothing to
+     * answer. `pack_test` composes through the product-test branch with the
+     * packaging bank; `usage_attitude` composes from the funnel, usage and
+     * pricing modules and needs no evaluation module of its own.
+     */
+    survey_type: 'taste_test' | 'product_test' | 'pack_test' | 'usage_attitude' | '';
     purchase_funnel_id?: string;
     links_count: number;
     sample_capacity: number;
