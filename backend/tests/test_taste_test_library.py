@@ -98,18 +98,23 @@ def test_overall_questions_are_hedonic_one_to_ten():
 
 def test_purchase_intent_is_monotonic_not_centered():
     """
-    T81 is 1-5 like the sensory scales, but 5 is genuinely the best answer.
-    Inferring "1-5 in a taste test means centered" scored a 5 as a defect and a
-    lukewarm 3 as ideal, so the shape has to be explicit.
+    T81 shares a numeric range with the sensory scales, but its top point is
+    genuinely the best answer. Inferring "a taste-test rating scale is centered"
+    scored the top box as a defect and a lukewarm middle as ideal, so the shape
+    has to be declared rather than guessed.
+
+    Now 1-10, matching the other summary questions. Per-point labels are
+    deliberately empty — the two anchors carry the direction, and a five-label
+    list against ten points is dropped downstream anyway.
     """
     question = BY_ID["tt_purchase_intent"]
 
     assert question.scale_shape == "monotonic"
-    assert (question.scale_min, question.scale_max) == (1, 5)
-    assert question.ideal_point == 5
-    assert question.point_labels_ar[-1] == "هشتريه جدا"
-    # Its midpoint must NOT claim to be suitable.
-    assert "مناسب" not in question.point_labels_ar[2]
+    assert (question.scale_min, question.scale_max) == (1, 10)
+    # The good end is the top of the scale, never the midpoint.
+    assert question.ideal_point == question.scale_max
+    assert question.point_labels_ar == []
+    assert question.ar_max_label and question.ar_min_label
     assert question.analytical_role == "purchase_intent"
 
 

@@ -16,6 +16,7 @@ import pytest
 from backend.services.orchestration_service import (
     PRICING_ATTRIBUTE,
     PRICING_QUESTION_IDS,
+    OrchestrationService,
     build_pricing_question_text,
     format_pricing_unit,
 )
@@ -103,3 +104,35 @@ def test_the_pricing_question_is_matched_by_attribute_and_by_id():
     assert PRICING_ATTRIBUTE == "Purchase Price"
     assert "tt_q16" in PRICING_QUESTION_IDS   # taste test
     assert "pt_q38" in PRICING_QUESTION_IDS   # product test
+
+# ── The placeholder must never reach a respondent ──────────────────────────
+
+
+@pytest.mark.parametrize("is_arabic", [True, False])
+def test_the_product_placeholder_is_filled_with_the_brand(is_arabic):
+    """
+    `build_pricing_question_text` leaves `{product}` for `format_text` to
+    fill. `format_text` handled `[product]` and `(المنتج)` but not the brace
+    form, so the pricing question reached respondents reading literally
+    "ممكن تشتري {product} بسعر ايه" — asking them to price a placeholder.
+    """
+    svc = OrchestrationService()
+    template = build_pricing_question_text({}, is_arabic=is_arabic)
+    assert "{product}" in template, "template should carry the placeholder"
+
+    out = svc.format_text(template, product="دايرة", category="آيس كريم", brand="دايرة")
+    assert "{product}" not in out
+    assert "دايرة" in out
+
+
+def test_no_placeholder_syntax_survives_formatting():
+    """
+    Every placeholder form the templates use must be consumed. A leftover
+    brace or bracket is always a respondent-visible defect, so assert on the
+    syntax rather than on one known token.
+    """
+    svc = OrchestrationService()
+    raw = "{product} [product] (المنتج) [brand] (البراند) [Category]"
+    out = svc.format_text(raw, product="مربع", category="آيس كريم", brand="مربع")
+    for leftover in ("{", "}", "[", "]"):
+        assert leftover not in out, f"unsubstituted placeholder syntax {leftover!r} in {out!r}"

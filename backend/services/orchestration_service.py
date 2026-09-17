@@ -108,6 +108,11 @@ class OrchestrationService:
         if not text:
             return ""
         
+        # Brace form, used by the pricing question templates. It was never
+        # substituted here, so respondents were shown the literal "{product}"
+        # in place of the brand they were meant to be pricing.
+        text = text.replace("{product}", product)
+
         # English placeholders
         text = re.sub(r'\[product\]', product, text, flags=re.IGNORECASE)
         text = re.sub(r'\[Category\]', category, text, flags=re.IGNORECASE)

@@ -6,12 +6,16 @@ import {
 } from './tasteTestModuleUtils';
 import { localizeTasteTestAttribute } from './tasteTestAttributeLabels';
 
+// Used only when the master-data call returns nothing, so these must track the
+// canonical library (backend/resources/taste_test/attribute_library.json).
+// Both summary questions are 1-10 there; this list had drifted to 1-5 and 1-9,
+// which would render the wrong scale length for a respondent.
 const FALLBACK_FIXED_QUESTIONS = [
     {
         question_id: 'tt_fallback_purchase_intent',
-        en_text: 'How likely are you to purchase this product?',
-        ar_text: 'ما مدى احتمالية شرائك لهذا المنتج؟',
-        question_type: 'Scale 1-5',
+        en_text: 'How likely are you to buy (product)?',
+        ar_text: 'ممكن تشتري (المنتج) بنسبة اد ايه؟',
+        question_type: 'Scale 1-10',
         timing: 'After Taste',
         question_status: 'fixed'
     },
@@ -19,7 +23,7 @@ const FALLBACK_FIXED_QUESTIONS = [
         question_id: 'tt_fallback_overall_liking',
         en_text: 'Overall, how much do you like this product?',
         ar_text: 'بشكل عام، ما مدى إعجابك بهذا المنتج؟',
-        question_type: 'Scale 1-9',
+        question_type: 'Scale 1-10',
         timing: 'After Taste',
         question_status: 'fixed'
     }

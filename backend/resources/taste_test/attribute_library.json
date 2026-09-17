@@ -1,10 +1,11 @@
 {
-  "version": 1,
+  "version": 2,
   "description": "Canonical Taste Test attribute library, transcribed from 'Taste Test attributes' (Marketeers). This file is the source of truth: backend/scripts/seed_taste_test_library.py upserts it into the taste_test_questions collection. Previously the library existed only inside an untracked Taste_Test_restructured.xlsx, so it could not be rebuilt or reviewed.",
   "notes": {
     "scales": "Sensory sub-attributes use a 5-point CENTERED scale: every point carries its own label and the MIDDLE label is the ideal answer ('مناسب' = suitable for me). 'Overall ...' questions use a 1-10 HEDONIC scale where 10 is best. Purchase intent (T81) is a 5-point MONOTONIC ladder where 5 is best - it looks like a centered scale but is not one, so its labels say so explicitly.",
     "interpretation": "There is deliberately no separate 'JAR' flag. The point labels ARE the semantics - reporting and AI read point_labels_ar / point_labels_en to decide whether the midpoint or the top of a scale is the good outcome.",
-    "status": "question_status is the platform's inclusion rule, not research guidance. 'fixed' questions are asked in every taste test; 'optional' questions are asked only when their main attribute is selected during survey creation. An 'Overall ...' row has no sub-attribute, so it is pulled in automatically whenever its main attribute is chosen. Separately, condition_ar/condition_en carry the source document's advice that an attribute (acidity, bitterness, crispness) is only worth measuring when that characteristic is natural and expected in the product."
+    "status": "question_status is the platform's inclusion rule, not research guidance. 'fixed' questions are asked in every taste test; 'optional' questions are asked only when their main attribute is selected during survey creation. An 'Overall ...' row has no sub-attribute, so it is pulled in automatically whenever its main attribute is chosen. Separately, condition_ar/condition_en carry the source document's advice that an attribute (acidity, bitterness, crispness) is only worth measuring when that characteristic is natural and expected in the product.",
+    "purchase_intent": "Moved to a 1-10 monotonic scale with anchor labels only, matching the other summary questions. Per-point labels were cleared because five labels cannot describe ten points, and a mismatched list is dropped downstream. tt_q15 was retired as a duplicate — both questions asked purchase intent and both were fixed, so respondents rated it twice. Answers collected before this change are on a 1-5 scale and are not comparable with later ones."
   },
   "instructions": {
     "centered_ar": "(اختر الإجابة الأنسب لك، والاختيار الأوسط يعني أنها مناسبة لك تمامًا)",
@@ -458,31 +459,23 @@
       "legacy_id": "T81",
       "main_att": "Overall",
       "supp_att": "Purchase Intent",
-      "question_type": "scale 1-5",
+      "question_type": "scale 1-10",
       "scale_shape": "monotonic",
       "scale_min": 1,
-      "scale_max": 5,
+      "scale_max": 10,
       "question_status": "fixed",
       "timing": "After Taste",
       "order": 180,
       "analytical_role": "purchase_intent",
-      "ar_text": "إلي أي مدى ممكن تشتري المنتج ده؟",
-      "en_text": "How likely are you to buy this product?",
-      "point_labels_ar": [
-        "مش هاشتريه خالص",
-        "مش هشتريه",
-        "هشتريه الى حد ما",
-        "هشتريه",
-        "هشتريه جدا"
-      ],
-      "point_labels_en": [
-        "Definitely would not buy",
-        "Would not buy",
-        "Might buy",
-        "Would buy",
-        "Definitely would buy"
-      ],
-      "interpretation_note": "MONOTONIC, not centered. 5 is the best outcome and 3 is a lukewarm middle - do NOT treat the midpoint as the ideal here."
+      "ar_text": "ممكن تشتري (المنتج) بنسبة اد ايه؟",
+      "en_text": "How likely are you to buy (product)?",
+      "point_labels_ar": [],
+      "point_labels_en": [],
+      "interpretation_note": "MONOTONIC, not centered. 10 is the best outcome and 5 is a lukewarm middle - do NOT treat the midpoint as the ideal here.",
+      "ar_min_label": "مش هاشتريه خالص",
+      "ar_max_label": "أكيد هشتريه",
+      "en_min_label": "Definitely would not buy",
+      "en_max_label": "Definitely would buy"
     },
     {
       "question_id": "tt_open_likes",

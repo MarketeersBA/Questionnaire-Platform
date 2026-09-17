@@ -15,6 +15,12 @@ import pandas as pd
 # Canonical taste-test purchase intent question IDs (stable across surveys).
 DEFAULT_PI_QUESTION_IDS: FrozenSet[str] = frozenset(
     {
+        # The live question. It was missing here, so PI rows were only ever
+        # found by matching the question text — which silently breaks the
+        # moment anyone rewords it.
+        "tt_purchase_intent",
+        # Retired as a duplicate of the above, kept so reports over data
+        # collected before the merge still resolve their PI rows.
         "tt_q15",
         "tt_fallback_purchase_intent",
     }

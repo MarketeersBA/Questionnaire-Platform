@@ -8,11 +8,37 @@ import pytest
 from backend.analytics_module.aggregator import ReportAggregator
 from backend.analytics_module.ingestor import SurveyData
 from backend.analytics_module.purchase_intent_detection import (
+    DEFAULT_PI_QUESTION_IDS,
     build_pi_diagnostics,
     compute_pi_t2b_by_brand,
     filter_purchase_intent_rows,
     purchase_intent_row_mask,
 )
+
+
+def test_library_purchase_intent_questions_are_all_registered():
+    """
+    Every library question declaring ``analytical_role: purchase_intent`` must
+    appear in ``DEFAULT_PI_QUESTION_IDS``.
+
+    The set is the only id-based route into PI detection; anything missing from
+    it is found solely by matching the question's wording. That is silent and it
+    breaks on the next reword — which is exactly what happened when
+    ``tt_purchase_intent`` replaced ``tt_q15`` and was never added here, leaving
+    the live question detectable only through its Arabic text.
+    """
+    from backend.services.taste_test_library import load_library
+
+    declared = {
+        q.question_id
+        for q in load_library()
+        if getattr(q, "analytical_role", None) == "purchase_intent"
+    }
+    assert declared, "library declares no purchase-intent question at all"
+    assert declared <= set(DEFAULT_PI_QUESTION_IDS), (
+        "purchase-intent questions missing from DEFAULT_PI_QUESTION_IDS: "
+        f"{sorted(declared - set(DEFAULT_PI_QUESTION_IDS))}"
+    )
 
 
 def _eval_row(
