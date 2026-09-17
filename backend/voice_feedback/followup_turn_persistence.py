@@ -16,6 +16,7 @@ async def persist_followup_turn(
     answer_text: str,
     followup_text: Optional[str],
     action: Optional[str],
+    key_insights: Optional[list] = None,
 ) -> None:
     """
     Store one follow-up turn in voice_feedbacks for multi-round context.
@@ -32,10 +33,16 @@ async def persist_followup_turn(
         sort=[("created_at", -1)],
     )
 
+    # `key_insights` is what the moderator actually extracted from the
+    # answer — the findings a decision-maker would act on. The engine has
+    # always produced them and they were always discarded here, so every
+    # AIMI conversation ended with its substance thrown away and only the
+    # question text kept.
     payload = {
         "round": current_round,
         "followup_text": followup_text,
         "action": action,
+        "key_insights": key_insights or [],
     }
 
     if existing_voice:
@@ -54,6 +61,7 @@ async def persist_followup_turn(
             "answer_text": answer_text,
             "followup_text": followup_text,
             "action": action,
+            "key_insights": key_insights or [],
             "status": "completed",
             "created_at": datetime.utcnow(),
         }

@@ -37,6 +37,51 @@ logger = logging.getLogger(__name__)
 #  Output Container
 # ──────────────────────────────────────────────────────────────────────────────
 
+async def load_followup_verbatims(db, survey_id: str) -> List[Dict[str, Any]]:
+    """
+    Answers respondents gave to AI follow-up questions, as open-end rows.
+
+    These live in `voice_feedbacks`, which the ingestor never read — it only
+    loads `responses`. So the entire AIMI conversation was absent from every
+    report: the deepest answers in the study, the ones a moderator probed for
+    specifically because the first answer was too thin, counted for nothing.
+
+    Shaped like the open-end rows built from `flat_evaluations` so the verbatim
+    analyser and the word clouds pick them up without knowing where they came
+    from. `metric` marks them as follow-up answers so they can still be told
+    apart downstream.
+    """
+    records: List[Dict[str, Any]] = []
+    try:
+        cursor = db.get_collection("voice_feedbacks").find(
+            {"survey_id": {"$in": [survey_id, str(survey_id)]}},
+            {"token": 1, "question_id": 1, "transcript": 1, "answer_text": 1,
+             "key_insights": 1, "round": 1},
+        )
+        async for doc in cursor:
+            text = (doc.get("transcript") or doc.get("answer_text") or "").strip()
+            # One character is noise, not a verbatim. The same floor the
+            # flat_evaluations path applies.
+            if len(text) <= 1:
+                continue
+            token = doc.get("token") or ""
+            records.append({
+                "response_id": token,
+                "token": token,
+                "brand": "",
+                "group": "followup",
+                "attribute": "AI Follow-up",
+                "metric": "followup_answer",
+                "value": text,
+                "question_id": doc.get("question_id") or "",
+            })
+    except Exception:
+        # A report missing its follow-up verbatims is worth far more than no
+        # report, so this never blocks generation.
+        logger.warning("Could not load follow-up verbatims for %s", survey_id, exc_info=True)
+    return records
+
+
 @dataclass
 class SurveyData:
     """
@@ -264,6 +309,25 @@ class DirectIngestor:
         )
         data.own_brand = own_brand
         data.category = category
+
+        # Follow-up answers join the open-end corpus so the verbatim analyser
+        # and word clouds see what respondents said when probed — not only
+        # their first, often one-word, reply. Merged here rather than in the
+        # parser because they come from `voice_feedbacks`, a second collection
+        # the sync parser has no access to.
+        followup_rows = await load_followup_verbatims(db, survey_id)
+        if followup_rows:
+            extra = pd.DataFrame(followup_rows)
+            data.open_ends = (
+                pd.concat([data.open_ends, extra], ignore_index=True)
+                if not data.open_ends.empty
+                else extra
+            )
+            logger.info(
+                "[Ingestor] Added %d AI follow-up verbatim(s) for survey %s",
+                len(followup_rows),
+                survey_id,
+            )
         return data
 
     @staticmethod

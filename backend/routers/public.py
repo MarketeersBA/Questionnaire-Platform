@@ -860,6 +860,7 @@ async def handle_ai_followup(token: str, request: FollowUpRequest):
         answer_text=request.answer_text,
         followup_text=result.get("followup_text"),
         action=result.get("action"),
+        key_insights=result.get("key_insights") or [],
     )
 
     return result

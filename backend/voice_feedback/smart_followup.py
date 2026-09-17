@@ -27,6 +27,41 @@ def _complete_response(reasoning: str) -> Dict[str, Any]:
     }
 
 
+#: How the moderator is told to speak, per survey language.
+#:
+#: The prompt used to hard-code "ARABIC ONLY", so an English study was
+#: moderated in Arabic — the respondent could not read the follow-up, and the
+#: verbatims came back in a language the analyst had not asked for. The
+#: language the creator chose for the survey is the one that governs.
+_LANGUAGE_RULES = {
+    "ar": (
+        "Arabic",
+        "You MUST ask your questions, respond, and close the conversation in "
+        "ARABIC ONLY, using natural Egyptian colloquial phrasing.",
+    ),
+    "en": (
+        "English",
+        "You MUST ask your questions, respond, and close the conversation in "
+        "ENGLISH ONLY, in plain conversational wording.",
+    ),
+}
+
+
+def resolve_language_rule(language: str) -> tuple[str, str]:
+    """
+    Return ``(display_name, instruction)`` for a survey language.
+
+    Unknown or "auto" falls back to Arabic, which is what the platform's
+    studies have overwhelmingly been. The fallback is deliberate rather than
+    silent: a moderator with no language instruction drifts between languages
+    mid-interview, which is worse than one consistent choice.
+    """
+    key = (language or "").strip().lower()
+    if key.startswith("en"):
+        return _LANGUAGE_RULES["en"]
+    return _LANGUAGE_RULES["ar"]
+
+
 class SmartFollowUpEngine:
     def __init__(self, api_key: Optional[str] = None):
         self.api_key = api_key if api_key is not None else settings.OPENAI_API_KEY
@@ -93,12 +128,20 @@ class SmartFollowUpEngine:
             if ctx.custom_instructions and ctx.custom_instructions.strip()
             else ""
         )
+        language_name, language_rule = resolve_language_rule(ctx.language)
+        # The system prompt carries the rule too: a language instruction that
+        # appears only in the user turn is easily outweighed by the respondent
+        # replying in another language.
+        god_prompt = god_prompt.replace("{language_rule}", language_rule)
+
         user_content = user_template.format(
             answer=ctx.answer,
             conversation_history=self._build_conversation_history(ctx.question, ctx.previous_turns),
             brand_name=ctx.brand_name,
             objective=ctx.survey_objective,
             language=ctx.language,
+            language_name=language_name,
+            language_rule=language_rule,
             custom_instructions=custom_text,
             question_category=ctx.question_category,
             survey_type=ctx.survey_type,
