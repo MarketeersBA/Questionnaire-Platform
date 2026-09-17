@@ -585,14 +585,17 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                         <Beaker className="w-5 h-5 text-primary-soft" />
                         <label className="text-sm font-black uppercase tracking-[0.2em] text-ink-muted transition-colors">Survey Type</label>
                     </div>
-                    <div id="survey-type-section" className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div id="survey-type-section" className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                         {surveyTypesList.map((type) => (
                             <button
                                 key={type.id}
                                 type="button"
                                 onClick={() => setFormData(prev => {
                                     const isTasteTest = type.id === 'taste_test';
-                                    const isProductTest = type.id === 'product_test';
+                                    // Pack testing runs the product-test composer with the
+                                    // packaging bank, so it needs the same config objects.
+                                    const isProductTest = type.id === 'product_test' || type.id === 'pack_test';
+                                    const isUsageAttitude = type.id === 'usage_attitude';
                                     return {
                                         ...prev,
                                         survey_type: type.id as any,
@@ -606,25 +609,31 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                             ? ['screening', 'taste_test', 'purchase_funnel', 'brand_usage', 'brand_pricing_behavior', 'brand_analyzer']
                                             : isProductTest
                                                 ? ['screening', 'product_test']
-                                                : ['screening'],
-                                        purchase_funnel: isTasteTest ? {
+                                                // Usage & Attitude has no evaluation module: it is
+                                                // the funnel, usage and pricing modules. Falling
+                                                // through to ['screening'] gave it nothing to ask.
+                                                : isUsageAttitude
+                                                    ? ['screening', 'purchase_funnel', 'brand_usage', 'brand_pricing_behavior']
+                                                    : ['screening'],
+                                        purchase_funnel: (isTasteTest || isUsageAttitude) ? {
                                             is_enabled: true,
                                             category_name: prev.purchase_funnel?.category_name || '',
                                             brand_list: prev.purchase_funnel?.brand_list || []
                                         } : prev.purchase_funnel
                                     };
                                 })}
-                                className={`text-left p-6 rounded-3xl border-2 transition-all group relative ${formData.survey_type === type.id
-                                    ? 'border-primary bg-primary/5 dark:bg-primary/10 scale-[1.02] shadow-lg'
+                                title={type.desc}
+                                className={`text-left px-4 py-3 rounded-2xl border-2 transition-all group relative ${formData.survey_type === type.id
+                                    ? 'border-primary bg-primary/5 dark:bg-primary/10 shadow-md'
                                     : 'border-line/80 dark:border-line/10 bg-surface/20 hover:border-primary/40'
                                     }`}
                             >
-                                <div className={`w-10 h-10 rounded-xl ${type.bg} ${type.color} flex items-center justify-center mb-4 transition-transform group-hover:scale-110`}>
-                                    <type.icon className="w-5 h-5" />
+                                <div className={`w-8 h-8 rounded-lg ${type.bg} ${type.color} flex items-center justify-center mb-2 transition-transform group-hover:scale-110`}>
+                                    <type.icon className="w-4 h-4" />
                                 </div>
-                                <h4 className="text-sm font-black uppercase tracking-widest text-ink mb-1">{type.name}</h4>
+                                <h4 className="text-[11px] font-black uppercase tracking-widest text-ink leading-tight">{type.name}</h4>
                                 {formData.survey_type === type.id && (
-                                    <div className="absolute top-4 right-4">
+                                    <div className="absolute top-2.5 right-2.5">
                                         <div className="w-4 h-4 rounded-full bg-primary text-white flex items-center justify-center animate-in zoom-in">
                                             <Check className="w-2.5 h-2.5" />
                                         </div>

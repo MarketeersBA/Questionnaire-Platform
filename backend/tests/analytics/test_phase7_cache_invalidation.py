@@ -20,10 +20,29 @@ class TestPhase7CacheInvalidation:
         assert ANALYTICS_PROMPT_SUITE_VERSION == "2.0.0"
         assert DEFAULT_PREFIX_VERSION == "2.0.0"
 
-    def test_all_cache_versioned_prompts_at_v2(self):
+    def test_every_cache_versioned_prompt_declares_a_usable_version(self):
+        """
+        Each prompt must carry a version the cache key can be built from.
+
+        This used to assert the literal "2.0.0" for every prompt, which made
+        it fail the moment any prompt was legitimately revised — the version
+        bump is exactly how stale cached insights get invalidated, so pinning
+        it turned a correct change into a red test.
+
+        What actually matters is the invariant: a version exists, it parses as
+        semver, and it has not regressed below the 2.x baseline that the cache
+        entry defaults assume.
+        """
         for key in sorted(CACHE_VERSIONED_PROMPT_KEYS):
-            assert registry.get_template_version(key) == "2.0.0", (
-                f"Prompt '{key}' must be v2.0.0 for cache invalidation"
+            version = registry.get_template_version(key)
+            assert version, f"Prompt '{key}' has no version; its cache key cannot be built"
+
+            parts = version.split(".")
+            assert len(parts) == 3 and all(p.isdigit() for p in parts), (
+                f"Prompt '{key}' version {version!r} is not semver"
+            )
+            assert int(parts[0]) >= 2, (
+                f"Prompt '{key}' is at {version}, below the 2.x cache baseline"
             )
 
     def test_ai_insight_cache_entry_defaults(self):

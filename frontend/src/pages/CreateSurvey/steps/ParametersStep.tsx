@@ -1127,7 +1127,30 @@ export function ParametersStep({
                 </div>
             </div>
 
-            {formData.survey_type !== 'taste_test' && formData.survey_type !== 'product_test' && (
+            {/* Shown only for a type this page has no parameters UI for. Pack testing
+                and usage & attitude are handled below, so they must not be
+                told to switch to a taste test. */}
+            {/* Usage & Attitude has no evaluation module: nobody tastes or
+                uses a product. Its parameters are the category, the brand list
+                and which behavioural modules run — the funnel, usage habits and
+                pricing behaviour — all of which live in the shared section. It
+                previously fell through to "Module Under Construction", which was
+                wrong: every module it needs already exists and composes. */}
+            {formData.survey_type === 'usage_attitude' && (
+                <div className="space-y-5">
+                    <SurveyLanguageMenu
+                        id="ua-language"
+                        value={formData.config?.language === 'en' ? 'en' : 'ar'}
+                        onChange={(lang) => setFormData(prev => ({
+                            ...prev,
+                            config: { ...(prev.config || DEFAULT_TASTE_CONFIG), language: lang },
+                        }))}
+                    />
+                    {renderSharedProtocolsAndBrands()}
+                </div>
+            )}
+
+            {!['taste_test', 'product_test', 'pack_test', 'usage_attitude'].includes(formData.survey_type) && formData.survey_type !== '' && (
                 <div className="p-5 rounded-[2.5rem] bg-amber-50 dark:bg-amber-950/20 border-2 border-amber-200 dark:border-amber-900/50 mb-5 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <div className="p-3 rounded-2xl bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400">
@@ -1159,6 +1182,67 @@ export function ParametersStep({
                     />
 
                     {renderSharedProtocolsAndBrands()}
+
+                    {/* ═══ Pack size for the pricing question ═══
+                        The taste test always asks what the respondent would pay.
+                        Without a stated quantity each person prices whatever
+                        pack they happen to picture, so the answers cannot be
+                        compared or averaged. Declaring the size here puts every
+                        respondent on the same basis; leaving it blank falls back
+                        to the sample physically in front of them. */}
+                    {formData.survey_type === 'taste_test' && (
+                        <section className="space-y-4 border-t border-line/80 dark:border-line/10 pt-6">
+                            <div className="space-y-1">
+                                <label className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-ink ml-1">
+                                    <Tag className="w-3.5 h-3.5 text-primary-soft" /> Pack Size for Pricing
+                                    <span className="text-[10px] font-bold text-ink-subtle normal-case tracking-normal">(optional)</span>
+                                </label>
+                                <p className="text-sm text-ink-muted font-semibold ml-1">
+                                    The quantity respondents are pricing. Leave blank to ask about the sample in front of them.
+                                </p>
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-3 ml-1">
+                                <input
+                                    type="text"
+                                    inputMode="decimal"
+                                    value={formData.config?.pricing_unit_amount ?? ''}
+                                    onChange={(e) => setFormData(prev => ({
+                                        ...prev,
+                                        config: { ...(prev.config || DEFAULT_TASTE_CONFIG), pricing_unit_amount: e.target.value },
+                                    }))}
+                                    placeholder="200"
+                                    className="w-28 bg-surface border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm font-black text-ink text-center focus:outline-none focus:border-primary transition-all"
+                                />
+                                <input
+                                    type="text"
+                                    value={formData.config?.pricing_unit_label ?? ''}
+                                    onChange={(e) => setFormData(prev => ({
+                                        ...prev,
+                                        config: { ...(prev.config || DEFAULT_TASTE_CONFIG), pricing_unit_label: e.target.value },
+                                    }))}
+                                    placeholder={"ml / g / جم"}
+                                    className="w-32 bg-surface border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm font-black text-ink text-center focus:outline-none focus:border-primary transition-all"
+                                />
+                            </div>
+
+                            {/* Shows the question as the respondent will read it,
+                                so the choice is not an abstract setting. */}
+                            <div className="ml-1 p-3.5 rounded-2xl bg-surface-raised/60 border border-line/80 dark:border-line/10" dir="rtl">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-ink-subtle mb-1.5" dir="ltr">
+                                    Respondent sees
+                                </p>
+                                <p className="text-sm font-bold text-ink">
+                                    {(() => {
+                                        const size = `${formData.config?.pricing_unit_amount ?? ''} ${formData.config?.pricing_unit_label ?? ''}`.trim();
+                                        return size
+                                            ? `\u0645\u0645\u0643\u0646 \u062a\u0634\u062a\u0631\u064a [\u0627\u0644\u0645\u0646\u062a\u062c] \u0628\u0633\u0639\u0631 \u0627\u064a\u0647 \u0644\u0648 \u062d\u062c\u0645\u0647 ${size}\u061f`
+                                            : '\u0645\u0645\u0643\u0646 \u062a\u0634\u062a\u0631\u064a [\u0627\u0644\u0645\u0646\u062a\u062c] \u0628\u0633\u0639\u0631 \u0627\u064a\u0647 \u0644\u0648 \u0628\u0627\u0644\u062d\u062c\u0645 \u0627\u0644\u0644\u064a \u0642\u062f\u0627\u0645\u0643 \u062f\u0647\u061f';
+                                    })()}
+                                </p>
+                            </div>
+                        </section>
+                    )}
 
                     {/* ═══ Unified Attribute Engine ═══ */}
                     <section className="space-y-5 border-t border-line/80 dark:border-line/10 pt-6" id="attribute-engine-section">
@@ -2630,7 +2714,10 @@ export function ParametersStep({
                 </div>
             )}
 
-            {formData.survey_type === 'product_test' && (
+            {/* Pack testing is a product test with the packaging bank and heatmap
+                turned on — same parameters, same composer branch — so it renders
+                this UI rather than a placeholder. */}
+            {(formData.survey_type === 'product_test' || formData.survey_type === 'pack_test') && (
                 <div className="space-y-5 animate-slide-up">
                     <SurveyLanguageMenu
                         id="survey-language-select-product"
@@ -2821,7 +2908,7 @@ export function ParametersStep({
                 </div>
             )}
 
-            {formData.survey_type !== 'taste_test' && formData.survey_type !== 'product_test' && formData.survey_type !== '' && (
+            {!['taste_test', 'product_test', 'pack_test', 'usage_attitude'].includes(formData.survey_type) && formData.survey_type !== '' && (
                 <div className="p-6 flex flex-col items-center justify-center text-center space-y-5 bg-surface-raised/40 rounded-[2.5rem] border border-dashed border-line/80 dark:border-line/10 transition-colors">
                     <div className="w-16 h-16 rounded-full bg-slate-200 dark:bg-slate-900 flex items-center justify-center text-slate-400 dark:text-slate-700 transition-colors">
                         <Settings2 className="w-8 h-8" />

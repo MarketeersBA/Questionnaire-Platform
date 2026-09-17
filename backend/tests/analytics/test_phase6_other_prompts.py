@@ -33,7 +33,11 @@ def _ice_cream_context() -> SurveyContextBlock:
 class TestPhase6OtherPrompts:
     def test_executive_summary_v2_prompt_contract(self):
         payload = json.loads((_PROMPTS_DIR / "executive_summary.json").read_text(encoding="utf-8"))
-        assert payload["version"] == "2.0.0"
+        # Not pinned to a literal: the version is bumped whenever the prompt
+        # changes, which is how cached insights get invalidated. This test is
+        # about the brand and protocol variables, not which revision the
+        # prompt happens to be on.
+        assert int(payload["version"].split(".")[0]) >= 2
         user_base = payload["user_base"]
         assert "Your primary client is {target_brand}" in user_base
         required = set(payload["validation"]["required_vars"])
@@ -41,7 +45,11 @@ class TestPhase6OtherPrompts:
 
     def test_recommendations_v2_removes_hardcoded_market(self):
         payload = json.loads((_PROMPTS_DIR / "recommendations.json").read_text(encoding="utf-8"))
-        assert payload["version"] == "2.0.0"
+        # Not pinned to a literal revision: the version is bumped whenever a
+        # prompt changes, which is how stale cached insights are invalidated.
+        # These tests are about the prompt's variables and structure, not about
+        # which revision it currently sits on.
+        assert int(payload["version"].split(".")[0]) >= 2
         user_base = payload["user_base"]
         assert "Egyptian FMCG" not in user_base
         assert "{market}" in user_base
@@ -50,7 +58,11 @@ class TestPhase6OtherPrompts:
 
     def test_opportunity_summary_v12_adds_blind_protocol_rule(self):
         payload = json.loads((_PROMPTS_DIR / "opportunity_summary.json").read_text(encoding="utf-8"))
-        assert payload["version"] == "2.0.0"
+        # Not pinned to a literal revision: the version is bumped whenever a
+        # prompt changes, which is how stale cached insights are invalidated.
+        # These tests are about the prompt's variables and structure, not about
+        # which revision it currently sits on.
+        assert int(payload["version"].split(".")[0]) >= 2
         user_base = payload["user_base"]
         assert "{testing_protocol}" in user_base
         assert "BLIND" in user_base
@@ -59,7 +71,11 @@ class TestPhase6OtherPrompts:
 
     def test_verbatim_analysis_v13_adds_target_brand_and_protocol(self):
         payload = json.loads((_PROMPTS_DIR / "verbatim_analysis.json").read_text(encoding="utf-8"))
-        assert payload["version"] == "2.0.0"
+        # Not pinned to a literal revision: the version is bumped whenever a
+        # prompt changes, which is how stale cached insights are invalidated.
+        # These tests are about the prompt's variables and structure, not about
+        # which revision it currently sits on.
+        assert int(payload["version"].split(".")[0]) >= 2
         for field in ("user_base", "user_base_brand_scoped"):
             section = payload[field]
             assert "{target_brand}" in section

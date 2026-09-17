@@ -45,6 +45,64 @@ def localize_taste_test_attribute(name: str, language: str) -> str:
     return TASTE_ATTRIBUTE_AR.get(name) or TASTE_ATTRIBUTE_AR.get(name.strip()) or name
 
 
+#: The taste-test pricing question, identified by its attribute rather than its
+#: id so a re-seeded bank with a different id still matches.
+PRICING_ATTRIBUTE = "Purchase Price"
+PRICING_QUESTION_IDS = {"tt_q16", "pt_q38"}
+
+#: Asked when the analyst has not declared a pack size. Points the respondent at
+#: the physical sample in front of them, which is the only shared reference when
+#: no size is stated.
+PRICING_FALLBACK_AR = "ممكن تشتري {product} بسعر ايه لو بالحجم اللي قدامك ده؟"
+PRICING_FALLBACK_EN = "What price would you pay for {product} at the size in front of you?"
+
+#: Asked when a size is declared, so every respondent prices the same quantity.
+PRICING_SIZED_AR = "ممكن تشتري {product} بسعر ايه لو حجمه {size}؟"
+PRICING_SIZED_EN = "What price would you pay for {product} at {size}?"
+
+
+def format_pricing_unit(config: dict) -> str:
+    """
+    Render the declared pack size, e.g. "200 ml". Empty when not set.
+
+    Accepts the amount and unit either as one free-text string or as separate
+    fields, because the creation form has carried both shapes.
+    """
+    if not isinstance(config, dict):
+        return ""
+
+    combined = str(config.get("pricing_unit") or "").strip()
+    if not combined:
+        amount = str(config.get("pricing_unit_amount") or "").strip()
+        unit = str(config.get("pricing_unit_label") or "").strip()
+        combined = f"{amount} {unit}".strip()
+
+    # Braces are stripped because the result is dropped into a template that is
+    # substituted again downstream. A size typed as "{product} 200ml" would
+    # otherwise leave a second placeholder for `format_text` to fill, producing
+    # the brand name twice in one sentence.
+    return combined.replace("{", "").replace("}", "").strip()
+
+
+def build_pricing_question_text(config: dict, *, is_arabic: bool) -> str:
+    """
+    The pricing question, phrased for whether a pack size is known.
+
+    A price means nothing without the quantity it buys: "would you pay 50 for
+    this?" cannot be compared across respondents who each pictured a different
+    pack. Naming the size makes the answers comparable, and when no size has
+    been declared the question at least anchors on the sample in front of the
+    respondent rather than leaving the quantity unstated.
+
+    `{product}` is filled downstream by `format_text`, which substitutes the
+    brand — or its blind code on a blind study.
+    """
+    size = format_pricing_unit(config)
+    if size:
+        return (PRICING_SIZED_AR if is_arabic else PRICING_SIZED_EN).replace("{size}", size)
+    return PRICING_FALLBACK_AR if is_arabic else PRICING_FALLBACK_EN
+
+
 class OrchestrationService:
     def format_text(self, text: str, product: str = "product", category: str = "Category", brand: str = "Brand") -> str:
         if not text:
@@ -63,9 +121,15 @@ class OrchestrationService:
         
         return text
 
-    def map_taste_test_question(self, q: Dict[str, Any], brand_name: str, attr_name: str, language: str, category: str, meta: Dict[str, Any]) -> Dict[str, Any]:
+    def map_taste_test_question(self, q: Dict[str, Any], brand_name: str, attr_name: str, language: str, category: str, meta: Dict[str, Any], pricing_config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         is_arabic = language == 'ar'
         text = q.get('ar_text') if is_arabic and q.get('ar_text') else q.get('en_text', '')
+
+        # The pricing question is rewritten to name the quantity being priced.
+        # Left as authored it asks for a price without saying how much product
+        # that price buys, so answers cannot be compared between respondents.
+        if q.get("main_att") == PRICING_ATTRIBUTE or q.get("question_id") in PRICING_QUESTION_IDS:
+            text = build_pricing_question_text(pricing_config or {}, is_arabic=is_arabic)
         raw_options = q.get('ar_options') if is_arabic and q.get('ar_options') else q.get('en_options', [])
 
         q_type_str = (q.get('question_type') or "").lower()
@@ -246,7 +310,7 @@ class OrchestrationService:
 
                 # L1
                 l1_questions = [
-                    self.map_taste_test_question(q, "", "", language, category, meta)
+                    self.map_taste_test_question(q, "", "", language, category, meta, pricing_config=tt_config)
                     for q in master_data.get("fixed", [])
                     if q.get("timing") == "Layer 1"
                 ]
@@ -259,7 +323,7 @@ class OrchestrationService:
                 # L2
                 l2_sections = []
                 before_taste = [
-                    self.map_taste_test_question(q, "", "", language, category, meta)
+                    self.map_taste_test_question(q, "", "", language, category, meta, pricing_config=tt_config)
                     for q in master_data.get("fixed", [])
                     if q.get("timing") == "Before Taste"
                 ]
@@ -315,7 +379,7 @@ class OrchestrationService:
                         attr_questions = []
                         if source == "library":
                             attr_questions = [
-                                self.map_taste_test_question(q, brand, main_attr, language, category, meta)
+                                self.map_taste_test_question(q, brand, main_attr, language, category, meta, pricing_config=tt_config)
                                 for q in master_data.get(main_attr, [])
                                 if q.get("timing") != "Layer 1"
                             ]
@@ -392,7 +456,7 @@ class OrchestrationService:
 
                     # Brand fixed after taste
                     brand_fixed = [
-                        self.map_taste_test_question(q, brand, "", language, category, meta)
+                        self.map_taste_test_question(q, brand, "", language, category, meta, pricing_config=tt_config)
                         for q in master_data.get("fixed", [])
                         if q.get("timing") == "After Taste"
                     ]

@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import {useEffect, useMemo } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import OpenEndAnswerWithFollowUpThread from '../voice-feedback/OpenEndAnswerWithFollowUpThread';
 import AiFollowUpPanel from '../voice-feedback/AiFollowUpPanel';
-import FollowUpRoundsSlider from '../voice-feedback/FollowUpRoundsSlider';
 import type { AiFollowupConfig } from '../../pages/CreateSurvey/types';
 import {
   canSubmitFollowUpReply,
@@ -73,7 +72,6 @@ export default function TasteTestOpenEndQuestion({
   onFollowUpTrigger,
   onVoiceFollowUpTrigger,
   onFollowUpReplyChange,
-  onMaxRoundsChange,
 }: TasteTestOpenEndQuestionProps) {
   const isArabic = language === 'ar';
   const followUpEligibility = useMemo(() => buildTasteTestFollowUpEligibility({
@@ -86,9 +84,6 @@ export default function TasteTestOpenEndQuestion({
   const minAnswerLength = resolveMinAnswerLength(aiFollowup);
   const panelState = followUpStateMap?.[questionId];
   const questionCategory = classifyQuestionCategory(questionText);
-  const adminMaxRounds = getMaxFollowUpRounds(aiFollowup, questionCategory);
-  const showRoundsPicker = Boolean(aiFollowup?.is_enabled && aiFollowup?.apply_to_text && adminMaxRounds > 1);
-  const [respondentRounds, setRespondentRounds] = useState(adminMaxRounds);
 
   const appendFollowUpExchange = (respondentPart: string) => {
     onChange(appendTasteTestFollowUpToOpenEndValue(
@@ -138,20 +133,13 @@ export default function TasteTestOpenEndQuestion({
 
   return (
     <>
-      {showRoundsPicker && (
-        <div className="mb-3">
-          <FollowUpRoundsSlider
-            maxAllowed={adminMaxRounds}
-            value={respondentRounds}
-            language={language}
-            onChange={(n) => {
-              setRespondentRounds(n);
-              onMaxRoundsChange?.(questionId, n);
-            }}
-          />
-        </div>
-      )}
-
+      {/* No respondent-facing rounds control.
+          How many follow-ups a study asks is a research-design decision: it
+          determines how much depth the data carries, and it has to be the same
+          for everyone or the answers are not comparable. Letting respondents
+          lower it meant each person effectively ran a different study, and in
+          practice it was used to cut the interview short. The creator's
+          `max_rounds` is now the only source, enforced server-side. */}
       <OpenEndAnswerWithFollowUpThread
         value={value}
         showVoice={showVoice}
