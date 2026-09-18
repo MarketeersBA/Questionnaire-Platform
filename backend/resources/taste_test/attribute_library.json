@@ -468,7 +468,7 @@
       "order": 180,
       "analytical_role": "purchase_intent",
       "ar_text": "ممكن تشتري المنتج بنسبة اد ايه؟",
-      "en_text": "How likely are you to buy (product)?",
+      "en_text": "How likely are you to buy product?",
       "point_labels_ar": [],
       "point_labels_en": [],
       "interpretation_note": "MONOTONIC, not centered. 10 is the best outcome and 5 is a lukewarm middle - do NOT treat the midpoint as the ideal here.",

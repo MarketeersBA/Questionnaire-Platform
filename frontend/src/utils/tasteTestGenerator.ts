@@ -10,6 +10,63 @@ import { localizeTasteTestAttribute } from './tasteTestAttributeLabels';
 // canonical library (backend/resources/taste_test/attribute_library.json).
 // Both summary questions are 1-10 there; this list had drifted to 1-5 and 1-9,
 // which would render the wrong scale length for a respondent.
+/**
+ * Pricing question rewrite — mirrors `orchestration_service.py`.
+ *
+ * A price means nothing without the quantity it buys: "would you pay 50 for
+ * this?" cannot be compared across respondents who each pictured a different
+ * pack. The backend has rewritten this question for a while, but the survey
+ * schema is composed HERE, in the browser — so the rewrite never reached a
+ * real survey and respondents kept seeing the bare "بسعره ايه؟" wording.
+ * Keep this in step with the Python constants of the same name.
+ */
+const PRICING_ATTRIBUTE = 'Purchase Price';
+const PRICING_QUESTION_IDS = new Set(['tt_q16', 'pt_q38']);
+
+/** Asked when no pack size is declared: anchors on the sample in front of them. */
+const PRICING_FALLBACK_AR = 'ممكن تشتري {product} بسعر ايه لو بالحجم اللي قدامك ده؟';
+const PRICING_FALLBACK_EN = 'What price would you pay for {product} at the size in front of you?';
+
+/** Asked when a size is declared, so every respondent prices the same quantity. */
+const PRICING_SIZED_AR = 'ممكن تشتري {product} بسعر ايه لو حجمه {size}؟';
+const PRICING_SIZED_EN = 'What price would you pay for {product} at {size}?';
+
+/**
+ * Render the declared pack size, e.g. "200 ml". Empty when not set.
+ *
+ * Accepts the amount and unit as one free-text string or as separate fields,
+ * because the creation form has carried both shapes.
+ */
+export function formatPricingUnit(config: any): string {
+    if (!config || typeof config !== 'object') return '';
+
+    let combined = String(config.pricing_unit ?? '').trim();
+    if (!combined) {
+        const amount = String(config.pricing_unit_amount ?? '').trim();
+        const unit = String(config.pricing_unit_label ?? '').trim();
+        combined = `${amount} ${unit}`.trim();
+    }
+
+    // Braces are stripped because the result is dropped into a template that is
+    // substituted again below. A size typed as "{product} 200ml" would otherwise
+    // leave a second placeholder, producing the brand name twice in one sentence.
+    return combined.replace(/[{}]/g, '').trim();
+}
+
+/** The pricing question text for this survey's declared size (or lack of one). */
+export function buildPricingQuestionText(config: any, isArabic: boolean): string {
+    const size = formatPricingUnit(config);
+    if (size) {
+        return (isArabic ? PRICING_SIZED_AR : PRICING_SIZED_EN).replace('{size}', size);
+    }
+    return isArabic ? PRICING_FALLBACK_AR : PRICING_FALLBACK_EN;
+}
+
+/** Matched on attribute as well as id, so a re-seeded bank still gets the rewrite. */
+export function isPricingQuestion(q: any): boolean {
+    return q?.main_att === PRICING_ATTRIBUTE || PRICING_QUESTION_IDS.has(q?.question_id);
+}
+
 const FALLBACK_FIXED_QUESTIONS = [
     {
         question_id: 'tt_fallback_purchase_intent',
@@ -51,7 +108,13 @@ export function generateTasteTestModuleSchema(
         if (!text) return "";
         let result = text;
 
-        // English placeholders
+        // Brace form first: the bare `/product/gi` pass below would otherwise
+        // match inside "{product}" and leave the braces stranded in the text.
+        result = result.replace(/\{product\}/gi, brandName || "product");
+
+        // English placeholders. Bracket form before the bare one, for the same
+        // reason as the braces above.
+        result = result.replace(/\[product\]/gi, brandName || "product");
         result = result.replace(/product/gi, brandName || "product");
         result = result.replace(/\[Category\]/gi, category || "Category");
         result = result.replace(/\[Attribute\]/gi, attrName);
@@ -66,7 +129,14 @@ export function generateTasteTestModuleSchema(
     // Helper to map backend question to frontend schema
     const mapQuestion = (q: any, brandName: string, attrName: string = "") => {
         const isArabic = language === 'ar';
-        const text = isArabic ? q.ar_text || q.en_text : q.en_text;
+        let text = isArabic ? q.ar_text || q.en_text : q.en_text;
+
+        // Left as authored, this asks for a price without saying how much
+        // product that price buys, so answers cannot be compared between
+        // respondents. Naming the declared size makes them comparable.
+        if (isPricingQuestion(q)) {
+            text = buildPricingQuestionText(config, isArabic);
+        }
         const rawOptions = isArabic ? q.ar_options : q.en_options;
 
         // Parse question type and scale

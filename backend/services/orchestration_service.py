@@ -117,6 +117,12 @@ class OrchestrationService:
         text = re.sub(r'\[product\]', product, text, flags=re.IGNORECASE)
         text = re.sub(r'\[Category\]', category, text, flags=re.IGNORECASE)
         text = re.sub(r'\[brand\]', brand, text, flags=re.IGNORECASE)
+
+        # Bare word, mirroring the Arabic rule below and the browser-side
+        # composer. Without it the two composers disagreed about which
+        # placeholder spellings work, and an English question authored with a
+        # bare "product" reached the respondent unsubstituted.
+        text = re.sub(r'\bproduct\b', product, text, flags=re.IGNORECASE)
         
         # Arabic placeholders
         text = text.replace("(المنتج)", product)
