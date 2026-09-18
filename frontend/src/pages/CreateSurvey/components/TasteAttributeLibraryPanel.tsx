@@ -70,22 +70,51 @@ interface Props {
     language?: 'en' | 'ar';
 }
 
-const SHAPE_BADGE: Record<LibraryQuestion['scale_shape'], { label: string; className: string }> = {
+/**
+ * How each scale shape is described, minus its range.
+ *
+ * The range is NOT baked in here. These labels used to read 'Ladder 1-5' and
+ * 'Centered 1-5' as fixed strings, so the badge asserted a range it had never
+ * looked at — a question moved to 1-10 went on being advertised to the analyst
+ * as 1-5. The question's own scale_min/scale_max are the only authority.
+ */
+const SHAPE_STYLE: Record<
+    LibraryQuestion['scale_shape'],
+    { term: string; hint: string; ranged: boolean; className: string }
+> = {
     centered: {
-        label: 'Centered 1-5 · middle is ideal',
+        term: 'Centered',
+        hint: 'middle is ideal',
+        ranged: true,
         className: 'bg-emerald-500/12 text-emerald-700 dark:text-emerald-400',
     },
     hedonic: {
-        label: 'Liking 1-10 · high is best',
+        term: 'Liking',
+        hint: 'high is best',
+        ranged: true,
         className: 'bg-[#21A0FF]/12 text-[#255E91] dark:text-[#8ACAEC]',
     },
     monotonic: {
-        label: 'Ladder 1-5 · high is best',
+        term: 'Ladder',
+        hint: 'high is best',
+        ranged: true,
         className: 'bg-[#21A0FF]/12 text-[#255E91] dark:text-[#8ACAEC]',
     },
-    bipolar: { label: 'Bipolar', className: 'bg-surface-sunken text-ink-muted' },
-    open_end: { label: 'Open end', className: 'bg-surface-sunken text-ink-muted' },
+    bipolar: { term: 'Bipolar', hint: '', ranged: false, className: 'bg-surface-sunken text-ink-muted' },
+    open_end: { term: 'Open end', hint: '', ranged: false, className: 'bg-surface-sunken text-ink-muted' },
 };
+
+/** Badge describing a question's scale, read from that question's own range. */
+export function scaleBadge(question: LibraryQuestion): { label: string; className: string } {
+    const style = SHAPE_STYLE[question.scale_shape] ?? SHAPE_STYLE.open_end;
+    if (!style.ranged) {
+        return { label: style.term, className: style.className };
+    }
+    return {
+        label: `${style.term} ${question.scale_min}-${question.scale_max} · ${style.hint}`,
+        className: style.className,
+    };
+}
 
 /** Row of per-point labels, with the ideal answer marked. */
 function PointLabelPreview({ question }: { question: LibraryQuestion }) {
@@ -356,7 +385,7 @@ export default function TasteAttributeLibraryPanel({
                                         {group.sub_attributes.map((question) => {
                                             const label = question.sub_attribute ?? question.question_id;
                                             const isSelected = chosen.includes(label);
-                                            const badge = SHAPE_BADGE[question.scale_shape];
+                                            const badge = scaleBadge(question);
 
                                             return (
                                                 <button
@@ -461,8 +490,8 @@ export default function TasteAttributeLibraryPanel({
                                                     <span className="text-xs font-black uppercase tracking-wider text-ink-muted">
                                                         Always included
                                                     </span>
-                                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${SHAPE_BADGE.hedonic.className}`}>
-                                                        {SHAPE_BADGE.hedonic.label}
+                                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${scaleBadge(group.overall).className}`}>
+                                                        {scaleBadge(group.overall).label}
                                                     </span>
                                                 </div>
                                                 <p dir="rtl" className="text-sm font-bold text-ink mt-1.5 text-right">
