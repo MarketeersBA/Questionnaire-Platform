@@ -217,7 +217,13 @@ async def check_survey_code(
     current_user: Annotated[User, Depends(get_current_user)],
     exclude_id: Optional[str] = None
 ):
-    """Check if a survey code is already taken by a non-deleted survey."""
+    """
+    Check if a survey code is already taken by a non-deleted survey.
+
+    `exclude_id` is the survey being edited. Without it an edit screen asks
+    "is my own code taken?", matches itself, and tells the analyst their own
+    reserved code is unavailable.
+    """
     surveys_col = db.get_collection("surveys")
     query = {
         "survey_code": code,
@@ -225,7 +231,16 @@ async def check_survey_code(
     }
     if exclude_id:
         from bson import ObjectId
-        query["_id"] = {"$ne": ObjectId(exclude_id)}
+        from bson.errors import InvalidId
+        try:
+            query["_id"] = {"$ne": ObjectId(exclude_id)}
+        except (InvalidId, TypeError):
+            # An unparseable id used to raise, turning a routine availability
+            # check into a 500 and leaving the form unable to validate at all.
+            # Excluding nothing is the safe reading: worst case the caller is
+            # told a code is taken, which fails closed rather than allowing a
+            # genuine collision.
+            logger.warning("check-code called with an unparseable exclude_id: %r", exclude_id)
 
     existing = await surveys_col.find_one(query)
     return {"exists": existing is not None}

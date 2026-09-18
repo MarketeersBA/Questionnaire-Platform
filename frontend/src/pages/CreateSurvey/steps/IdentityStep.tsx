@@ -425,7 +425,9 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
 
         const timeout = setTimeout(checkCode, 500);
         return () => clearTimeout(timeout);
-    }, [formData.survey_code]);
+        // draftSurveyId belongs here: the callback closes over it, and without
+        // it a check that ran before the id arrived would keep its stale result.
+    }, [formData.survey_code, draftSurveyId]);
 
 
     return (
