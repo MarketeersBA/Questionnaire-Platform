@@ -2,6 +2,7 @@ import type { ModuleQuestion, ModuleSection, QuestionModule, QuestionOption } fr
 import { moduleRollout } from '../constants/moduleRollout';
 import { generateSchemaSectionsFromModule } from './moduleSchemaUtils';
 import { fetchQuestionModuleDoc, resolveQuestionModule } from './questionModuleFetch';
+import { isModuleExplicitlyDisabled } from './moduleEnablement';
 
 const MODULE_ID = 'brand_usage';
 
@@ -151,6 +152,7 @@ export function generateLayer5FromModule(
 
 export function isBrandUsageEnabled(survey: any): boolean {
     if (!moduleRollout.genericRenderer() || !moduleRollout.usagePricing()) return false;
+    if (isModuleExplicitlyDisabled(survey, 'brand_usage')) return false;
     if (survey?.module_snapshots?.brand_usage) return true;
     if (survey?.brand_usage?.is_enabled) return true;
     return (survey?.config?.module_sequence || survey?.module_sequence || []).includes('brand_usage');

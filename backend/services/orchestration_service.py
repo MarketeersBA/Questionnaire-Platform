@@ -104,31 +104,51 @@ def build_pricing_question_text(config: dict, *, is_arabic: bool) -> str:
 
 
 class OrchestrationService:
-    def format_text(self, text: str, product: str = "product", category: str = "Category", brand: str = "Brand") -> str:
+    def format_text(
+        self,
+        text: str,
+        product: Optional[str] = None,
+        category: str = "Category",
+        brand: Optional[str] = None,
+    ) -> str:
+        """
+        Fill question placeholders.
+
+        `product` and `brand` default to None, not to the literal words
+        "product" / "Brand". The bare Arabic nouns below are ordinary words
+        that only sometimes stand in for a value, so substituting them
+        against a default rewrote plain prose: the perception-grid
+        instruction asking the respondent to pick البراند reached them as
+        "Brand أو Brandات".
+        """
         if not text:
             return ""
         
         # Brace form, used by the pricing question templates. It was never
         # substituted here, so respondents were shown the literal "{product}"
         # in place of the brand they were meant to be pricing.
-        text = text.replace("{product}", product)
+        product_value = product or category
+        text = text.replace("{product}", product_value)
 
         # English placeholders
-        text = re.sub(r'\[product\]', product, text, flags=re.IGNORECASE)
+        text = re.sub(r'\[product\]', product_value, text, flags=re.IGNORECASE)
         text = re.sub(r'\[Category\]', category, text, flags=re.IGNORECASE)
-        text = re.sub(r'\[brand\]', brand, text, flags=re.IGNORECASE)
+        text = re.sub(r'\[brand\]', brand or category, text, flags=re.IGNORECASE)
 
         # Bare word, mirroring the Arabic rule below and the browser-side
         # composer. Without it the two composers disagreed about which
         # placeholder spellings work, and an English question authored with a
         # bare "product" reached the respondent unsubstituted.
-        text = re.sub(r'\bproduct\b', product, text, flags=re.IGNORECASE)
+        if product:
+            text = re.sub(r'\bproduct\b', product, text, flags=re.IGNORECASE)
         
         # Arabic placeholders
-        text = text.replace("(المنتج)", product)
-        text = text.replace("المنتج", product)
-        text = text.replace("(البراند)", brand)
-        text = text.replace("البراند", brand)
+        if product or category:
+            text = text.replace("(المنتج)", product_value)
+            text = text.replace("المنتج", product_value)
+        if brand:
+            text = text.replace("(البراند)", brand)
+            text = text.replace("البراند", brand)
         
         return text
 

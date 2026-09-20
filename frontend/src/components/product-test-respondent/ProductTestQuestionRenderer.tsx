@@ -10,7 +10,7 @@ import type { VoiceCaptureConfig } from '../../utils/voiceQuestions';
 import { isVoiceEnabledForProductTestQuestion } from '../../utils/voiceQuestions';
 import OpenEndAnswerWithFollowUpThread from '../voice-feedback/OpenEndAnswerWithFollowUpThread';
 import type { FollowUpEligibilityInput, FollowUpReplyChangeHandler, FollowUpStateMap, FollowUpTriggerHandler, VoiceFollowUpTriggerHandler } from '../../utils/aiFollowup';
-import { classifyQuestionCategory, getMaxFollowUpRounds, isFollowUpAnswerEligible, isAiFollowUpEligible, shouldTriggerInitialFollowUp, canSubmitFollowUpReply, isFollowUpResponsePending } from '../../utils/aiFollowup';
+import { classifyQuestionCategory, getMaxFollowUpRounds, isFollowUpAnswerEligible, isFollowUpReplyEligible, isAiFollowUpEligible, shouldTriggerInitialFollowUp, canSubmitFollowUpReply, isFollowUpResponsePending } from '../../utils/aiFollowup';
 import { resolveMinAnswerLength } from '../../utils/aiFollowupConfig';
 import {
   appendFollowUpExchangeToOpenEndValue,
@@ -262,7 +262,10 @@ export default function ProductTestQuestionRenderer({
                 followUpQuestionText={followUpStateMap?.[question.id]?.followUpText ?? null}
                 onReplyChange={(replyValue) => onFollowUpReplyChange?.(question.id, replyValue)}
                 onReplyTextSubmit={(text) => {
-                    if (!aiFollowup?.apply_to_text || !isFollowUpAnswerEligible(text, minAnswerLength) || !onFollowUpTrigger) return;
+                    // A reply is judged by `isFollowUpReplyEligible`, not the initial-answer
+              // minimum: "اه" or "لا" is a real answer to a direct probe, and
+              // the five-character gate used to discard it without a word.
+              if (!aiFollowup?.apply_to_text || !isFollowUpReplyEligible(text) || !onFollowUpTrigger) return;
                     if (followUpStateMap && !canSubmitFollowUpReply(followUpStateMap[question.id])) return;
                     if (question.type === 'packaging-heatmap') {
                         const heatmapVal = value as Record<string, unknown>;

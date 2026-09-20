@@ -1,6 +1,7 @@
 import type { QuestionModule } from '../types/questionModules';
 import { moduleRollout } from '../constants/moduleRollout';
 import { resolveQuestionModule } from './questionModuleFetch';
+import { isModuleExplicitlyDisabled } from './moduleEnablement';
 
 const MODULE_ID = 'brand_analyzer';
 
@@ -93,6 +94,10 @@ export async function resolveBrandAnalyzerModule(survey?: any): Promise<Question
 
 export function isBrandAnalyzerEnabled(survey: any): boolean {
     if (!moduleRollout.genericRenderer()) return false;
+    // An explicit false is the analyst's decision and outranks everything
+    // below, including the module_sequence fallback that used to run this
+    // module with no attributes selected and block the respondent.
+    if (isModuleExplicitlyDisabled(survey, 'brand_analyzer')) return false;
     if (survey?.module_snapshots?.brand_analyzer) return true;
     if (survey?.brand_analyzer?.is_enabled) return true;
     const seq = survey?.config?.module_sequence || survey?.module_sequence || [];

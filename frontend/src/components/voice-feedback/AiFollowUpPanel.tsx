@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Loader2, Sparkles } from 'lucide-react';
+import { Loader2, Send, Sparkles } from 'lucide-react';
 import OpenEndAnswerInput from './OpenEndAnswerInput';
 import type { FollowUpPanelState } from '../../utils/aiFollowup';
 import { normalizeOpenEndAnswer } from '../../utils/voiceQuestions';
@@ -70,17 +70,33 @@ export default function AiFollowUpPanel({
     const onReplyTextSubmitRef = useRef(onReplyTextSubmit);
     onReplyTextSubmitRef.current = onReplyTextSubmit;
 
+    // The last text actually sent. The idle timer and the Send button are two
+    // routes to the same call, so without this a respondent who presses Send
+    // and then pauses sends the same reply twice and burns a probe round.
+    const lastSubmittedRef = useRef<string | null>(null);
+
+    const submitReply = useCallback(() => {
+        const text = replyText.trim();
+        if (!text || lastSubmittedRef.current === text) return;
+        lastSubmittedRef.current = text;
+        onReplyTextSubmitRef.current(replyText);
+    }, [replyText]);
+
+    // A new question means a new answer: allow the same word again ("اه" twice
+    // in a row is two distinct answers to two distinct probes).
+    useEffect(() => {
+        lastSubmittedRef.current = null;
+    }, [state.followUpText]);
+
     useEffect(() => {
         if (!visible || state.loading || !replyText.trim()) return;
 
         // A finished sentence fires immediately — no need to wait out the idle window.
         const idleMs = SENTENCE_END_PATTERN.test(replyText) ? 300 : FOLLOW_UP_REPLY_IDLE_MS;
-        const timeout = setTimeout(() => {
-            onReplyTextSubmitRef.current(replyText);
-        }, idleMs);
+        const timeout = setTimeout(submitReply, idleMs);
 
         return () => clearTimeout(timeout);
-    }, [visible, state.loading, replyText]);
+    }, [visible, state.loading, replyText, submitReply]);
 
     if (!visible) return null;
 
@@ -185,7 +201,7 @@ export default function AiFollowUpPanel({
                         </p>
                     </div>
 
-                    <div className="relative group">
+                    <div className="relative group space-y-3">
                         <OpenEndAnswerInput
                             value={state.replyValue || {}}
                             showVoice={showVoice}
@@ -202,6 +218,23 @@ export default function AiFollowUpPanel({
                                 }
                             }}
                         />
+
+                        {/* Explicit send. The idle timer alone left respondents
+                            with no way to say "I'm done" and no sign anything
+                            had registered — they typed a short answer and just
+                            waited. Label stays English across both languages, as
+                            requested. */}
+                        <div className="flex justify-end">
+                            <button
+                                type="button"
+                                onClick={submitReply}
+                                disabled={!replyText.trim() || state.loading}
+                                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-black tracking-wide shadow-sm transition-all hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
+                            >
+                                <Send className="w-4 h-4" />
+                                Send
+                            </button>
+                        </div>
                     </div>
                 </motion.div>
             ) : null}

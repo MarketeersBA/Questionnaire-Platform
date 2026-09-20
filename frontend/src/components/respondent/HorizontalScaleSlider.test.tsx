@@ -51,23 +51,47 @@ describe('HorizontalScaleSlider interactions', () => {
         render(<SliderHarness max={5} />);
 
         fireEvent.click(screen.getByRole('button', { name: '4' }));
-        expect(screen.getByRole('button', { name: '4' })).toHaveAttribute('aria-pressed', 'true');
-        expect(screen.getByRole('button', { name: '1' })).toHaveAttribute('aria-pressed', 'false');
+        // Plain DOM assertions: @testing-library/jest-dom is not a dependency
+        // here, so its matchers silently fail as unknown Chai properties.
+        expect(screen.getByRole('button', { name: '4' }).getAttribute('aria-pressed')).toBe('true');
+        expect(screen.getByRole('button', { name: '1' }).getAttribute('aria-pressed')).toBe('false');
     });
 
     it('keeps no selection until the respondent taps', () => {
         render(<SliderHarness initialValue={null} max={10} />);
 
         for (let n = 1; n <= 10; n += 1) {
-            expect(screen.getByRole('button', { name: String(n) })).toHaveAttribute(
-                'aria-pressed',
-                'false',
-            );
+            expect(
+                screen.getByRole('button', { name: String(n) }).getAttribute('aria-pressed'),
+            ).toBe('false');
         }
     });
 
     it('shows tap guidance instead of drag guidance', () => {
         render(<SliderHarness max={5} />);
         expect(screen.getByText('Tap a number to select')).toBeTruthy();
+    });
+
+    it('lays every point out in a single row, including the last', () => {
+        // A 1-10 scale rendered with fixed-width buttons in a wrapping flex row
+        // pushed "10" onto a second line, where it read as a separate option
+        // rather than the top of the scale. One grid track per point keeps the
+        // row intact at any width.
+        render(<SliderHarness max={10} />);
+
+        const row = screen.getByRole('button', { name: '1' }).parentElement as HTMLElement;
+        expect(row.className).not.toContain('flex-wrap');
+        expect(row.style.gridTemplateColumns).toBe('repeat(10, minmax(2rem, 1fr))');
+
+        // Every point is in that one container, 10 included.
+        for (let n = 1; n <= 10; n += 1) {
+            expect(screen.getByRole('button', { name: String(n) }).parentElement).toBe(row);
+        }
+    });
+
+    it('tracks the scale length rather than assuming ten', () => {
+        render(<SliderHarness max={7} />);
+        const row = screen.getByRole('button', { name: '1' }).parentElement as HTMLElement;
+        expect(row.style.gridTemplateColumns).toBe('repeat(7, minmax(2rem, 1fr))');
     });
 });

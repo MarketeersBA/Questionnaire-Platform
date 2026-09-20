@@ -8,13 +8,12 @@ import {
   canSubmitFollowUpReply,
   classifyQuestionCategory,
   getMaxFollowUpRounds,
-  isFollowUpAnswerEligible,
+  isFollowUpReplyEligible,
   type FollowUpReplyChangeHandler,
   type FollowUpStateMap,
   type FollowUpTriggerHandler,
   type VoiceFollowUpTriggerHandler,
 } from '../../utils/aiFollowup';
-import { resolveMinAnswerLength } from '../../utils/aiFollowupConfig';
 import { normalizeOpenEndAnswer } from '../../utils/voiceQuestions';
 import {
   buildTasteTestFollowUpEligibility,
@@ -81,7 +80,6 @@ export default function TasteTestOpenEndQuestion({
     timing,
     sectionTitle,
   }), [questionId, questionText, effectiveType, timing, sectionTitle]);
-  const minAnswerLength = resolveMinAnswerLength(aiFollowup);
   const panelState = followUpStateMap?.[questionId];
   const questionCategory = classifyQuestionCategory(questionText);
 
@@ -241,7 +239,10 @@ export default function TasteTestOpenEndQuestion({
             followUpQuestionText={panelState.followUpText}
             onReplyChange={(replyValue) => onFollowUpReplyChange?.(questionId, replyValue)}
             onReplyTextSubmit={(text) => {
-              if (!aiFollowup?.apply_to_text || !isFollowUpAnswerEligible(text, minAnswerLength) || !onFollowUpTrigger) return;
+              // A reply is judged by `isFollowUpReplyEligible`, not the initial-answer
+              // minimum: "اه" or "لا" is a real answer to a direct probe, and
+              // the five-character gate used to discard it without a word.
+              if (!aiFollowup?.apply_to_text || !isFollowUpReplyEligible(text) || !onFollowUpTrigger) return;
               if (!canSubmitFollowUpReply(getFollowUpStateSnapshot()[questionId])) return;
               appendFollowUpExchange(text);
               onFollowUpTrigger(
