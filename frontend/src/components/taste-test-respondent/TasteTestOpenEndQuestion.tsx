@@ -1,4 +1,4 @@
-import {useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import OpenEndAnswerWithFollowUpThread from '../voice-feedback/OpenEndAnswerWithFollowUpThread';
@@ -27,7 +27,6 @@ import {
 } from './tasteTestOpenEndFollowUp';
 import {
   FOLLOWUP_VOICE_REPLY_PLACEHOLDER,
-  splitFollowUpAnswerText,
 } from '../../utils/followUpAnswerPersistence';
 
 export interface TasteTestOpenEndQuestionProps {
@@ -91,43 +90,15 @@ export default function TasteTestOpenEndQuestion({
     ));
   };
 
-  const textValue = normalizeOpenEndAnswer(value).text || '';
-  const primaryText = splitFollowUpAnswerText(textValue).primaryText;
 
-  useEffect(() => {
-    // A finished sentence (ends in . ! ? or Arabic ؟) means the respondent is
-    // done typing right now — fire almost immediately instead of waiting out
-    // the full idle window, so the AI feels responsive rather than laggy.
-    const idleMs = /[.!?؟]\s*$/.test(primaryText) ? 300 : 1600;
-    const timeout = setTimeout(() => {
-      const debounceCtx = {
-        questionId,
-        questionText,
-        effectiveType,
-        timing,
-        sectionTitle,
-        aiFollowup,
-        text: primaryText,
-        followUpStateMap: getFollowUpStateSnapshot(),
-      };
-      const evaluation = evaluateTasteTestTextBlurFollowUp(debounceCtx);
-      if (evaluation.shouldTrigger && onFollowUpTrigger) {
-        onFollowUpTrigger(
-          questionId,
-          primaryText,
-          questionText,
-          brandName,
-          'text',
-          followUpEligibility
-        );
-      }
-    }, idleMs);
-
-    return () => clearTimeout(timeout);
-  }, [
-    primaryText, questionId, questionText, effectiveType, timing, sectionTitle,
-    aiFollowup, brandName, followUpEligibility, onFollowUpTrigger, getFollowUpStateSnapshot
-  ]);
+  // No idle timer here, deliberately.
+  //
+  // The moderator used to start probing 1.6s after the last keystroke,
+  // guessing that a pause meant the respondent had finished. It interrupted
+  // people mid-thought — they were still composing an answer when the AI cut
+  // in on a half-written one. The probe now waits for a real signal that the
+  // answer is done: the respondent leaving the field (`onBlur` below), which
+  // is something they did rather than something we inferred.
 
   return (
     <>

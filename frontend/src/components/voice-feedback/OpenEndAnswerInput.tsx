@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Mic, CheckCircle2 } from 'lucide-react';
 import AudioRecorder from './AudioRecorder';
 import {
@@ -17,6 +18,12 @@ interface Props {
     language?: 'en' | 'ar';
     showVoice: boolean;
     onBlur?: (text: string) => void;
+    /**
+     * Rendered inside the input box, pinned to its bottom trailing corner.
+     * Sits within the field rather than under it so the action reads as part
+     * of the answer, the way a chat composer does.
+     */
+    action?: ReactNode;
 }
 
 export default function OpenEndAnswerInput({
@@ -29,6 +36,7 @@ export default function OpenEndAnswerInput({
     language = 'en',
     showVoice,
     onBlur,
+    action,
 }: Props) {
     const answer = normalizeOpenEndAnswer(value);
     const isAr = language === 'ar';
@@ -36,14 +44,31 @@ export default function OpenEndAnswerInput({
 
     return (
         <div className="space-y-3">
-            <textarea
-                rows={2}
-                className="w-full bg-surface-raised/50 border-2 border-line/80 dark:border-line/10 rounded-2xl px-4 py-3 text-sm font-semibold resize-none"
-                placeholder={isAr ? 'اكتب إجابتك هنا...' : 'Type your answer...'}
-                value={answer.text || ''}
-                onChange={(e) => onChange(updateOpenEndText(value, e.target.value))}
-                onBlur={(e) => onBlur?.(e.target.value)}
-            />
+            <div className="relative">
+                <textarea
+                    rows={2}
+                    // Extra bottom padding keeps the last line of text clear of
+                    // the action pinned inside the field.
+                    className={`w-full bg-surface-raised/50 border-2 border-line/80 dark:border-line/10 rounded-2xl px-4 pt-3 text-sm font-semibold resize-none ${
+                        action ? 'pb-14' : 'pb-3'
+                    }`}
+                    placeholder={isAr ? 'اكتب إجابتك هنا...' : 'Type your answer...'}
+                    value={answer.text || ''}
+                    onChange={(e) => onChange(updateOpenEndText(value, e.target.value))}
+                    onBlur={(e) => onBlur?.(e.target.value)}
+                />
+
+                {action && (
+                    // Logical inset: the trailing corner is the left in Arabic and
+                    // the right in English, without branching on language.
+                    <div
+                        className="absolute bottom-3"
+                        style={{ insetInlineEnd: '0.75rem' }}
+                    >
+                        {action}
+                    </div>
+                )}
+            </div>
 
             {showVoice && (
                 <div className="space-y-3">

@@ -5,11 +5,13 @@ import OpenEndAnswerInput from './OpenEndAnswerInput';
 import type { FollowUpPanelState } from '../../utils/aiFollowup';
 import { normalizeOpenEndAnswer } from '../../utils/voiceQuestions';
 
-// Idle-debounce before an AI follow-up fires off a just-typed answer. Kept
-// short because a sentence-ending punctuation mark (below) fires immediately
-// instead of waiting out the full idle window.
-export const FOLLOW_UP_REPLY_IDLE_MS = 1600;
-const SENTENCE_END_PATTERN = /[.!?؟]\s*$/;
+// There is deliberately no idle timer here.
+//
+// Replies used to be sent after a pause in typing, which guessed at when a
+// respondent had finished. It guessed wrong in both directions: it fired
+// mid-thought on someone typing slowly, and it left someone who had finished
+// staring at the screen wondering whether anything had registered. Sending is
+// now an explicit act — the respondent decides when the answer is done.
 
 export type AiFollowUpPanelVariant = 'premium' | 'standard';
 
@@ -39,6 +41,7 @@ const COPY = {
         subtitleStandard: 'In-depth moderation activated',
         loadingPremium: 'Analyzing & composing...',
         loadingStandard: 'Analyzing your response...',
+        send: 'Send',
     },
     ar: {
         titlePremium: 'الباحث الذكي',
@@ -47,6 +50,7 @@ const COPY = {
         subtitleStandard: 'الإشراف المعمق مُفعّل',
         loadingPremium: 'الباحث يحلل إجابتك...',
         loadingStandard: 'جاري تحليل إجابتك...',
+        send: 'إرسال',
     },
 } as const;
 
@@ -70,9 +74,8 @@ export default function AiFollowUpPanel({
     const onReplyTextSubmitRef = useRef(onReplyTextSubmit);
     onReplyTextSubmitRef.current = onReplyTextSubmit;
 
-    // The last text actually sent. The idle timer and the Send button are two
-    // routes to the same call, so without this a respondent who presses Send
-    // and then pauses sends the same reply twice and burns a probe round.
+    // Guards a double tap on Send: two sends of the same text would burn a
+    // probe round and leave the respondent answering a question twice.
     const lastSubmittedRef = useRef<string | null>(null);
 
     const submitReply = useCallback(() => {
@@ -87,16 +90,6 @@ export default function AiFollowUpPanel({
     useEffect(() => {
         lastSubmittedRef.current = null;
     }, [state.followUpText]);
-
-    useEffect(() => {
-        if (!visible || state.loading || !replyText.trim()) return;
-
-        // A finished sentence fires immediately — no need to wait out the idle window.
-        const idleMs = SENTENCE_END_PATTERN.test(replyText) ? 300 : FOLLOW_UP_REPLY_IDLE_MS;
-        const timeout = setTimeout(submitReply, idleMs);
-
-        return () => clearTimeout(timeout);
-    }, [visible, state.loading, replyText, submitReply]);
 
     if (!visible) return null;
 
@@ -201,7 +194,7 @@ export default function AiFollowUpPanel({
                         </p>
                     </div>
 
-                    <div className="relative group space-y-3">
+                    <div className="relative group">
                         <OpenEndAnswerInput
                             value={state.replyValue || {}}
                             showVoice={showVoice}
@@ -217,24 +210,22 @@ export default function AiFollowUpPanel({
                                     onReplyVoiceUpload(next.voice_feedback_id);
                                 }
                             }}
+                            // Sending is the only way a reply leaves this panel,
+                            // so the control lives in the field the respondent is
+                            // already looking at.
+                            action={(
+                                <button
+                                    type="button"
+                                    onClick={submitReply}
+                                    disabled={!replyText.trim() || state.loading}
+                                    aria-label={copy.send}
+                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white text-sm font-black tracking-wide shadow-sm transition-all hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
+                                >
+                                    <Send className="w-4 h-4" />
+                                    {copy.send}
+                                </button>
+                            )}
                         />
-
-                        {/* Explicit send. The idle timer alone left respondents
-                            with no way to say "I'm done" and no sign anything
-                            had registered — they typed a short answer and just
-                            waited. Label stays English across both languages, as
-                            requested. */}
-                        <div className="flex justify-end">
-                            <button
-                                type="button"
-                                onClick={submitReply}
-                                disabled={!replyText.trim() || state.loading}
-                                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-black tracking-wide shadow-sm transition-all hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
-                            >
-                                <Send className="w-4 h-4" />
-                                Send
-                            </button>
-                        </div>
                     </div>
                 </motion.div>
             ) : null}
