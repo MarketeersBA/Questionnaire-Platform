@@ -44,6 +44,12 @@ export default function OpenEndAnswerInput({
     const isAr = language === 'ar';
     const hasVoice = Boolean(answer.voice_feedback_id);
     const text = answer.text || '';
+    const canSubmit = Boolean(onSubmit) && Boolean(text.trim()) && !submitBusy;
+
+    const submit = () => {
+        if (!canSubmit) return;
+        onSubmit?.(text);
+    };
 
     return (
         <div className="space-y-3">
@@ -60,13 +66,28 @@ export default function OpenEndAnswerInput({
                     value={text}
                     onChange={(e) => onChange(updateOpenEndText(value, e.target.value))}
                     onBlur={(e) => onBlur?.(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key !== 'Enter' || e.shiftKey) return;
+
+                        // An IME is mid-word: Enter is committing a candidate word,
+                        // not finishing the answer. Sending here would cut the
+                        // respondent off mid-word.
+                        if (e.nativeEvent.isComposing) return;
+
+                        // Enter sends, Shift+Enter starts a new line — the
+                        // convention every messaging app uses, so it needs no
+                        // explaining. preventDefault stops the newline being
+                        // inserted before the answer is read.
+                        e.preventDefault();
+                        submit();
+                    }}
                 />
 
                 {onSubmit && (
                     <button
                         type="button"
-                        onClick={() => onSubmit(text)}
-                        disabled={!text.trim() || submitBusy}
+                        onClick={submit}
+                        disabled={!canSubmit}
                         aria-label={isAr ? 'إرسال' : 'Send'}
                         className="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-primary text-white text-sm font-black tracking-wide shadow-sm transition-all hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
                     >
