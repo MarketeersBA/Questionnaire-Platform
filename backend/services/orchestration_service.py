@@ -21,11 +21,13 @@ TASTE_ATTRIBUTE_AR: Dict[str, str] = {
     "Texture": "القوام",
     "Texture Profile": "خصائص القوام",
     "Physical Texture": "القوام الفيزيائي",
+    "Taste": "الطعم",
     "Taste Profile": "خصائص الطعم",
     "Before Taste": "قبل التذوق",
     "After Taste": "بعد التذوق",
     "Aftertaste": "الطعم المتبقي",
     "Aftertaste & Finish": "الطعم المتبقي والنهاية",
+    "Overall": "التقييم العام",
     "Overall Taste": "الطعم العام",
     "Overall Likeness": "الإعجاب العام",
     "Overall Satisfaction": "الرضا العام",
@@ -419,6 +421,17 @@ class OrchestrationService:
                         matching_custom = next((c for c in tt_config.get("custom_research_attributes", []) if c["main_attribute"] == main_attr), None)
                         display_attr = localize_taste_test_attribute(main_attr, language)
                         
+                        # `master_data[attribute]` holds only that attribute's
+                        # *optional* questions; anything `fixed` is grouped under
+                        # `master_data["fixed"]` and asked once per brand in the
+                        # General Evaluation block. Overall is entirely fixed, so
+                        # its bucket is always empty — which is not the same as the
+                        # bank having nothing to ask, and reading it that way
+                        # invented a question nobody wrote.
+                        covered_by_fixed_block = any(
+                            q.get("main_att") == main_attr
+                            for q in master_data.get("fixed", [])
+                        )
                         if source == "custom" or matching_custom:
                             if not attr_questions:
                                 # Fallback main eval
@@ -458,8 +471,8 @@ class OrchestrationService:
                                         "scaleMax": 5
                                     }
                                 })
-                        elif not attr_questions:
-                             # Pure library fallback
+                        elif not attr_questions and not covered_by_fixed_block:
+                             # A library attribute the bank genuinely has nothing for.
                              attr_questions.append({
                                 "id": f"{brand}_fallback_{main_attr.replace(' ', '_')}_{''.join(random.choices(string.ascii_lowercase + string.digits, k=4))}",
                                 "type": "scale",

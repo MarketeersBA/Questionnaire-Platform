@@ -281,6 +281,18 @@ export function generateTasteTestModuleSchema(
                     .map(q => mapQuestion(q, brand, mainAttr));
             }
 
+            // `masterData[attribute]` holds only the *optional* questions for that
+            // attribute. Anything marked `fixed` is grouped under `masterData.fixed`
+            // and asked once per brand in the General Evaluation block instead.
+            //
+            // Overall is entirely fixed, so its bucket is always empty — which is
+            // not the same as the bank having nothing to ask. Read as 'no questions'
+            // it triggered the fallback below and invented
+            // "ما رأيك في (Overall) الخاصة بـ Obour؟", a question nobody wrote, asked
+            // alongside the real Overall questions a few screens later.
+            const coveredByFixedBlock = (safeMasterData['fixed'] || [])
+                .some((q: any) => q?.main_att === mainAttr);
+
             const attrQuestions = [...libraryQuestions];
 
             // 2. Identify custom dimensions 
@@ -335,8 +347,9 @@ export function generateTasteTestModuleSchema(
                         }
                     });
                 });
-            } else if (libraryQuestions.length === 0) {
-                // If it's a library dimension but had ZERO master questions and NO custom details
+            } else if (libraryQuestions.length === 0 && !coveredByFixedBlock) {
+                // A library dimension the bank genuinely has nothing for. Without
+                // this the attribute would render as an empty section.
                 attrQuestions.unshift({
                     id: `${brand}_fallback_${mainAttr.replace(/\s+/g, '_')}_${Math.random().toString(36).substr(2, 4)}`,
                     type: 'scale',
