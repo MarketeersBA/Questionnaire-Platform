@@ -25,6 +25,7 @@ export type {
 } from './tasteTestOpenEndTriggerEvaluation';
 export {
   evaluateTasteTestTextBlurFollowUp,
+  evaluateTasteTestTextSubmitFollowUp,
   evaluateTasteTestVoiceUploadFollowUp,
   logTasteTestFollowUpTriggerBlock,
 } from './tasteTestOpenEndTriggerEvaluation';

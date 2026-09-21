@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Loader2, Send, Sparkles } from 'lucide-react';
+import { Loader2, Sparkles } from 'lucide-react';
 import OpenEndAnswerInput from './OpenEndAnswerInput';
 import type { FollowUpPanelState } from '../../utils/aiFollowup';
 import { normalizeOpenEndAnswer } from '../../utils/voiceQuestions';
@@ -210,21 +210,9 @@ export default function AiFollowUpPanel({
                                     onReplyVoiceUpload(next.voice_feedback_id);
                                 }
                             }}
-                            // Sending is the only way a reply leaves this panel,
-                            // so the control lives in the field the respondent is
-                            // already looking at.
-                            action={(
-                                <button
-                                    type="button"
-                                    onClick={submitReply}
-                                    disabled={!replyText.trim() || state.loading}
-                                    aria-label={copy.send}
-                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white text-sm font-black tracking-wide shadow-sm transition-all hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
-                                >
-                                    <Send className="w-4 h-4" />
-                                    {copy.send}
-                                </button>
-                            )}
+                            // Sending is the only way a reply leaves this panel.
+                            onSubmit={submitReply}
+                            submitBusy={state.loading}
                         />
                     </div>
                 </motion.div>

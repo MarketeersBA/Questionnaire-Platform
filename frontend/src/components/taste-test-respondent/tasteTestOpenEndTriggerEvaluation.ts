@@ -36,7 +36,15 @@ export interface TasteTestVoiceUploadContext extends TasteTestOpenEndContext {
   nextVoiceFeedbackId?: string | null;
 }
 
-export type TasteTestFollowUpTriggerChannel = 'text_blur' | 'voice_upload';
+/**
+ * How a follow-up came to be triggered, for diagnostics.
+ *
+ * `text_submit` is the live path: the respondent pressed send. `text_blur`
+ * is retained because older diagnostics and tests refer to it, but leaving
+ * the field no longer triggers anything — it fired the moderator at
+ * half-written answers when someone tapped away or scrolled on a phone.
+ */
+export type TasteTestFollowUpTriggerChannel = 'text_submit' | 'text_blur' | 'voice_upload';
 
 export type TasteTestFollowUpBlockReason =
   | 'eligible'
@@ -102,6 +110,18 @@ function buildEvaluation(
 }
 
 /** Full gate evaluation for text blur follow-up triggers. */
+/**
+ * Whether a typed answer should start the AI moderator.
+ *
+ * The same check regardless of what prompted it, which is why this is an
+ * alias rather than a second implementation. The `...TextBlur...` name below
+ * predates the send button and is kept for the existing callers and tests;
+ * new code should use this one, because blur no longer triggers anything.
+ */
+export const evaluateTasteTestTextSubmitFollowUp = (
+  ctx: Parameters<typeof evaluateTasteTestTextBlurFollowUp>[0],
+) => evaluateTasteTestTextBlurFollowUp(ctx);
+
 export function evaluateTasteTestTextBlurFollowUp(
   ctx: TasteTestTextBlurContext,
 ): TasteTestFollowUpTriggerEvaluation {

@@ -81,11 +81,17 @@ describe('sending a reply to the AI researcher', () => {
 
         const textarea = screen.getByPlaceholderText('اكتب إجابتك هنا...');
         const button = screen.getByRole('button', { name: 'إرسال' });
+        const field = textarea.parentElement as HTMLElement;
 
-        // Same bounding field as the textarea, positioned within it.
-        expect(textarea.parentElement?.contains(button)).toBe(true);
-        expect(textarea.parentElement?.className).toContain('relative');
-        expect((button.parentElement as HTMLElement).className).toContain('absolute');
+        // Both live in the one element that draws the outline, so the button
+        // is within the visible box rather than under it.
+        expect(field.contains(button)).toBe(true);
+        expect(field.className).toContain('border-2');
+        expect(field.className).toContain('rounded-2xl');
+
+        // The textarea must not draw a competing outline of its own — that is
+        // what made the button appear to sit below the field.
+        expect(textarea.className).toContain('border-0');
     });
 
     it('cannot be sent empty', () => {

@@ -1,5 +1,4 @@
-import type { ReactNode } from 'react';
-import { Mic, CheckCircle2 } from 'lucide-react';
+import { Mic, CheckCircle2, Send } from 'lucide-react';
 import AudioRecorder from './AudioRecorder';
 import {
     normalizeOpenEndAnswer,
@@ -19,11 +18,13 @@ interface Props {
     showVoice: boolean;
     onBlur?: (text: string) => void;
     /**
-     * Rendered inside the input box, pinned to its bottom trailing corner.
-     * Sits within the field rather than under it so the action reads as part
-     * of the answer, the way a chat composer does.
+     * Send the answer. When provided, a send button is rendered inside the
+     * field and becomes the only way the answer is submitted — there is no
+     * idle timer and no submit-on-blur behind it.
      */
-    action?: ReactNode;
+    onSubmit?: (text: string) => void;
+    /** Suppresses the button while a previous answer is still being processed. */
+    submitBusy?: boolean;
 }
 
 export default function OpenEndAnswerInput({
@@ -36,37 +37,42 @@ export default function OpenEndAnswerInput({
     language = 'en',
     showVoice,
     onBlur,
-    action,
+    onSubmit,
+    submitBusy = false,
 }: Props) {
     const answer = normalizeOpenEndAnswer(value);
     const isAr = language === 'ar';
     const hasVoice = Boolean(answer.voice_feedback_id);
+    const text = answer.text || '';
 
     return (
         <div className="space-y-3">
-            <div className="relative">
+            {/* One row: the text and the send control share a line, the way a
+                chat composer does. The border is on this wrapper rather than
+                the textarea — a textarea's box ends where its rows end, so a
+                button placed against it always fell outside the outline.
+                `items-end` keeps the button on the baseline as the text grows. */}
+            <div className="flex items-end gap-2 rounded-2xl border-2 border-line/80 dark:border-line/10 bg-surface-raised/50 px-3 py-2 transition-colors focus-within:border-primary/60">
                 <textarea
                     rows={2}
-                    // Extra bottom padding keeps the last line of text clear of
-                    // the action pinned inside the field.
-                    className={`w-full bg-surface-raised/50 border-2 border-line/80 dark:border-line/10 rounded-2xl px-4 pt-3 text-sm font-semibold resize-none ${
-                        action ? 'pb-14' : 'pb-3'
-                    }`}
+                    className="flex-1 min-w-0 bg-transparent border-0 px-1 py-1.5 text-sm font-semibold resize-none outline-none focus:ring-0"
                     placeholder={isAr ? 'اكتب إجابتك هنا...' : 'Type your answer...'}
-                    value={answer.text || ''}
+                    value={text}
                     onChange={(e) => onChange(updateOpenEndText(value, e.target.value))}
                     onBlur={(e) => onBlur?.(e.target.value)}
                 />
 
-                {action && (
-                    // Logical inset: the trailing corner is the left in Arabic and
-                    // the right in English, without branching on language.
-                    <div
-                        className="absolute bottom-3"
-                        style={{ insetInlineEnd: '0.75rem' }}
+                {onSubmit && (
+                    <button
+                        type="button"
+                        onClick={() => onSubmit(text)}
+                        disabled={!text.trim() || submitBusy}
+                        aria-label={isAr ? 'إرسال' : 'Send'}
+                        className="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-primary text-white text-sm font-black tracking-wide shadow-sm transition-all hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                        {action}
-                    </div>
+                        <Send className="w-4 h-4" />
+                        {isAr ? 'إرسال' : 'Send'}
+                    </button>
                 )}
             </div>
 

@@ -237,14 +237,18 @@ export default function ProductTestQuestionRenderer({
                     brandName={voiceBrandName}
                     questionText={displayText}
                     language={language}
-                    onBlur={(text) => {
+                    // Sent by the respondent, not inferred from them leaving the
+                    // field. Blur fires when someone taps away or scrolls on a
+                    // phone, which started the moderator on a half-written answer.
+                    submitBusy={Boolean(followUpStateMap?.[question.id]?.loading)}
+                    onSubmit={followUpEligible ? (text) => {
                         if (followUpStateMap && !shouldTriggerInitialFollowUp(question.id, followUpStateMap)) return;
                         if (aiFollowup?.is_enabled && aiFollowup?.apply_to_text && onFollowUpTrigger && openEndFollowUpEligible) {
                             if (isFollowUpAnswerEligible(text, minAnswerLength)) {
                                 onFollowUpTrigger(question.id, text, displayText, voiceBrandName || '', 'text', openEndFollowUpEligibility);
                             }
                         }
-                    }}
+                    } : undefined}
                 />
             )}
 

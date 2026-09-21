@@ -8,6 +8,7 @@ import {
   canSubmitFollowUpReply,
   classifyQuestionCategory,
   getMaxFollowUpRounds,
+  isAiFollowUpEligible,
   isFollowUpReplyEligible,
   type FollowUpReplyChangeHandler,
   type FollowUpStateMap,
@@ -17,7 +18,7 @@ import {
 import { normalizeOpenEndAnswer } from '../../utils/voiceQuestions';
 import {
   buildTasteTestFollowUpEligibility,
-  evaluateTasteTestTextBlurFollowUp,
+  evaluateTasteTestTextSubmitFollowUp,
   evaluateTasteTestVoiceUploadFollowUp,
   logTasteTestFollowUpTriggerBlock,
   shouldShowTasteTestFollowUpPanel,
@@ -80,6 +81,10 @@ export default function TasteTestOpenEndQuestion({
     sectionTitle,
   }), [questionId, questionText, effectiveType, timing, sectionTitle]);
   const panelState = followUpStateMap?.[questionId];
+  // Only a question the AI moderator will actually probe gets a send button.
+  // On the rest, the answer is carried by the survey's own Next control and a
+  // second button would do nothing.
+  const aiWillProbe = isAiFollowUpEligible(followUpEligibility, aiFollowup);
   const questionCategory = classifyQuestionCategory(questionText);
 
   const appendFollowUpExchange = (respondentPart: string) => {
@@ -156,8 +161,13 @@ export default function TasteTestOpenEndQuestion({
             toast.success(isArabic ? 'تم حفظ التسجيل' : 'Recording saved');
           }
         }}
-        onBlur={(text) => {
-          const blurCtx = {
+        // The respondent says when the answer is finished, by sending it.
+        // Nothing infers it any more: the idle timer is gone, and blur is not
+        // a substitute — tapping outside the box, or scrolling on a phone,
+        // would have fired the moderator at a half-written answer.
+        submitBusy={Boolean(panelState?.loading)}
+        onSubmit={aiWillProbe ? (text) => {
+          const submitCtx = {
             questionId,
             questionText,
             effectiveType,
@@ -167,9 +177,9 @@ export default function TasteTestOpenEndQuestion({
             text,
             followUpStateMap: getFollowUpStateSnapshot(),
           };
-          const blurEvaluation = evaluateTasteTestTextBlurFollowUp(blurCtx);
-          if (!blurEvaluation.shouldTrigger) {
-            logTasteTestFollowUpTriggerBlock('text_blur', blurEvaluation, {
+          const evaluation = evaluateTasteTestTextSubmitFollowUp(submitCtx);
+          if (!evaluation.shouldTrigger) {
+            logTasteTestFollowUpTriggerBlock('text_submit', evaluation, {
               questionId,
               questionText,
             });
@@ -184,7 +194,7 @@ export default function TasteTestOpenEndQuestion({
               'text',
               followUpEligibility,
             );
-        }}
+        } : undefined}
       />
 
       <AnimatePresence>

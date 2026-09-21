@@ -17,6 +17,9 @@ interface Props {
   language?: 'en' | 'ar';
   showVoice: boolean;
   onBlur?: (primaryText: string) => void;
+  /** Send the first answer to the AI moderator. Renders the button in-field. */
+  onSubmit?: (primaryText: string) => void;
+  submitBusy?: boolean;
 }
 
 export default function OpenEndAnswerWithFollowUpThread({
@@ -29,6 +32,8 @@ export default function OpenEndAnswerWithFollowUpThread({
   language = 'en',
   showVoice,
   onBlur,
+  onSubmit,
+  submitBusy,
 }: Props) {
   const storedText = normalizeOpenEndAnswer(value).text || '';
   const { exchanges } = splitFollowUpAnswerText(storedText);
@@ -46,6 +51,8 @@ export default function OpenEndAnswerWithFollowUpThread({
         language={language}
         onChange={(next) => onChange(commitOpenEndPrimaryEdit(value, next))}
         onBlur={onBlur}
+        onSubmit={onSubmit}
+        submitBusy={submitBusy}
       />
       <FollowUpConversationThread exchanges={exchanges} language={language} />
     </>
