@@ -41,7 +41,7 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('token');
   const role = localStorage.getItem('role');
   if (!token) return <Navigate to="/" />;
-  if (role !== 'admin') return <Navigate to="/dashboard" />;
+  if (role !== 'admin') return <Navigate to="/create-survey" />;
   return <Layout>{children}</Layout>;
 }
 
@@ -49,7 +49,7 @@ function AnalystRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('token');
   const role = localStorage.getItem('role');
   if (!token) return <Navigate to="/" />;
-  if (role !== 'admin' && role !== 'analyst') return <Navigate to="/dashboard" />;
+  if (role !== 'admin' && role !== 'analyst') return <Navigate to="/create-survey" />;
   return <Layout>{children}</Layout>;
 }
 

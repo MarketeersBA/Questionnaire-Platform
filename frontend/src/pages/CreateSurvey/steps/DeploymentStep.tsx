@@ -215,7 +215,7 @@ export function DeploymentStep({ formData, setFormData }: StepProps) {
                             <div className="min-w-0">
                                 <h4 className="text-base font-display font-black text-ink uppercase tracking-tight">AI Voice Analysis</h4>
                                 <p className="text-xs text-slate-500 font-bold uppercase tracking-wide mt-0.5 opacity-80">
-                                    After Taste open-ended brand questions — text plus optional voice recording.
+                                    After sensory open-ended brand questions — text plus optional voice recording.
                                 </p>
                             </div>
                         </div>

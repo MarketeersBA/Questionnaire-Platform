@@ -44,10 +44,10 @@ export default function ProductTestAnalyticsStrip({ surveyId }: ProductTestAnaly
     const timingKeys = Object.keys(summary?.by_timing || {});
 
     return (
-        <div className="rounded-3xl border border-indigo-500/20 bg-gradient-to-br from-indigo-500/5 to-violet-500/5 dark:from-indigo-950/30 dark:to-violet-950/20 p-6 space-y-4">
+        <div className="rounded-2xl border border-indigo-500/20 bg-gradient-to-br from-indigo-500/5 to-violet-500/5 dark:from-indigo-950/30 dark:to-violet-950/20 p-4 space-y-3">
             <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
-                    <Beaker size={18} />
+                <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                    <Beaker size={16} />
                 </div>
                 <div>
                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400">
@@ -59,8 +59,8 @@ export default function ProductTestAnalyticsStrip({ surveyId }: ProductTestAnaly
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div className="rounded-2xl bg-white/70 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800 px-4 py-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+                <div className="rounded-xl bg-white/70 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800 px-3.5 py-2.5">
                     <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1">
                         <Layers size={12} /> Registry
                     </div>
@@ -69,7 +69,7 @@ export default function ProductTestAnalyticsStrip({ surveyId }: ProductTestAnaly
                     </div>
                     <div className="text-[9px] font-bold text-slate-500">questions indexed</div>
                 </div>
-                <div className="rounded-2xl bg-white/70 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800 px-4 py-3">
+                <div className="rounded-xl bg-white/70 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800 px-3.5 py-2.5">
                     <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1">
                         <Tag size={12} /> Answers
                     </div>
@@ -78,7 +78,7 @@ export default function ProductTestAnalyticsStrip({ surveyId }: ProductTestAnaly
                     </div>
                     <div className="text-[9px] font-bold text-slate-500">flat evaluations</div>
                 </div>
-                <div className="rounded-2xl bg-white/70 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800 px-4 py-3">
+                <div className="rounded-xl bg-white/70 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800 px-3.5 py-2.5">
                     <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1">
                         <Timer size={12} /> Phases
                     </div>
@@ -89,7 +89,7 @@ export default function ProductTestAnalyticsStrip({ surveyId }: ProductTestAnaly
                         {timingKeys.join(' · ') || '—'}
                     </div>
                 </div>
-                <div className="rounded-2xl bg-white/70 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800 px-4 py-3">
+                <div className="rounded-xl bg-white/70 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800 px-3.5 py-2.5">
                     <div className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1">
                         Responses
                     </div>

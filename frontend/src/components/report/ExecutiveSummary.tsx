@@ -1,5 +1,7 @@
+import { EyeOff } from 'lucide-react';
 import { InsightsActionsSection } from './InsightsActionsSection';
 import { StrategicCommandSection } from './StrategicCommandSection';
+import { useReport } from '../../context/ReportContext';
 
 interface Finding {
     label: string;
@@ -77,9 +79,13 @@ export function ExecutiveSummary({
     editable?: boolean,
     report?: any,
 }) {
+    const { isItemHidden, hideItem } = useReport();
+    const keyFindingId = 'card:key-finding';
+    const keyFindingHidden = isItemHidden(keyFindingId);
+
     return (
         <div className="space-y-6">
-            {summary && (
+            {summary && !keyFindingHidden && (
                 <div className="card-brand p-8 rounded-2xl relative overflow-hidden">
                     {/* Brand spine: blue at the top resolving to red */}
                     <div
@@ -92,6 +98,16 @@ export function ExecutiveSummary({
                                 Key Finding
                             </h2>
                             <span className="h-px flex-1 bg-primary/15" />
+                            <button
+                                type="button"
+                                onClick={() => hideItem(keyFindingId, 'Key Finding', 'card')}
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-line/80 dark:border-line/20 bg-surface-raised text-ink-muted hover:text-ink transition-all"
+                                title="Hide key finding"
+                                aria-label="Hide key finding"
+                            >
+                                <EyeOff className="w-3.5 h-3.5" />
+                                Hide
+                            </button>
                         </div>
                         {/* Strip Arabic shape labels like (مثلث) and (مربع) which are already
                             shown in the chart legend — they clutter the prose sentence. */}

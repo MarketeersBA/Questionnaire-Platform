@@ -123,7 +123,7 @@ export default function TasteTestConfigModal({ isOpen, onClose, onConfirm }: Tas
                             <h2 className="text-3xl font-display font-black text-ink tracking-tight transition-colors">
                                 Research <span className="text-primary-soft">Architect</span>
                             </h2>
-                            <p className="text-sm text-ink-muted font-medium transition-colors">Configure your multi-product taste test logic.</p>
+                            <p className="text-sm text-ink-muted font-medium transition-colors">Configure your multi-product sensory test logic.</p>
                         </div>
                     </div>
                     <button onClick={onClose} className="p-3 rounded-2xl bg-surface border border-slate-100 dark:border-slate-700 text-ink-subtle hover:text-slate-600 dark:hover:text-white transition-all shadow-sm">

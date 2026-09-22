@@ -218,7 +218,7 @@ export default function ProductTestConfigModal({
                             <h2 className="text-2xl font-display font-black text-ink tracking-tight">
                                 Product Test <span className="text-primary-soft">Architect</span>
                             </h2>
-                            <p className="text-xs text-ink-muted font-medium">Configure taste test / performance attributes and package attachment.</p>
+                            <p className="text-xs text-ink-muted font-medium">Configure sensory test / performance attributes and package attachment.</p>
                         </div>
                     </div>
 

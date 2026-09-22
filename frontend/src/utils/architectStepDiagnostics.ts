@@ -134,8 +134,8 @@ export function resolveLayerEmptyDiagnostic(
 
     if (activeLayer === 'taste_test') {
         return {
-            title: 'Taste Test Layer Empty',
-            message: 'Taste test sections have not been generated. Return to Parameters, verify category, brands, and attributes, then refresh.',
+            title: 'Sensory Test Layer Empty',
+            message: 'Sensory test sections have not been generated. Return to Parameters, verify category, brands, and attributes, then refresh.',
             statsLine: `${snapshot.l2SectionCount} sections · ${snapshot.l2QuestionCount} questions in blueprint`,
         };
     }

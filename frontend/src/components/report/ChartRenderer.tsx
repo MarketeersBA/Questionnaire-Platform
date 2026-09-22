@@ -25,8 +25,9 @@ import { TornadoChart } from './TornadoChart';
 import { KeyPreferenceDriversChart } from './KeyPreferenceDriversChart';
 import { AIInsightHeader } from './AIInsightHeader';
 import { AIDeepAnalysis } from './AIDeepAnalysis';
-import { Layout } from 'lucide-react';
+import { Layout, EyeOff } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { useReportVisibility } from '../../context/ReportContext';
 import type { ExportChartOptions } from '../../export/types';
 import { ChartCsvExportButton } from './ChartCsvExportButton';
 import { AsyncBoundary } from '../common/AsyncBoundary';
@@ -50,6 +51,7 @@ export function ChartRenderer({
     const footerRef = React.useRef<HTMLDivElement>(null);
     const { theme } = useTheme();
     const isDark = theme === 'dark';
+    const { isItemHidden, hideItem } = useReportVisibility();
     const [chartHeight, setChartHeight] = React.useState(500);
 
     const resolvedExportOptions = React.useMemo<ExportChartOptions>(() => ({
@@ -124,8 +126,7 @@ export function ChartRenderer({
         chartType === 'horizontal_bar' ||
         chartType === 'preference_bar' ||
         chartType === 'driver_ranking' ||
-        chartType === 'profile_chart' ||
-        chartType === 'snake_line';
+        chartType === 'profile_chart';
     let Component = CHART_MAP[chartType] || DataTable;
     let displayTitle = chart.title;
 
@@ -190,42 +191,64 @@ export function ChartRenderer({
         );
     }
 
+    const hideId = `chart:${chart.chart_id || displayTitle || chartType}`;
+    const hideLabel = displayTitle || chart.chart_id || 'Chart';
+    if (!isFocusMode && isItemHidden(hideId)) return null;
+
     return (
         <div
             ref={containerRef}
-            className={`panel !rounded-[28px] overflow-hidden relative group transition-all duration-500 ${isFocusMode ? 'p-6 md:p-8 min-h-0 h-full flex flex-col' : isCompactCard ? 'p-6' : 'p-8 min-h-[500px]'}`}
+            className={`panel !rounded-[28px] overflow-hidden relative group transition-all duration-500 ${
+                isFocusMode
+                    ? 'p-6 md:p-8 min-h-0 h-full flex flex-col'
+                    : isCompactCard
+                        ? 'p-6'
+                        : 'p-8 min-h-[500px]'
+            }`}
         >
             <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-all">
                 <Layout className="h-24 w-24" />
             </div>
 
-            {(displayTitle || chart.chart_id) && (
-                <div ref={headerRef} className={`${isFocusMode || isCompactCard ? 'mb-3' : 'mb-8'} relative z-10 shrink-0`}>
-                    <div className="flex items-center gap-3 mb-2 flex-wrap">
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <div className="text-[10px] font-black uppercase tracking-[0.4em] text-primary-soft">
-                                {chart.chart_id === 'sub_attribute_scatter' ? 'IMPORTANCE MATRIX' : (chartType || 'Visualization').replace(/_/g, ' ')}
-                            </div>
-                            {chart.base_n > 0 && (
-                                <div className="text-[10px] font-mono px-2 py-0.5 rounded bg-surface-sunken text-ink-muted">
-                                    N={chart.base_n}
-                                </div>
-                            )}
+            <div ref={headerRef} className={`${isFocusMode || isCompactCard ? 'mb-3' : 'mb-8'} relative z-10 shrink-0`}>
+                <div className="flex items-center gap-3 mb-2 flex-wrap">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="text-[10px] font-black uppercase tracking-[0.4em] text-primary-soft">
+                            {chart.chart_id === 'sub_attribute_scatter' ? 'IMPORTANCE MATRIX' : (chartType || 'Visualization').replace(/_/g, ' ')}
                         </div>
-                        <ChartCsvExportButton chart={chart} />
+                        {chart.base_n > 0 && (
+                            <div className="text-[10px] font-mono px-2 py-0.5 rounded bg-surface-sunken text-ink-muted">
+                                N={chart.base_n}
+                            </div>
+                        )}
                     </div>
-                    {displayTitle && (
-                        <h3 className={`${isFocusMode ? 'text-xl' : 'text-2xl'} font-black font-display tracking-tight text-ink`}>
-                            {displayTitle}
-                        </h3>
-                    )}
-                    {chart.subtitle && (
-                        <p className="text-sm font-medium mt-2 text-ink-muted">
-                            {chart.subtitle}
-                        </p>
-                    )}
+                    <div className="flex items-center gap-2">
+                        {!isFocusMode && <ChartCsvExportButton chart={chart} />}
+                        {!isFocusMode && (
+                            <button
+                                type="button"
+                                onClick={() => hideItem(hideId, hideLabel, 'card')}
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-line/80 dark:border-line/20 bg-surface-raised text-ink-muted hover:text-ink hover:border-primary/30 transition-all"
+                                title="Hide chart"
+                                aria-label="Hide chart"
+                            >
+                                <EyeOff className="w-3.5 h-3.5" />
+                                Hide
+                            </button>
+                        )}
+                    </div>
                 </div>
-            )}
+                {(displayTitle || chart.chart_id) && displayTitle && (
+                    <h3 className={`${isFocusMode ? 'text-xl' : 'text-2xl'} font-black font-display tracking-tight text-ink`}>
+                        {displayTitle}
+                    </h3>
+                )}
+                {chart.subtitle && (
+                    <p className="text-sm font-medium mt-2 text-ink-muted">
+                        {chart.subtitle}
+                    </p>
+                )}
+            </div>
 
             {chart.ai_headline && (
                 <div className={`${isCompactCard || isFocusMode ? 'mb-3' : 'mb-4'} z-10 relative shrink-0`}>

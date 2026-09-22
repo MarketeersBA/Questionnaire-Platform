@@ -7,9 +7,30 @@ import api from '../../../services/api';
 import { useNavigate } from 'react-router-dom';
 
 export const surveyTypesList = [
-    { id: 'taste_test', name: 'Taste Test', desc: 'Product comparison, sensory profiling, and preference mapping.', icon: Beaker, color: 'text-primary-soft', bg: 'bg-primary/10' },
-    { id: 'product_test', name: 'Product Test', desc: 'In-home use tests (IHUT) and performance evaluation.', icon: Palette, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { id: 'concept_test', name: 'Concept Test', desc: 'Validate new ideas, packaging, or messaging.', icon: Sparkles, color: 'text-amber-500', bg: 'bg-amber-50' }
+    {
+        id: 'taste_test',
+        name: 'Sensory Test',
+        desc: 'Compare products on taste, texture, and aroma. Builds preference maps and sensory profiles.',
+        icon: Beaker,
+        color: 'text-primary-soft',
+        bg: 'bg-primary/10',
+    },
+    {
+        id: 'product_test',
+        name: 'Product Test',
+        desc: 'In-home use tests (IHUT) that track real-world performance, packaging, and trial feedback.',
+        icon: Palette,
+        color: 'text-emerald-600',
+        bg: 'bg-emerald-50 dark:bg-emerald-950/40',
+    },
+    {
+        id: 'concept_test',
+        name: 'Concept Test',
+        desc: 'Validate new ideas, packaging, or messaging before launch with concept appeal checks.',
+        icon: Sparkles,
+        color: 'text-amber-500',
+        bg: 'bg-amber-50 dark:bg-amber-950/40',
+    },
 ];
 
 // ─── Local Input Component for Smarter Typing ──────────────────────────────
@@ -335,7 +356,6 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
     }, []);
     const cfg = formData.layer1_screening_config;
     const target = formData.sample_capacity || 0;
-    const linkCount = formData.links_count || 0;
 
     const [isCheckingCode, setIsCheckingCode] = useState(false);
     const [codeAvailable, setCodeAvailable] = useState<boolean | null>(null);
@@ -532,6 +552,31 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                     </div>
                 </div>
 
+                {/* Business Question — before survey type so intent is set first */}
+                <div className="space-y-5">
+                    <div className="flex items-center gap-3">
+                        <Target className="w-5 h-5 text-primary-soft" />
+                        <div id="survey-objective-section" className="flex flex-col">
+                            <label className="text-sm font-black uppercase tracking-[0.2em] text-ink-muted">Business Question</label>
+                            <span className="text-xs text-slate-400 font-bold tracking-tight">Why we conducted the study</span>
+                        </div>
+                    </div>
+                    <div className="relative group">
+                        <textarea
+                            id="survey-objective-input"
+                            rows={1}
+                            placeholder="Describe the business question or research objective..."
+                            className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 rounded-2xl px-5 py-3 text-ink focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-bold text-sm shadow-sm resize-none h-12"
+                            value={formData.survey_objective || ''}
+                            onChange={e => setFormData(prev => ({
+                                ...prev,
+                                survey_objective: e.target.value,
+                                survey_objective_other: '',
+                            }))}
+                        />
+                    </div>
+                </div>
+
                 {/* Survey Type Selector */}
                 <div className="space-y-5">
                     <div className="flex items-center gap-3">
@@ -575,7 +620,10 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                 <div className={`w-10 h-10 rounded-xl ${type.bg} ${type.color} flex items-center justify-center mb-4 transition-transform group-hover:scale-110`}>
                                     <type.icon className="w-5 h-5" />
                                 </div>
-                                <h4 className="text-sm font-black uppercase tracking-widest text-ink mb-1">{type.name}</h4>
+                                <h4 className="text-sm font-black uppercase tracking-widest text-ink mb-2 pr-6">{type.name}</h4>
+                                <p className="text-xs font-medium leading-relaxed text-ink-muted">
+                                    {type.desc}
+                                </p>
                                 {formData.survey_type === type.id && (
                                     <div className="absolute top-4 right-4">
                                         <div className="w-4 h-4 rounded-full bg-primary text-white flex items-center justify-center animate-in zoom-in">
@@ -588,47 +636,15 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                     </div>
                 </div>
 
-                {/* Survey Objective Panel (Taste Test & Product Test) */}
+                {/* Attached Modules — only after a Survey Type is chosen */}
                 <AnimatePresence>
-                    {(formData.survey_type === 'taste_test' || formData.survey_type === 'product_test') && (
+                    {Boolean(formData.survey_type) && (
                         <motion.div
-                            initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-                            animate={{ opacity: 1, height: 'auto', marginBottom: 16 }}
-                            exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                            className="space-y-5 overflow-hidden"
-                        >
-                            <div className="flex items-center gap-3">
-                                <Target className="w-5 h-5 text-primary-soft" />
-                                <div id="survey-objective-section" className="flex flex-col">
-                                    <label className="text-sm font-black uppercase tracking-[0.2em] text-ink-muted">Business Question</label>
-                                    <span className="text-xs text-slate-400 font-bold tracking-tight">Why we conducted the study</span>
-                                </div>
-                            </div>
-                            <div className="relative group">
-                                <textarea
-                                    id="survey-objective-input"
-                                    rows={1}
-                                    placeholder="Describe the business question or research objective..."
-                                    className="w-full bg-surface border-2 border-slate-300 dark:border-slate-700 rounded-2xl px-5 py-3 text-ink focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-bold text-sm shadow-sm resize-none h-12"
-                                    value={formData.survey_objective || ''}
-                                    onChange={e => setFormData(prev => ({
-                                        ...prev,
-                                        survey_objective: e.target.value,
-                                        survey_objective_other: '',
-                                    }))}
-                                />
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-
-                {/* Attached Modules */}
-                <AnimatePresence>
-                    {formData.survey_type === 'taste_test' && (
-                        <motion.div
-                            initial={{ opacity: 0, y: -10 }}
+                            key={`attached-modules-${formData.survey_type}`}
+                            initial={{ opacity: 0, y: 8 }}
                             animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
+                            exit={{ opacity: 0, y: 8 }}
+                            transition={{ duration: 0.2 }}
                             className="space-y-3 p-3.5 bg-surface-raised/40 rounded-2xl border border-line/80 dark:border-line/10"
                         >
                             <div className="flex items-center gap-2">
@@ -636,6 +652,8 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                 <label className="text-xs font-black uppercase tracking-[0.16em] text-ink-muted">Attached Modules</label>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 items-stretch">
+                                {formData.survey_type === 'taste_test' && (
+                                    <>
                                 {/* Purchase Funnel */}
                                 <div
                                     onClick={() => setFormData(prev => ({
@@ -766,6 +784,8 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                         {formData.brand_analyzer?.is_enabled && <Check className="w-3 h-3" />}
                                     </div>
                                 </div>
+                                    </>
+                                )}
 
                                 {/* Custom Modules Map */}
                                 {customModules.length > 0 && customModules.map(mod => {
@@ -829,73 +849,6 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                         </motion.div>
                     )}
                 </AnimatePresence>
-
-                {/* Token + Respondent Target row */}
-                <div className="p-3 bg-primary/5 dark:bg-primary/10 rounded-2xl border border-primary/20 dark:border-primary/30 space-y-2 relative overflow-hidden">
-                    <div className="flex items-center justify-between gap-3">
-                        <label className="text-[10px] font-black uppercase tracking-[0.16em] text-ink-muted flex items-center gap-2">
-                            <Target className="w-3.5 h-3.5 text-primary-soft" />
-                            Sample Size
-                        </label>
-                        <button
-                            type="button"
-                            onClick={() => setFormData(prev => ({ ...prev, sample_intelligence: !prev.sample_intelligence }))}
-                            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${formData.sample_intelligence ? 'bg-primary text-white shadow-sm shadow-primary/30' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'}`}
-                        >
-                            <Sparkles className={`w-3 h-3 ${formData.sample_intelligence ? 'animate-pulse' : ''}`} />
-                            {formData.sample_intelligence ? 'Intelligence: Active' : 'Manual Mode'}
-                        </button>
-                    </div>
-
-                    <div className="relative group">
-                        <Target className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-soft/60 group-focus-within:text-primary-soft transition-colors pointer-events-none" />
-                        <input
-                            type="number"
-                            min="0"
-                            max={formData.links_count || 10000}
-                            placeholder="e.g. 200"
-                            className="w-full bg-surface border border-primary/30 dark:border-primary/40 rounded-xl pl-10 pr-4 py-2.5 text-ink focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all font-black text-base shadow-sm placeholder:text-slate-400"
-                            value={formData.sample_capacity || ''}
-                            onChange={e => {
-                                const val = parseInt(e.target.value) || 0;
-                                setFormData(prev => {
-                                    const newLinks = prev.sample_intelligence ? Math.round(val / 0.2) : prev.links_count;
-                                    const updatedQuotas: typeof prev.gate_quotas = {};
-                                    Object.entries(prev.gate_quotas || {}).forEach(([gk, gate]) => {
-                                        updatedQuotas[gk] = {};
-                                        Object.entries(gate).forEach(([opt, bucket]) => {
-                                            const newCount = (bucket.pct !== null && val > 0)
-                                                ? Math.round((bucket.pct / 100) * val)
-                                                : bucket.count;
-                                            updatedQuotas[gk][opt] = { count: newCount, pct: bucket.pct };
-                                        });
-                                    });
-                                    return {
-                                        ...prev,
-                                        sample_capacity: val,
-                                        links_count: newLinks,
-                                        gate_quotas: updatedQuotas
-                                    };
-                                });
-                            }}
-                        />
-                    </div>
-                    {linkCount > 0 && target > 0 && (
-                        <div className="space-y-1">
-                            <div className="flex justify-between text-[10px] font-bold text-slate-400">
-                                <span>{target} Target</span>
-                                <span className={target > linkCount ? 'text-amber-500' : 'text-primary-soft'}>{((target / linkCount) * 100).toFixed(0)}% Fill</span>
-                            </div>
-                            <div className="h-1 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                                <div
-                                    className={`h-full rounded-full transition-all duration-500 ${target > linkCount ? 'bg-amber-500' : 'bg-primary'}`}
-                                    style={{ width: `${Math.min(100, (target / linkCount) * 100)}%` }}
-                                />
-                            </div>
-                        </div>
-                    )}
-                    <p className="text-[11px] text-slate-500">Survey closes when this many qualify. 0 = no cap.</p>
-                </div>
 
                 {/* Layer 1 Screening Configuration */}
                 <div className="space-y-3 pt-4 border-t border-line/80 dark:border-line/10">

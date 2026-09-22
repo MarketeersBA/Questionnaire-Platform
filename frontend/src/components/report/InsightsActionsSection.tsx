@@ -1,13 +1,30 @@
-import { useMemo } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import {
     ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Cell, Tooltip,
     PieChart, Pie, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
 } from 'recharts';
-import { Search, Rocket } from 'lucide-react';
+import { Search, Rocket, EyeOff } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { useReport } from '../../context/ReportContext';
 import { chartChrome } from '../../constants/brandPalette';
 import { formatBrandName } from '../../utils/brandName';
 import { condenseAll, condense, type CondensedPoint } from '../../utils/condense';
+
+function CardHideButton({ id, label }: { id: string; label: string }) {
+    const { hideItem } = useReport();
+    return (
+        <button
+            type="button"
+            onClick={() => hideItem(id, label, 'card')}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-line/80 dark:border-line/20 bg-surface-raised text-ink-muted hover:text-ink shrink-0 transition-all"
+            title={`Hide ${label}`}
+            aria-label={`Hide ${label}`}
+        >
+            <EyeOff className="w-3.5 h-3.5" />
+            Hide
+        </button>
+    );
+}
 
 /**
  * Insights & Actions.
@@ -143,8 +160,12 @@ function buildCharts(report: any): MiniChart[] {
 
 function MiniChartCard({ chart, index }: { chart: MiniChart; index: number }) {
     const { theme } = useTheme();
+    const { isItemHidden } = useReport();
     const chrome = chartChrome(theme === 'dark');
     const palette = index % 2 === 0 ? [BLUE_LIGHT, BLUE] : [RED_LIGHT, RED];
+    const hideId = `insight-mini:${chart.key}`;
+
+    if (isItemHidden(hideId)) return null;
 
     const tooltipStyle = {
         borderRadius: 12,
@@ -157,9 +178,12 @@ function MiniChartCard({ chart, index }: { chart: MiniChart; index: number }) {
 
     return (
         <div className="card-brand rounded-2xl p-5 flex flex-col">
-            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-ink-subtle mb-1">
-                {chart.title}
-            </p>
+            <div className="flex items-start justify-between gap-2 mb-1">
+                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-ink-subtle">
+                    {chart.title}
+                </p>
+                <CardHideButton id={hideId} label={chart.title} />
+            </div>
             <p className="text-[15px] font-black text-ink mb-3 leading-snug" title={chart.caption}>
                 {chart.caption}
             </p>
@@ -432,28 +456,60 @@ export function InsightsActionsSection({
             )}
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div className="card-brand rounded-2xl p-6">
-                    <div className="flex items-center gap-2.5 mb-4">
-                        <div className="w-9 h-9 rounded-lg bg-primary/10 grid place-items-center">
-                            <Search className="w-4.5 h-4.5 text-primary-soft" />
-                        </div>
-                        <h3 className="text-[17px] font-black text-ink">What drives preference</h3>
-                    </div>
-                    <EvidenceBars rows={evidenceRows} tone="primary" />
-                    <PointLines points={observations} tone="primary" />
-                </div>
-
-                <div className="card-brand rounded-2xl p-6">
-                    <div className="flex items-center gap-2.5 mb-4">
-                        <div className="w-9 h-9 rounded-lg bg-accent/10 grid place-items-center">
-                            <Rocket className="w-4.5 h-4.5 text-accent-soft" />
-                        </div>
-                        <h3 className="text-[17px] font-black text-ink">What to improve</h3>
-                    </div>
-                    <EvidenceBars rows={actionRows} tone="accent" />
-                    <PointLines points={actions} tone="accent" />
-                </div>
+                <HideableSummaryCard
+                    id="insight-summary:drives"
+                    title="What drives preference"
+                    icon={<Search className="w-4.5 h-4.5 text-primary-soft" />}
+                    iconBg="bg-primary/10"
+                    tone="primary"
+                    evidenceRows={evidenceRows}
+                    points={observations}
+                />
+                <HideableSummaryCard
+                    id="insight-summary:improve"
+                    title="What to improve"
+                    icon={<Rocket className="w-4.5 h-4.5 text-accent-soft" />}
+                    iconBg="bg-accent/10"
+                    tone="accent"
+                    evidenceRows={actionRows}
+                    points={actions}
+                />
             </div>
+        </div>
+    );
+}
+
+function HideableSummaryCard({
+    id,
+    title,
+    icon,
+    iconBg,
+    tone,
+    evidenceRows,
+    points,
+}: {
+    id: string;
+    title: string;
+    icon: ReactNode;
+    iconBg: string;
+    tone: 'primary' | 'accent';
+    evidenceRows: { name: string; value: number }[];
+    points: CondensedPoint[];
+}) {
+    const { isItemHidden } = useReport();
+    if (isItemHidden(id)) return null;
+
+    return (
+        <div className="card-brand rounded-2xl p-6">
+            <div className="flex items-center gap-2.5 mb-4">
+                <div className={`w-9 h-9 rounded-lg ${iconBg} grid place-items-center`}>
+                    {icon}
+                </div>
+                <h3 className="text-[17px] font-black text-ink flex-1">{title}</h3>
+                <CardHideButton id={id} label={title} />
+            </div>
+            <EvidenceBars rows={evidenceRows} tone={tone} />
+            <PointLines points={points} tone={tone} />
         </div>
     );
 }

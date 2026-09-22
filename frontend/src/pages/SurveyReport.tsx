@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useMemo, useRef, useLayoutEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { AlertCircle, RefreshCw, Activity, Database, Sparkles, LayoutPanelLeft, BarChart3, Maximize, ChevronLeft, ChevronRight, X, Sun, Moon, ArrowUp } from 'lucide-react';
+import { AlertCircle, RefreshCw, Activity, Database, Sparkles, LayoutPanelLeft, BarChart3, Maximize, ChevronLeft, ChevronRight, X, Sun, Moon, ArrowUp, EyeOff } from 'lucide-react';
 import { analytics, surveys } from '../services/api';
 import { toast } from 'sonner';
 import { useTheme } from '../context/ThemeContext';
@@ -9,7 +9,6 @@ import { ReportKpiRow } from '../components/report/ReportKpiRow';
 import { MarketPositionSection } from '../components/report/MarketPositionSection';
 import { ChartRenderer } from '../components/report/ChartRenderer';
 import { SwotCard } from '../components/report/SwotCard';
-import { SectionDivider } from '../components/report/SectionDivider';
 import { ReportSkeleton } from '../components/report/ReportSkeleton';
 import { FilterPanel } from '../components/report/FilterPanel';
 import { TabbedChartGroup } from '../components/report/TabbedChartGroup';
@@ -20,6 +19,8 @@ import ProductTestAnalyticsStrip from '../components/report/ProductTestAnalytics
 import ExportConfigModal from '../components/report/ExportConfigModal';
 import { ExportMenu, type ExportFormat } from '../components/report/ExportMenu';
 import ReportShareBar from '../components/report/ReportShareBar';
+import { ReportSectionCard } from '../components/report/ReportSectionCard';
+import { HiddenItemsTray } from '../components/report/HiddenItemsTray';
 import { useReportStatusPoll } from '../hooks/useReportStatusPoll';
 import { useScrollSpy } from '../hooks/useScrollSpy';
 
@@ -622,8 +623,12 @@ function ReportContent({
     // A client viewing via a share link has no account, so account-only chrome
     // is removed rather than disabled.
     const isSharedView = Boolean(shareToken);
-    const { activeGroupIndex, setActiveGroupIndex, registerChartLocation } = useReport();
+    const { activeGroupIndex, setActiveGroupIndex, registerChartLocation, isItemHidden, showItem, setSuppressHiding } = useReport();
     const [surveyMeta, setSurveyMeta] = useState({ category: '', sampleCapacity: 0 });
+
+    useEffect(() => {
+        setSuppressHiding(isPrintMode);
+    }, [isPrintMode, setSuppressHiding]);
 
     useEffect(() => {
         if (!surveyId) return;
@@ -687,8 +692,16 @@ function ReportContent({
         } else {
             (report?.sections || []).forEach((_: any, i: number) => ids.push(`section-${i}`));
         }
+        if (report?.insights?.brand_swot && Object.keys(report.insights.brand_swot).length > 0) {
+            ids.push('swot');
+        }
         return ids;
     }, [report, groupNames, hasNewPipeline]);
+
+    const isSectionHidden = useCallback((id: string) => isItemHidden(id), [isItemHidden]);
+    const restoreSection = useCallback((id: string) => {
+        if (isItemHidden(id)) showItem(id);
+    }, [isItemHidden, showItem]);
 
     // Rail visibility is user-controlled; focus mode hides it regardless.
     const [railOpen, setRailOpen] = useState(true);
@@ -1128,10 +1141,11 @@ function ReportContent({
                                     <a
                                         href="#summary"
                                         data-active={activeSectionId === 'summary'}
-                                        className="nav-item"
+                                        onClick={() => restoreSection('summary')}
+                                        className={`nav-item ${isSectionHidden('summary') ? 'opacity-45' : ''}`}
                                     >
                                         <span className="shrink-0 w-8 h-8 rounded-lg bg-white/10 grid place-items-center">
-                                            <Activity className="w-4 h-4" />
+                                            {isSectionHidden('summary') ? <EyeOff className="w-4 h-4" /> : <Activity className="w-4 h-4" />}
                                         </span>
                                         <span className="text-[12.5px] uppercase tracking-[0.06em] truncate">Overview</span>
                                     </a>
@@ -1142,10 +1156,11 @@ function ReportContent({
                                         <a
                                             href="#strategic-positioning"
                                             data-active={activeSectionId === 'strategic-positioning'}
-                                            className="nav-item"
+                                            onClick={() => restoreSection('strategic-positioning')}
+                                            className={`nav-item ${isSectionHidden('strategic-positioning') ? 'opacity-45' : ''}`}
                                         >
                                             <span className="shrink-0 w-8 h-8 rounded-lg bg-accent/25 grid place-items-center">
-                                                <Sparkles className="w-4 h-4" />
+                                                {isSectionHidden('strategic-positioning') ? <EyeOff className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
                                             </span>
                                             <span className="text-[12.5px] uppercase tracking-[0.06em] truncate">Strategic</span>
                                         </a>
@@ -1161,19 +1176,22 @@ function ReportContent({
                                         const id = `group-${i}`;
                                         const count = chartGroups[group]?.length || 0;
                                         const active = activeSectionId === id;
+                                        const hidden = isSectionHidden(id);
                                         return (
                                             <li key={group}>
-                                                <a href={`#${id}`} data-active={active} className="nav-item">
-                                                    {/* Sequential order number — the badge on the
-                                                        right is the chart count, kept visually
-                                                        distinct so the two are never confused. */}
+                                                <a
+                                                    href={`#${id}`}
+                                                    data-active={active}
+                                                    onClick={() => restoreSection(id)}
+                                                    className={`nav-item ${hidden ? 'opacity-45' : ''}`}
+                                                >
                                                     <span className={`shrink-0 w-8 h-8 rounded-lg grid place-items-center text-[11px] font-black tabular-nums transition-colors ${active ? 'bg-white/20 text-white' : 'bg-white/[0.07] text-white/50'}`}>
-                                                        {String(i + 1).padStart(2, '0')}
+                                                        {hidden ? <EyeOff className="w-3.5 h-3.5" /> : String(i + 1).padStart(2, '0')}
                                                     </span>
                                                     <span className="text-[12.5px] uppercase tracking-[0.06em] leading-tight truncate flex-1">
                                                         {group}
                                                     </span>
-                                                    {count > 0 && (
+                                                    {count > 0 && !hidden && (
                                                         <span className="shrink-0 min-w-[20px] h-5 px-1.5 rounded-full bg-white/10 text-[10px] font-bold text-white/60 tabular-nums grid place-items-center">
                                                             {count}
                                                         </span>
@@ -1183,22 +1201,43 @@ function ReportContent({
                                         );
                                     })
                                 ) : (
-                                    report.sections?.map((section: any, i: number) => (
+                                    report.sections?.map((section: any, i: number) => {
+                                        const id = `section-${i}`;
+                                        const hidden = isSectionHidden(id);
+                                        return (
                                         <li key={i}>
                                             <a
-                                                href={`#section-${i}`}
-                                                data-active={activeSectionId === `section-${i}`}
-                                                className="nav-item"
+                                                href={`#${id}`}
+                                                data-active={activeSectionId === id}
+                                                onClick={() => restoreSection(id)}
+                                                className={`nav-item ${hidden ? 'opacity-45' : ''}`}
                                             >
                                                 <span className="shrink-0 w-8 h-8 rounded-lg bg-white/[0.07] grid place-items-center text-[11px] font-black text-white/50 tabular-nums">
-                                                    {String(i + 1).padStart(2, '0')}
+                                                    {hidden ? <EyeOff className="w-3.5 h-3.5" /> : String(i + 1).padStart(2, '0')}
                                                 </span>
                                                 <span className="text-[12.5px] uppercase tracking-[0.06em] leading-tight truncate">
                                                     {section.section_name}
                                                 </span>
                                             </a>
                                         </li>
-                                    ))
+                                        );
+                                    })
+                                )}
+
+                                {report?.insights?.brand_swot && Object.keys(report.insights.brand_swot).length > 0 && (
+                                    <li>
+                                        <a
+                                            href="#swot"
+                                            data-active={activeSectionId === 'swot'}
+                                            onClick={() => restoreSection('swot')}
+                                            className={`nav-item ${isSectionHidden('swot') ? 'opacity-45' : ''}`}
+                                        >
+                                            <span className="shrink-0 w-8 h-8 rounded-lg bg-white/10 grid place-items-center">
+                                                {isSectionHidden('swot') ? <EyeOff className="w-4 h-4" /> : <BarChart3 className="w-4 h-4" />}
+                                            </span>
+                                            <span className="text-[12.5px] uppercase tracking-[0.06em] truncate">SWOT</span>
+                                        </a>
+                                    </li>
                                 )}
                             </ul>
                         </nav>
@@ -1221,7 +1260,7 @@ function ReportContent({
                 </aside>
 
                 {/* Main Content - Padded to avoid overlap */}
-                <div className={`flex-1 min-w-0 space-y-16 pb-24 transition-all duration-500`}>
+                <div className={`flex-1 min-w-0 space-y-6 pb-24 transition-all duration-500`}>
                     {/* Executive Summary Section */}
                     {/* Non-blocking: the report still renders everything it has. This only
                         names what is absent, so an incomplete report is never mistaken for a
@@ -1243,17 +1282,14 @@ function ReportContent({
                       </div>
                     )}
 
-                    <section id="summary" className="scroll-mt-40 animate-fade-in">
-                        <div className="flex items-center gap-4 mb-6">
-                            <div
-                                className="h-1 w-12 rounded-full"
-                                style={{ background: 'linear-gradient(90deg, rgb(var(--c-primary)), rgb(var(--c-accent)))' }}
-                            />
-                            <h2 className="text-xl font-black uppercase tracking-[0.25em] text-ink-subtle">Business Objective</h2>
-                        </div>
-                        {surveyId && <ProductTestAnalyticsStrip surveyId={surveyId} />}
-                        {/* Report vitals, read off the existing payload */}
-                        <div className="mb-8">
+                    <ReportSectionCard
+                        id="summary"
+                        title="Business Objective"
+                        eyebrow="Overview"
+                        forceVisible={isPrintMode}
+                    >
+                        <div className="space-y-3 mb-6">
+                            {surveyId && <ProductTestAnalyticsStrip surveyId={surveyId} />}
                             <ReportKpiRow report={report} />
                         </div>
                         {report.insights && (
@@ -1266,69 +1302,76 @@ function ReportContent({
                                 editable={['admin', 'analyst'].includes(localStorage.getItem('role') || '')}
                             />
                         )}
-                    </section>
+                    </ReportSectionCard>
 
                     {/* Strategic Command Center - Integrated AI Layer */}
                     {report.insights?.market_position_report && (
-                        <section id="strategic-positioning" className="scroll-mt-40 animate-slide-up">
-                            <div className="flex items-center gap-4 mb-12">
-                                <div className="h-1 w-12 bg-primary rounded-full"></div>
-                                <h2 className="text-3xl font-black uppercase tracking-widest italic text-primary-soft">Strategic Intelligence</h2>
-                            </div>
+                        <ReportSectionCard
+                            id="strategic-positioning"
+                            title="Strategic Intelligence"
+                            eyebrow="AI Layer"
+                            forceVisible={isPrintMode}
+                        >
                             <MarketPositionSection
                                 data={report.insights.market_position_report}
                                 strategicCharts={strategicCharts}
                             />
-                        </section>
+                        </ReportSectionCard>
                     )}
 
                     {hasNewPipeline ? (
                         groupNames.map((group: string, gIdx: number) => (
-                            <section key={group} id={`group-${gIdx}`} className="scroll-mt-40 space-y-4 animate-slide-up" style={{ animationDelay: `${gIdx * 0.1}s` }}>
-                                <div className="flex items-center justify-between border-b border-line/80 dark:border-line/10 pb-4">
-                                    <div className="space-y-1">
-                                        <div className="text-xs font-black text-primary-soft uppercase tracking-[0.4em]">Section — {String(gIdx + 1).padStart(2, '0')}</div>
-                                        <h3 className="text-3xl font-black font-display tracking-tight text-ink">{group}</h3>
-                                    </div>
-                                    <div className="px-6 py-2 bg-primary/10 border border-primary/20 rounded-full text-primary-soft text-xs font-black uppercase tracking-widest">
+                            <ReportSectionCard
+                                key={group}
+                                id={`group-${gIdx}`}
+                                title={group}
+                                eyebrow={`Section — ${String(gIdx + 1).padStart(2, '0')}`}
+                                badge={
+                                    <div className="px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full text-primary-soft text-[10px] font-black uppercase tracking-widest">
                                         {chartGroups[group].length} {chartGroups[group].length === 1 ? 'Visualization' : 'Visualizations'}
                                     </div>
-                                </div>
-
+                                }
+                                forceVisible={isPrintMode}
+                                className="animate-slide-up"
+                            >
                                 <TabbedChartGroup groupName={group} charts={chartGroups[group]} isFocusMode={false} />
-                            </section>
+                            </ReportSectionCard>
                         ))
                     ) : (
                         report.sections?.map((section: any, idx: number) => (
-                            <section key={idx} id={`section-${idx}`} className="scroll-mt-40 space-y-16 animate-slide-up" style={{ animationDelay: `${idx * 0.1}s` }}>
-                                <div className="flex items-center justify-between border-b border-line/80 dark:border-line/10 pb-8">
-                                    <div className="space-y-2">
-                                        <div className="text-xs font-black text-primary-soft uppercase tracking-[0.4em]">Section — {String(idx + 1).padStart(2, '0')}</div>
-                                        <h3 className="text-3xl font-black font-display tracking-tight text-ink">{section.section_name}</h3>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 gap-12">
+                            <ReportSectionCard
+                                key={idx}
+                                id={`section-${idx}`}
+                                title={section.section_name}
+                                eyebrow={`Section — ${String(idx + 1).padStart(2, '0')}`}
+                                forceVisible={isPrintMode}
+                                className="animate-slide-up"
+                            >
+                                <div className="grid grid-cols-1 gap-8">
                                     {section.charts?.map((chart: any, cIdx: number) => (
                                         <div key={cIdx} className="hover:scale-[1.01] transition-transform duration-500">
                                             <ChartRenderer chart={chart} isFocusMode={false} />
                                         </div>
                                     ))}
                                 </div>
-                            </section>
+                            </ReportSectionCard>
                         ))
                     )}
 
                     {/* AI Strategic Layers */}
                     {report.insights?.brand_swot && Object.keys(report.insights.brand_swot).length > 0 && (
-                        <section id="swot" className="space-y-16">
-                            <SectionDivider title="Competitive Archetypes" />
+                        <ReportSectionCard
+                            id="swot"
+                            title="Competitive Archetypes"
+                            eyebrow="SWOT"
+                            forceVisible={isPrintMode}
+                        >
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                                 {Object.entries(report.insights.brand_swot).map(([brand, swot]: [string, any]) => (
                                     <SwotCard key={brand} brand={brand} swot={swot} />
                                 ))}
                             </div>
-                        </section>
+                        </ReportSectionCard>
                     )}
                 </div>
             </main>
@@ -1336,6 +1379,8 @@ function ReportContent({
             {/* ── Floating controls ── */}
             {!isFocusMode && (
                 <>
+                    <HiddenItemsTray />
+
                     {/* Re-open the rail once it has been collapsed */}
                     {!railOpen && (
                         <button
