@@ -252,7 +252,7 @@ export function ArchitectStep({ formData, setFormData, handleGenerateSchema, loa
 
     const getLayerMiniLabel = (modId: string) => {
         if (modId === 'screening') return 'Screening';
-        if (modId === 'taste_test') return 'Taste Test';
+        if (modId === 'taste_test') return 'Sensory Test';
         if (modId === 'product_test') return 'Product Test';
         if (modId === 'purchase_funnel') return 'Purchase';
         if (modId === 'brand_usage') return 'Usage';

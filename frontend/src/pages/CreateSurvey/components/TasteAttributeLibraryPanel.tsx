@@ -333,7 +333,7 @@ export default function TasteAttributeLibraryPanel({
                     <div className="min-w-0">
                         <h3 className="text-lg font-black text-ink flex items-center gap-2">
                             <Sparkles className="w-4 h-4 text-[#21A0FF]" />
-                            Taste Test Attribute Library
+                            Sensory Test Attribute Library
                         </h3>
                         <p className="text-sm font-semibold text-ink-subtle mt-0.5">
                             Pick the attributes to measure. Each shows the exact question and answer

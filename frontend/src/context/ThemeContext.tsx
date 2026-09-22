@@ -23,7 +23,8 @@ export function ThemeProvider({
         }
         const saved = localStorage.getItem('theme');
         if (saved === 'dark' || saved === 'light') return saved;
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        // Default to light; ignore OS preference on first visit.
+        return 'light';
     });
 
     const effectiveTheme = forcedTheme ?? theme;

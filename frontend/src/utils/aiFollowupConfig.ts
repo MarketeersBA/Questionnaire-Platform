@@ -54,7 +54,7 @@ export const AI_FOLLOWUP_SURFACE_OPTIONS: ReadonlyArray<{
 }> = [
   {
     id: 'taste_l2_open_end',
-    label: 'Taste test — open-ended (L2)',
+    label: 'Sensory test — open-ended (L2)',
     description: 'Like / dislike / recommend open ends after tasting',
   },
   {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Settings2, Tag, Layers, Palette, EyeOff, X, Info, Sparkles, Plus, ShieldCheck, Search, ChevronDown, ChevronUp, Trash2, PlusCircle, ArrowUp, ArrowDown, MoveVertical, BarChart3, Wallet, Check, Zap, Box, Globe } from 'lucide-react';
+import { Settings2, Tag, Layers, Palette, EyeOff, X, Info, Sparkles, Plus, ShieldCheck, Search, ChevronDown, ChevronUp, Trash2, PlusCircle, ArrowUp, ArrowDown, MoveVertical, BarChart3, Wallet, Check, Zap, Box, Globe, Target } from 'lucide-react';
 import { StepProps, DEFAULT_TASTE_CONFIG, DEFAULT_PRODUCT_TEST_CONFIG, DEFAULT_AI_FOLLOWUP } from '../types';
 import TasteAttributeLibraryPanel from '../components/TasteAttributeLibraryPanel';
 import {
@@ -65,7 +65,7 @@ function SurveyLanguageMenu({
     }, [open]);
 
     return (
-        <div className="max-w-sm space-y-3" ref={rootRef}>
+        <div className="space-y-3" ref={rootRef}>
             <label className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-muted ml-1 flex items-center gap-2">
                 <Globe className="w-3.5 h-3.5 text-primary-soft" />
                 Survey Language
@@ -143,6 +143,87 @@ function SurveyLanguageMenu({
                     )}
                 </AnimatePresence>
             </div>
+        </div>
+    );
+}
+
+function SampleSizeField({
+    formData,
+    setFormData,
+}: {
+    formData: StepProps['formData'];
+    setFormData: StepProps['setFormData'];
+}) {
+    const target = formData.sample_capacity || 0;
+    const linkCount = formData.links_count || 0;
+
+    return (
+        <div className="p-3 bg-primary/5 dark:bg-primary/10 rounded-2xl border border-primary/20 dark:border-primary/30 space-y-2 relative overflow-hidden h-full">
+            <div className="flex items-center justify-between gap-3">
+                <label className="text-[10px] font-black uppercase tracking-[0.16em] text-ink-muted flex items-center gap-2">
+                    <Target className="w-3.5 h-3.5 text-primary-soft" />
+                    Sample Size
+                </label>
+                <button
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, sample_intelligence: !prev.sample_intelligence }))}
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${formData.sample_intelligence ? 'bg-primary text-white shadow-sm shadow-primary/30' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'}`}
+                >
+                    <Sparkles className={`w-3 h-3 ${formData.sample_intelligence ? 'animate-pulse' : ''}`} />
+                    {formData.sample_intelligence ? 'Intelligence: Active' : 'Manual Mode'}
+                </button>
+            </div>
+
+            <div className="relative group">
+                <Target className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-soft/60 group-focus-within:text-primary-soft transition-colors pointer-events-none" />
+                <input
+                    type="number"
+                    min="0"
+                    max={formData.links_count || 10000}
+                    placeholder="e.g. 200"
+                    className="w-full bg-surface border border-primary/30 dark:border-primary/40 rounded-xl pl-10 pr-4 py-2.5 text-ink focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all font-black text-base shadow-sm placeholder:text-slate-400"
+                    value={formData.sample_capacity || ''}
+                    onChange={e => {
+                        const val = parseInt(e.target.value) || 0;
+                        setFormData(prev => {
+                            const newLinks = prev.sample_intelligence ? Math.round(val / 0.2) : prev.links_count;
+                            const updatedQuotas: typeof prev.gate_quotas = {};
+                            Object.entries(prev.gate_quotas || {}).forEach(([gk, gate]) => {
+                                updatedQuotas[gk] = {};
+                                Object.entries(gate).forEach(([opt, bucket]) => {
+                                    const newCount = (bucket.pct !== null && val > 0)
+                                        ? Math.round((bucket.pct / 100) * val)
+                                        : bucket.count;
+                                    updatedQuotas[gk][opt] = { count: newCount, pct: bucket.pct };
+                                });
+                            });
+                            return {
+                                ...prev,
+                                sample_capacity: val,
+                                links_count: newLinks,
+                                gate_quotas: updatedQuotas,
+                            };
+                        });
+                    }}
+                />
+            </div>
+            {linkCount > 0 && target > 0 && (
+                <div className="space-y-1">
+                    <div className="flex justify-between text-[10px] font-bold text-slate-400">
+                        <span>{target} Target</span>
+                        <span className={target > linkCount ? 'text-amber-500' : 'text-primary-soft'}>
+                            {((target / linkCount) * 100).toFixed(0)}% Fill
+                        </span>
+                    </div>
+                    <div className="h-1 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                        <div
+                            className={`h-full rounded-full transition-all duration-500 ${target > linkCount ? 'bg-amber-500' : 'bg-primary'}`}
+                            style={{ width: `${Math.min(100, (target / linkCount) * 100)}%` }}
+                        />
+                    </div>
+                </div>
+            )}
+            <p className="text-[11px] text-slate-500">Survey closes when this many qualify. 0 = no cap.</p>
         </div>
     );
 }
@@ -1244,28 +1325,31 @@ export function ParametersStep({
                         </div>
                         <div>
                             <h4 className="text-sm font-black text-amber-900 dark:text-amber-100 uppercase tracking-widest leading-none">Blueprint Type Mismatch</h4>
-                            <p className="text-sm text-amber-600 dark:text-amber-400 font-bold mt-1">This page is optimized for Taste Tests. Current type: <span className="font-black underline">{formData.survey_type || 'Unset'}</span></p>
+                            <p className="text-sm text-amber-600 dark:text-amber-400 font-bold mt-1">This page is optimized for Sensory Tests. Current type: <span className="font-black underline">{formData.survey_type || 'Unset'}</span></p>
                         </div>
                     </div>
                     <button
                         onClick={() => setFormData(prev => ({ ...prev, survey_type: 'taste_test', config: prev.config || DEFAULT_TASTE_CONFIG }))}
                         className="px-6 py-2.5 bg-amber-600 text-white rounded-xl text-sm font-black uppercase tracking-widest hover:bg-amber-700 transition-all shadow-md"
                     >
-                        Force Taste Test UI
+                        Force Sensory Test UI
                     </button>
                 </div>
             )}
 
             {(formData.survey_type === 'taste_test' || !formData.survey_type) && (
                 <div className="space-y-5">
-                    <SurveyLanguageMenu
-                        id="survey-language-select"
-                        value={(formData.config?.language as 'en' | 'ar') || 'en'}
-                        onChange={lang => setFormData(prev => ({
-                            ...prev,
-                            config: { ...(prev.config || DEFAULT_TASTE_CONFIG), language: lang },
-                        }))}
-                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                        <SurveyLanguageMenu
+                            id="survey-language-select"
+                            value={(formData.config?.language as 'en' | 'ar') || 'en'}
+                            onChange={lang => setFormData(prev => ({
+                                ...prev,
+                                config: { ...(prev.config || DEFAULT_TASTE_CONFIG), language: lang },
+                            }))}
+                        />
+                        <SampleSizeField formData={formData} setFormData={setFormData} />
+                    </div>
 
                     {renderSharedProtocolsAndBrands()}
 
@@ -2805,18 +2889,21 @@ export function ParametersStep({
                 this UI rather than a placeholder. */}
             {(formData.survey_type === 'product_test' || formData.survey_type === 'pack_test') && (
                 <div className="space-y-5 animate-slide-up">
-                    <SurveyLanguageMenu
-                        id="survey-language-select-product"
-                        value={(formData.product_test_config?.language || formData.config?.language || 'en') as 'en' | 'ar'}
-                        onChange={lang => setFormData(prev => {
-                            const ptConfig = prev.product_test_config || { ...DEFAULT_PRODUCT_TEST_CONFIG, language: lang };
-                            return {
-                                ...prev,
-                                config: { ...(prev.config || DEFAULT_TASTE_CONFIG), language: lang },
-                                product_test_config: { ...ptConfig, language: lang },
-                            };
-                        })}
-                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                        <SurveyLanguageMenu
+                            id="survey-language-select-product"
+                            value={(formData.product_test_config?.language || formData.config?.language || 'en') as 'en' | 'ar'}
+                            onChange={lang => setFormData(prev => {
+                                const ptConfig = prev.product_test_config || { ...DEFAULT_PRODUCT_TEST_CONFIG, language: lang };
+                                return {
+                                    ...prev,
+                                    config: { ...(prev.config || DEFAULT_TASTE_CONFIG), language: lang },
+                                    product_test_config: { ...ptConfig, language: lang },
+                                };
+                            })}
+                        />
+                        <SampleSizeField formData={formData} setFormData={setFormData} />
+                    </div>
 
                     {/* ═══ Brand Architecture (shared) ═══ */}
                     {renderSharedProtocolsAndBrands()}

@@ -16,7 +16,8 @@ import {
     Layout,
     Beaker,
     Activity,
-    Sparkles
+    Sparkles,
+    RotateCcw,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -48,6 +49,76 @@ import { CloneSurveyModal } from './components/CloneSurveyModal';
 import { getSurveyLink } from '../../utils/surveyLinks';
 import { DEFAULT_VOICE_CAPTURE } from './types';
 import { useCreateSurveyPersistence } from '../../hooks/useCreateSurveyPersistence';
+import { flushPendingPackagingHeatmapUploads, type PackagingHeatmapPendingFiles } from '../../utils/packagingHeatmapConfig';
+
+const DEFAULT_QUALITY_CONTROL = {
+    is_enabled: false,
+    min_time_seconds: 60,
+    max_time_seconds: 1200,
+    min_time_message_en: "You weren't focused on the survey",
+    min_time_message_ar: 'لم تكن مركزاً في الاستبيان',
+    max_time_message_en: 'Out of time',
+    max_time_message_ar: 'انتهى الوقت المسموح',
+};
+
+function createEmptyFormData(): SurveyFormData {
+    return {
+        survey_name: '',
+        survey_code: '',
+        survey_type: '',
+        links_count: 1000,
+        sample_capacity: 200,
+        gate_quotas: {},
+        locked_quotas: {},
+        config: null,
+        product_test_config: null,
+        internal_brands_data: [],
+        competitor_brands_data: [],
+        template_snapshot_schema: null,
+        template_snapshot_questions: [],
+        template_snapshot_l2: null,
+        schema: {
+            layer1_structure: { sections: [] },
+            layer2_structure: { sections: [] },
+        },
+        layer1_screening_config: { ...INITIAL_SCREENING_CONFIG },
+        google_form_url: '',
+        google_form_id: '',
+        industry: '',
+        survey_objective: '',
+        survey_objective_other: '',
+        sample_intelligence: true,
+        sec_classes: [],
+        purchase_funnel_id: undefined,
+        purchase_funnel: {
+            is_enabled: false,
+            category_name: '',
+            brand_list: [],
+        },
+        brand_usage: { is_enabled: false },
+        brand_pricing_behavior: { is_enabled: false },
+        brand_analyzer: {
+            is_enabled: false,
+            sync_with_purchase_funnel: true,
+            selected_attributes: [],
+            brand_list: [],
+        },
+        voice_capture: { ...DEFAULT_VOICE_CAPTURE },
+        ai_followup: { ...DEFAULT_AI_FOLLOWUP },
+        quality_control: { ...DEFAULT_QUALITY_CONTROL },
+        attached_modules: [],
+        selected_modules: [],
+        module_sequence: [],
+        blueprint: {
+            category: '',
+            ratingScale: 10,
+            own_brand: null,
+            brands: [],
+            attributes: {},
+            custom_research_attributes: [],
+        },
+    } as SurveyFormData;
+}
 
 const LEGACY_OBJECTIVE_IDS = new Set([
     'taste_new_product',
@@ -65,7 +136,6 @@ function resolveBusinessQuestion(objective?: string | null, other?: string | nul
     if (!objective || LEGACY_OBJECTIVE_IDS.has(objective)) return '';
     return objective;
 }
-import { flushPendingPackagingHeatmapUploads, type PackagingHeatmapPendingFiles } from '../../utils/packagingHeatmapConfig';
 
 
 
@@ -79,6 +149,7 @@ export default function CreateSurvey({ editSurveyId, initialSurveyData }: Create
     const navigate = useNavigate();
 
     const [currentStep, setCurrentStep] = useState(1);
+    const [maxStepReached, setMaxStepReached] = useState(1);
     const [successData, setSuccessData] = useState<any>(null);
     const [loading, setLoading] = useState(false);
     const [showCloneModal, setShowCloneModal] = useState(false);
@@ -87,48 +158,7 @@ export default function CreateSurvey({ editSurveyId, initialSurveyData }: Create
     const { draft, saveDraft, clearDraft } = useCreateSurveyPersistence();
     const [hasRestored, setHasRestored] = useState(false);
 
-    const [formData, setFormData] = useState<SurveyFormData>({
-        survey_name: '',
-        survey_code: '',
-        survey_type: '',
-        links_count: 1000,
-        sample_capacity: 200,
-        gate_quotas: {},
-        config: null,
-        internal_brands_data: [],
-        competitor_brands_data: [],
-        template_snapshot_schema: null,
-        template_snapshot_questions: [],
-        template_snapshot_l2: null,
-        schema: {
-            layer1_structure: { sections: [] },
-            layer2_structure: { sections: [] }
-        },
-        layer1_screening_config: INITIAL_SCREENING_CONFIG,
-        google_form_url: '',
-        google_form_id: '',
-        industry: '',
-        sample_intelligence: true,
-        sec_classes: [],
-        purchase_funnel_id: undefined,
-        purchase_funnel: {
-            is_enabled: false,
-            category_name: '',
-            brand_list: []
-        },
-        brand_usage: { is_enabled: false },
-        brand_pricing_behavior: { is_enabled: false },
-        voice_capture: { ...DEFAULT_VOICE_CAPTURE },
-        ai_followup: { ...DEFAULT_AI_FOLLOWUP },
-        blueprint: {
-            category: '',
-            ratingScale: 10,
-            own_brand: null,
-            brands: [],
-            attributes: {},
-            custom_research_attributes: []
-        }
-    } as SurveyFormData);
+    const [formData, setFormData] = useState<SurveyFormData>(() => createEmptyFormData());
 
     // Populate form from existing survey data when in edit mode
     useEffect(() => {
@@ -213,6 +243,7 @@ export default function CreateSurvey({ editSurveyId, initialSurveyData }: Create
                 survey_objective_other: '',
             });
             setCurrentStep(draft.currentStep);
+            setMaxStepReached(Math.max(draft.currentStep || 1, 1));
             setHasRestored(true);
             toast.info('Progress restored from draft', {
                 description: `Last saved: ${new Date(draft.updatedAt).toLocaleTimeString()}`,
@@ -546,6 +577,7 @@ export default function CreateSurvey({ editSurveyId, initialSurveyData }: Create
                     });
 
                     setCurrentStep(3);
+                    setMaxStepReached(m => Math.max(m, 3));
                     if (mainContent) {
                         mainContent.scrollTo({ top: 0, behavior: 'smooth' });
                     } else {
@@ -777,6 +809,34 @@ export default function CreateSurvey({ editSurveyId, initialSurveyData }: Create
         }
     };
 
+    const scrollStepToTop = () => {
+        const mainContent = document.getElementById('main-content');
+        if (mainContent) {
+            mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+
+    const goToStep = (targetId: number) => {
+        if (targetId === currentStep) return;
+
+        // Allow free navigation to any step already reached
+        if (targetId < currentStep || targetId <= maxStepReached) {
+            setCurrentStep(targetId);
+            scrollStepToTop();
+            return;
+        }
+
+        // Advance one step forward via existing validation (and schema generation)
+        if (targetId === currentStep + 1) {
+            nextStep();
+            return;
+        }
+
+        toast.error('Complete the current steps in order before jumping ahead');
+    };
+
     const nextStep = () => {
         if (currentStep === 1) {
             if (!formData.survey_name) {
@@ -850,23 +910,17 @@ export default function CreateSurvey({ editSurveyId, initialSurveyData }: Create
             // Move straight to Deployment Step (4).
         }
 
-        setCurrentStep(prev => Math.min(prev + 1, 5));
-        const mainContent = document.getElementById('main-content');
-        if (mainContent) {
-            mainContent.scrollTo({ top: 0, behavior: 'smooth' });
-        } else {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+        setCurrentStep(prev => {
+            const next = Math.min(prev + 1, 5);
+            setMaxStepReached(m => Math.max(m, next));
+            return next;
+        });
+        scrollStepToTop();
     };
 
     const prevStep = () => {
         setCurrentStep(prev => Math.max(prev - 1, 1));
-        const mainContent = document.getElementById('main-content');
-        if (mainContent) {
-            mainContent.scrollTo({ top: 0, behavior: 'smooth' });
-        } else {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+        scrollStepToTop();
     };
 
     const handleSubmit = async () => {
@@ -1104,6 +1158,120 @@ export default function CreateSurvey({ editSurveyId, initialSurveyData }: Create
         { id: 4, name: 'Quality Control', icon: Activity },
     ];
 
+    const resetCurrentStep = () => {
+        const empty = createEmptyFormData();
+        const stepName = steps[currentStep - 1]?.name || 'this page';
+
+        setFormData(prev => {
+            switch (currentStep) {
+                case 1:
+                    return {
+                        ...prev,
+                        survey_name: empty.survey_name,
+                        survey_code: empty.survey_code,
+                        survey_type: empty.survey_type,
+                        industry: empty.industry,
+                        survey_objective: empty.survey_objective,
+                        survey_objective_other: empty.survey_objective_other,
+                        layer1_screening_config: { ...INITIAL_SCREENING_CONFIG },
+                        gate_quotas: {},
+                        locked_quotas: {},
+                        sec_classes: [],
+                        purchase_funnel_id: undefined,
+                        purchase_funnel: empty.purchase_funnel,
+                        brand_usage: empty.brand_usage,
+                        brand_pricing_behavior: empty.brand_pricing_behavior,
+                        brand_analyzer: empty.brand_analyzer,
+                        attached_modules: [],
+                        selected_modules: [],
+                        module_sequence: [],
+                        sample_intelligence: true,
+                        // Keep category off identity until type is chosen again
+                        config: prev.config
+                            ? { ...prev.config, category: '' }
+                            : prev.config,
+                    };
+                case 2:
+                    return {
+                        ...prev,
+                        sample_capacity: empty.sample_capacity,
+                        links_count: empty.links_count,
+                        config: prev.survey_type === 'taste_test' || prev.survey_type === 'product_test'
+                            ? {
+                                ...DEFAULT_TASTE_CONFIG,
+                                category: prev.config?.category || '',
+                                language: 'en',
+                            }
+                            : null,
+                        product_test_config: prev.survey_type === 'product_test'
+                            ? { ...DEFAULT_PRODUCT_TEST_CONFIG }
+                            : null,
+                        internal_brands_data: [],
+                        competitor_brands_data: [],
+                        blueprint: empty.blueprint,
+                        ai_followup: { ...DEFAULT_AI_FOLLOWUP },
+                        purchase_funnel: {
+                            is_enabled: prev.purchase_funnel?.is_enabled || false,
+                            category_name: '',
+                            brand_list: [],
+                        },
+                        brand_usage: {
+                            is_enabled: prev.brand_usage?.is_enabled || false,
+                            target_brand: '',
+                            selected_questions: prev.brand_usage?.is_enabled
+                                ? ['us_q1', 'us_q2', 'us_q3', 'us_q4']
+                                : undefined,
+                        },
+                        brand_pricing_behavior: {
+                            is_enabled: prev.brand_pricing_behavior?.is_enabled || false,
+                            target_brand: '',
+                            selected_questions: prev.brand_pricing_behavior?.is_enabled
+                                ? ['cb_q1', 'cb_q2', 'cb_q3', 'cb_q4']
+                                : undefined,
+                        },
+                        brand_analyzer: {
+                            is_enabled: prev.brand_analyzer?.is_enabled || false,
+                            sync_with_purchase_funnel: true,
+                            selected_attributes: [],
+                            brand_list: [],
+                        },
+                    };
+                case 3:
+                    return {
+                        ...prev,
+                        schema: {
+                            layer1_structure: { sections: [] },
+                            layer2_structure: { sections: [] },
+                        },
+                        template_snapshot_schema: null,
+                        template_snapshot_questions: [],
+                        template_snapshot_l2: null,
+                    };
+                case 4:
+                    return {
+                        ...prev,
+                        quality_control: { ...DEFAULT_QUALITY_CONTROL },
+                        voice_capture: { ...DEFAULT_VOICE_CAPTURE },
+                    };
+                default:
+                    return prev;
+            }
+        });
+
+        if (currentStep === 2) {
+            setSelectedBank(null);
+            setPackagingHeatmapPending({});
+        }
+
+        if (!isEditMode && currentStep === 1) {
+            clearDraft();
+        }
+
+        toast.success(`${stepName} reset`, {
+            description: 'This page’s fields were restored to defaults. Other steps were left unchanged.',
+        });
+    };
+
     return (
         <div className="relative">
             <div className="relative z-10 space-y-6">
@@ -1118,24 +1286,33 @@ export default function CreateSurvey({ editSurveyId, initialSurveyData }: Create
                     </div>
 
                     <div className="hidden lg:flex items-center gap-6 glass-panel p-4 rounded-3xl shadow-premium border-white/5 dark:border-slate-800/50 backdrop-blur-xl bg-white/50 dark:bg-slate-900/50 transition-colors">
-                        {steps.map((s, idx) => (
-                            <React.Fragment key={s.id}>
-                                <div
-                                    className={`flex items-center gap-3 transition-all duration-500 ${currentStep === s.id ? 'text-primary-soft scale-105' : currentStep > s.id ? 'text-emerald-500' : 'text-slate-600'}`}
-                                >
-                                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center border-2 transition-all duration-500 ${currentStep === s.id ? 'border-primary bg-primary/10 shadow-lg shadow-primary/20' : currentStep > s.id ? 'border-emerald-500 bg-emerald-500/10' : 'border-slate-400 dark:border-slate-600 bg-white/50 dark:bg-slate-900/50'}`}>
-                                        <s.icon size={14} strokeWidth={currentStep === s.id ? 3 : 2} />
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-[9px] font-black uppercase tracking-[0.2em]">{s.name}</span>
-                                        {currentStep === s.id && <span className="text-[7px] font-bold text-primary-soft/60 dark:text-primary-soft/80 uppercase tracking-widest animate-pulse">Active</span>}
-                                    </div>
-                                </div>
-                                {idx < steps.length - 1 && (
-                                    <div className={`w-8 h-[1px] ${currentStep > s.id ? 'bg-emerald-500/30' : 'bg-slate-400 dark:bg-slate-600'}`} />
-                                )}
-                            </React.Fragment>
-                        ))}
+                        {steps.map((s, idx) => {
+                            const isActive = currentStep === s.id;
+                            const isComplete = maxStepReached > s.id;
+                            const canNavigate = s.id <= maxStepReached || s.id === currentStep + 1;
+                            return (
+                                <React.Fragment key={s.id}>
+                                    <button
+                                        type="button"
+                                        onClick={() => goToStep(s.id)}
+                                        disabled={!canNavigate && !isActive}
+                                        title={canNavigate || isActive ? `Go to ${s.name}` : 'Complete earlier steps first'}
+                                        className={`flex items-center gap-3 transition-all duration-500 ${isActive ? 'text-primary-soft scale-105' : isComplete ? 'text-emerald-500' : 'text-slate-600'} ${canNavigate || isActive ? 'cursor-pointer hover:opacity-90' : 'cursor-not-allowed opacity-50'}`}
+                                    >
+                                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center border-2 transition-all duration-500 ${isActive ? 'border-primary bg-primary/10 shadow-lg shadow-primary/20' : isComplete ? 'border-emerald-500 bg-emerald-500/10' : 'border-slate-400 dark:border-slate-600 bg-white/50 dark:bg-slate-900/50'}`}>
+                                            <s.icon size={14} strokeWidth={isActive ? 3 : 2} />
+                                        </div>
+                                        <div className="flex flex-col text-left">
+                                            <span className="text-[9px] font-black uppercase tracking-[0.2em]">{s.name}</span>
+                                            {isActive && <span className="text-[7px] font-bold text-primary-soft/60 dark:text-primary-soft/80 uppercase tracking-widest animate-pulse">Active</span>}
+                                        </div>
+                                    </button>
+                                    {idx < steps.length - 1 && (
+                                        <div className={`w-8 h-[1px] ${isComplete ? 'bg-emerald-500/30' : 'bg-slate-400 dark:bg-slate-600'}`} />
+                                    )}
+                                </React.Fragment>
+                            );
+                        })}
                     </div>
                 </div>
 
@@ -1213,16 +1390,26 @@ export default function CreateSurvey({ editSurveyId, initialSurveyData }: Create
                                             )}
                                         </button>
                                     )}
-                                    {currentStep > 1 && (
+                                    <div className={`grid gap-2 ${currentStep > 1 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
                                         <button
                                             type="button"
-                                            onClick={prevStep}
-                                            className="w-full py-4 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:text-slate-900 dark:hover:text-slate-300 transition-colors flex items-center justify-center gap-2"
+                                            onClick={resetCurrentStep}
+                                            className="w-full py-3.5 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 border border-transparent hover:border-rose-500/30 hover:bg-rose-500/5 rounded-2xl transition-all flex items-center justify-center gap-2"
                                         >
-                                            <ArrowLeft className="w-4 h-4" />
-                                            Return to Phase {steps[currentStep - 2].name}
+                                            <RotateCcw className="w-3.5 h-3.5" />
+                                            Reset {steps[currentStep - 1].name}
                                         </button>
-                                    )}
+                                        {currentStep > 1 && (
+                                            <button
+                                                type="button"
+                                                onClick={prevStep}
+                                                className="w-full py-3.5 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:text-slate-900 dark:hover:text-slate-300 transition-colors flex items-center justify-center gap-2"
+                                            >
+                                                <ArrowLeft className="w-4 h-4" />
+                                                Return to {steps[currentStep - 2].name}
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
 
                                 <AnimatePresence>

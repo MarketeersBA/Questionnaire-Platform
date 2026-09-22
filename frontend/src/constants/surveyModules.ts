@@ -31,7 +31,7 @@ export const SURVEY_MODULE_REGISTRY: Record<string, SurveyModuleMeta> = {
     },
     taste_test: {
         id: 'taste_test',
-        label: 'Product Taste Test (Loop)',
+        label: 'Product Sensory Test (Loop)',
     },
     product_test: {
         id: 'product_test',

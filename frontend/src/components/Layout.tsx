@@ -13,7 +13,8 @@ import {
     Moon,
     Zap,
     Layers,
-    ShieldCheck
+    ShieldCheck,
+    PlusCircle,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { auth } from '../services/api';
@@ -94,6 +95,7 @@ export default function Layout({ children }: LayoutProps) {
     };
 
     const topNavItems = [
+        { icon: PlusCircle, label: 'Create Survey', path: '/create-survey', description: 'Build a new study' },
         { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', description: 'Performance overview' },
         // Comparative Hub temporarily hidden from the rail.
         // Comparative Hub is a real route (/analytics/compare) that previously had
@@ -169,7 +171,7 @@ export default function Layout({ children }: LayoutProps) {
                     {/* Logo — centred and sized to fill the rail head rather than
                         sitting small in a large empty block. */}
                     <div className={`shrink-0 flex items-center justify-center border-b border-white/[0.06] ${sidebarOpen ? 'px-5 py-6' : 'px-3 py-5'}`}>
-                        <div className="flex items-center justify-center cursor-pointer group/logo w-full" onClick={() => navigate('/dashboard')} title="Dashboard">
+                        <div className="flex items-center justify-center cursor-pointer group/logo w-full" onClick={() => navigate('/create-survey')} title="Create Survey">
                             <div className="relative flex-shrink-0 grid place-items-center">
                                 <div className="absolute inset-0 bg-primary/25 blur-xl rounded-full scale-75 group-hover/logo:scale-125 transition-transform duration-700 opacity-0 group-hover/logo:opacity-100"></div>
                                 {/* The logo artwork is navy, close to the rail

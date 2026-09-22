@@ -20,7 +20,7 @@ export default function Login() {
       localStorage.setItem('token', response.access_token);
       localStorage.setItem('role', response.role || 'user');
       localStorage.setItem('username', username.trim());
-      navigate('/dashboard');
+      navigate('/create-survey');
     } catch (err: any) {
       if (err.response?.status === 401) {
         setError('Invalid username or password');
@@ -120,7 +120,7 @@ export default function Login() {
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
               <>
-                Sign in to Dashboard
+                Sign in
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </>
             )}

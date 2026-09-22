@@ -21,7 +21,7 @@ export default function SignUp() {
       localStorage.setItem('token', response.access_token);
       localStorage.setItem('role', response.role || 'user');
       localStorage.setItem('username', username.trim());
-      navigate('/dashboard');
+      navigate('/create-survey');
     } catch (err) {
       setError('Unable to sign up. Username may already be taken.');
     } finally {

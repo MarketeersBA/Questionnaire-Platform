@@ -181,7 +181,7 @@ export default function Templates() {
             const schema = generateTasteTestModuleSchema(config, dbQuestions);
             setCurrentTemplate({
                 ...currentTemplate,
-                name: `${config.category} Taste Test`,
+                name: `${config.category} Sensory Test`,
                 template_type: 'taste_test',
                 taste_test_config: config,
                 layer1_structure: schema.layer1_structure,
@@ -666,7 +666,7 @@ export default function Templates() {
                                                             <Sparkles className="w-8 h-8" />
                                                         </div>
                                                         <div>
-                                                            <h3 className="text-xl font-black text-white">Taste Test Configuration</h3>
+                                                            <h3 className="text-xl font-black text-white">Sensory Test Configuration</h3>
                                                             <div className="flex flex-wrap gap-3 mt-2">
                                                                 <span className="px-3 py-1 bg-white/5 dark:bg-slate-800/40 rounded-lg text-[10px] font-black uppercase text-primary-soft border border-primary/20 dark:border-primary/40 transition-colors">
                                                                     Category: {currentTemplate.taste_test_config.category}
@@ -710,7 +710,7 @@ export default function Templates() {
                                                             value={currentTemplate.type}
                                                             onChange={e => setCurrentTemplate({ ...currentTemplate, type: e.target.value })}
                                                         >
-                                                            <option value="taste_test">Taste Test</option>
+                                                            <option value="taste_test">Sensory Test</option>
                                                             <option value="consumer_habit">Consumer Habit</option>
                                                             <option value="b2b_qualification">B2B Qualification</option>
                                                         </select>
