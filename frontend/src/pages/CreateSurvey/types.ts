@@ -87,6 +87,16 @@ export interface SurveyFormData {
     config: TasteTestConfig | null;
     product_test_config?: ProductTestConfig | null;
     blueprint?: ResearchBlueprint;
+    /**
+     * Signature of the brand/attribute/language inputs that produced the
+     * current `schema`, from `computeGeneratorSignature`. Lets step
+     * navigation tell a fresh generation apart from one left over from
+     * before the last edit — see the comment at `goToStep` for why that
+     * distinction matters: without it, editing a brand name on Parameters
+     * and returning to the Blueprint step via the tab (rather than "Next")
+     * left the already-generated questions holding the old brand name.
+     */
+    schemaGeneratedSignature?: string;
     template_snapshot_schema?: any;
     template_snapshot_questions?: any[];
     template_snapshot_l2?: any;
