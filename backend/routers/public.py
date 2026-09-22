@@ -136,35 +136,65 @@ class MasterLinkRequest(BaseModel):
 class MasterLinkResponse(BaseModel):
     token: str
 
+#: How long a still-in-progress attempt on the same device is treated as "the
+#: same respondent coming back" and resumed, rather than a new attempt. Chosen
+#: to comfortably cover a dropped connection or an accidental tab close within
+#: one sitting, while staying short enough that a device reused later — a
+#: shared fieldwork tablet handed to the next respondent, or the link simply
+#: reopened hours or days afterward — gets a clean slate instead of someone
+#: else's answers. Tune here if real fieldwork needs a longer allowance.
+MASTER_LINK_RESUME_WINDOW = timedelta(hours=1)
+
+
 @router.post("/master-link/{survey_id}/generate-token", response_model=MasterLinkResponse)
 async def generate_master_link_token(survey_id: str, req: Request, payload: MasterLinkRequest = None):
     if not ObjectId.is_valid(survey_id):
         raise HTTPException(status_code=400, detail="Invalid survey ID")
-        
+
     survey = await db.get_collection("surveys").find_one({"_id": ObjectId(survey_id)})
     if not survey:
         raise HTTPException(status_code=404, detail="Survey not found")
-        
+
     if survey.get("status") not in ["active", "draft"]:
         raise HTTPException(status_code=403, detail="Survey must be active or draft to generate tokens")
 
     device_id = payload.device_id if payload else None
     ip_address = req.client.host if req.client else None
-    
-    # Check for existing token
+
+    # Check for an existing, still-open attempt on this device.
+    #
+    # `submitted` / `failed` are excluded outright: those are finished, and
+    # reusing that token here handed the very next respondent on the same
+    # device straight back to `get_survey_by_token`'s 403 for that finished
+    # attempt (view public.py's GET /{token} above) — so once anyone on a
+    # shared device completed or was screened out, nobody else could ever
+    # open the survey on it again. A new visitor always deserves a shot.
     query = {
         "survey_id": survey_id,
-        "batch_id": "master_link"
+        "batch_id": "master_link",
+        "status": {"$nin": ["submitted", "failed"]},
     }
-    
+
     if device_id:
         query["device_id"] = device_id
     elif ip_address:
         query["ip_address"] = ip_address
-        
-    existing_token = await db.get_collection("tokens").find_one(query)
+
+    existing_token = await db.get_collection("tokens").find_one(
+        query, sort=[("created_at", -1)]
+    )
     if existing_token:
-        return {"token": existing_token["token"]}
+        created_at = existing_token.get("created_at")
+        is_recent = (
+            isinstance(created_at, datetime)
+            and datetime.utcnow() - created_at <= MASTER_LINK_RESUME_WINDOW
+        )
+        if is_recent:
+            return {"token": existing_token["token"]}
+        # Old and still unfinished: whoever started it has effectively
+        # abandoned it. Fall through and mint a fresh token so this visit —
+        # someone new, or the same person long after the fact — starts the
+        # survey from the beginning rather than resuming stale progress.
 
     token_str = str(uuid.uuid4())
     expires_at = datetime.utcnow() + timedelta(days=30)
