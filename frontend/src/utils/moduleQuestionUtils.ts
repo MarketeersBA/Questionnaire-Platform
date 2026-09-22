@@ -29,18 +29,29 @@ export function formatModuleQuestionText(
     if (!text) return '';
     const product = ctx.product || ctx.category || 'product';
     const category = ctx.category || ctx.product || 'Category';
-    const brand = ctx.brand || 'Brand';
 
-    return text
+    // Bracketed forms are unambiguous placeholders: they exist only to be
+    // filled, so they always are.
+    let out = text
         .replace(/\[product\]/gi, product)
         .replace(/\[Product\]/gi, product)
         .replace(/\[Category\]/gi, category)
-        .replace(/\[brand\]/gi, brand)
-        .replace(/\[Brand\]/gi, brand)
-        .replace(/\(المنتج\)/g, product)
-        .replace(/المنتج/g, product)
-        .replace(/\(البراند\)/g, brand)
-        .replace(/البراند/g, brand);
+        .replace(/\[brand\]/gi, ctx.brand || category)
+        .replace(/\[Brand\]/gi, ctx.brand || category);
+
+    // The bare Arabic nouns are a different matter — they are ordinary words
+    // that only sometimes stand in for a value. Substituting them against a
+    // default rewrote plain prose: "اختاري البراند أو البراندات اللي ينطبق"
+    // reached respondents as "اختاري Brand أو Brandات". Only replace them
+    // when the caller actually supplied something to replace them with.
+    if (ctx.product || ctx.category) {
+        out = out.replace(/\(المنتج\)/g, product).replace(/المنتج/g, product);
+    }
+    if (ctx.brand) {
+        out = out.replace(/\(البراند\)/g, ctx.brand).replace(/البراند/g, ctx.brand);
+    }
+
+    return out;
 }
 
 export function getQuestionDisplayText(
@@ -225,6 +236,12 @@ export function isAnswerComplete(
     question: ModuleQuestion,
     answer: ModuleAnswerValue | undefined
 ): boolean {
+    // A grid with no rows asks nothing — there is no control to click, so
+    // requiring an answer strands the respondent on a screen they cannot
+    // complete. That happened when Brand Analyzer ran with no attributes
+    // selected. Vacuously satisfied is the only answerable reading.
+    if (question.type === 'grid' && !(question.questionMeta?.rows?.length)) return true;
+
     if (answer === undefined || answer === null) return !question.required;
 
     switch (question.type) {

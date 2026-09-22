@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Dict, List, Optional
 from datetime import datetime
 from backend.database import db
@@ -6,6 +7,8 @@ from backend.utils.taste_test_question_ids import build_module_metadata, resolve
 import random
 import string
 import re
+
+logger = logging.getLogger(__name__)
 
 # Arabic labels for taste-test main attributes shown in respondent section titles.
 TASTE_ATTRIBUTE_AR: Dict[str, str] = {
@@ -18,11 +21,13 @@ TASTE_ATTRIBUTE_AR: Dict[str, str] = {
     "Texture": "القوام",
     "Texture Profile": "خصائص القوام",
     "Physical Texture": "القوام الفيزيائي",
+    "Taste": "الطعم",
     "Taste Profile": "خصائص الطعم",
     "Before Taste": "قبل التذوق",
     "After Taste": "بعد التذوق",
     "Aftertaste": "الطعم المتبقي",
     "Aftertaste & Finish": "الطعم المتبقي والنهاية",
+    "Overall": "التقييم العام",
     "Overall Taste": "الطعم العام",
     "Overall Likeness": "الإعجاب العام",
     "Overall Satisfaction": "الرضا العام",
@@ -42,27 +47,122 @@ def localize_taste_test_attribute(name: str, language: str) -> str:
     return TASTE_ATTRIBUTE_AR.get(name) or TASTE_ATTRIBUTE_AR.get(name.strip()) or name
 
 
+#: The taste-test pricing question, identified by its attribute rather than its
+#: id so a re-seeded bank with a different id still matches.
+PRICING_ATTRIBUTE = "Purchase Price"
+PRICING_QUESTION_IDS = {"tt_q16", "pt_q38"}
+
+#: Asked when the analyst has not declared a pack size. Points the respondent at
+#: the physical sample in front of them, which is the only shared reference when
+#: no size is stated.
+PRICING_FALLBACK_AR = "ممكن تشتري {product} بسعر ايه لو بالحجم اللي قدامك ده؟"
+PRICING_FALLBACK_EN = "What price would you pay for {product} at the size in front of you?"
+
+#: Asked when a size is declared, so every respondent prices the same quantity.
+PRICING_SIZED_AR = "ممكن تشتري {product} بسعر ايه لو حجمه {size}؟"
+PRICING_SIZED_EN = "What price would you pay for {product} at {size}?"
+
+
+def format_pricing_unit(config: dict) -> str:
+    """
+    Render the declared pack size, e.g. "200 ml". Empty when not set.
+
+    Accepts the amount and unit either as one free-text string or as separate
+    fields, because the creation form has carried both shapes.
+    """
+    if not isinstance(config, dict):
+        return ""
+
+    combined = str(config.get("pricing_unit") or "").strip()
+    if not combined:
+        amount = str(config.get("pricing_unit_amount") or "").strip()
+        unit = str(config.get("pricing_unit_label") or "").strip()
+        combined = f"{amount} {unit}".strip()
+
+    # Braces are stripped because the result is dropped into a template that is
+    # substituted again downstream. A size typed as "{product} 200ml" would
+    # otherwise leave a second placeholder for `format_text` to fill, producing
+    # the brand name twice in one sentence.
+    return combined.replace("{", "").replace("}", "").strip()
+
+
+def build_pricing_question_text(config: dict, *, is_arabic: bool) -> str:
+    """
+    The pricing question, phrased for whether a pack size is known.
+
+    A price means nothing without the quantity it buys: "would you pay 50 for
+    this?" cannot be compared across respondents who each pictured a different
+    pack. Naming the size makes the answers comparable, and when no size has
+    been declared the question at least anchors on the sample in front of the
+    respondent rather than leaving the quantity unstated.
+
+    `{product}` is filled downstream by `format_text`, which substitutes the
+    brand — or its blind code on a blind study.
+    """
+    size = format_pricing_unit(config)
+    if size:
+        return (PRICING_SIZED_AR if is_arabic else PRICING_SIZED_EN).replace("{size}", size)
+    return PRICING_FALLBACK_AR if is_arabic else PRICING_FALLBACK_EN
+
+
 class OrchestrationService:
-    def format_text(self, text: str, product: str = "product", category: str = "Category", brand: str = "Brand") -> str:
+    def format_text(
+        self,
+        text: str,
+        product: Optional[str] = None,
+        category: str = "Category",
+        brand: Optional[str] = None,
+    ) -> str:
+        """
+        Fill question placeholders.
+
+        `product` and `brand` default to None, not to the literal words
+        "product" / "Brand". The bare Arabic nouns below are ordinary words
+        that only sometimes stand in for a value, so substituting them
+        against a default rewrote plain prose: the perception-grid
+        instruction asking the respondent to pick البراند reached them as
+        "Brand أو Brandات".
+        """
         if not text:
             return ""
         
+        # Brace form, used by the pricing question templates. It was never
+        # substituted here, so respondents were shown the literal "{product}"
+        # in place of the brand they were meant to be pricing.
+        product_value = product or category
+        text = text.replace("{product}", product_value)
+
         # English placeholders
-        text = re.sub(r'\[product\]', product, text, flags=re.IGNORECASE)
+        text = re.sub(r'\[product\]', product_value, text, flags=re.IGNORECASE)
         text = re.sub(r'\[Category\]', category, text, flags=re.IGNORECASE)
-        text = re.sub(r'\[brand\]', brand, text, flags=re.IGNORECASE)
+        text = re.sub(r'\[brand\]', brand or category, text, flags=re.IGNORECASE)
+
+        # Bare word, mirroring the Arabic rule below and the browser-side
+        # composer. Without it the two composers disagreed about which
+        # placeholder spellings work, and an English question authored with a
+        # bare "product" reached the respondent unsubstituted.
+        if product:
+            text = re.sub(r'\bproduct\b', product, text, flags=re.IGNORECASE)
         
         # Arabic placeholders
-        text = text.replace("(المنتج)", product)
-        text = text.replace("المنتج", product)
-        text = text.replace("(البراند)", brand)
-        text = text.replace("البراند", brand)
+        if product or category:
+            text = text.replace("(المنتج)", product_value)
+            text = text.replace("المنتج", product_value)
+        if brand:
+            text = text.replace("(البراند)", brand)
+            text = text.replace("البراند", brand)
         
         return text
 
-    def map_taste_test_question(self, q: Dict[str, Any], brand_name: str, attr_name: str, language: str, category: str, meta: Dict[str, Any]) -> Dict[str, Any]:
+    def map_taste_test_question(self, q: Dict[str, Any], brand_name: str, attr_name: str, language: str, category: str, meta: Dict[str, Any], pricing_config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         is_arabic = language == 'ar'
         text = q.get('ar_text') if is_arabic and q.get('ar_text') else q.get('en_text', '')
+
+        # The pricing question is rewritten to name the quantity being priced.
+        # Left as authored it asks for a price without saying how much product
+        # that price buys, so answers cannot be compared between respondents.
+        if q.get("main_att") == PRICING_ATTRIBUTE or q.get("question_id") in PRICING_QUESTION_IDS:
+            text = build_pricing_question_text(pricing_config or {}, is_arabic=is_arabic)
         raw_options = q.get('ar_options') if is_arabic and q.get('ar_options') else q.get('en_options', [])
 
         q_type_str = (q.get('question_type') or "").lower()
@@ -209,11 +309,41 @@ class OrchestrationService:
                 if not competitor_brands and tt_config.get("competitive_brands"):
                     competitor_brands = tt_config["competitive_brands"]
                 
-                all_brands = [b for b in internal_brands + competitor_brands if b]
+                # Deduplicated, case- and whitespace-insensitively, preserving order.
+                #
+                # The client brand routinely appears in both lists: an analyst
+                # names it as the own brand and then also lists it among the
+                # brands being tested, which is a reasonable thing to do. Without
+                # this, the Layer 2 loop built a full set of sensory sections for
+                # it twice, so the respondent was asked every attribute question
+                # about the same product a second time — appearance, aroma,
+                # taste, texture, the lot — and simply gave up.
+                #
+                # Internal order is kept ahead of competitors so the client brand
+                # is still evaluated first where the design calls for it.
+                all_brands: list[str] = []
+                seen_brands: set[str] = set()
+                for brand in internal_brands + competitor_brands:
+                    if not brand:
+                        continue
+                    key = str(brand).strip().casefold()
+                    if not key or key in seen_brands:
+                        continue
+                    seen_brands.add(key)
+                    all_brands.append(brand)
+
+                if len(all_brands) < len([b for b in internal_brands + competitor_brands if b]):
+                    logger.info(
+                        "[Orchestration] Collapsed duplicate brands for survey composition: "
+                        "internal=%s competitors=%s -> %s",
+                        internal_brands,
+                        competitor_brands,
+                        all_brands,
+                    )
 
                 # L1
                 l1_questions = [
-                    self.map_taste_test_question(q, "", "", language, category, meta)
+                    self.map_taste_test_question(q, "", "", language, category, meta, pricing_config=tt_config)
                     for q in master_data.get("fixed", [])
                     if q.get("timing") == "Layer 1"
                 ]
@@ -226,7 +356,7 @@ class OrchestrationService:
                 # L2
                 l2_sections = []
                 before_taste = [
-                    self.map_taste_test_question(q, "", "", language, category, meta)
+                    self.map_taste_test_question(q, "", "", language, category, meta, pricing_config=tt_config)
                     for q in master_data.get("fixed", [])
                     if q.get("timing") == "Before Taste"
                 ]
@@ -282,7 +412,7 @@ class OrchestrationService:
                         attr_questions = []
                         if source == "library":
                             attr_questions = [
-                                self.map_taste_test_question(q, brand, main_attr, language, category, meta)
+                                self.map_taste_test_question(q, brand, main_attr, language, category, meta, pricing_config=tt_config)
                                 for q in master_data.get(main_attr, [])
                                 if q.get("timing") != "Layer 1"
                             ]
@@ -291,6 +421,17 @@ class OrchestrationService:
                         matching_custom = next((c for c in tt_config.get("custom_research_attributes", []) if c["main_attribute"] == main_attr), None)
                         display_attr = localize_taste_test_attribute(main_attr, language)
                         
+                        # `master_data[attribute]` holds only that attribute's
+                        # *optional* questions; anything `fixed` is grouped under
+                        # `master_data["fixed"]` and asked once per brand in the
+                        # General Evaluation block. Overall is entirely fixed, so
+                        # its bucket is always empty — which is not the same as the
+                        # bank having nothing to ask, and reading it that way
+                        # invented a question nobody wrote.
+                        covered_by_fixed_block = any(
+                            q.get("main_att") == main_attr
+                            for q in master_data.get("fixed", [])
+                        )
                         if source == "custom" or matching_custom:
                             if not attr_questions:
                                 # Fallback main eval
@@ -330,8 +471,8 @@ class OrchestrationService:
                                         "scaleMax": 5
                                     }
                                 })
-                        elif not attr_questions:
-                             # Pure library fallback
+                        elif not attr_questions and not covered_by_fixed_block:
+                             # A library attribute the bank genuinely has nothing for.
                              attr_questions.append({
                                 "id": f"{brand}_fallback_{main_attr.replace(' ', '_')}_{''.join(random.choices(string.ascii_lowercase + string.digits, k=4))}",
                                 "type": "scale",
@@ -359,7 +500,7 @@ class OrchestrationService:
 
                     # Brand fixed after taste
                     brand_fixed = [
-                        self.map_taste_test_question(q, brand, "", language, category, meta)
+                        self.map_taste_test_question(q, brand, "", language, category, meta, pricing_config=tt_config)
                         for q in master_data.get("fixed", [])
                         if q.get("timing") == "After Taste"
                     ]

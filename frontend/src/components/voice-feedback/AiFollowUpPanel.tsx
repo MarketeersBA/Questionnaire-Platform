@@ -1,15 +1,17 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Loader2, Sparkles } from 'lucide-react';
 import OpenEndAnswerInput from './OpenEndAnswerInput';
 import type { FollowUpPanelState } from '../../utils/aiFollowup';
 import { normalizeOpenEndAnswer } from '../../utils/voiceQuestions';
 
-// Idle-debounce before an AI follow-up fires off a just-typed answer. Kept
-// short because a sentence-ending punctuation mark (below) fires immediately
-// instead of waiting out the full idle window.
-export const FOLLOW_UP_REPLY_IDLE_MS = 1600;
-const SENTENCE_END_PATTERN = /[.!?؟]\s*$/;
+// There is deliberately no idle timer here.
+//
+// Replies used to be sent after a pause in typing, which guessed at when a
+// respondent had finished. It guessed wrong in both directions: it fired
+// mid-thought on someone typing slowly, and it left someone who had finished
+// staring at the screen wondering whether anything had registered. Sending is
+// now an explicit act — the respondent decides when the answer is done.
 
 export type AiFollowUpPanelVariant = 'premium' | 'standard';
 
@@ -39,6 +41,7 @@ const COPY = {
         subtitleStandard: 'In-depth moderation activated',
         loadingPremium: 'Analyzing & composing...',
         loadingStandard: 'Analyzing your response...',
+        send: 'Send',
     },
     ar: {
         titlePremium: 'الباحث الذكي',
@@ -47,6 +50,7 @@ const COPY = {
         subtitleStandard: 'الإشراف المعمق مُفعّل',
         loadingPremium: 'الباحث يحلل إجابتك...',
         loadingStandard: 'جاري تحليل إجابتك...',
+        send: 'إرسال',
     },
 } as const;
 
@@ -70,17 +74,22 @@ export default function AiFollowUpPanel({
     const onReplyTextSubmitRef = useRef(onReplyTextSubmit);
     onReplyTextSubmitRef.current = onReplyTextSubmit;
 
+    // Guards a double tap on Send: two sends of the same text would burn a
+    // probe round and leave the respondent answering a question twice.
+    const lastSubmittedRef = useRef<string | null>(null);
+
+    const submitReply = useCallback(() => {
+        const text = replyText.trim();
+        if (!text || lastSubmittedRef.current === text) return;
+        lastSubmittedRef.current = text;
+        onReplyTextSubmitRef.current(replyText);
+    }, [replyText]);
+
+    // A new question means a new answer: allow the same word again ("اه" twice
+    // in a row is two distinct answers to two distinct probes).
     useEffect(() => {
-        if (!visible || state.loading || !replyText.trim()) return;
-
-        // A finished sentence fires immediately — no need to wait out the idle window.
-        const idleMs = SENTENCE_END_PATTERN.test(replyText) ? 300 : FOLLOW_UP_REPLY_IDLE_MS;
-        const timeout = setTimeout(() => {
-            onReplyTextSubmitRef.current(replyText);
-        }, idleMs);
-
-        return () => clearTimeout(timeout);
-    }, [visible, state.loading, replyText]);
+        lastSubmittedRef.current = null;
+    }, [state.followUpText]);
 
     if (!visible) return null;
 
@@ -201,6 +210,9 @@ export default function AiFollowUpPanel({
                                     onReplyVoiceUpload(next.voice_feedback_id);
                                 }
                             }}
+                            // Sending is the only way a reply leaves this panel.
+                            onSubmit={submitReply}
+                            submitBusy={state.loading}
                         />
                     </div>
                 </motion.div>

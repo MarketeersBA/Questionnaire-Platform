@@ -1338,6 +1338,10 @@ export default function CreateSurvey({ editSurveyId, initialSurveyData }: Create
                                         formData={formData}
                                         setFormData={setFormData}
                                         onOpenClone={() => setShowCloneModal(true)}
+                                        // Without this the uniqueness check matches the survey
+                                        // against itself, so editing anything else on the page
+                                        // reported the project's own code as already taken.
+                                        draftSurveyId={editSurveyId}
                                     />
                                 )}
                                 {currentStep === 2 && (

@@ -1,11 +1,28 @@
 import { useEffect, useState } from 'react';
-import { Layout, ShieldCheck, Check, Briefcase, GraduationCap, Layers, Lock, Target, SplitSquareHorizontal, Sparkles, Edit3, ChevronDown, Palette, Tag, Beaker, Zap, DollarSign, Loader2, CheckCircle2, XCircle, Wand2, Plus } from 'lucide-react';
+import { Layout, ShieldCheck, Check, Briefcase, GraduationCap, Layers, Lock, Target, SplitSquareHorizontal, Sparkles, Edit3, ChevronDown, Palette, Tag, Beaker, Zap, DollarSign, Loader2, CheckCircle2, XCircle, Wand2, Plus, Package, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StepProps, DEFAULT_TASTE_CONFIG, DEFAULT_PRODUCT_TEST_CONFIG } from '../types';
 import { surveys } from '../../../services/api';
 import api from '../../../services/api';
 import { useNavigate } from 'react-router-dom';
 
+/**
+ * Study types offered at creation.
+ *
+ * Every entry here maps to a composer branch that actually builds questions.
+ * `concept_test` was removed: it was a card with no branch in
+ * `orchestration_service.compose_survey_schema`, so choosing it produced a
+ * survey with a screening layer and nothing to answer.
+ *
+ * `usage_attitude` is new to the UI but not to the backend — it composes from
+ * the purchase-funnel, brand-usage and brand-pricing modules, which are already
+ * seeded and already handled by the composer. It needs no evaluation module,
+ * which is what distinguishes it from the three product studies.
+ *
+ * `pack_test` runs the product-test composer with its packaging bank and
+ * heatmap surface, so its id stays `product_test` with a package focus rather
+ * than becoming a fourth type the backend would not recognise.
+ */
 export const surveyTypesList = [
     {
         id: 'taste_test',
@@ -24,14 +41,23 @@ export const surveyTypesList = [
         bg: 'bg-emerald-50 dark:bg-emerald-950/40',
     },
     {
-        id: 'concept_test',
-        name: 'Concept Test',
-        desc: 'Validate new ideas, packaging, or messaging before launch with concept appeal checks.',
-        icon: Sparkles,
-        color: 'text-amber-500',
-        bg: 'bg-amber-50 dark:bg-amber-950/40',
+        id: 'pack_test',
+        name: 'Pack Testing',
+        desc: 'Packaging evaluation with click heatmaps on the design.',
+        icon: Package,
+        color: 'text-violet-600',
+        bg: 'bg-violet-50 dark:bg-violet-950/40',
+    },
+    {
+        id: 'usage_attitude',
+        name: 'Usage & Attitude',
+        desc: 'Awareness funnel, usage habits and pricing behaviour.',
+        icon: Users,
+        color: 'text-sky-600',
+        bg: 'bg-sky-50 dark:bg-sky-950/40',
     },
 ];
+
 
 // ─── Local Input Component for Smarter Typing ──────────────────────────────
 function LocalQuotaInput({
@@ -398,7 +424,9 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
 
         const timeout = setTimeout(checkCode, 500);
         return () => clearTimeout(timeout);
-    }, [formData.survey_code]);
+        // draftSurveyId belongs here: the callback closes over it, and without
+        // it a check that ran before the id arrived would keep its stale result.
+    }, [formData.survey_code, draftSurveyId]);
 
 
     return (
@@ -583,14 +611,17 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                         <Beaker className="w-5 h-5 text-primary-soft" />
                         <label className="text-sm font-black uppercase tracking-[0.2em] text-ink-muted transition-colors">Survey Type</label>
                     </div>
-                    <div id="survey-type-section" className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div id="survey-type-section" className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                         {surveyTypesList.map((type) => (
                             <button
                                 key={type.id}
                                 type="button"
                                 onClick={() => setFormData(prev => {
                                     const isTasteTest = type.id === 'taste_test';
-                                    const isProductTest = type.id === 'product_test';
+                                    // Pack testing runs the product-test composer with the
+                                    // packaging bank, so it needs the same config objects.
+                                    const isProductTest = type.id === 'product_test' || type.id === 'pack_test';
+                                    const isUsageAttitude = type.id === 'usage_attitude';
                                     return {
                                         ...prev,
                                         survey_type: type.id as any,
@@ -604,28 +635,34 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                             ? ['screening', 'taste_test', 'purchase_funnel', 'brand_usage', 'brand_pricing_behavior', 'brand_analyzer']
                                             : isProductTest
                                                 ? ['screening', 'product_test']
-                                                : ['screening'],
-                                        purchase_funnel: isTasteTest ? {
+                                                // Usage & Attitude has no evaluation module: it is
+                                                // the funnel, usage and pricing modules. Falling
+                                                // through to ['screening'] gave it nothing to ask.
+                                                : isUsageAttitude
+                                                    ? ['screening', 'purchase_funnel', 'brand_usage', 'brand_pricing_behavior']
+                                                    : ['screening'],
+                                        purchase_funnel: (isTasteTest || isUsageAttitude) ? {
                                             is_enabled: true,
                                             category_name: prev.purchase_funnel?.category_name || '',
                                             brand_list: prev.purchase_funnel?.brand_list || []
                                         } : prev.purchase_funnel
                                     };
                                 })}
-                                className={`text-left p-6 rounded-3xl border-2 transition-all group relative ${formData.survey_type === type.id
-                                    ? 'border-primary bg-primary/5 dark:bg-primary/10 scale-[1.02] shadow-lg'
+                                title={type.desc}
+                                className={`text-left px-4 py-3 rounded-2xl border-2 transition-all group relative ${formData.survey_type === type.id
+                                    ? 'border-primary bg-primary/5 dark:bg-primary/10 shadow-md'
                                     : 'border-line/80 dark:border-line/10 bg-surface/20 hover:border-primary/40'
                                     }`}
                             >
-                                <div className={`w-10 h-10 rounded-xl ${type.bg} ${type.color} flex items-center justify-center mb-4 transition-transform group-hover:scale-110`}>
-                                    <type.icon className="w-5 h-5" />
+                                <div className={`w-8 h-8 rounded-lg ${type.bg} ${type.color} flex items-center justify-center mb-2 transition-transform group-hover:scale-110`}>
+                                    <type.icon className="w-4 h-4" />
                                 </div>
                                 <h4 className="text-sm font-black uppercase tracking-widest text-ink mb-2 pr-6">{type.name}</h4>
                                 <p className="text-xs font-medium leading-relaxed text-ink-muted">
                                     {type.desc}
                                 </p>
                                 {formData.survey_type === type.id && (
-                                    <div className="absolute top-4 right-4">
+                                    <div className="absolute top-2.5 right-2.5">
                                         <div className="w-4 h-4 rounded-full bg-primary text-white flex items-center justify-center animate-in zoom-in">
                                             <Check className="w-2.5 h-2.5" />
                                         </div>

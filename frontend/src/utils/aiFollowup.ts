@@ -8,6 +8,26 @@ import { isSurfaceEnabledForFollowUp } from './aiFollowupConfig';
 
 export const MIN_FOLLOWUP_ANSWER_LENGTH = 5;
 
+/**
+ * Minimum length for a REPLY to a follow-up question.
+ *
+ * The initial-answer gate above stops the moderator probing an empty or
+ * throwaway first answer. A reply is a different thing: the moderator has
+ * just asked something direct, and "اه", "لا" or a single word answers it
+ * properly. Holding replies to five characters dropped those in silence —
+ * the respondent typed, nothing happened, and the conversation stalled with
+ * the question still on screen.
+ *
+ * Whether a short answer is worth probing further is the moderator's
+ * decision, made with the full conversation in hand. It is not something a
+ * character count can decide.
+ */
+export const MIN_FOLLOWUP_REPLY_LENGTH = 1;
+
+export function isFollowUpReplyEligible(text: string): boolean {
+  return text.trim().length >= MIN_FOLLOWUP_REPLY_LENGTH;
+}
+
 export const VOICE_TRANSCRIPT_POLL_INTERVAL_MS = 1500;
 export const VOICE_TRANSCRIPT_POLL_MAX_MS = 30_000;
 

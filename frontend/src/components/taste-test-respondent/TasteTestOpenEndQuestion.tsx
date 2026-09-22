@@ -1,25 +1,24 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import OpenEndAnswerWithFollowUpThread from '../voice-feedback/OpenEndAnswerWithFollowUpThread';
 import AiFollowUpPanel from '../voice-feedback/AiFollowUpPanel';
-import FollowUpRoundsSlider from '../voice-feedback/FollowUpRoundsSlider';
 import type { AiFollowupConfig } from '../../pages/CreateSurvey/types';
 import {
   canSubmitFollowUpReply,
   classifyQuestionCategory,
   getMaxFollowUpRounds,
-  isFollowUpAnswerEligible,
+  isAiFollowUpEligible,
+  isFollowUpReplyEligible,
   type FollowUpReplyChangeHandler,
   type FollowUpStateMap,
   type FollowUpTriggerHandler,
   type VoiceFollowUpTriggerHandler,
 } from '../../utils/aiFollowup';
-import { resolveMinAnswerLength } from '../../utils/aiFollowupConfig';
 import { normalizeOpenEndAnswer } from '../../utils/voiceQuestions';
 import {
   buildTasteTestFollowUpEligibility,
-  evaluateTasteTestTextBlurFollowUp,
+  evaluateTasteTestTextSubmitFollowUp,
   evaluateTasteTestVoiceUploadFollowUp,
   logTasteTestFollowUpTriggerBlock,
   shouldShowTasteTestFollowUpPanel,
@@ -29,7 +28,6 @@ import {
 } from './tasteTestOpenEndFollowUp';
 import {
   FOLLOWUP_VOICE_REPLY_PLACEHOLDER,
-  splitFollowUpAnswerText,
 } from '../../utils/followUpAnswerPersistence';
 
 export interface TasteTestOpenEndQuestionProps {
@@ -73,7 +71,6 @@ export default function TasteTestOpenEndQuestion({
   onFollowUpTrigger,
   onVoiceFollowUpTrigger,
   onFollowUpReplyChange,
-  onMaxRoundsChange,
 }: TasteTestOpenEndQuestionProps) {
   const isArabic = language === 'ar';
   const followUpEligibility = useMemo(() => buildTasteTestFollowUpEligibility({
@@ -83,12 +80,12 @@ export default function TasteTestOpenEndQuestion({
     timing,
     sectionTitle,
   }), [questionId, questionText, effectiveType, timing, sectionTitle]);
-  const minAnswerLength = resolveMinAnswerLength(aiFollowup);
   const panelState = followUpStateMap?.[questionId];
+  // Only a question the AI moderator will actually probe gets a send button.
+  // On the rest, the answer is carried by the survey's own Next control and a
+  // second button would do nothing.
+  const aiWillProbe = isAiFollowUpEligible(followUpEligibility, aiFollowup);
   const questionCategory = classifyQuestionCategory(questionText);
-  const adminMaxRounds = getMaxFollowUpRounds(aiFollowup, questionCategory);
-  const showRoundsPicker = Boolean(aiFollowup?.is_enabled && aiFollowup?.apply_to_text && adminMaxRounds > 1);
-  const [respondentRounds, setRespondentRounds] = useState(adminMaxRounds);
 
   const appendFollowUpExchange = (respondentPart: string) => {
     onChange(appendTasteTestFollowUpToOpenEndValue(
@@ -98,60 +95,25 @@ export default function TasteTestOpenEndQuestion({
     ));
   };
 
-  const textValue = normalizeOpenEndAnswer(value).text || '';
-  const primaryText = splitFollowUpAnswerText(textValue).primaryText;
 
-  useEffect(() => {
-    // A finished sentence (ends in . ! ? or Arabic ؟) means the respondent is
-    // done typing right now — fire almost immediately instead of waiting out
-    // the full idle window, so the AI feels responsive rather than laggy.
-    const idleMs = /[.!?؟]\s*$/.test(primaryText) ? 300 : 1600;
-    const timeout = setTimeout(() => {
-      const debounceCtx = {
-        questionId,
-        questionText,
-        effectiveType,
-        timing,
-        sectionTitle,
-        aiFollowup,
-        text: primaryText,
-        followUpStateMap: getFollowUpStateSnapshot(),
-      };
-      const evaluation = evaluateTasteTestTextBlurFollowUp(debounceCtx);
-      if (evaluation.shouldTrigger && onFollowUpTrigger) {
-        onFollowUpTrigger(
-          questionId,
-          primaryText,
-          questionText,
-          brandName,
-          'text',
-          followUpEligibility
-        );
-      }
-    }, idleMs);
-
-    return () => clearTimeout(timeout);
-  }, [
-    primaryText, questionId, questionText, effectiveType, timing, sectionTitle,
-    aiFollowup, brandName, followUpEligibility, onFollowUpTrigger, getFollowUpStateSnapshot
-  ]);
+  // No idle timer here, deliberately.
+  //
+  // The moderator used to start probing 1.6s after the last keystroke,
+  // guessing that a pause meant the respondent had finished. It interrupted
+  // people mid-thought — they were still composing an answer when the AI cut
+  // in on a half-written one. The probe now waits for a real signal that the
+  // answer is done: the respondent leaving the field (`onBlur` below), which
+  // is something they did rather than something we inferred.
 
   return (
     <>
-      {showRoundsPicker && (
-        <div className="mb-3">
-          <FollowUpRoundsSlider
-            maxAllowed={adminMaxRounds}
-            value={respondentRounds}
-            language={language}
-            onChange={(n) => {
-              setRespondentRounds(n);
-              onMaxRoundsChange?.(questionId, n);
-            }}
-          />
-        </div>
-      )}
-
+      {/* No respondent-facing rounds control.
+          How many follow-ups a study asks is a research-design decision: it
+          determines how much depth the data carries, and it has to be the same
+          for everyone or the answers are not comparable. Letting respondents
+          lower it meant each person effectively ran a different study, and in
+          practice it was used to cut the interview short. The creator's
+          `max_rounds` is now the only source, enforced server-side. */}
       <OpenEndAnswerWithFollowUpThread
         value={value}
         showVoice={showVoice}
@@ -199,8 +161,13 @@ export default function TasteTestOpenEndQuestion({
             toast.success(isArabic ? 'تم حفظ التسجيل' : 'Recording saved');
           }
         }}
-        onBlur={(text) => {
-          const blurCtx = {
+        // The respondent says when the answer is finished, by sending it.
+        // Nothing infers it any more: the idle timer is gone, and blur is not
+        // a substitute — tapping outside the box, or scrolling on a phone,
+        // would have fired the moderator at a half-written answer.
+        submitBusy={Boolean(panelState?.loading)}
+        onSubmit={aiWillProbe ? (text) => {
+          const submitCtx = {
             questionId,
             questionText,
             effectiveType,
@@ -210,9 +177,9 @@ export default function TasteTestOpenEndQuestion({
             text,
             followUpStateMap: getFollowUpStateSnapshot(),
           };
-          const blurEvaluation = evaluateTasteTestTextBlurFollowUp(blurCtx);
-          if (!blurEvaluation.shouldTrigger) {
-            logTasteTestFollowUpTriggerBlock('text_blur', blurEvaluation, {
+          const evaluation = evaluateTasteTestTextSubmitFollowUp(submitCtx);
+          if (!evaluation.shouldTrigger) {
+            logTasteTestFollowUpTriggerBlock('text_submit', evaluation, {
               questionId,
               questionText,
             });
@@ -227,7 +194,7 @@ export default function TasteTestOpenEndQuestion({
               'text',
               followUpEligibility,
             );
-        }}
+        } : undefined}
       />
 
       <AnimatePresence>
@@ -253,7 +220,10 @@ export default function TasteTestOpenEndQuestion({
             followUpQuestionText={panelState.followUpText}
             onReplyChange={(replyValue) => onFollowUpReplyChange?.(questionId, replyValue)}
             onReplyTextSubmit={(text) => {
-              if (!aiFollowup?.apply_to_text || !isFollowUpAnswerEligible(text, minAnswerLength) || !onFollowUpTrigger) return;
+              // A reply is judged by `isFollowUpReplyEligible`, not the initial-answer
+              // minimum: "اه" or "لا" is a real answer to a direct probe, and
+              // the five-character gate used to discard it without a word.
+              if (!aiFollowup?.apply_to_text || !isFollowUpReplyEligible(text) || !onFollowUpTrigger) return;
               if (!canSubmitFollowUpReply(getFollowUpStateSnapshot()[questionId])) return;
               appendFollowUpExchange(text);
               onFollowUpTrigger(

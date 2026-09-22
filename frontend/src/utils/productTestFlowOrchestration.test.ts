@@ -21,6 +21,7 @@ import {
     shouldShowProductTestPhaseIntro,
     validateProductTestSection,
 } from './productTestFlowOrchestration';
+import { getNextPhaseStep, isRuntimeModuleEnabled } from './surveyFlowOrchestration';
 import type { ProductTestSnapshot } from '../types/productTestRespondent';
 
 const MOCK_SNAPSHOT: ProductTestSnapshot = {
@@ -921,7 +922,6 @@ describe('product test respondent navigation model', () => {
 
 describe('surveyFlowOrchestration product_test routing', () => {
     it('routes screening to product_test when enabled', async () => {
-        const { getNextPhaseStep } = await import('./surveyFlowOrchestration');
         const survey = {
             module_sequence: ['screening', 'product_test', 'purchase_funnel'],
             survey_type: 'product_test',
@@ -933,7 +933,6 @@ describe('surveyFlowOrchestration product_test routing', () => {
     });
 
     it('does not route to layer2 when only product test L2 sections existed', async () => {
-        const { getNextPhaseStep, isRuntimeModuleEnabled } = await import('./surveyFlowOrchestration');
         const survey = {
             module_sequence: ['screening', 'taste_test', 'product_test'],
             layer2_questions: {

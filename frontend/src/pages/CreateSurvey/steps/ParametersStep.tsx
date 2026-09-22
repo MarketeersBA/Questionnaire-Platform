@@ -656,39 +656,123 @@ export function ParametersStep({
             });
         };
 
-        return (
-        <section className="space-y-5 border-t border-line/80 dark:border-line/10 pt-6" id="ai-moderator-section">
-            <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                    <label className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-ink ml-1">
-                        <Sparkles className="w-3.5 h-3.5 text-primary-soft" /> Smart Follow-up Engine (AI / MI)
-                    </label>
-                    <p className="text-sm text-slate-800 dark:text-slate-300 font-black ml-1 uppercase tracking-tighter">
-                        AI-driven qualitative probing for deeper open-ended insights.
-                    </p>
-                    <p className="text-xs text-primary-soft font-bold ml-1 leading-relaxed max-w-xl">
-                        Runs on open-ended like / dislike / recommend questions only.
-                    </p>
-                </div>
-                <div
-                    onClick={() => setFormData(prev => ({
-                        ...prev,
-                        ai_followup: withAiFollowupDefaults({
-                            ...(prev.ai_followup || DEFAULT_AI_FOLLOWUP),
-                            is_enabled: !(prev.ai_followup?.is_enabled),
-                        }),
-                    }))}
-                    className={`w-12 h-6 rounded-full relative cursor-pointer transition-all ${formData.ai_followup?.is_enabled ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-800'}`}
-                >
-                    <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${formData.ai_followup?.is_enabled ? 'right-1' : 'left-1'}`} />
-                </div>
-            </div>
+        const aiMiEnabled = Boolean(formData.ai_followup?.is_enabled);
+        const aiMiRounds = formData.ai_followup?.max_rounds || DEFAULT_AI_FOLLOWUP.max_rounds;
+        const aiMiChannels = [
+            formData.ai_followup?.apply_to_voice ? 'Voice' : null,
+            formData.ai_followup?.apply_to_text ? 'Text' : null,
+        ].filter(Boolean);
+        // Reads back the decision in one line, so the analyst can confirm it
+        // without reopening a panel they have already collapsed.
+        const aiMiSummary = [
+            `${aiMiRounds} ${aiMiRounds === 1 ? 'round' : 'rounds'}`,
+            aiMiChannels.length ? aiMiChannels.join(' + ') : 'No input channel selected',
+        ].join('  ·  ');
 
-            {formData.ai_followup?.is_enabled && (
+        return (
+        <section className="pt-8" id="ai-moderator-section">
+            {/* A card with its own surface, not a thin band between two larger
+                blocks. This section was a one-line header with a small
+                unlabelled switch on the right, so it read as a minor setting
+                and got skipped — even though it is the only place the
+                qualitative depth of the whole study is decided. */}
+            <div className={`relative overflow-hidden rounded-[2rem] border-2 transition-all duration-300 ${
+                aiMiEnabled
+                    ? 'border-[#21A0FF]/40 bg-gradient-to-br from-[#21A0FF]/[0.07] via-surface to-surface shadow-lg shadow-[#21A0FF]/5'
+                    : 'border-line/80 dark:border-line/10 bg-surface hover:border-[#21A0FF]/30'
+            }`}>
+                {/* Lapis -> chart blue -> baby blue: the logo's own run of blues. */}
+                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#255E91] via-[#21A0FF] to-[#8ACAEC]" />
+
+                <div className="p-6 md:p-7 space-y-6">
+                    <div className="flex flex-col md:flex-row md:items-start gap-5">
+                        <div className={`shrink-0 w-14 h-14 rounded-2xl grid place-items-center transition-all duration-300 ${
+                            aiMiEnabled
+                                ? 'bg-gradient-to-br from-[#255E91] to-[#21A0FF] text-white shadow-lg shadow-[#21A0FF]/30'
+                                : 'bg-[#DCEFF9] dark:bg-[#21A0FF]/10 text-[#255E91] dark:text-[#8ACAEC]'
+                        }`}>
+                            <Sparkles className="w-7 h-7" />
+                        </div>
+
+                        <div className="flex-1 min-w-0 space-y-2.5">
+                            <div className="flex flex-wrap items-center gap-2.5">
+                                <h3 className="text-lg font-black tracking-tight text-ink">AI Moderator</h3>
+                                <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors ${
+                                    aiMiEnabled ? 'bg-[#21A0FF] text-white' : 'bg-surface-sunken text-ink-subtle'
+                                }`}>
+                                    {aiMiEnabled ? 'Active' : 'Off'}
+                                </span>
+                            </div>
+
+                            <p className="text-sm font-bold text-ink-muted leading-relaxed max-w-2xl">
+                                Asks each respondent a follow-up in their own words, then carries
+                                what they say into the report. Without it an open end is whatever
+                                they typed first &mdash; often a single word.
+                            </p>
+
+                            {/* Stated before the decision: the cost of skipping this is
+                                invisible until the report has already been written. */}
+                            {!aiMiEnabled && (
+                                <div className="flex flex-wrap gap-2 pt-0.5">
+                                    {['Probes thin answers', 'Voice & text', 'Verbatims reach the report'].map((feature) => (
+                                        <span
+                                            key={feature}
+                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#DCEFF9]/70 dark:bg-[#21A0FF]/10 text-[11px] font-black uppercase tracking-wide text-[#255E91] dark:text-[#8ACAEC]"
+                                        >
+                                            <Check className="w-3 h-3" />
+                                            {feature}
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
+
+                            {aiMiEnabled && (
+                                <p className="text-[11px] font-black uppercase tracking-widest text-[#255E91] dark:text-[#8ACAEC]">
+                                    {aiMiSummary}
+                                </p>
+                            )}
+
+                            <p className="text-xs font-bold text-ink-subtle leading-relaxed">
+                                Runs on open-ended like / dislike / recommend questions only.
+                            </p>
+                        </div>
+
+                        {/* Labelled, because the bare switch it replaces gave no clue what
+                            turning it on would do. */}
+                        <button
+                            type="button"
+                            aria-pressed={aiMiEnabled}
+                            onClick={() => setFormData(prev => ({
+                                ...prev,
+                                ai_followup: withAiFollowupDefaults({
+                                    ...(prev.ai_followup || DEFAULT_AI_FOLLOWUP),
+                                    is_enabled: !(prev.ai_followup?.is_enabled),
+                                }),
+                            }))}
+                            className={`shrink-0 self-start inline-flex items-center gap-2.5 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+                                aiMiEnabled
+                                    ? 'bg-surface border-2 border-line/80 dark:border-line/10 text-ink-muted hover:border-[#CD393B]/40 hover:text-[#CD393B]'
+                                    : 'bg-gradient-to-r from-[#255E91] to-[#21A0FF] text-white shadow-lg shadow-[#21A0FF]/25 hover:brightness-110'
+                            }`}
+                        >
+                            <span className={`w-9 h-5 rounded-full relative transition-colors ${
+                                aiMiEnabled ? 'bg-[#21A0FF]' : 'bg-white/30'
+                            }`}>
+                                <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${
+                                    aiMiEnabled ? 'left-[1.15rem]' : 'left-0.5'
+                                }`} />
+                            </span>
+                            {aiMiEnabled ? 'Turn off' : 'Enable'}
+                        </button>
+                    </div>
+
+                    {formData.ai_followup?.is_enabled && (
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="grid grid-cols-1 md:grid-cols-3 gap-6 p-5 bg-primary/5 dark:bg-primary/10 border-2 border-primary/20 rounded-[2.5rem]"
+                    // Part of the card above, not a second card inside it: a
+                    // divider and spacing instead of another border and fill.
+                    className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-[#21A0FF]/20"
                 >
                     <div className="space-y-3">
                         <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Moderation Depth</label>
@@ -951,6 +1035,8 @@ export function ParametersStep({
                     </div>
                 </motion.div>
             )}
+                </div>
+            </div>
         </section>
         );
     };
@@ -1208,7 +1294,30 @@ export function ParametersStep({
                 </div>
             </div>
 
-            {formData.survey_type !== 'taste_test' && formData.survey_type !== 'product_test' && (
+            {/* Shown only for a type this page has no parameters UI for. Pack testing
+                and usage & attitude are handled below, so they must not be
+                told to switch to a taste test. */}
+            {/* Usage & Attitude has no evaluation module: nobody tastes or
+                uses a product. Its parameters are the category, the brand list
+                and which behavioural modules run — the funnel, usage habits and
+                pricing behaviour — all of which live in the shared section. It
+                previously fell through to "Module Under Construction", which was
+                wrong: every module it needs already exists and composes. */}
+            {formData.survey_type === 'usage_attitude' && (
+                <div className="space-y-5">
+                    <SurveyLanguageMenu
+                        id="ua-language"
+                        value={formData.config?.language === 'en' ? 'en' : 'ar'}
+                        onChange={(lang) => setFormData(prev => ({
+                            ...prev,
+                            config: { ...(prev.config || DEFAULT_TASTE_CONFIG), language: lang },
+                        }))}
+                    />
+                    {renderSharedProtocolsAndBrands()}
+                </div>
+            )}
+
+            {!['taste_test', 'product_test', 'pack_test', 'usage_attitude'].includes(formData.survey_type) && formData.survey_type !== '' && (
                 <div className="p-5 rounded-[2.5rem] bg-amber-50 dark:bg-amber-950/20 border-2 border-amber-200 dark:border-amber-900/50 mb-5 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <div className="p-3 rounded-2xl bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400">
@@ -1243,6 +1352,67 @@ export function ParametersStep({
                     </div>
 
                     {renderSharedProtocolsAndBrands()}
+
+                    {/* ═══ Pack size for the pricing question ═══
+                        The taste test always asks what the respondent would pay.
+                        Without a stated quantity each person prices whatever
+                        pack they happen to picture, so the answers cannot be
+                        compared or averaged. Declaring the size here puts every
+                        respondent on the same basis; leaving it blank falls back
+                        to the sample physically in front of them. */}
+                    {formData.survey_type === 'taste_test' && (
+                        <section className="space-y-4 border-t border-line/80 dark:border-line/10 pt-6">
+                            <div className="space-y-1">
+                                <label className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-ink ml-1">
+                                    <Tag className="w-3.5 h-3.5 text-primary-soft" /> Pack Size for Pricing
+                                    <span className="text-[10px] font-bold text-ink-subtle normal-case tracking-normal">(optional)</span>
+                                </label>
+                                <p className="text-sm text-ink-muted font-semibold ml-1">
+                                    The quantity respondents are pricing. Leave blank to ask about the sample in front of them.
+                                </p>
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-3 ml-1">
+                                <input
+                                    type="text"
+                                    inputMode="decimal"
+                                    value={formData.config?.pricing_unit_amount ?? ''}
+                                    onChange={(e) => setFormData(prev => ({
+                                        ...prev,
+                                        config: { ...(prev.config || DEFAULT_TASTE_CONFIG), pricing_unit_amount: e.target.value },
+                                    }))}
+                                    placeholder="200"
+                                    className="w-28 bg-surface border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm font-black text-ink text-center focus:outline-none focus:border-primary transition-all"
+                                />
+                                <input
+                                    type="text"
+                                    value={formData.config?.pricing_unit_label ?? ''}
+                                    onChange={(e) => setFormData(prev => ({
+                                        ...prev,
+                                        config: { ...(prev.config || DEFAULT_TASTE_CONFIG), pricing_unit_label: e.target.value },
+                                    }))}
+                                    placeholder={"ml / g / جم"}
+                                    className="w-32 bg-surface border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm font-black text-ink text-center focus:outline-none focus:border-primary transition-all"
+                                />
+                            </div>
+
+                            {/* Shows the question as the respondent will read it,
+                                so the choice is not an abstract setting. */}
+                            <div className="ml-1 p-3.5 rounded-2xl bg-surface-raised/60 border border-line/80 dark:border-line/10" dir="rtl">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-ink-subtle mb-1.5" dir="ltr">
+                                    Respondent sees
+                                </p>
+                                <p className="text-sm font-bold text-ink">
+                                    {(() => {
+                                        const size = `${formData.config?.pricing_unit_amount ?? ''} ${formData.config?.pricing_unit_label ?? ''}`.trim();
+                                        return size
+                                            ? `\u0645\u0645\u0643\u0646 \u062a\u0634\u062a\u0631\u064a [\u0627\u0644\u0645\u0646\u062a\u062c] \u0628\u0633\u0639\u0631 \u0627\u064a\u0647 \u0644\u0648 \u062d\u062c\u0645\u0647 ${size}\u061f`
+                                            : '\u0645\u0645\u0643\u0646 \u062a\u0634\u062a\u0631\u064a [\u0627\u0644\u0645\u0646\u062a\u062c] \u0628\u0633\u0639\u0631 \u0627\u064a\u0647 \u0644\u0648 \u0628\u0627\u0644\u062d\u062c\u0645 \u0627\u0644\u0644\u064a \u0642\u062f\u0627\u0645\u0643 \u062f\u0647\u061f';
+                                    })()}
+                                </p>
+                            </div>
+                        </section>
+                    )}
 
                     {/* ═══ Unified Attribute Engine ═══ */}
                     <section className="space-y-5 border-t border-line/80 dark:border-line/10 pt-6" id="attribute-engine-section">
@@ -2714,7 +2884,10 @@ export function ParametersStep({
                 </div>
             )}
 
-            {formData.survey_type === 'product_test' && (
+            {/* Pack testing is a product test with the packaging bank and heatmap
+                turned on — same parameters, same composer branch — so it renders
+                this UI rather than a placeholder. */}
+            {(formData.survey_type === 'product_test' || formData.survey_type === 'pack_test') && (
                 <div className="space-y-5 animate-slide-up">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                         <SurveyLanguageMenu
@@ -2908,7 +3081,7 @@ export function ParametersStep({
                 </div>
             )}
 
-            {formData.survey_type !== 'taste_test' && formData.survey_type !== 'product_test' && formData.survey_type !== '' && (
+            {!['taste_test', 'product_test', 'pack_test', 'usage_attitude'].includes(formData.survey_type) && formData.survey_type !== '' && (
                 <div className="p-6 flex flex-col items-center justify-center text-center space-y-5 bg-surface-raised/40 rounded-[2.5rem] border border-dashed border-line/80 dark:border-line/10 transition-colors">
                     <div className="w-16 h-16 rounded-full bg-slate-200 dark:bg-slate-900 flex items-center justify-center text-slate-400 dark:text-slate-700 transition-colors">
                         <Settings2 className="w-8 h-8" />

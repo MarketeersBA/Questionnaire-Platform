@@ -74,9 +74,34 @@ UNIFIED_AI_RESPONSE_SCHEMA: Dict[str, Any] = {
                             },
                             "required": ["product", "price", "place", "promotion"],
                             "additionalProperties": False
+                        },
+                        "sentiment": {
+                            # Counts of verbatims by sentiment, not percentages.
+                            #
+                            # The verbatim analyser read `meta.sentiment` and fell
+                            # back to a hardcoded {33, 33, 34} when it was absent —
+                            # and it was always absent, because this schema is
+                            # `strict` and did not declare the field, so the model
+                            # could not return it. Every report therefore showed an
+                            # even three-way split that looked like analysis and
+                            # was a constant.
+                            #
+                            # Counts rather than percentages so the split can be
+                            # checked against the number of verbatims actually
+                            # analysed; a model asked for percentages will happily
+                            # return three numbers that sum to 100 regardless of
+                            # what it read.
+                            "type": ["object", "null"],
+                            "properties": {
+                                "positive": {"type": "integer"},
+                                "negative": {"type": "integer"},
+                                "neutral": {"type": "integer"}
+                            },
+                            "required": ["positive", "negative", "neutral"],
+                            "additionalProperties": False
                         }
                     },
-                    "required": ["swot", "four_ps"],
+                    "required": ["swot", "four_ps", "sentiment"],
                     "additionalProperties": False
                 }
             },

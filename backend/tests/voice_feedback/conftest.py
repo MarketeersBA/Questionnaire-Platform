@@ -7,22 +7,27 @@ from backend.models import User
 from backend.database import db
 
 
-@pytest.fixture(scope="session")
-def event_loop():
-    """Create an instance of the default event loop for each test session."""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
-    yield loop
-    loop.close()
-
-
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(autouse=True)
 async def setup_database():
-    """Initializes the database connection once for the entire test session."""
+    """
+    A database client bound to *this* test's event loop.
+
+    Deliberately function-scoped. Motor binds its client to the loop that
+    created it, and `asyncio_mode = auto` gives every test its own loop — so a
+    session-scoped client works for whichever test happens to run first and then
+    fails for the rest, as the loop it was built on is already closed. That
+    presented as "Database unavailable" and looked like a DNS or Atlas problem;
+    running any one of these tests alone passed, which is the tell.
+
+    Reconnecting per test costs a few hundred milliseconds and removes an
+    entire class of order-dependent failure.
+    """
     db.connect()
     yield
-    # No need to close in lifespan if we manage it here
     if db.client:
         db.client.close()
+        db.client = None
+        db.db = None
 
 
 @pytest.fixture

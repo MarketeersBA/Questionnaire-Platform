@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Plus, Sparkles } from 'lucide-react';
 import type { ModuleQuestionRendererProps, ModuleAnswerValue } from '../../types/moduleQuestions';
 import type { QuestionOption } from '../../types/questionModules';
@@ -180,6 +180,20 @@ function BrandChoiceList({
     );
 
     const isMcq = question.type === 'mcq';
+
+    // A single-choice stage that funnels down to one brand has only one
+    // possible answer. Making the respondent tap it adds nothing and reads as
+    // a broken screen — most visibly at the end of the purchase funnel, where
+    // "which brand do you use most often?" can cascade to a single survivor.
+    // Auto-select it, left visible and changeable rather than hidden.
+    const soleBrand = !isMcq && relevantBrands.length === 1 ? relevantBrands[0] : null;
+    const hasAnswer = typeof answer === 'string' ? answer.trim().length > 0 : answer != null;
+    useEffect(() => {
+        // `has_other` stages can still gain brands the respondent types in, so
+        // never pre-commit them to the only one currently listed.
+        if (!soleBrand || hasAnswer || question.has_other) return;
+        onChange(soleBrand);
+    }, [soleBrand, hasAnswer, question.has_other, onChange]);
 
     const toggleBrand = (brand: string) => {
         if (isMcq) {

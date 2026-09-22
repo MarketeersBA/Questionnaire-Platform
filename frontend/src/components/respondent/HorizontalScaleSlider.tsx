@@ -66,9 +66,13 @@ export default function HorizontalScaleSlider({
     });
 
     const isLarge = size === 'large';
+    // Height only. Width comes from the grid track below, so the row always
+    // holds every point: a fixed min-width made ten 44px buttons overflow the
+    // card and wrap, dropping "10" onto its own line under the others — which
+    // reads as a separate option rather than the top of the scale.
     const buttonSizeClass = isLarge
-        ? 'min-w-11 h-11 md:min-w-12 md:h-12 text-sm md:text-base'
-        : 'min-w-10 h-10 text-sm';
+        ? 'h-11 md:h-12 text-sm md:text-base'
+        : 'h-10 text-sm';
 
     return (
         <div
@@ -76,9 +80,15 @@ export default function HorizontalScaleSlider({
             role="group"
             aria-label={ariaLabel}
         >
+            {/* One equal-width column per point. The buttons shrink to fit
+                rather than wrapping; below ~2rem a point the row scrolls
+                horizontally instead of becoming untappable. */}
             <div
                 dir="ltr"
-                className="flex flex-wrap gap-2 justify-center"
+                className="grid gap-1.5 sm:gap-2 overflow-x-auto pb-1"
+                style={{
+                    gridTemplateColumns: `repeat(${steps.length}, minmax(2rem, 1fr))`,
+                }}
             >
                 {steps.map((step) => {
                     const isSelected = selected === step;
@@ -89,7 +99,7 @@ export default function HorizontalScaleSlider({
                             aria-pressed={isSelected}
                             aria-label={`${step}`}
                             onClick={() => onChange(step)}
-                            className={`${buttonSizeClass} px-2 rounded-xl border font-black transition-all ${
+                            className={`${buttonSizeClass} w-full px-0 rounded-xl border font-black transition-all ${
                                 isSelected
                                     ? 'bg-primary text-white border-primary scale-105 shadow-md'
                                     : 'bg-surface-raised border-slate-200 text-slate-500 hover:border-primary/40 hover:text-ink dark:border-slate-700'

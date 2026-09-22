@@ -2,6 +2,7 @@ import type { ModuleQuestion, ModuleSection, QuestionModule, QuestionOption } fr
 import { moduleRollout } from '../constants/moduleRollout';
 import { generateSchemaSectionsFromModule } from './moduleSchemaUtils';
 import { fetchQuestionModuleDoc, resolveQuestionModule } from './questionModuleFetch';
+import { isModuleExplicitlyDisabled } from './moduleEnablement';
 
 const MODULE_ID = 'brand_pricing_behavior';
 
@@ -149,6 +150,7 @@ export function generateLayer6FromModule(
 
 export function isBrandPricingBehaviorEnabled(survey: any): boolean {
     if (!moduleRollout.genericRenderer() || !moduleRollout.usagePricing()) return false;
+    if (isModuleExplicitlyDisabled(survey, 'brand_pricing_behavior')) return false;
     if (survey?.module_snapshots?.brand_pricing_behavior) return true;
     if (survey?.brand_pricing_behavior?.is_enabled) return true;
     return (survey?.config?.module_sequence || survey?.module_sequence || []).includes('brand_pricing_behavior');

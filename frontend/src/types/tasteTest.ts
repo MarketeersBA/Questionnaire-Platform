@@ -79,6 +79,16 @@ export interface TasteTestConfig {
     module_sequence?: string[];
     bipolarPairs?: [string, string][];
     // Added missing fields based on common taste test configurations
+    /**
+     * Pack size the pricing question asks about, e.g. 200 + "ml".
+     *
+     * The taste test always asks what the respondent would pay. Without a
+     * stated quantity each person prices whatever pack they picture, so the
+     * answers cannot be compared or averaged. Both blank falls back to asking
+     * about the sample physically in front of them.
+     */
+    pricing_unit_amount?: string;
+    pricing_unit_label?: string;
     testing_protocol?: 'branded' | 'blind';
     blind_codes?: Record<string, string>;
     product_codes?: string[];

@@ -4,6 +4,7 @@ import type { SurveyFormData } from '../pages/CreateSurvey/types';
 import { PURCHASE_FUNNEL_QUESTIONS } from '../constants/purchaseFunnel';
 import { moduleRollout } from '../constants/moduleRollout';
 import { formatModuleQuestionText } from './moduleQuestionUtils';
+import { isModuleExplicitlyDisabled } from './moduleEnablement';
 
 /** pf_q* → legacy aw_/pb_* keys for analytics backward compatibility */
 export const PF_TO_LEGACY_ID: Record<string, string> = {
@@ -183,6 +184,7 @@ export function buildPurchaseFunnelSubmissionPayload(
 
 export function isPurchaseFunnelEnabled(survey: any): boolean {
     if (!moduleRollout.genericRenderer()) return false;
+    if (isModuleExplicitlyDisabled(survey, 'purchase_funnel')) return false;
     if (survey?.module_snapshots?.purchase_funnel) return true;
     if (survey?.purchase_funnel?.is_enabled) return true;
     if (survey?.purchase_funnel_id) return true;

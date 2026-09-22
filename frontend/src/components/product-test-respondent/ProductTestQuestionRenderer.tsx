@@ -10,7 +10,7 @@ import type { VoiceCaptureConfig } from '../../utils/voiceQuestions';
 import { isVoiceEnabledForProductTestQuestion } from '../../utils/voiceQuestions';
 import OpenEndAnswerWithFollowUpThread from '../voice-feedback/OpenEndAnswerWithFollowUpThread';
 import type { FollowUpEligibilityInput, FollowUpReplyChangeHandler, FollowUpStateMap, FollowUpTriggerHandler, VoiceFollowUpTriggerHandler } from '../../utils/aiFollowup';
-import { classifyQuestionCategory, getMaxFollowUpRounds, isFollowUpAnswerEligible, isAiFollowUpEligible, shouldTriggerInitialFollowUp, canSubmitFollowUpReply, isFollowUpResponsePending } from '../../utils/aiFollowup';
+import { classifyQuestionCategory, getMaxFollowUpRounds, isFollowUpAnswerEligible, isFollowUpReplyEligible, isAiFollowUpEligible, shouldTriggerInitialFollowUp, canSubmitFollowUpReply, isFollowUpResponsePending } from '../../utils/aiFollowup';
 import { resolveMinAnswerLength } from '../../utils/aiFollowupConfig';
 import {
   appendFollowUpExchangeToOpenEndValue,
@@ -237,14 +237,18 @@ export default function ProductTestQuestionRenderer({
                     brandName={voiceBrandName}
                     questionText={displayText}
                     language={language}
-                    onBlur={(text) => {
+                    // Sent by the respondent, not inferred from them leaving the
+                    // field. Blur fires when someone taps away or scrolls on a
+                    // phone, which started the moderator on a half-written answer.
+                    submitBusy={Boolean(followUpStateMap?.[question.id]?.loading)}
+                    onSubmit={followUpEligible ? (text) => {
                         if (followUpStateMap && !shouldTriggerInitialFollowUp(question.id, followUpStateMap)) return;
                         if (aiFollowup?.is_enabled && aiFollowup?.apply_to_text && onFollowUpTrigger && openEndFollowUpEligible) {
                             if (isFollowUpAnswerEligible(text, minAnswerLength)) {
                                 onFollowUpTrigger(question.id, text, displayText, voiceBrandName || '', 'text', openEndFollowUpEligibility);
                             }
                         }
-                    }}
+                    } : undefined}
                 />
             )}
 
@@ -262,7 +266,10 @@ export default function ProductTestQuestionRenderer({
                 followUpQuestionText={followUpStateMap?.[question.id]?.followUpText ?? null}
                 onReplyChange={(replyValue) => onFollowUpReplyChange?.(question.id, replyValue)}
                 onReplyTextSubmit={(text) => {
-                    if (!aiFollowup?.apply_to_text || !isFollowUpAnswerEligible(text, minAnswerLength) || !onFollowUpTrigger) return;
+                    // A reply is judged by `isFollowUpReplyEligible`, not the initial-answer
+              // minimum: "اه" or "لا" is a real answer to a direct probe, and
+              // the five-character gate used to discard it without a word.
+              if (!aiFollowup?.apply_to_text || !isFollowUpReplyEligible(text) || !onFollowUpTrigger) return;
                     if (followUpStateMap && !canSubmitFollowUpReply(followUpStateMap[question.id])) return;
                     if (question.type === 'packaging-heatmap') {
                         const heatmapVal = value as Record<string, unknown>;

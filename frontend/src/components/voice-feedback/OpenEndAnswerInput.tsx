@@ -1,4 +1,4 @@
-import { Mic, CheckCircle2 } from 'lucide-react';
+import { Mic, CheckCircle2, Send } from 'lucide-react';
 import AudioRecorder from './AudioRecorder';
 import {
     normalizeOpenEndAnswer,
@@ -17,6 +17,14 @@ interface Props {
     language?: 'en' | 'ar';
     showVoice: boolean;
     onBlur?: (text: string) => void;
+    /**
+     * Send the answer. When provided, a send button is rendered inside the
+     * field and becomes the only way the answer is submitted — there is no
+     * idle timer and no submit-on-blur behind it.
+     */
+    onSubmit?: (text: string) => void;
+    /** Suppresses the button while a previous answer is still being processed. */
+    submitBusy?: boolean;
 }
 
 export default function OpenEndAnswerInput({
@@ -29,21 +37,65 @@ export default function OpenEndAnswerInput({
     language = 'en',
     showVoice,
     onBlur,
+    onSubmit,
+    submitBusy = false,
 }: Props) {
     const answer = normalizeOpenEndAnswer(value);
     const isAr = language === 'ar';
     const hasVoice = Boolean(answer.voice_feedback_id);
+    const text = answer.text || '';
+    const canSubmit = Boolean(onSubmit) && Boolean(text.trim()) && !submitBusy;
+
+    const submit = () => {
+        if (!canSubmit) return;
+        onSubmit?.(text);
+    };
 
     return (
         <div className="space-y-3">
-            <textarea
-                rows={2}
-                className="w-full bg-surface-raised/50 border-2 border-line/80 dark:border-line/10 rounded-2xl px-4 py-3 text-sm font-semibold resize-none"
-                placeholder={isAr ? 'اكتب إجابتك هنا...' : 'Type your answer...'}
-                value={answer.text || ''}
-                onChange={(e) => onChange(updateOpenEndText(value, e.target.value))}
-                onBlur={(e) => onBlur?.(e.target.value)}
-            />
+            {/* One row: the text and the send control share a line, the way a
+                chat composer does. The border is on this wrapper rather than
+                the textarea — a textarea's box ends where its rows end, so a
+                button placed against it always fell outside the outline.
+                `items-end` keeps the button on the baseline as the text grows. */}
+            <div className="flex items-end gap-2 rounded-2xl border-2 border-line/80 dark:border-line/10 bg-surface-raised/50 px-3 py-2 transition-colors focus-within:border-primary/60">
+                <textarea
+                    rows={2}
+                    className="flex-1 min-w-0 bg-transparent border-0 px-1 py-1.5 text-sm font-semibold resize-none outline-none focus:ring-0"
+                    placeholder={isAr ? 'اكتب إجابتك هنا...' : 'Type your answer...'}
+                    value={text}
+                    onChange={(e) => onChange(updateOpenEndText(value, e.target.value))}
+                    onBlur={(e) => onBlur?.(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key !== 'Enter' || e.shiftKey) return;
+
+                        // An IME is mid-word: Enter is committing a candidate word,
+                        // not finishing the answer. Sending here would cut the
+                        // respondent off mid-word.
+                        if (e.nativeEvent.isComposing) return;
+
+                        // Enter sends, Shift+Enter starts a new line — the
+                        // convention every messaging app uses, so it needs no
+                        // explaining. preventDefault stops the newline being
+                        // inserted before the answer is read.
+                        e.preventDefault();
+                        submit();
+                    }}
+                />
+
+                {onSubmit && (
+                    <button
+                        type="button"
+                        onClick={submit}
+                        disabled={!canSubmit}
+                        aria-label={isAr ? 'إرسال' : 'Send'}
+                        className="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-primary text-white text-sm font-black tracking-wide shadow-sm transition-all hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                        <Send className="w-4 h-4" />
+                        {isAr ? 'إرسال' : 'Send'}
+                    </button>
+                )}
+            </div>
 
             {showVoice && (
                 <div className="space-y-3">
