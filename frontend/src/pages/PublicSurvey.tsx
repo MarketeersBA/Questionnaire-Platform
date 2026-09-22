@@ -68,6 +68,7 @@ import { normalizePublicSurveyAiFollowup } from '../utils/aiFollowupConfig';
 import { localizeTasteTestSectionTitle } from '../utils/tasteTestAttributeLabels';
 import { useSurveyDirection } from '../hooks/useSurveyDirection';
 import { pickBilingualDisplayText } from '../utils/bilingualDisplayText';
+import { dedupeBrandNames, isSameBrand } from '../utils/brandNameIdentity';
 import WelcomeScreen from './PublicSurvey/WelcomeScreen';
 
 export default function PublicSurvey() {
@@ -266,6 +267,28 @@ export default function PublicSurvey() {
   const getEffectiveBrandName = (brandName: string) => {
     if (!brandName) return '';
     return productTestDisplay.resolveBrandDisplay(brandName);
+  };
+
+  /**
+   * The purchase funnel keeps its own, separately-typed brand list (see
+   * purchaseFunnelBrandIdentity.ts) — it isn't necessarily the taste test's
+   * brand set, so it must not be blind-coded wholesale: a funnel-only
+   * competitor the taste test never heard of was never part of that blind
+   * design. Only a funnel entry that actually identifies one of the
+   * taste-test's own brands (exact or cross-script match) should switch to
+   * that brand's blind code — otherwise the same brand would read as its
+   * real name in Purchase Funnel while the taste test screens the respondent
+   * already saw showed only the code.
+   */
+  const getEffectiveFunnelBrandName = (rawName: string) => {
+    const name = (rawName || '').trim();
+    if (!name) return '';
+    const tasteTestBrands: string[] = [
+      ...(survey?.internal_brands_data?.map((b: any) => b.name) || []),
+      ...(survey?.competitor_brands_data?.map((b: any) => b.name) || []),
+    ];
+    const matched = tasteTestBrands.find((tb) => isSameBrand(tb, name));
+    return matched ? getEffectiveBrandName(matched) : name;
   };
 
   const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -869,14 +892,32 @@ export default function PublicSurvey() {
               brandContext={
                 ['purchase_funnel', 'brand_analyzer', 'brand_usage', 'brand_pricing_behavior'].includes(currentModuleId)
                   ? {
-                    masterBrands: [
-                      ...(survey?.internal_brands_data?.map((b: any) => b.name) || []),
-                      ...(survey?.competitor_brands_data?.map((b: any) => b.name) || []),
-                      ...(survey?.purchase_funnel?.brand_list?.map((b: any) =>
-                        survey?.language === 'ar' ? (b.name_ar || b.name) : (b.name_en || b.name)
-                      ) || []),
-                      ...customBrands,
-                    ],
+                    // The taste-test brand list and the purchase funnel's own
+                    // brand list are separate, independently-typed lists (see
+                    // purchaseFunnelBrandIdentity.ts) — this plain
+                    // concatenation used to carry both straight through with
+                    // no dedup at all, so "Squizz" (taste test) and "سكويز"
+                    // (funnel) reached the respondent as two options for the
+                    // same brand. dedupeBrandNames catches a same-script
+                    // duplicate and, via brandNameIdentity's phonetic
+                    // comparison, a transliteration across scripts too.
+                    //
+                    // Each real name is also routed through
+                    // productTestDisplay.resolveBrandDisplay (which already
+                    // reads taste_test_config's testing_protocol/blind_codes)
+                    // before the dedup, so a blind taste test doesn't leak the
+                    // real brand name here while the taste-test screens the
+                    // respondent already saw showed only its blind code.
+                    masterBrands: dedupeBrandNames(
+                      survey?.internal_brands_data?.map((b: any) => getEffectiveBrandName(b.name)),
+                      survey?.competitor_brands_data?.map((b: any) => getEffectiveBrandName(b.name)),
+                      survey?.purchase_funnel?.brand_list?.map((b: any) =>
+                        getEffectiveFunnelBrandName(
+                          survey?.language === 'ar' ? (b.name_ar || b.name) : (b.name_en || b.name)
+                        )
+                      ),
+                      customBrands,
+                    ),
                     customBrands,
                     onAddCustomBrand: (brand) =>
                       setCustomBrands((prev) => Array.from(new Set([...prev, brand]))),

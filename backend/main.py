@@ -2,9 +2,10 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from backend.utils.seed_utils import seed_admin
 from backend.config import settings
-from backend.database import db
+from backend.database import db, DatabaseUnavailableError
 from backend.routers import auth, templates, surveys, tokens, public, webhook, analytics, users, attribute_banks, taste_test_configs, questions, purchase_funnels, question_modules, exports, responses, voice_feedback, voice_dashboard, sessions, brand_attributes, product_test_configs, product_test_questions, packaging_heatmap, product_test_media
 from backend.utils.logging_utils import setup_logging, LoggingMiddleware
 
@@ -100,6 +101,30 @@ app = FastAPI(title="Survey Platform API", lifespan=lifespan)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
+
+
+@app.exception_handler(DatabaseUnavailableError)
+async def database_unavailable_handler(request: Request, exc: DatabaseUnavailableError):
+    # This has come up repeatedly in practice — Atlas SRV/DNS or an access-list
+    # drift making the database briefly unreachable — and without this handler
+    # it fell through as an unhandled 500: a huge traceback in the response and
+    # the logs, and a frontend left showing an endless loading skeleton with no
+    # indication anything was actually wrong. `db.get_collection` already
+    # retries the connection on every call (see database.py), so this is
+    # explicitly transient — 503 with Retry-After tells any well-behaved
+    # client (and a human reading the response) exactly that.
+    import logging
+    logging.getLogger("uvicorn").error(
+        "Database unavailable while handling %s %s: %s", request.method, request.url.path, exc
+    )
+    return JSONResponse(
+        status_code=503,
+        content={
+            "detail": "The database is temporarily unavailable. This usually resolves on its own within a few seconds — please try again.",
+            "error": "database_unavailable",
+        },
+        headers={"Retry-After": "5"},
+    )
 
 # Logging Middleware
 app.add_middleware(LoggingMiddleware)

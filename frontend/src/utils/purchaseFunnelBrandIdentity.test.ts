@@ -107,4 +107,24 @@ describe('addBrandName', () => {
         expect(matchedExisting).toBe(false);
         expect(list).toBe(start);
     });
+
+    it('links a brand typed independently in the other script — the case this used to be unable to solve', () => {
+        // "Squizz" typed once (taste test), "سكويز" typed completely
+        // separately (funnel) — nothing else ever associated the two. Exact
+        // matching alone can't see they're the same; the phonetic fallback
+        // in findMatchingBrand can.
+        const start = [{ name_en: 'Squizz', name_ar: '' }];
+        const { list, matchedExisting } = addBrandName(start, 'سكويز');
+
+        expect(matchedExisting).toBe(true);
+        expect(list).toEqual([{ name_en: 'Squizz', name_ar: 'سكويز' }]);
+    });
+
+    it('the reverse direction works too — Arabic added first, English typed later', () => {
+        const start = [{ name_en: '', name_ar: 'بيبسي' }];
+        const { list, matchedExisting } = addBrandName(start, 'Pepsi');
+
+        expect(matchedExisting).toBe(true);
+        expect(list).toEqual([{ name_en: 'Pepsi', name_ar: 'بيبسي' }]);
+    });
 });

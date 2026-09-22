@@ -66,6 +66,47 @@ describe('productTestPlaceholderEngine', () => {
                 }),
             ).toBe('العينة ب');
         });
+
+        it('finds the configured code even when this brand is looked up by its Arabic transliteration', () => {
+            // The code was set against "Squizz" (taste-test architecture); a
+            // funnel entry or a re-synced brand list asking about "سكويز"
+            // must resolve to the same code, not fall through to a generated
+            // sample label or the real name.
+            expect(
+                resolveBrandDisplayName('سكويز', {
+                    testing_protocol: 'blind',
+                    blind_codes: { Squizz: 'دايرة' },
+                }),
+            ).toBe('دايرة');
+        });
+
+        it('the reverse direction works too — code configured against the Arabic name, looked up by the English one', () => {
+            expect(
+                resolveBrandDisplayName('Squizz', {
+                    testing_protocol: 'blind',
+                    blind_codes: { 'سكويز': 'مربع' },
+                }),
+            ).toBe('مربع');
+        });
+
+        it('tolerates case and whitespace drift between where the code was set and where it is looked up', () => {
+            expect(
+                resolveBrandDisplayName('  squizz ', {
+                    testing_protocol: 'blind',
+                    blind_codes: { Squizz: 'دايرة' },
+                }),
+            ).toBe('دايرة');
+        });
+
+        it('does not cross-match two genuinely different brands just because one has no code', () => {
+            expect(
+                resolveBrandDisplayName('Kiks', {
+                    testing_protocol: 'blind',
+                    blind_codes: { Squizz: 'دايرة' },
+                    brands: ['Squizz', 'Kiks'],
+                }),
+            ).toMatch(/^Sample [A-Z]+$/);
+        });
     });
 
     describe('buildProductTestBrandContext', () => {

@@ -8,16 +8,12 @@
  * `name_en` with a case-sensitive exact match, so "Pepsi" / "pepsi" (let
  * alone the same brand typed in Arabic) all landed as separate brands.
  *
- * None of this can reliably tell "Pepsi" and "بيبسي" are the same brand on
- * its own — that needs either a translation dictionary or an AI call, and
- * this platform has neither wired up for brand names. What it *can* do,
- * which is most of the actual harm here: stop writing the wrong text into
- * the wrong field, stop missing same-script duplicates the exact-match check
- * was blind to (case, whitespace, a brand already known from the taste
- * test), and make the Arabic name visible/editable so a creator who *does*
- * notice two chips for one brand can fix it in a few seconds instead of
- * never being shown `name_ar` at all.
+ * Matching now also goes through `brandNameIdentity`'s phonetic
+ * comparison, so a brand typed in one script matches the same brand
+ * typed in the other — without a dictionary or a network call. See
+ * that module for how.
  */
+import { isSameBrand } from "./brandNameIdentity";
 
 const ARABIC_CHARS = /[\u0600-\u06FF]/;
 
@@ -53,9 +49,11 @@ function keysFor(brand: PurchaseFunnelBrand): string[] {
 }
 
 /**
- * The existing funnel entry this name already refers to, if any — matched
- * case/whitespace-insensitively against *either* of its two fields, so a
- * duplicate is caught whichever field it was originally filed under.
+ * The existing funnel entry this name already refers to, if any. Tries an
+ * exact case/whitespace-insensitive match against *either* of the entry's
+ * two fields first (cheap, and unambiguous when it hits); falls back to
+ * `isSameBrand`'s cross-script phonetic comparison so "Squizz" typed here
+ * matches an entry already filed as "سكويز", or vice versa.
  */
 export function findMatchingBrand(
     list: PurchaseFunnelBrand[],
@@ -63,7 +61,11 @@ export function findMatchingBrand(
 ): PurchaseFunnelBrand | undefined {
     const key = normalizeKey(candidateName);
     if (!key) return undefined;
-    return list.find((b) => keysFor(b).includes(key));
+
+    const exact = list.find((b) => keysFor(b).includes(key));
+    if (exact) return exact;
+
+    return list.find((b) => keysFor(b).some((existingKey) => isSameBrand(existingKey, key)));
 }
 
 /**

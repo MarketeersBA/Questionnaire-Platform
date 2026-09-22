@@ -9,6 +9,7 @@ import {
     flattenModuleQuestions,
     isAnswerComplete,
 } from '../../utils/moduleQuestionUtils';
+import { dedupeBrandNames } from '../../utils/brandNameIdentity';
 import {
     sanitizePfAnswersForQuestion,
 } from '../../utils/purchaseFunnelBrandLogic';
@@ -46,10 +47,7 @@ export default function PurchaseFunnelStep({
     const totalSteps = questions.length;
 
     const masterBrands = useMemo(
-        () => [
-            ...(brandContext.masterBrands || []),
-            ...(brandContext.customBrands || []),
-        ],
+        () => dedupeBrandNames(brandContext.masterBrands, brandContext.customBrands),
         [brandContext.masterBrands, brandContext.customBrands]
     );
 

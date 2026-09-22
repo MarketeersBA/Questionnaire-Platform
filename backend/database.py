@@ -4,6 +4,22 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
+class DatabaseUnavailableError(RuntimeError):
+    """
+    Raised by `get_collection` when Mongo can't be reached (DNS/network/Atlas
+    access-list drift, all seen in this project). A plain `RuntimeError` here
+    meant every request against a down database fell through FastAPI's
+    default handler as an unhandled 500 — a multi-thousand-line traceback to
+    the client and the logs alike, and an endless loading skeleton in the UI
+    with nothing telling the user *why*. A dedicated subclass lets
+    `main.py` register one handler that turns this specific, expected
+    failure into a short, honest 503 instead — without catching (and
+    potentially masking) an unrelated `RuntimeError` raised by a genuine bug
+    elsewhere in the app.
+    """
+
+
 class Database:
     client: AsyncIOMotorClient = None
     db = None
@@ -75,7 +91,7 @@ class Database:
         # Retry here so the API self-heals once DNS/Atlas comes back, instead
         # of staying broken until a manual restart.
         if not self.ensure_connected():
-            raise RuntimeError(
+            raise DatabaseUnavailableError(
                 f"Database unavailable — cannot access '{collection_name}'. "
                 f"Last error: {self.last_error}"
             )

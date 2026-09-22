@@ -3,6 +3,7 @@ import type {
     ProductTestBrandContextInput,
     ProductTestTestingProtocol,
 } from '../types/productTestRespondent';
+import { isSameBrand } from './brandNameIdentity';
 
 export type { ProductTestBrandContext, ProductTestBrandContextInput, ProductTestTestingProtocol };
 
@@ -84,12 +85,43 @@ export function formatBlindSampleLabel(
     return language === 'ar' ? `العينة ${suffix}` : `Sample ${suffix}`;
 }
 
+/**
+ * The configured blind code for `brandKey`, if any. An exact (normalized) key
+ * match is tried first; if that misses, falls back to `isSameBrand`'s
+ * cross-script comparison, so a code set against "Squizz" is still found when
+ * this brand shows up elsewhere as "سكويز" — the funnel's own separate brand
+ * list, a re-synced brand-architecture entry with different casing, etc.
+ * Without this fallback, a blind code silently failed to apply for a brand
+ * whose spelling drifted even slightly from however it read when the code
+ * was typed, leaking the real name in one place while another correctly
+ * showed the code.
+ */
+function findConfiguredBlindCode(brandKey: string, blindCodes: Record<string, string> | undefined): string {
+    if (!blindCodes) return '';
+    const trimmed = brandKey.trim();
+    const trimmedLower = trimmed.toLowerCase();
+
+    for (const [key, code] of Object.entries(blindCodes)) {
+        if (key.trim().toLowerCase() === trimmedLower) {
+            const value = code?.trim();
+            if (value) return value;
+        }
+    }
+    for (const [key, code] of Object.entries(blindCodes)) {
+        if (isSameBrand(key, trimmed)) {
+            const value = code?.trim();
+            if (value) return value;
+        }
+    }
+    return '';
+}
+
 export function resolveBlindSampleLabel(
     brandKey: string,
     context: Pick<ProductTestPlaceholderContext, 'blind_codes' | 'brands' | 'language'>,
 ): string {
     const trimmed = brandKey?.trim();
-    const configuredCode = trimmed ? context.blind_codes?.[trimmed]?.trim() : '';
+    const configuredCode = trimmed ? findConfiguredBlindCode(trimmed, context.blind_codes) : '';
     if (configuredCode) return configuredCode;
 
     const brandIndex = trimmed && context.brands?.length
