@@ -1,9 +1,9 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Loader2, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import type { ConfigurableModuleId } from '../../types/surveyFlow';
 import type { ModuleAnswersMap, ModuleBrandContext } from '../../types/moduleQuestions';
-import type { QuestionModule } from '../../types/questionModules';
+import type { ModuleQuestion, QuestionModule } from '../../types/questionModules';
 import ModuleQuestionRenderer from './ModuleQuestionRenderer';
 import {
     asBrandPipelineCarrier,
@@ -12,11 +12,29 @@ import {
     getOptionDisplayLabel,
     isAnswerComplete,
 } from '../../utils/moduleQuestionUtils';
-import { sanitizePfAnswersForQuestion } from '../../utils/purchaseFunnelBrandLogic';
+import { sanitizePfAnswersForQuestion, skipSoleBrandSteps, soleListedBrand } from '../../utils/purchaseFunnelBrandLogic';
 import {
     type VoiceCaptureConfig,
     isVoiceEnabledForModuleOpenQuestion,
 } from '../../utils/voiceQuestions';
+
+function isBrandChoiceQuestion(question: ModuleQuestion): boolean {
+    if (question.type !== 'mcq' && question.type !== 'scq') return false;
+    const hasOptions = (question.options?.length ?? 0) > 0;
+    return Boolean(question.brand_pipeline) || (Boolean(question.has_other) && !hasOptions);
+}
+
+/** A fixed option list with exactly one real answer. "Add another" is not a choice. */
+function soleFixedOption(question: ModuleQuestion): string | null {
+    if (question.type !== 'mcq' && question.type !== 'scq') return null;
+    if (isBrandChoiceQuestion(question)) return null;
+    const options = question.options ?? [];
+    if (options.length !== 1) return null;
+    const only = options[0];
+    if (!only?.value || only.value.toLowerCase() === 'open-end') return null;
+    if (only.allows_specify) return null;
+    return only.value;
+}
 
 export interface ConfigurableModuleStepProps {
     moduleId: ConfigurableModuleId;
@@ -65,6 +83,8 @@ export default function ConfigurableModuleStep({
     const totalSteps = questions.length;
     const showVoice = isVoiceEnabledForModuleOpenQuestion(voiceCapture);
     const canGoBack = stepIndex > 0 || allowCrossPhaseBack;
+    const navDirection = useRef<'forward' | 'back'>('forward');
+    const appliedSkip = useRef('');
 
     const isPurchaseFunnelTopOfMindQuestion = useMemo(() => {
         if (!currentQuestion || moduleId !== 'purchase_funnel') return false;
@@ -111,8 +131,53 @@ export default function ConfigurableModuleStep({
         }
     }, [moduleId, stepIndex, upstreamKey, currentQuestion, masterBrands, answers, onAnswersChange]);
 
+    // One listed choice is not a decision, whatever that choice is. Record it
+    // and move past the screen. "Add another brand" does not count as a second
+    // choice. A run of single-choice screens is skipped together.
+    useEffect(() => {
+        if (!currentQuestion) return;
+
+        const direction = navDirection.current;
+        const result = skipSoleBrandSteps(
+            questions.map((question) => ({
+                id: question.question_id,
+                type: question.type,
+                brandChoice: isBrandChoiceQuestion(question),
+                carrier: asBrandPipelineCarrier(question),
+                soleChoice: isBrandChoiceQuestion(question) ? undefined : soleFixedOption(question),
+            })),
+            stepIndex,
+            answers as Record<string, unknown>,
+            masterBrands,
+            direction,
+            brandContext?.customBrands || [],
+        );
+
+        if (result.action === 'stay') return;
+
+        const signature = `${direction}:${stepIndex}:${result.action}:${result.index}`;
+        if (appliedSkip.current === signature) return;
+        appliedSkip.current = signature;
+
+        const nextAnswers = result.answers as ModuleAnswersMap;
+        if (result.action === 'complete') {
+            onComplete(nextAnswers);
+            return;
+        }
+        if (JSON.stringify(nextAnswers) !== JSON.stringify(answers)) {
+            onAnswersChange(nextAnswers);
+        }
+        if (result.action === 'boundary') {
+            onBoundaryBack?.();
+            return;
+        }
+        onStepIndexChange(result.index);
+    }, [stepIndex, upstreamKey, currentQuestion, questions, masterBrands, answers, onAnswersChange, onStepIndexChange, onComplete, onBoundaryBack]);
+
     const handleBack = () => {
         if (loading || !canGoBack) return;
+        navDirection.current = 'back';
+        appliedSkip.current = '';
 
         if (stepIndex > 0) {
             onStepIndexChange(stepIndex - 1);
@@ -126,6 +191,8 @@ export default function ConfigurableModuleStep({
 
     const handleNext = async () => {
         if (loading || !currentQuestion) return;
+        navDirection.current = 'forward';
+        appliedSkip.current = '';
 
         const missingSpecifyOption = findMissingSpecifyOption(
             currentQuestion,
@@ -173,6 +240,22 @@ export default function ConfigurableModuleStep({
         )?.[language === 'ar' ? 'title_ar' : 'title_en'] || module.name;
 
     const isLast = stepIndex === totalSteps - 1;
+    const hiddenSoleChoice = Boolean(
+        currentQuestion && (
+            soleFixedOption(currentQuestion)
+            || (
+                isBrandChoiceQuestion(currentQuestion)
+                && soleListedBrand(
+                    asBrandPipelineCarrier(currentQuestion),
+                    masterBrands,
+                    answers as Record<string, unknown>,
+                    brandContext?.customBrands || [],
+                )
+            )
+        )
+    );
+
+    if (hiddenSoleChoice) return null;
 
     return (
         <div className="space-y-8">

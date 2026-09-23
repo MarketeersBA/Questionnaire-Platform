@@ -85,8 +85,10 @@ export default function ScaleAnchorLabels({
                         </span>
                         <span
                             dir={isArabic ? 'rtl' : 'ltr'}
-                            className={`${SCALE_ANCHOR_RESPONDENT_LABEL_CLASSES} ${
-                                point.isIdeal ? 'text-emerald-600 dark:text-emerald-400 font-bold' : ''
+                            className={`text-xs md:text-sm leading-snug tracking-normal ${
+                                point.isIdeal
+                                    ? 'font-extrabold text-emerald-600 dark:text-emerald-400'
+                                    : 'font-semibold text-slate-600 dark:text-slate-300'
                             }`}
                         >
                             {point.text}

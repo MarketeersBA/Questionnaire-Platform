@@ -95,12 +95,50 @@ const resolvePipelineSources = (pipeline: BrandPipeline): string[] => {
         : [];
 };
 
+/** pf_q* and the older aw_/pb_* ids name the same answer. */
+const ANSWER_ID_ALIASES: Record<string, string> = {
+    pf_q1: 'aw_q1',
+    pf_q2: 'aw_q2',
+    pf_q3: 'aw_q3',
+    pf_q4: 'pb_q1',
+    pf_q5: 'pb_q2',
+    pf_q6: 'pb_q3',
+    pf_q7: 'pb_q4',
+    aw_q1: 'pf_q1',
+    aw_q2: 'pf_q2',
+    aw_q3: 'pf_q3',
+    pb_q1: 'pf_q4',
+    pb_q2: 'pf_q5',
+    pb_q3: 'pf_q6',
+    pb_q4: 'pf_q7',
+};
+
+const readSourceAnswer = (
+    answers: Record<string, unknown>,
+    sourceId: string,
+): unknown => {
+    if (answers[sourceId] !== undefined) return answers[sourceId];
+    const alias = ANSWER_ID_ALIASES[sourceId];
+    if (alias && answers[alias] !== undefined) return answers[alias];
+    return undefined;
+};
+
+const dedupeBrands = (brands: string[]): string[] => {
+    const unique: string[] = [];
+    for (const brand of brands) {
+        if (!brand.trim()) continue;
+        if (unique.some((existing) => brandsFuzzyMatch(existing, brand))) continue;
+        unique.push(brand);
+    }
+    return unique;
+};
+
 const collectAllowedBrands = (
     sources: string[],
     answers: Record<string, unknown>,
     strategy: BrandPipeline['strategy']
 ): Set<string> => {
-    const perSource = sources.map((sourceId) => collectAnswerBrands(answers[sourceId]));
+    const perSource = sources.map((sourceId) => collectAnswerBrands(readSourceAnswer(answers, sourceId)));
 
     if (perSource.length === 0) return new Set();
 
@@ -176,12 +214,32 @@ export const resolvePurchaseFunnelBrands = (
         pipelineBrands = uniqueMaster.filter((brand) => !brandIsInSet(brand, excluded));
     } else {
         const activeSources = resolvePipelineSources(pipeline);
-        const allowed = collectAllowedBrands(activeSources, answers, pipeline.strategy ?? 'cascade');
+        const perSource = activeSources.map((sourceId) =>
+            collectAnswerBrands(readSourceAnswer(answers, sourceId))
+        );
+        const strategy = pipeline.strategy ?? 'cascade';
+        const allowedOriginals = dedupeBrands(
+            strategy === 'intersection'
+                ? (perSource[0] || []).filter((brand) =>
+                    perSource.slice(1).every((sourceBrands) =>
+                        sourceBrands.some((candidate) => brandsFuzzyMatch(brand, candidate))
+                    )
+                )
+                : perSource.flat()
+        );
 
-        if (allowed.size === 0) {
+        if (allowedOriginals.length === 0) {
             pipelineBrands = [];
         } else {
-            pipelineBrands = uniqueMaster.filter((brand) => brandIsInSet(brand, allowed));
+            // A brand the respondent already named stays a choice even when it
+            // was typed in and is not on the study's master list.
+            const fromMaster = uniqueMaster.filter((brand) =>
+                allowedOriginals.some((allowed) => brandsFuzzyMatch(brand, allowed))
+            );
+            const extras = allowedOriginals.filter(
+                (allowed) => !fromMaster.some((brand) => brandsFuzzyMatch(brand, allowed))
+            );
+            pipelineBrands = [...fromMaster, ...extras];
         }
     }
 
@@ -266,4 +324,123 @@ export const sanitizePfAnswersForQuestion = (
     if (JSON.stringify(pruned) === JSON.stringify(current)) return answers;
 
     return { ...answers, [question.id]: pruned };
+};
+
+/**
+ * The only brand a choice question can offer.
+ *
+ * A funnel stage with one surviving brand is not a question — the respondent
+ * has nothing to choose. Callers skip that screen and keep the brand as the
+ * answer so the next stage still has something to cascade from.
+ * Returns null when there is a real choice, or when the question is not MCQ/SCQ.
+ */
+export const soleListedBrand = (
+    question: BrandPipelineCarrier,
+    masterBrands: string[],
+    answers: Record<string, unknown>,
+    customBrands: string[] = [],
+): string | null => {
+    if (question.type !== 'mcq' && question.type !== 'scq') return null;
+    // Same inputs the choice list renders with, so a brand that is only on the
+    // previous answer — any brand, not a particular name — still counts.
+    const brands = resolvePurchaseFunnelBrands(question, masterBrands, answers, {
+        currentAnswer: answers[question.id],
+        customBrands,
+    });
+    return brands.length === 1 ? brands[0] : null;
+};
+
+/**
+ * Record `brand` on `questionId` unless the stored answer already includes it.
+ * An existing answer that names the brand is kept, so a brand the respondent
+ * added earlier is not wiped when the screen is skipped on a later visit.
+ */
+export const withSoleBrandAnswer = (
+    answers: Record<string, unknown>,
+    questionId: string,
+    questionType: string,
+    brand: string,
+): Record<string, unknown> => {
+    const current = answers[questionId];
+
+    if (questionType === 'mcq') {
+        const list = Array.isArray(current)
+            ? current.filter((item): item is string => typeof item === 'string')
+            : [];
+        if (list.some((item) => brandsFuzzyMatch(item, brand))) return answers;
+        return { ...answers, [questionId]: [brand] };
+    }
+
+    if (typeof current === 'string' && brandsFuzzyMatch(current, brand)) return answers;
+    return { ...answers, [questionId]: brand };
+};
+
+export interface SoleBrandStep {
+    id: string;
+    type: string;
+    /** True for a brand-list MCQ/SCQ, false for open questions and fixed option lists. */
+    brandChoice: boolean;
+    carrier: BrandPipelineCarrier;
+    /**
+     * The only selectable value, when the caller already counted choices
+     * (a fixed option list with one entry). Undefined falls through to the
+     * brand-list count. Null means this step is not a single-choice skip.
+     */
+    soleChoice?: string | null;
+}
+
+/**
+ * Walk off brand questions that list a single choice.
+ *
+ * `action` is `move` when a later question should be shown, `complete` when
+ * the skipped question was the last one going forward, and `boundary` when
+ * backing up would leave the module.
+ */
+export const skipSoleBrandSteps = (
+    steps: SoleBrandStep[],
+    startIndex: number,
+    answers: Record<string, unknown>,
+    masterBrands: string[],
+    direction: 'forward' | 'back',
+    customBrands: string[] = [],
+): {
+    index: number;
+    answers: Record<string, unknown>;
+    action: 'stay' | 'move' | 'complete' | 'boundary';
+} => {
+    let index = startIndex;
+    let nextAnswers = answers;
+    let hops = 0;
+
+    while (hops < steps.length) {
+        const step = steps[index];
+        if (!step) break;
+        const brand = step.soleChoice !== undefined
+            ? step.soleChoice
+            : step.brandChoice
+                ? soleListedBrand(step.carrier, masterBrands, nextAnswers, customBrands)
+                : null;
+        if (!brand) break;
+
+        nextAnswers = withSoleBrandAnswer(nextAnswers, step.id, step.type, brand);
+        hops += 1;
+
+        if (direction === 'back') {
+            if (index === 0) {
+                return { index, answers: nextAnswers, action: 'boundary' };
+            }
+            index -= 1;
+            continue;
+        }
+
+        if (index >= steps.length - 1) {
+            return { index, answers: nextAnswers, action: 'complete' };
+        }
+        index += 1;
+    }
+
+    if (hops === 0 || index === startIndex) {
+        return { index: startIndex, answers, action: 'stay' };
+    }
+    return { index, answers: nextAnswers, action: 'move' };
 };

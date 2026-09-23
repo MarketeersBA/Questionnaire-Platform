@@ -265,11 +265,11 @@ async def get_survey_by_token(token: str):
          "required": False},
         {"id": "family_income", "label": "Family Monthly Income / الدخل الشهري للأسرة", "type": "mcq", 
          "options": [
-             "Below 4,000 EGP / أقل من ٤٠٠٠ جنيه",
-             "4,001 - 6,000 EGP / ٤٠٠١ - ٦٠٠٠ جنيه",
-             "6,001 - 12,000 EGP / ٦٠٠١ - ١٢٠٠٠ جنيه",
+             "Above 40,000 EGP / أكثر من ٤٠٠٠٠ جنيه",
              "12,001 - 40,000 EGP / ١٢٠٠١ - ٤٠٠٠٠ جنيه",
-             "Above 40,000 EGP / أكثر من ٤٠٠٠٠ جنيه"
+             "6,001 - 12,000 EGP / ٦٠٠١ - ١٢٠٠٠ جنيه",
+             "4,001 - 6,000 EGP / ٤٠٠١ - ٦٠٠٠ جنيه",
+             "Below 4,000 EGP / أقل من ٤٠٠٠ جنيه",
          ], "required": False},
         {"id": "occupation", "label": "Occupation / المهنة", "type": "mcq", "options": [
             "CEO / GM / Large company owner / Senior government official / مدير تنفيذي / مدير عام / صاحب شركة كبيرة / مسؤول حكومي رفيع",
@@ -318,6 +318,10 @@ async def get_survey_by_token(token: str):
             existing_q = questions[existing_idx]
             if dq.get("type") == "mcq" and existing_q.get("type") != "mcq":
                 existing_q["type"] = "mcq"
+                existing_q["options"] = dq["options"]
+            elif dq_id == "family_income":
+                # Snapshots store the option list. Reapply the canonical order
+                # so income stays highest-first even on surveys already composed.
                 existing_q["options"] = dq["options"]
         else:
             # Insert if not found anywhere

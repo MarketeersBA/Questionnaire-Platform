@@ -372,11 +372,11 @@ export default function CreateSurvey({ editSurveyId, initialSurveyData }: Create
                 text: 'Family Monthly Income / الدخل الشهري للأسرة',
                 type: 'mcq',
                 options: [
-                    'Below 4,000 EGP / أقل من ٤٠٠٠ جنيه',
-                    '4,001 - 6,000 EGP / ٤٠٠١ - ٦٠٠٠ جنيه',
-                    '6,001 - 12,000 EGP / ٦٠٠١ - ١٢٠٠٠ جنيه',
+                    'Above 40,000 EGP / أكثر من ٤٠٠٠٠ جنيه',
                     '12,001 - 40,000 EGP / ١٢٠٠١ - ٤٠٠٠٠ جنيه',
-                    'Above 40,000 EGP / أكثر من ٤٠٠٠٠ جنيه'
+                    '6,001 - 12,000 EGP / ٦٠٠١ - ١٢٠٠٠ جنيه',
+                    '4,001 - 6,000 EGP / ٤٠٠١ - ٦٠٠٠ جنيه',
+                    'Below 4,000 EGP / أقل من ٤٠٠٠ جنيه',
                 ],
                 required: true,
                 correct_answer: cfg.allowed_income && cfg.allowed_income.length > 0 ? cfg.allowed_income : null,
