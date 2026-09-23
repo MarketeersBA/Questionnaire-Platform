@@ -632,7 +632,15 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                             ? (prev.product_test_config || DEFAULT_PRODUCT_TEST_CONFIG)
                                             : prev.product_test_config,
                                         module_sequence: isTasteTest
-                                            ? ['screening', 'taste_test', 'purchase_funnel', 'brand_usage', 'brand_pricing_behavior', 'brand_analyzer']
+                                            // Brand Analyzer isn't offered as a quick-attach module for
+                                            // Sensory Test below — pre-baking it into the sequence here
+                                            // meant it composed into the respondent flow with zero
+                                            // configured attributes (nothing to render, brand_analyzer.
+                                            // is_enabled never set) whenever nothing else added it back.
+                                            // It's still reachable, deliberately, via the "+ Add Brand
+                                            // Analyzer Module" section on Parameters — that flow manages
+                                            // module_sequence itself when actually toggled on.
+                                            ? ['screening', 'taste_test', 'purchase_funnel', 'brand_usage', 'brand_pricing_behavior']
                                             : isProductTest
                                                 ? ['screening', 'product_test']
                                                 // Usage & Attitude has no evaluation module: it is
@@ -794,38 +802,9 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                     </div>
                                 </div>
 
-                                {/* Brand Analyzer */}
-                                <div
-                                    onClick={() => setFormData(prev => ({
-                                        ...prev,
-                                        brand_analyzer: {
-                                            is_enabled: !prev.brand_analyzer?.is_enabled,
-                                            sync_with_purchase_funnel: prev.brand_analyzer?.sync_with_purchase_funnel ?? true,
-                                            selected_attributes: prev.brand_analyzer?.selected_attributes || [],
-                                            brand_list: prev.brand_analyzer?.brand_list || []
-                                        }
-                                    }))}
-                                    className={`px-3.5 py-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-2.5 group ${formData.brand_analyzer?.is_enabled
-                                        ? 'bg-sky-500/10 border-sky-500 text-sky-900 dark:text-sky-100'
-                                        : 'bg-surface border-line/80 dark:border-line/10 hover:border-sky-500/50'
-                                        }`}
-                                >
-                                    <div className="flex items-center gap-2.5 min-w-0">
-                                        <div className={`p-2 rounded-lg shrink-0 ${formData.brand_analyzer?.is_enabled ? 'bg-sky-500 text-white' : 'bg-surface-sunken text-slate-400 group-hover:text-sky-500'}`}>
-                                            <ShieldCheck className="w-4 h-4" />
-                                        </div>
-                                        <div className="flex flex-col text-left min-w-0">
-                                            <span className="text-xs font-black uppercase tracking-wider leading-tight truncate">Brand Analyzer</span>
-                                            <span className="text-[10px] font-bold text-ink-subtle uppercase tracking-tight mt-0.5 truncate">Perception & Satisfaction</span>
-                                        </div>
-                                    </div>
-                                    <div className={`w-6 h-6 shrink-0 rounded-full border-2 flex items-center justify-center transition-all ${formData.brand_analyzer?.is_enabled
-                                        ? 'bg-sky-500 border-sky-600 text-white'
-                                        : 'border-slate-300 dark:border-slate-600'
-                                        }`}>
-                                        {formData.brand_analyzer?.is_enabled && <Check className="w-3 h-3" />}
-                                    </div>
-                                </div>
+                                {/* Brand Analyzer is deliberately not offered here for Sensory
+                                    Test — it's still reachable via the "+ Add Brand Analyzer
+                                    Module" section on Parameters for anyone who wants it there. */}
                                     </>
                                 )}
 

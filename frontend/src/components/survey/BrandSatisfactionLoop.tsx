@@ -4,6 +4,7 @@ import { ChevronRight, ChevronLeft } from 'lucide-react';
 import type { ModuleQuestionRendererProps } from '../../types/moduleQuestions';
 import { resolvePurchaseFunnelBrands } from '../../utils/purchaseFunnelBrandLogic';
 import { asBrandPipelineCarrier, getQuestionDisplayText } from '../../utils/moduleQuestionUtils';
+import { dedupeBrandNames } from '../../utils/brandNameIdentity';
 
 /**
  * Premium Satisfaction Loop for Brand Analyzer.
@@ -20,11 +21,10 @@ export default function BrandSatisfactionLoop({
 }: ModuleQuestionRendererProps) {
     const isAr = language === 'ar';
 
-    const masterBrands = useMemo(() => {
-        const base = brandContext?.masterBrands || [];
-        const custom = brandContext?.customBrands || [];
-        return Array.from(new Set([...base, ...custom]));
-    }, [brandContext]);
+    const masterBrands = useMemo(
+        () => dedupeBrandNames(brandContext?.masterBrands, brandContext?.customBrands),
+        [brandContext]
+    );
 
     const carrier = asBrandPipelineCarrier(question);
     const applicableBrands = resolvePurchaseFunnelBrands(

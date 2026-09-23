@@ -20,6 +20,33 @@ def test_resolve_brand_display_name_blind():
     ) == "SAMPLE-A"
 
 
+def test_resolve_brand_display_name_blind_finds_code_via_arabic_transliteration():
+    # The code was set against "Squizz" (taste-test architecture); a funnel
+    # entry or re-synced brand list asking about "سكويز" must resolve to the
+    # same code, not leak the real name.
+    assert resolve_brand_display_name(
+        "سكويز",
+        testing_protocol="blind",
+        blind_codes={"Squizz": "دايرة"},
+    ) == "دايرة"
+
+
+def test_resolve_brand_display_name_blind_reverse_direction():
+    assert resolve_brand_display_name(
+        "Squizz",
+        testing_protocol="blind",
+        blind_codes={"سكويز": "مربع"},
+    ) == "مربع"
+
+
+def test_resolve_brand_display_name_blind_tolerates_case_and_whitespace_drift():
+    assert resolve_brand_display_name(
+        "  squizz ",
+        testing_protocol="blind",
+        blind_codes={"Squizz": "دايرة"},
+    ) == "دايرة"
+
+
 def test_build_brand_scoped_question_id():
     assert build_brand_scoped_question_id("Own Brand", "pt_q01") == "Own Brand_pt_q01"
     assert build_brand_scoped_question_id("Own Brand", "Own Brand_pt_q01") == "Own Brand_pt_q01"

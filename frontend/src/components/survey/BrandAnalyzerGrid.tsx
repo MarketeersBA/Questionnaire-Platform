@@ -4,6 +4,7 @@ import { Check, Sparkles } from 'lucide-react';
 import type { ModuleQuestionRendererProps } from '../../types/moduleQuestions';
 import { resolvePurchaseFunnelBrands } from '../../utils/purchaseFunnelBrandLogic';
 import { asBrandPipelineCarrier } from '../../utils/moduleQuestionUtils';
+import { dedupeBrandNames } from '../../utils/brandNameIdentity';
 
 /**
  * Premium Perception Grid for Brand Analyzer.
@@ -20,11 +21,10 @@ export default function BrandAnalyzerGrid({
     const isAr = language === 'ar';
     const rows = question.questionMeta?.rows || [];
 
-    const masterBrands = useMemo(() => {
-        const base = brandContext?.masterBrands || [];
-        const custom = brandContext?.customBrands || [];
-        return Array.from(new Set([...base, ...custom]));
-    }, [brandContext]);
+    const masterBrands = useMemo(
+        () => dedupeBrandNames(brandContext?.masterBrands, brandContext?.customBrands),
+        [brandContext]
+    );
 
     const carrier = asBrandPipelineCarrier(question);
     const applicableBrands = resolvePurchaseFunnelBrands(

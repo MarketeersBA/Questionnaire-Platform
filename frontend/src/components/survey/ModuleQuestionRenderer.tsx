@@ -5,6 +5,7 @@ import type { QuestionOption } from '../../types/questionModules';
 import OpenEndAnswerInput from '../voice-feedback/OpenEndAnswerInput';
 import { normalizeOpenEndAnswer } from '../../utils/voiceQuestions';
 import { moduleOpenAnswerToText } from '../../utils/aiFollowup';
+import { dedupeBrandNames } from '../../utils/brandNameIdentity';
 import {
     asBrandPipelineCarrier,
     getOptionDisplayLabel,
@@ -159,15 +160,10 @@ function BrandChoiceList({
     const [showOtherInput, setShowOtherInput] = useState(false);
     const [otherBrandInput, setOtherBrandInput] = useState('');
 
-    const masterBrands = useMemo(() => {
-        const base = brandContext?.masterBrands || [];
-        const custom = brandContext?.customBrands || [];
-        return Array.from(
-            new Map(
-                [...base, ...custom].map((b) => [b.toLowerCase().trim(), b])
-            ).values()
-        );
-    }, [brandContext?.masterBrands, brandContext?.customBrands]);
+    const masterBrands = useMemo(
+        () => dedupeBrandNames(brandContext?.masterBrands, brandContext?.customBrands),
+        [brandContext?.masterBrands, brandContext?.customBrands]
+    );
 
     const carrier = asBrandPipelineCarrier(question);
     const relevantBrands = resolvePurchaseFunnelBrands(

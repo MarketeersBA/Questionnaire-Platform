@@ -59,6 +59,18 @@ describe('a module switched off does not run', () => {
         // Saved before is_enabled existed: the sequence is the only signal.
         expect(isBrandAnalyzerEnabled({ module_sequence: ['brand_analyzer'] })).toBe(true);
     });
+
+    it('stays off for a freshly created Sensory Test, which no longer offers it', () => {
+        // The exact module_sequence IdentityStep now sets when Sensory Test is
+        // selected — Brand Analyzer's quick-attach card was removed from that
+        // screen, so it must not be pre-baked into the sequence either. Both
+        // have to move together: leaving it in the sequence alone would
+        // recreate the empty-grid bug above through a module the creator
+        // never even saw an option for, let alone attached.
+        expect(isBrandAnalyzerEnabled({
+            module_sequence: ['screening', 'taste_test', 'purchase_funnel', 'brand_usage', 'brand_pricing_behavior'],
+        })).toBe(false);
+    });
 });
 
 describe('a grid with no rows cannot block the respondent', () => {

@@ -271,6 +271,7 @@ class OrchestrationService:
 
     async def compose_survey_schema(self, survey_data: Dict[str, Any]) -> Dict[str, Any]:
         from backend.services.product_test_orchestration import (
+            resolve_brand_display_name,
             resolve_orchestration_category,
             resolve_orchestration_language,
         )
@@ -368,8 +369,22 @@ class OrchestrationService:
                     })
 
 
+                testing_protocol = tt_config.get("testing_protocol", "branded")
+                blind_codes = tt_config.get("blind_codes") or {}
+
                 # 1. Individual Brand Evaluation (L2) Loop
                 for brand in all_brands:
+                    # Respondent-facing name for this brand: the real name under
+                    # 'branded', or its configured blind code under 'blind' —
+                    # mirrors resolve_brand_display_name in product test. Every
+                    # question "id" and "brand" pipeline key stays on the real
+                    # `brand`; only what respondents actually READ switches.
+                    display_brand = resolve_brand_display_name(
+                        brand,
+                        testing_protocol=testing_protocol,
+                        blind_codes=blind_codes,
+                    )
+
                     # Attributes sequence
                     sequence = tt_config.get("attribute_sequence") or []
                     if not sequence:
@@ -412,7 +427,7 @@ class OrchestrationService:
                         attr_questions = []
                         if source == "library":
                             attr_questions = [
-                                self.map_taste_test_question(q, brand, main_attr, language, category, meta, pricing_config=tt_config)
+                                self.map_taste_test_question(q, display_brand, main_attr, language, category, meta, pricing_config=tt_config)
                                 for q in master_data.get(main_attr, [])
                                 if q.get("timing") != "Layer 1"
                             ]
@@ -438,7 +453,7 @@ class OrchestrationService:
                                 attr_questions.insert(0, {
                                     "id": f"{brand}_fallback_{main_attr.replace(' ', '_')}_{''.join(random.choices(string.ascii_lowercase + string.digits, k=4))}",
                                     "type": "scale",
-                                    "text": f"ما رأيك في ({display_attr}) الخاصة بـ {brand}؟" if language == 'ar' else f"What do you think about ({main_attr}) for {brand}?",
+                                    "text": f"ما رأيك في ({display_attr}) الخاصة بـ {display_brand}؟" if language == 'ar' else f"What do you think about ({main_attr}) for {display_brand}?",
                                     "options": [],
                                     "required": True,
                                     "timing": "After Taste",
@@ -450,7 +465,7 @@ class OrchestrationService:
                                         "scaleMax": 10
                                     }
                                 })
-                            
+
                             for label in sub_labels:
                                 sub_obj = next((s for s in matching_custom["sub_attributes"] if s["label"] == label), None) if matching_custom else None
                                 min_l = sub_obj["minLabel"] if sub_obj else ("سيء" if language == 'ar' else "Poor")
@@ -476,7 +491,7 @@ class OrchestrationService:
                              attr_questions.append({
                                 "id": f"{brand}_fallback_{main_attr.replace(' ', '_')}_{''.join(random.choices(string.ascii_lowercase + string.digits, k=4))}",
                                 "type": "scale",
-                                "text": f"ما رأيك في ({display_attr}) الخاصة بـ {brand}؟" if language == 'ar' else f"What do you think about ({main_attr}) for {brand}?",
+                                "text": f"ما رأيك في ({display_attr}) الخاصة بـ {display_brand}؟" if language == 'ar' else f"What do you think about ({main_attr}) for {display_brand}?",
                                 "options": [],
                                 "required": True,
                                 "timing": "After Taste",
@@ -491,7 +506,7 @@ class OrchestrationService:
 
                         if attr_questions:
                             l2_sections.append({
-                                "title": f"{brand}: {display_attr}",
+                                "title": f"{display_brand}: {display_attr}",
                                 "brand": brand,
                                 "module": "taste_test",
                                 "attribute": main_attr,
@@ -500,13 +515,13 @@ class OrchestrationService:
 
                     # Brand fixed after taste
                     brand_fixed = [
-                        self.map_taste_test_question(q, brand, "", language, category, meta, pricing_config=tt_config)
+                        self.map_taste_test_question(q, display_brand, "", language, category, meta, pricing_config=tt_config)
                         for q in master_data.get("fixed", [])
                         if q.get("timing") == "After Taste"
                     ]
                     if brand_fixed:
                         l2_sections.append({
-                            "title": f"{brand}: {'تقييم عام' if language == 'ar' else 'General Evaluation'}",
+                            "title": f"{display_brand}: {'تقييم عام' if language == 'ar' else 'General Evaluation'}",
                             "brand": brand,
                             "module": "taste_test",
                             "questions": brand_fixed
@@ -514,6 +529,13 @@ class OrchestrationService:
 
                 # Overall preference
                 if len(all_brands) > 1:
+                    # Respondent picks from blind-coded labels when the protocol
+                    # calls for it; brandOptions keeps the real names alongside
+                    # for answer mapping.
+                    display_options = [
+                        resolve_brand_display_name(b, testing_protocol=testing_protocol, blind_codes=blind_codes)
+                        for b in all_brands
+                    ]
                     l2_sections.append({
                         "title": "التفضيل" if language == 'ar' else "Preference",
                         "module": "taste_test",
@@ -521,12 +543,13 @@ class OrchestrationService:
                             "id": "overall_preference",
                             "text": "أي منتج تفضله أكثر؟" if language == 'ar' else "Which product did you prefer the most?",
                             "type": "mcq",
-                            "options": all_brands,
+                            "options": display_options,
                             "required": True,
                             "questionMeta": {
                                 "nature": "fixed",
                                 "inputType": "single-choice",
-                                "options": all_brands
+                                "options": display_options,
+                                "brandOptions": all_brands
                             }
                         }]
                     })

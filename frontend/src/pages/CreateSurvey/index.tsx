@@ -50,6 +50,7 @@ import { getSurveyLink } from '../../utils/surveyLinks';
 import { DEFAULT_VOICE_CAPTURE } from './types';
 import { useCreateSurveyPersistence } from '../../hooks/useCreateSurveyPersistence';
 import { flushPendingPackagingHeatmapUploads, type PackagingHeatmapPendingFiles } from '../../utils/packagingHeatmapConfig';
+import { computeGeneratorSignature } from '../../utils/generatorSignature';
 
 const DEFAULT_QUALITY_CONTROL = {
     is_enabled: false,
@@ -218,6 +219,20 @@ export default function CreateSurvey({ editSurveyId, initialSurveyData }: Create
                 competitor_brands_data: normalizeBrands(s.competitor_brands_data || []),
                 voice_capture: s.voice_capture || prev.voice_capture,
                 ai_followup: s.ai_followup || prev.ai_followup,
+                // Best-effort assumption that the snapshot already stored on
+                // the server matches this loaded config — there is no local
+                // record of what it was actually built from. `schema` itself
+                // is left untouched (still empty) here on purpose: editing an
+                // existing survey does not re-run the generator until the
+                // Blueprint step is visited, so this signature exists purely
+                // so a brand/attribute edit made *without* visiting it is
+                // still caught by the submit guard below, rather than saving
+                // silently with the section titles and question text out of
+                // sync with each other.
+                schemaGeneratedSignature: computeGeneratorSignature({
+                    config: clonedConfig,
+                    product_test_config: s.product_test_config || null,
+                }),
             }));
             setHasRestored(true);
         }
@@ -573,7 +588,11 @@ export default function CreateSurvey({ editSurveyId, initialSurveyData }: Create
                         const enrichedConfig = (isTasteTest || hasTasteTestInSequenceInner) && prev.config
                             ? enrichTasteTestConfigWithMetadata(prev.config, masterData)
                             : prev.config;
-                        return { ...prev, schema: merged, config: enrichedConfig };
+                        const next = { ...prev, schema: merged, config: enrichedConfig };
+                        // Recorded against the config actually used, not `prev`,
+                        // so an enrichment step above can't itself register as
+                        // a pending change the next time this is compared.
+                        return { ...next, schemaGeneratedSignature: computeGeneratorSignature(next) };
                     });
 
                     setCurrentStep(3);
@@ -818,11 +837,48 @@ export default function CreateSurvey({ editSurveyId, initialSurveyData }: Create
         }
     };
 
+    // Same condition `nextStep` uses to decide whether Parameters -> Blueprint
+    // must run the generator. Shared so `goToStep`'s staleness check below
+    // agrees with it exactly — a survey type this treats as "no generator"
+    // never needed a fresh schema in the first place, so it must not decide
+    // in `goToStep` that it does.
+    const usesSchemaGenerator = (data: SurveyFormData) => {
+        const isTasteTest = data.survey_type === 'taste_test';
+        const isProductTest = data.survey_type === 'product_test';
+        const seq = data.config?.module_sequence || [];
+        const hasTasteTestInSequence = seq.includes('taste_test');
+        const hasProductTestInSequence = (data.config?.module_sequence || data.module_sequence || []).includes('product_test');
+        const hasPFInSequence = seq.includes('purchase_funnel');
+        const hasUsageInSequence = data.brand_usage?.is_enabled || seq.includes('brand_usage');
+        const hasPricingInSequence = data.brand_pricing_behavior?.is_enabled || seq.includes('brand_pricing_behavior');
+        const hasBAInSequence = data.brand_analyzer?.is_enabled || seq.includes('brand_analyzer');
+        return isTasteTest || isProductTest || hasTasteTestInSequence || hasProductTestInSequence
+            || hasPFInSequence || hasUsageInSequence || hasPricingInSequence || hasBAInSequence;
+    };
+
     const goToStep = (targetId: number) => {
         if (targetId === currentStep) return;
 
         // Allow free navigation to any step already reached
         if (targetId < currentStep || targetId <= maxStepReached) {
+            // Stepping to (or past) the Blueprint step on a survey whose
+            // questions are brand/attribute-driven: if Parameters was edited
+            // since the last generation — most often by renaming or swapping
+            // a brand after stepping back to fix it — the already-generated
+            // questions still carry the old brand name even though every
+            // other surface (section titles included) reads the live config
+            // and already shows the new one. Regenerating here, the same way
+            // the first "Next" from Parameters does, is what keeps the two in
+            // sync instead of shipping a survey with a section titled for one
+            // brand and worded for another.
+            if (targetId >= 3 && usesSchemaGenerator(formData)) {
+                const currentSignature = computeGeneratorSignature(formData);
+                if (formData.schemaGeneratedSignature && formData.schemaGeneratedSignature !== currentSignature) {
+                    toast.info('Brand or attribute settings changed since this was generated — refreshing the blueprint.');
+                    handleGenerateSchema(formData);
+                    return;
+                }
+            }
             setCurrentStep(targetId);
             scrollStepToTop();
             return;
@@ -927,6 +983,31 @@ export default function CreateSurvey({ editSurveyId, initialSurveyData }: Create
         if (!formData.survey_name) {
             toast.error('Survey name missing');
             return;
+        }
+
+        // Hard backstop, independent of how the user navigated here (the
+        // "Next" button, jumping via a step tab, or resuming a draft): a
+        // survey whose questions are generated from brands/attributes must
+        // never save with a snapshot built for a different brand/attribute
+        // config than the one on the Parameters step. `goToStep` already
+        // regenerates automatically for the common path — this catches the
+        // rest, including editing an existing survey's brands/attributes
+        // without ever visiting the Blueprint step this session: `schema`
+        // then stays empty, the submit payload omits the snapshot fields
+        // entirely (see `buildBlueprintSubmitSnapshots`), the backend leaves
+        // the *old* stored snapshot untouched (`exclude_unset`) while still
+        // applying the brand rename to `taste_test_config` — which is the
+        // exact split this whole guard exists to prevent: everywhere that
+        // reads the live config shows the new brand, the stored questions
+        // still read the old one.
+        if (usesSchemaGenerator(formData)) {
+            const currentSignature = computeGeneratorSignature(formData);
+            if (!formData.schemaGeneratedSignature || formData.schemaGeneratedSignature !== currentSignature) {
+                toast.error('Brand or attribute settings changed since the questions were last generated. Revisit the Blueprint step to refresh them before saving.');
+                setCurrentStep(3);
+                scrollStepToTop();
+                return;
+            }
         }
 
         setLoading(true);

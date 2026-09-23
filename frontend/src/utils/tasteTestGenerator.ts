@@ -5,6 +5,7 @@ import {
     type TasteTestModuleMetadata,
 } from './tasteTestModuleUtils';
 import { localizeTasteTestAttribute } from './tasteTestAttributeLabels';
+import { resolveBrandDisplayName } from './productTestPlaceholderEngine';
 
 // Used only when the master-data call returns nothing, so these must track the
 // canonical library (backend/resources/taste_test/attribute_library.json).
@@ -249,14 +250,26 @@ export function generateTasteTestModuleSchema(
 
     // 2. The Brand Loop
     allBrands.forEach((brand) => {
+        // Respondent-facing name for this brand: the real name under a
+        // 'branded' protocol, or its configured/generated blind code under
+        // 'blind' — mirrors resolveBrandDisplayName in product test. Every
+        // question `id:` and `brand:` pipeline key below stays on the real
+        // `brand`, only what respondents actually READ switches to this.
+        const displayBrand = resolveBrandDisplayName(brand, {
+            testing_protocol: config.testing_protocol,
+            blind_codes: config.blind_codes,
+            brands: allBrands,
+            language,
+        });
+
         // Instruction Block per brand
         layer2Sections.push({
-            title: `${brand} - ${language === 'ar' ? "تعليمات" : "Instructions"}`,
+            title: `${displayBrand} - ${language === 'ar' ? "تعليمات" : "Instructions"}`,
             isInstruction: true,
             module: 'taste_test',
             content: language === 'ar'
-                ? `يرجى تذوق ${brand} الآن.`
-                : `Please taste ${brand} now.`
+                ? `يرجى تذوق ${displayBrand} الآن.`
+                : `Please taste ${displayBrand} now.`
         });
 
         // Unify the Sequence Loop
@@ -278,7 +291,7 @@ export function generateTasteTestModuleSchema(
             if (source === 'library') {
                 libraryQuestions = (safeMasterData[mainAttr] || [])
                     .filter(q => q.timing !== 'Layer 1')
-                    .map(q => mapQuestion(q, brand, mainAttr));
+                    .map(q => mapQuestion(q, displayBrand, mainAttr));
             }
 
             // `masterData[attribute]` holds only the *optional* questions for that
@@ -308,8 +321,8 @@ export function generateTasteTestModuleSchema(
                         id: `${brand}_fallback_${mainAttr.replace(/\s+/g, '_')}_${Math.random().toString(36).substr(2, 4)}`,
                         type: 'scale',
                         text: isArabic
-                            ? `ما رأيك في (${displayAttr}) الخاصة بـ ${brand}؟`
-                            : `What do you think about (${mainAttr}) for ${brand}?`,
+                            ? `ما رأيك في (${displayAttr}) الخاصة بـ ${displayBrand}؟`
+                            : `What do you think about (${mainAttr}) for ${displayBrand}?`,
                         options: [],
                         required: true,
                         timing: 'After Taste',
@@ -354,8 +367,8 @@ export function generateTasteTestModuleSchema(
                     id: `${brand}_fallback_${mainAttr.replace(/\s+/g, '_')}_${Math.random().toString(36).substr(2, 4)}`,
                     type: 'scale',
                     text: isArabic
-                        ? `ما رأيك في (${displayAttr}) الخاصة بـ ${brand}؟`
-                        : `What do you think about (${mainAttr}) for ${brand}?`,
+                        ? `ما رأيك في (${displayAttr}) الخاصة بـ ${displayBrand}؟`
+                        : `What do you think about (${mainAttr}) for ${displayBrand}?`,
                     options: [],
                     required: true,
                     timing: 'After Taste',
@@ -371,7 +384,7 @@ export function generateTasteTestModuleSchema(
 
             if (attrQuestions.length > 0) {
                 layer2Sections.push({
-                    title: `${brand}: ${displayAttr}`,
+                    title: `${displayBrand}: ${displayAttr}`,
                     brand: brand,
                     module: 'taste_test',
                     attribute: mainAttr,
@@ -383,11 +396,11 @@ export function generateTasteTestModuleSchema(
         // Brand-specific fixed questions (After Taste)
         const brandFixedAfter = masterFixed
             .filter(q => q.timing === 'After Taste')
-            .map(q => mapQuestion(q, brand));
+            .map(q => mapQuestion(q, displayBrand));
 
         if (brandFixedAfter.length > 0) {
             layer2Sections.push({
-                title: `${brand}: ${language === 'ar' ? "تقييم عام" : "General Evaluation"}`,
+                title: `${displayBrand}: ${language === 'ar' ? "تقييم عام" : "General Evaluation"}`,
                 brand: brand,
                 module: 'taste_test',
                 questions: brandFixedAfter
@@ -397,6 +410,17 @@ export function generateTasteTestModuleSchema(
 
     // 3. Overall Preference (if multiple brands)
     if (allBrands.length > 1) {
+        // Respondent picks from blind-coded labels when the protocol calls for
+        // it; `brandOptions` keeps the real names alongside for answer mapping,
+        // mirroring resolve_brand_display_name's use in product test.
+        const displayOptions = allBrands.map((brand) =>
+            resolveBrandDisplayName(brand, {
+                testing_protocol: config.testing_protocol,
+                blind_codes: config.blind_codes,
+                brands: allBrands,
+                language,
+            })
+        );
         layer2Sections.push({
             title: language === 'ar' ? "التفضيل" : "Preference",
             module: 'taste_test',
@@ -405,12 +429,13 @@ export function generateTasteTestModuleSchema(
                     id: "overall_preference",
                     text: language === 'ar' ? "أي منتج تفضله أكثر؟" : "Which product did you prefer the most?",
                     type: "mcq",
-                    options: allBrands,
+                    options: displayOptions,
                     required: true,
                     questionMeta: {
                         nature: "fixed",
                         inputType: "single-choice",
-                        options: allBrands
+                        options: displayOptions,
+                        brandOptions: allBrands
                     }
                 }
             ]

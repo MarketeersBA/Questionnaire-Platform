@@ -9,6 +9,7 @@ import re
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
+from backend.services.brand_name_identity import is_same_brand
 from backend.services.product_test_visibility_conditions import apply_recommend_visibility_conditions
 
 PRODUCT_TEST_TIMING_PHASES = ("before_use", "during_use", "after_use", "packaging")
@@ -43,6 +44,35 @@ DEFAULT_BRAND_EN = "product"
 DEFAULT_BRAND_AR = "المنتج"
 
 
+def find_configured_blind_code(brand_key: str, blind_codes: Optional[Dict[str, str]]) -> str:
+    """The configured blind code for `brand_key`, if any. Tries an exact
+    (normalized) key match first; falls back to `is_same_brand`'s cross-script
+    comparison so a code set against "Squizz" is still found when this brand
+    shows up elsewhere as "سكويز" (a re-synced funnel entry, a slightly
+    different casing, etc.) — without this, a code silently failed to apply
+    for a brand whose spelling drifted from however it read when the code was
+    typed, leaking the real name in one place while another correctly showed
+    the code."""
+    if not blind_codes:
+        return ""
+    trimmed = (brand_key or "").strip()
+    if not trimmed:
+        return ""
+    trimmed_lower = trimmed.lower()
+
+    for key, code in blind_codes.items():
+        if key.strip().lower() == trimmed_lower:
+            value = (code or "").strip()
+            if value:
+                return value
+    for key, code in blind_codes.items():
+        if is_same_brand(key, trimmed):
+            value = (code or "").strip()
+            if value:
+                return value
+    return ""
+
+
 def resolve_brand_display_name(
     brand_key: str,
     *,
@@ -55,7 +85,7 @@ def resolve_brand_display_name(
         return ""
 
     if testing_protocol == "blind" and blind_codes:
-        code = (blind_codes.get(trimmed) or "").strip()
+        code = find_configured_blind_code(trimmed, blind_codes)
         if code:
             return code
 

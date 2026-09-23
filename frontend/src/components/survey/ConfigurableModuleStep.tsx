@@ -5,6 +5,7 @@ import type { ConfigurableModuleId } from '../../types/surveyFlow';
 import type { ModuleAnswersMap, ModuleBrandContext } from '../../types/moduleQuestions';
 import type { ModuleQuestion, QuestionModule } from '../../types/questionModules';
 import ModuleQuestionRenderer from './ModuleQuestionRenderer';
+import { dedupeBrandNames } from '../../utils/brandNameIdentity';
 import {
     asBrandPipelineCarrier,
     findMissingSpecifyOption,
@@ -102,10 +103,7 @@ export default function ConfigurableModuleStep({
     const brandName = brandContext?.masterBrands[0] || '';
 
     const masterBrands = useMemo(
-        () => [
-            ...(brandContext?.masterBrands || []),
-            ...(brandContext?.customBrands || []),
-        ],
+        () => dedupeBrandNames(brandContext?.masterBrands, brandContext?.customBrands),
         [brandContext?.masterBrands, brandContext?.customBrands]
     );
 

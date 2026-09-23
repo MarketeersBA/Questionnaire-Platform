@@ -23,6 +23,7 @@ import { ProductTestL2PreviewPanel } from '../../../components/ProductTestL2Prev
 import type { PackagingHeatmapPendingFiles } from '../../../utils/packagingHeatmapConfig';
 import type { ProductTestConfig, ProductTestQuestion, PackageTestQuestion } from '../../../types/productTest';
 import { resolveBrandContextFromFormConfig } from '../../../utils/productTestPlaceholderEngine';
+import { addBrandName, mergeBrandName, findMatchingBrand } from '../../../utils/purchaseFunnelBrandIdentity';
 import {
     formatTrialMediaAcceptedLabel,
     formatTrialMediaTimingLabel,
@@ -2095,18 +2096,36 @@ export function ParametersStep({
                                                     ...(formData.config?.internal_brands_data?.map(b => b.name) || []),
                                                     ...(formData.config?.competitor_brands_data?.map(b => b.name) || [])
                                                 ];
-                                                const existing = pfConfig.brand_list || [];
-                                                const newBrands = [...existing];
+                                                // The taste-test brand list has no separate Arabic field, so an
+                                                // architecture brand only ever supplies name_en here — never
+                                                // name_ar copied from the same string. A funnel entry already
+                                                // added by hand in Arabic (or a prior sync) is matched and has
+                                                // its English name filled in, rather than getting a second,
+                                                // parallel chip for the same brand.
+                                                let newBrands = pfConfig.brand_list || [];
                                                 let added = 0;
-                                                archBrands.forEach(name => {
-                                                    if (!newBrands.find((b: any) => b.name_en === name)) {
-                                                        newBrands.push({ name_en: name, name_ar: name });
-                                                        added++;
+                                                let linked = 0;
+                                                archBrands.forEach((name) => {
+                                                    if (!name) return;
+                                                    const existing = findMatchingBrand(newBrands, name);
+                                                    if (existing) {
+                                                        const merged = mergeBrandName(existing, name);
+                                                        if (merged !== existing) {
+                                                            newBrands = newBrands.map((b) => (b === existing ? merged : b));
+                                                            linked++;
+                                                        }
+                                                        return;
                                                     }
+                                                    newBrands = [...newBrands, { name_en: name, name_ar: '' }];
+                                                    added++;
                                                 });
-                                                if (added > 0) {
+                                                if (added > 0 || linked > 0) {
                                                     updatePF({ brand_list: newBrands });
-                                                    toast.success(`Imported ${added} brands from architecture`);
+                                                    const parts = [
+                                                        added > 0 ? `imported ${added}` : null,
+                                                        linked > 0 ? `linked ${linked} to an existing funnel entry` : null,
+                                                    ].filter(Boolean).join(', ');
+                                                    toast.success(`Architecture sync: ${parts}`);
                                                 } else {
                                                     toast.info("All architecture brands already in funnel");
                                                 }
@@ -2126,12 +2145,12 @@ export function ParametersStep({
                                             onKeyPress={e => {
                                                 if (e.key === 'Enter' && pfBrandInput.trim()) {
                                                     const name = pfBrandInput.trim();
-                                                    const existing = pfConfig.brand_list || [];
-                                                    if (!existing.find((b: any) => b.name_en === name)) {
-                                                        updatePF({ brand_list: [...existing, { name_en: name, name_ar: name }] });
-                                                    }
+                                                    const { list, matchedExisting } = addBrandName(pfConfig.brand_list || [], name);
+                                                    updatePF({ brand_list: list });
                                                     setPfBrandInput('');
-                                                    toast.success(`Brand "${name}" added to funnel`);
+                                                    toast.success(matchedExisting
+                                                        ? `"${name}" matches a brand already in the funnel — linked instead of duplicated`
+                                                        : `Brand "${name}" added to funnel`);
                                                 }
                                             }}
                                             placeholder="Type brand name and press Enter..."
@@ -2141,12 +2160,12 @@ export function ParametersStep({
                                             onClick={() => {
                                                 const name = pfBrandInput.trim();
                                                 if (!name) return;
-                                                const existing = pfConfig.brand_list || [];
-                                                if (!existing.find((b: any) => b.name_en === name)) {
-                                                    updatePF({ brand_list: [...existing, { name_en: name, name_ar: name }] });
-                                                }
+                                                const { list, matchedExisting } = addBrandName(pfConfig.brand_list || [], name);
+                                                updatePF({ brand_list: list });
                                                 setPfBrandInput('');
-                                                toast.success(`Brand "${name}" added to funnel`);
+                                                toast.success(matchedExisting
+                                                    ? `"${name}" matches a brand already in the funnel — linked instead of duplicated`
+                                                    : `Brand "${name}" added to funnel`);
                                             }}
                                             className="px-10 py-7 bg-primary text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all"
                                         >
@@ -2154,24 +2173,53 @@ export function ParametersStep({
                                         </button>
                                     </div>
 
-                                    {/* Brand chips */}
+                                    {/* Brand chips — both names shown and editable. Previously only
+                                        name_en was ever displayed, so a wrong or duplicated Arabic name
+                                        (the actual bug being fixed here) was invisible even to a creator
+                                        looking straight at this list; keyed on array index now that
+                                        name_en can legitimately be empty for an Arabic-only entry. */}
                                     {(pfConfig.brand_list || []).length > 0 && (
                                         <div className="flex flex-wrap gap-3 pt-1">
                                             {(pfConfig.brand_list || []).map((brand: any, idx: number) => (
                                                 <motion.div
-                                                    key={brand.name_en}
+                                                    key={idx}
                                                     layout
                                                     initial={{ scale: 0.9, opacity: 0 }}
                                                     animate={{ scale: 1, opacity: 1 }}
-                                                    className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-surface border-2 border-slate-200 dark:border-slate-700 shadow-sm group"
+                                                    className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-surface border-2 border-slate-200 dark:border-slate-700 shadow-sm group"
                                                 >
-                                                    <span className="text-sm font-black text-ink">{brand.name_en}</span>
+                                                    <div className="flex flex-col gap-1">
+                                                        <input
+                                                            type="text"
+                                                            value={brand.name_en}
+                                                            onChange={(e) => {
+                                                                const newList = [...(pfConfig.brand_list || [])];
+                                                                newList[idx] = { ...brand, name_en: e.target.value };
+                                                                updatePF({ brand_list: newList });
+                                                            }}
+                                                            placeholder="English name"
+                                                            dir="ltr"
+                                                            className="w-32 bg-transparent text-sm font-black text-ink outline-none border-b border-transparent focus:border-primary placeholder:font-medium placeholder:text-slate-400"
+                                                        />
+                                                        <input
+                                                            type="text"
+                                                            value={brand.name_ar}
+                                                            onChange={(e) => {
+                                                                const newList = [...(pfConfig.brand_list || [])];
+                                                                newList[idx] = { ...brand, name_ar: e.target.value };
+                                                                updatePF({ brand_list: newList });
+                                                            }}
+                                                            placeholder="الاسم بالعربي"
+                                                            dir="rtl"
+                                                            className="w-32 bg-transparent text-sm font-black text-ink outline-none border-b border-transparent focus:border-primary placeholder:font-medium placeholder:text-slate-400"
+                                                        />
+                                                    </div>
                                                     <button
                                                         onClick={() => {
                                                             const newList = (pfConfig.brand_list || []).filter((_: any, i: number) => i !== idx);
                                                             updatePF({ brand_list: newList });
                                                         }}
-                                                        className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-500 transition-all"
+                                                        className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-500 transition-all self-start mt-1"
                                                     >
                                                         <X className="w-3.5 h-3.5" />
                                                     </button>
