@@ -668,9 +668,8 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                 <h4 className="text-sm font-black uppercase tracking-widest text-ink mb-2 pr-6">{type.name}</h4>
                                 <ul className="space-y-1">
                                     {type.points.map((point) => (
-                                        <li key={point} className="flex items-start gap-1.5 text-xs font-medium leading-snug text-ink-muted">
-                                            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-current" aria-hidden />
-                                            <span>{point}</span>
+                                        <li key={point} className="text-xs font-medium leading-snug text-ink-muted">
+                                            {point}
                                         </li>
                                     ))}
                                 </ul>
