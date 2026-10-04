@@ -963,23 +963,6 @@ export const packagingHeatmap = {
       })
     ).data;
   },
-  uploadVoiceNote: async (
-    surveyId: string,
-    file: Blob,
-    options?: RequestOptions,
-  ) => {
-    const formData = new FormData();
-    formData.append('file', file, 'voice_note.webm');
-    return (
-      await api.post(`/surveys/${surveyId}/packaging-heatmap/voice-notes`, formData, {
-        ...options,
-        headers: {
-          ...(options?.headers || {}),
-          'Content-Type': 'multipart/form-data',
-        },
-      })
-    ).data;
-  },
   deleteImage: async (
     surveyId: string,
     side: 'front' | 'back',

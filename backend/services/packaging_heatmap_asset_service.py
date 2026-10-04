@@ -327,6 +327,41 @@ async def stream_packaging_image(asset_id: str) -> Tuple[Any, str, Dict[str, str
     return grid_out, mime, headers
 
 
+async def stream_voice_note(survey_id: str, asset_id: str) -> Tuple[Any, str, Dict[str, str]]:
+    """
+    Open a GridFS download stream for one survey's voice note.
+
+    Scoped to `survey_id` on purpose. Voice notes share the packaging-image
+    bucket, so looking an asset up by id alone would hand back any asset in
+    that bucket — including another survey's pack shots — to anyone who could
+    guess or obtain an id.
+    """
+    if not asset_id or not ObjectId.is_valid(asset_id):
+        raise PackagingHeatmapAssetError("Invalid asset ID.", status_code=400)
+
+    bucket = db.get_packaging_images_bucket()
+    try:
+        grid_out = await bucket.open_download_stream(ObjectId(asset_id))
+    except Exception as exc:
+        raise PackagingHeatmapAssetError("Voice note not found.", status_code=404) from exc
+
+    metadata = grid_out.metadata or {}
+    # Same 404 for "wrong survey" and "no such asset": a distinguishable
+    # response would confirm an id exists under some other survey.
+    if metadata.get("type") != "voice_note" or str(metadata.get("survey_id") or "") != str(survey_id):
+        raise PackagingHeatmapAssetError("Voice note not found.", status_code=404)
+
+    mime = metadata.get("mime") or "audio/webm"
+    filename = metadata.get("filename") or f"voice_note_{asset_id}.webm"
+
+    headers = {
+        "Content-Disposition": f'inline; filename="{filename}"',
+        "Cache-Control": "private, max-age=86400, immutable",
+        "ETag": f'"{asset_id}"',
+    }
+    return grid_out, mime, headers
+
+
 def packaging_error_to_http(exc: PackagingHeatmapAssetError) -> HTTPException:
     return HTTPException(status_code=exc.status_code, detail=exc.message)
 

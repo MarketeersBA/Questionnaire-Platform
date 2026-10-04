@@ -75,6 +75,39 @@ export default function PackagingHeatmapConfigPanel({
     const enabled = Boolean(ptConfig.packaging_heatmap_enabled);
     const canConfigure = Boolean(ownBrand);
 
+    /** Brands the creator has declared, in the order Brand Architecture shows them. */
+    const availableBrands = useMemo(() => {
+        const names = [
+            ...(formData.config?.internal_brands_data || []),
+            ...(formData.config?.competitor_brands_data || []),
+        ].map((b) => (b?.name || '').trim()).filter(Boolean);
+        return Array.from(new Set(names));
+    }, [formData.config?.internal_brands_data, formData.config?.competitor_brands_data]);
+
+    const scrollToBrandArchitecture = useCallback(() => {
+        document.getElementById('brand-architecture-section')
+            ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, []);
+
+    /**
+     * Set the target brand and switch the heatmap on in one go.
+     *
+     * Picking a brand from inside this panel is only ever done in order to use
+     * the heatmap, so making it a second, separate step would just be the
+     * blocked toggle again one click later.
+     */
+    const selectTargetBrand = useCallback((brand: string) => {
+        setFormData((prev: SurveyFormData) => ({
+            ...prev,
+            config: { ...(prev.config || {}), own_brand: brand },
+            product_test_config: {
+                ...(prev.product_test_config || {}),
+                packaging_heatmap_enabled: true,
+            },
+        } as SurveyFormData));
+        toast.success(`Target brand set to "${brand}" — packaging heatmap on.`);
+    }, [setFormData]);
+
     const [slotState, setSlotState] = useState<Record<PackagingImageSide, SideSlotState>>({
         front: { ...EMPTY_SLOT },
         back: { ...EMPTY_SLOT },
@@ -127,8 +160,9 @@ export default function PackagingHeatmapConfigPanel({
 
     const handleToggle = (next: boolean) => {
         if (next && !canConfigure) {
-            toast.error('Select a target brand first (sparkle icon on a brand chip).');
-            document.getElementById('brand-architecture-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // The brand picker below says what to do and does it in one click,
+            // so there is nothing useful to say here beyond pointing at it.
+            if (availableBrands.length === 0) scrollToBrandArchitecture();
             return;
         }
         mergePtConfig(setFormData, { packaging_heatmap_enabled: next });
@@ -360,12 +394,46 @@ export default function PackagingHeatmapConfigPanel({
                         initial={{ opacity: 0, y: -4 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0 }}
-                        className="flex items-start gap-3 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20"
+                        className="space-y-3 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20"
                     >
-                        <Sparkles className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                        <p className="text-xs font-medium text-amber-800 dark:text-amber-300">
-                            Select a <strong>target brand</strong> first — click the sparkle icon on a brand chip in Brand Architecture above.
-                        </p>
+                        <div className="flex items-start gap-3">
+                            <Sparkles className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                            <p className="text-xs font-medium text-amber-800 dark:text-amber-300">
+                                The heatmap tests <strong>one</strong> brand&apos;s pack — the target brand.
+                                {availableBrands.length > 0
+                                    ? ' Pick it here, or with the sparkle icon on a brand chip in Brand Architecture.'
+                                    : ' Add your brands in Brand Architecture above, then pick one here.'}
+                            </p>
+                        </div>
+
+                        {/* Chosen here rather than only in Brand Architecture: the toggle
+                            used to just refuse, pointing at a sparkle icon on another
+                            card, which left the creator hunting for a control whose
+                            connection to this panel was not stated anywhere. */}
+                        {availableBrands.length > 0 ? (
+                            <div className="flex flex-wrap gap-2 pl-7">
+                                {availableBrands.map((brand) => (
+                                    <button
+                                        key={brand}
+                                        type="button"
+                                        onClick={() => selectTargetBrand(brand)}
+                                        className="px-3 py-2 rounded-xl text-xs font-black bg-surface border border-amber-500/30 text-amber-900 dark:text-amber-200 hover:border-amber-500 hover:bg-amber-500/10 transition-all"
+                                    >
+                                        {brand}
+                                    </button>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="pl-7">
+                                <button
+                                    type="button"
+                                    onClick={scrollToBrandArchitecture}
+                                    className="px-3 py-2 rounded-xl text-xs font-black bg-surface border border-amber-500/30 text-amber-900 dark:text-amber-200 hover:border-amber-500 transition-all"
+                                >
+                                    Go to Brand Architecture
+                                </button>
+                            </div>
+                        )}
                     </motion.div>
                 )}
             </AnimatePresence>

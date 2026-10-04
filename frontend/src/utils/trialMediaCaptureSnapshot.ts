@@ -3,6 +3,7 @@ import type {
     ProductTestRespondentPhase,
     ProductTestRespondentQuestion,
     ProductTestRespondentSection,
+    ProductTestSnapshotMeta,
     ProductTestTimingPhase,
 } from '../types/productTestRespondent';
 import { PRODUCT_TEST_TIMING_PHASES } from '../types/productTestRespondent';
@@ -144,7 +145,9 @@ export function appendTrialMediaCaptureToPhases(
     return sortPhases(next);
 }
 
-export function enrichSnapshotWithTrialMediaCaptureMeta<T extends { meta?: Record<string, unknown> }>(
+// See the matching note on enrichSnapshotWithPackagingHeatmapMeta: the looser
+// `Record<string, unknown>` constraint no real snapshot could satisfy.
+export function enrichSnapshotWithTrialMediaCaptureMeta<T extends { meta?: ProductTestSnapshotMeta }>(
     snapshot: T,
     config: ProductTestConfig,
 ): T {

@@ -1283,6 +1283,7 @@ async def submit_layer1(token: str, response: Layer1Response):
 
     # ── Quota Enforcement (atomic reservation at screening pass) ────────────────
     from backend.services.quota_enforcement import (
+        close_survey_if_target_reached,
         resolve_quota_buckets,
         resolve_respondent_target,
         try_reserve_quota_slots,
@@ -1309,7 +1310,33 @@ async def submit_layer1(token: str, response: Layer1Response):
             {"_id": token_doc["_id"]},
             {"$set": {"status": "failed", "layer1_passed": False, "phone": phone}},
         )
+        # The quota was already full before this respondent arrived — a survey
+        # that filled up before auto-closing existed, or one whose last slot
+        # went to a path that did not close it. Close it now, so this is the
+        # last person who has to fill in a screener to be told the study is
+        # over. Harmless when the refusal was a per-cell quota instead: the
+        # close is conditional on the global count having actually been met.
+        if await close_survey_if_target_reached(
+            surveys_col, survey_id, global_target=respondent_target
+        ):
+            logger.info(
+                "Survey %s closed automatically: respondent quota of %s already full.",
+                survey_id,
+                respondent_target,
+            )
         return {"passed": False, "message": reservation.message}
+
+    # This respondent took the last slot, so stop the master link handing out
+    # any more: left active it would keep admitting people only to screen them
+    # out one at a time once the quota was already full.
+    if reservation.reserved_global and await close_survey_if_target_reached(
+        surveys_col, survey_id, global_target=respondent_target
+    ):
+        logger.info(
+            "Survey %s closed automatically: respondent quota of %s reached.",
+            survey_id,
+            respondent_target,
+        )
 
     logger.info(f"Validation PASSED for token {token}")
     

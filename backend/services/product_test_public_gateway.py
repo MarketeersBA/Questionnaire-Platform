@@ -22,9 +22,19 @@ from backend.services.product_test_snapshot_migration import (
 PRODUCT_TEST_BANK_DOCS = "docs/data/product-test-data-layer.md"
 
 
+# A pack test is a product test centred on packaging — same composer branch and
+# same question bank, plus the packaging questions and the heatmap. The frontend
+# maps it onto the `product_test` module (see frontend/src/constants/surveyModules.ts),
+# which is the only reason these surveys worked here at all: by type alone the
+# backend did not recognise one, so anything reaching it without that module
+# already injected — a survey created through the API, or a seeded fixture —
+# silently failed to be treated as a product test.
+PRODUCT_TEST_SURVEY_TYPES = ("product_test", "pack_test")
+
+
 def is_product_test_survey(survey: Dict[str, Any]) -> bool:
     """True when survey is configured to run the product test module."""
-    if survey.get("type") == "product_test":
+    if survey.get("type") in PRODUCT_TEST_SURVEY_TYPES:
         return True
     modules = set(survey.get("selected_modules") or [])
     modules.update(survey.get("module_sequence") or [])
@@ -40,7 +50,7 @@ def resolve_default_selected_modules(survey: Dict[str, Any]) -> List[str]:
     survey_type = survey.get("type")
     if survey_type == "taste_test":
         return ["screening", "taste_test"]
-    if survey_type == "product_test":
+    if survey_type in PRODUCT_TEST_SURVEY_TYPES:
         return ["screening", "product_test"]
     return ["screening"]
 

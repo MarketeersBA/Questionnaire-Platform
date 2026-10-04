@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from bson import ObjectId
@@ -200,6 +201,48 @@ async def try_reserve_quota_slots(
             reserved_buckets=reserved_buckets,
         )
         raise
+
+
+async def close_survey_if_target_reached(
+    surveys_col,
+    survey_id: str,
+    *,
+    global_target: int,
+) -> bool:
+    """
+    Close an active survey whose respondent quota has just been filled.
+
+    The master link mints a token for anyone who opens it as long as the
+    survey is `active`, and nothing else ever flips that status. So once the
+    last qualifying respondent was taken, every later visitor was still let
+    in, made to answer the whole screener, and only then told the study was
+    full — and the creator had to remember to close it by hand. Closing it
+    the moment the quota is met makes the link itself report that, through
+    the status check the master-link endpoint already performs.
+
+    Reports whether this call was the one that closed it. Conditioning the
+    update on `status: "active"` makes it idempotent under concurrent
+    submissions and leaves a `draft` (that is, a survey still being tested)
+    alone.
+    """
+    if global_target <= 0:
+        return False
+
+    result = await surveys_col.update_one(
+        {
+            "_id": ObjectId(survey_id),
+            "status": "active",
+            "respondent_count": {"$gte": global_target},
+        },
+        {
+            "$set": {
+                "status": "closed",
+                "closed_at": datetime.utcnow(),
+                "closed_reason": "quota_reached",
+            }
+        },
+    )
+    return result.modified_count == 1
 
 
 async def apply_legacy_submit_increments(

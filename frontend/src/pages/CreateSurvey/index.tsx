@@ -50,6 +50,7 @@ import { getSurveyLink } from '../../utils/surveyLinks';
 import { DEFAULT_VOICE_CAPTURE } from './types';
 import { useCreateSurveyPersistence } from '../../hooks/useCreateSurveyPersistence';
 import { flushPendingPackagingHeatmapUploads, type PackagingHeatmapPendingFiles } from '../../utils/packagingHeatmapConfig';
+import { refreshPackagingHeatmapInSnapshot } from '../../utils/packagingHeatmapSnapshot';
 import { computeGeneratorSignature } from '../../utils/generatorSignature';
 
 const DEFAULT_QUALITY_CONTROL = {
@@ -1131,7 +1132,21 @@ export default function CreateSurvey({ editSurveyId, initialSurveyData }: Create
                         packagingHeatmapPending,
                     );
                     if (updatedConfig && uploadedSides.length > 0) {
-                        await surveys.update(res._id, { product_test_config: updatedConfig });
+                        // A packaging image can only be uploaded against an
+                        // existing survey id, so the blueprint above was
+                        // necessarily composed while the image set was still
+                        // empty — and a heatmap section with no image is
+                        // dropped. Re-attach it now that the asset ids exist,
+                        // in the same write, so the creator does not have to
+                        // save a draft, re-open it and regenerate by hand.
+                        const priorSnapshot = blueprintSnapshots?.product_test_snapshot;
+                        const repaired = priorSnapshot
+                            ? refreshPackagingHeatmapInSnapshot(priorSnapshot, updatedConfig)
+                            : null;
+                        await surveys.update(res._id, {
+                            product_test_config: updatedConfig,
+                            ...(repaired ? { product_test_snapshot: repaired } : {}),
+                        });
                     }
                     setPackagingHeatmapPending({});
                 } catch (uploadErr) {

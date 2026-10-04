@@ -10,6 +10,7 @@ import type {
     ProductTestRespondentQuestion,
     ProductTestRespondentSection,
     ProductTestSnapshot,
+    ProductTestSnapshotMeta,
     ProductTestTimingPhase,
 } from '../types/productTestRespondent';
 import { PRODUCT_TEST_TIMING_PHASES } from '../types/productTestRespondent';
@@ -411,7 +412,7 @@ function computeSnapshotMeta(
     phases: ProductTestRespondentPhase[],
     brandCount: number,
     generatedAt: string,
-) {
+): ProductTestSnapshotMeta {
     const sectionCount = phases.reduce((sum, p) => sum + p.sections.length, 0);
     const totalQuestions = phases.reduce(
         (sum, p) => sum + p.sections.reduce((s, sec) => s + sec.questions.length, 0),

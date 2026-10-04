@@ -6,7 +6,6 @@ from typing import Any, Dict, List, Optional
 
 from backend.packaging_heatmap.constants import (
     PACKAGING_HEATMAP_INTENTS,
-    PACKAGING_HEATMAP_MAX_CLICKS,
     PACKAGING_HEATMAP_MAX_PINS,
     PACKAGING_IMAGE_SIDES,
 )

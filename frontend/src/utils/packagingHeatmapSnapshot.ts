@@ -1,8 +1,11 @@
 import type { ProductTestConfig, PackagingImageAsset } from '../types/productTest';
 import type {
     ProductTestBrandContext,
+    ProductTestRespondentPhase,
     ProductTestRespondentQuestion,
     ProductTestRespondentSection,
+    ProductTestSnapshot,
+    ProductTestSnapshotMeta,
     ProductTestTimingPhase,
 } from '../types/productTestRespondent';
 import type { QuestionMeta } from '../types/tasteTest';
@@ -193,7 +196,11 @@ export function buildPackagingHeatmapSection(
     };
 }
 
-export function enrichSnapshotWithPackagingHeatmapMeta<T extends { meta?: Record<string, unknown> }>(
+// Constrained to the real meta type rather than `Record<string, unknown>`:
+// `ProductTestSnapshotMeta` has declared fields and no index signature, so a
+// real snapshot never satisfied the looser constraint and every call site
+// using one failed to type-check.
+export function enrichSnapshotWithPackagingHeatmapMeta<T extends { meta?: ProductTestSnapshotMeta }>(
     snapshot: T,
     config: ProductTestConfig,
 ): T {
@@ -206,6 +213,61 @@ export function enrichSnapshotWithPackagingHeatmapMeta<T extends { meta?: Record
             packaging_heatmap: hmMeta,
         },
     };
+}
+
+/**
+ * Re-attach the heatmap section to a snapshot that was composed before its
+ * images existed.
+ *
+ * A packaging image cannot be uploaded until the survey has an id, so on a
+ * newly created survey the blueprint is necessarily composed while
+ * `packaging_heatmap_images` is still empty — and a section with no image is
+ * dropped entirely by `buildPackagingHeatmapSection`. The creator uploaded a
+ * pack shot, deployed, and the heatmap questions were simply absent from the
+ * survey, with nothing on screen to say why. Calling this once the upload has
+ * returned its `asset_id` repairs the snapshot in place.
+ *
+ * Only the heatmap section is touched: every other phase, section and question
+ * (and therefore every question id answers are keyed by) is left exactly as
+ * composed. Re-running it is safe — the existing heatmap section is replaced,
+ * not appended to — so it can also be used to pick up a swapped image.
+ */
+export function refreshPackagingHeatmapInSnapshot(
+    snapshot: ProductTestSnapshot,
+    config: ProductTestConfig,
+): ProductTestSnapshot {
+    const language = snapshot.language === 'ar' ? 'ar' : 'en';
+    const section = buildPackagingHeatmapSection(config, snapshot.brand_context || null, language);
+
+    const withoutHeatmap: ProductTestRespondentPhase[] = snapshot.phases
+        .map((phase) => (
+            phase.timing === 'packaging'
+                ? { ...phase, sections: phase.sections.filter((s) => s.module !== 'packaging_heatmap') }
+                : phase
+        ))
+        // A packaging phase that held nothing but the heatmap section would
+        // otherwise survive as an empty, unskippable screen.
+        .filter((phase) => phase.timing !== 'packaging' || phase.sections.length > 0);
+
+    let phases = withoutHeatmap;
+    if (section) {
+        const existing = withoutHeatmap.find((phase) => phase.timing === 'packaging');
+        if (existing) {
+            phases = withoutHeatmap.map((phase) => (
+                phase === existing
+                    ? { ...phase, sections: [...phase.sections, section] }
+                    : phase
+            ));
+        } else {
+            phases = [...withoutHeatmap, {
+                timing: 'packaging' as ProductTestTimingPhase,
+                label: language === 'ar' ? 'التعبئة والتغليف' : 'Packaging & Presentation',
+                sections: [section],
+            }];
+        }
+    }
+
+    return enrichSnapshotWithPackagingHeatmapMeta({ ...snapshot, phases }, config);
 }
 
 export function composePackagingPhase(

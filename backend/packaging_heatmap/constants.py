@@ -28,8 +28,16 @@ ALLOWED_PACKAGING_IMAGE_EXTENSIONS: frozenset[str] = frozenset({
 })
 
 PACKAGING_HEATMAP_GRID_SIZE: Final[int] = 32
-PACKAGING_HEATMAP_MAX_CLICKS: Final[int] = 30
-PACKAGING_HEATMAP_MAX_PINS: Final[int] = 10
+
+# Must equal PACKAGING_HEATMAP_MAX_REGIONS in
+# frontend/src/utils/packagingHeatmapSnapshot.ts — both composers write this
+# into the same `max_clicks`/`maxClicks` snapshot field, so the cap a
+# respondent actually gets is decided by whichever one composed their survey.
+# This used to sit alongside a second constant, PACKAGING_HEATMAP_MAX_CLICKS
+# = 30, that was imported but never read: the rename to _MAX_PINS was applied
+# here and not on the frontend, which is how the two sides came to disagree
+# (30 vs 10) without anything failing.
+PACKAGING_HEATMAP_MAX_PINS: Final[int] = 30
 
 MIME_TO_EXTENSION: dict[str, str] = {
     "image/jpeg": ".jpg",

@@ -20,8 +20,8 @@ from backend.services.packaging_heatmap_asset_service import (
     remove_packaging_image_for_survey,
     save_packaging_image,
     stream_packaging_image,
+    stream_voice_note,
     validate_packaging_image_side,
-    save_voice_note,
 )
 
 router = APIRouter(prefix="/surveys", tags=["packaging-heatmap"])
@@ -138,26 +138,23 @@ async def rebuild_packaging_heatmap_aggregates(
     del survey
     return await rebuild_aggregates(survey_id)
 
-@router.post("/{survey_id}/packaging-heatmap/voice-notes")
-async def upload_heatmap_voice_note(
-    survey_id: str,
-    file: UploadFile = File(...),
-):
-    """Upload a voice note for a packaging heatmap region. Accessible by respondents."""
-    try:
-        return await save_voice_note(survey_id, file)
-    except PackagingHeatmapAssetError as exc:
-        raise packaging_error_to_http(exc) from exc
+# Respondents upload their voice notes through POST /s/{token}/packaging-heatmap/voice-notes,
+# which validates the token. An unauthenticated twin of that route used to live
+# here as well, taking a bare survey_id; it had no callers, and it let anyone
+# write into any survey's GridFS bucket.
+
 
 @router.get("/{survey_id}/packaging-heatmap/voice-notes/{asset_id}")
 async def stream_heatmap_voice_note(
     survey_id: str,
     asset_id: str,
+    current_user: Annotated[User, Depends(get_current_active_analyst)],
 ):
-    """Stream a voice note audio file."""
+    """Stream one of this survey's voice notes, for analyst playback."""
+    del current_user
+    await _get_survey_or_404(survey_id)
     try:
-        # Re-use stream logic since it just fetches from GridFS by asset_id
-        grid_out, mime, headers = await stream_packaging_image(asset_id)
+        grid_out, mime, headers = await stream_voice_note(survey_id, asset_id)
         return StreamingResponse(grid_out, media_type=mime, headers=headers)
     except PackagingHeatmapAssetError as exc:
         raise packaging_error_to_http(exc) from exc

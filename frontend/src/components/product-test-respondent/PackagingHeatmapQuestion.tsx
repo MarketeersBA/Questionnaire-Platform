@@ -3,6 +3,7 @@ import { Loader2, RotateCcw, Crosshair, Heart, X, Wrench, MessageSquare } from '
 import { toast } from 'sonner';
 import type { ProductTestRespondentQuestion } from '../../types/productTestRespondent';
 import type { PackagingHeatmapAnswer, PackagingHeatmapClick } from '../../types/productTest';
+import { PACKAGING_HEATMAP_MAX_REGIONS } from '../../utils/packagingHeatmapSnapshot';
 import { packagingHeatmap, publicApi } from '../../services/api';
 import VoiceNoteRecorder from './VoiceNoteRecorder';
 import React from 'react';
@@ -165,7 +166,10 @@ export default function PackagingHeatmapQuestion({
     const meta = question.questionMeta;
     const side = meta?.imageSide || 'front';
     const intent = meta?.heatmapIntent || 'attraction';
-    const maxPins = meta?.maxClicks || 10;
+    // Falls back to the composer's own cap rather than a second literal: this
+    // read 10 while both composers wrote 30, so a snapshot missing the field
+    // silently cut the respondent off two thirds early.
+    const maxPins = meta?.maxClicks || PACKAGING_HEATMAP_MAX_REGIONS;
     const refWidth = meta?.imageWidth || 1;
     const refHeight = meta?.imageHeight || 1;
 
