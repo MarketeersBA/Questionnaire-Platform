@@ -66,8 +66,8 @@ function SurveyLanguageMenu({
     }, [open]);
 
     return (
-        <div className="space-y-3" ref={rootRef}>
-            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-ink-muted ml-1 flex items-center gap-2">
+        <div className="p-3 bg-primary/5 dark:bg-primary/10 rounded-2xl border border-primary/20 dark:border-primary/30 space-y-2 h-full" ref={rootRef}>
+            <label className="text-[10px] font-black uppercase tracking-[0.16em] text-ink-muted flex items-center gap-2">
                 <Globe className="w-3.5 h-3.5 text-primary-soft" />
                 Survey Language
             </label>
@@ -78,21 +78,21 @@ function SurveyLanguageMenu({
                     aria-haspopup="listbox"
                     aria-expanded={open}
                     onClick={() => setOpen(o => !o)}
-                    className={`w-full flex items-center gap-3 bg-surface border-2 rounded-[1.5rem] pl-5 pr-4 py-3.5 text-left shadow-sm transition-all ${
+                    className={`w-full flex items-center gap-2.5 bg-surface border-2 rounded-xl pl-3 pr-2.5 py-2 text-left shadow-sm transition-all ${
                         open
                             ? 'border-primary ring-4 ring-primary/10'
                             : 'border-slate-300 dark:border-slate-600 hover:border-primary/50'
                     }`}
                 >
-                    <span className="w-9 h-9 rounded-xl bg-primary/10 text-primary-soft grid place-items-center text-[11px] font-black tracking-widest shrink-0">
+                    <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary-soft grid place-items-center text-[11px] font-black tracking-widest shrink-0">
                         {selected.hint.slice(0, 2).toUpperCase() === 'EN' ? 'EN' : 'ع'}
                     </span>
                     <span className="flex-1 min-w-0">
-                        <span className="block text-base font-black text-ink leading-tight">{selected.label}</span>
-                        <span className="block text-[11px] font-bold text-ink-muted mt-0.5">{selected.hint}</span>
+                        <span className="block text-sm font-black text-ink leading-tight">{selected.label}</span>
+                        <span className="block text-[10px] font-bold text-ink-muted leading-tight">{selected.hint}</span>
                     </span>
-                    <span className={`w-8 h-8 rounded-xl grid place-items-center transition-all ${open ? 'bg-primary text-white rotate-180' : 'bg-primary/10 text-primary-soft'}`}>
-                        <ChevronDown className="w-4 h-4" />
+                    <span className={`w-7 h-7 rounded-lg grid place-items-center transition-all ${open ? 'bg-primary text-white rotate-180' : 'bg-primary/10 text-primary-soft'}`}>
+                        <ChevronDown className="w-3.5 h-3.5" />
                     </span>
                 </button>
 
@@ -155,25 +155,12 @@ function SampleSizeField({
     formData: StepProps['formData'];
     setFormData: StepProps['setFormData'];
 }) {
-    const target = formData.sample_capacity || 0;
-    const linkCount = formData.links_count || 0;
-
     return (
         <div className="p-3 bg-primary/5 dark:bg-primary/10 rounded-2xl border border-primary/20 dark:border-primary/30 space-y-2 relative overflow-hidden h-full">
-            <div className="flex items-center justify-between gap-3">
-                <label className="text-[10px] font-black uppercase tracking-[0.16em] text-ink-muted flex items-center gap-2">
-                    <Target className="w-3.5 h-3.5 text-primary-soft" />
-                    Sample Size
-                </label>
-                <button
-                    type="button"
-                    onClick={() => setFormData(prev => ({ ...prev, sample_intelligence: !prev.sample_intelligence }))}
-                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${formData.sample_intelligence ? 'bg-primary text-white shadow-sm shadow-primary/30' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'}`}
-                >
-                    <Sparkles className={`w-3 h-3 ${formData.sample_intelligence ? 'animate-pulse' : ''}`} />
-                    {formData.sample_intelligence ? 'Intelligence: Active' : 'Manual Mode'}
-                </button>
-            </div>
+            <label className="text-[10px] font-black uppercase tracking-[0.16em] text-ink-muted flex items-center gap-2">
+                <Target className="w-3.5 h-3.5 text-primary-soft" />
+                Sample Size
+            </label>
 
             <div className="relative group">
                 <Target className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-soft/60 group-focus-within:text-primary-soft transition-colors pointer-events-none" />
@@ -208,23 +195,6 @@ function SampleSizeField({
                     }}
                 />
             </div>
-            {linkCount > 0 && target > 0 && (
-                <div className="space-y-1">
-                    <div className="flex justify-between text-[10px] font-bold text-slate-400">
-                        <span>{target} Target</span>
-                        <span className={target > linkCount ? 'text-amber-500' : 'text-primary-soft'}>
-                            {((target / linkCount) * 100).toFixed(0)}% Fill
-                        </span>
-                    </div>
-                    <div className="h-1 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                        <div
-                            className={`h-full rounded-full transition-all duration-500 ${target > linkCount ? 'bg-amber-500' : 'bg-primary'}`}
-                            style={{ width: `${Math.min(100, (target / linkCount) * 100)}%` }}
-                        />
-                    </div>
-                </div>
-            )}
-            <p className="text-[11px] text-slate-500">Survey closes when this many qualify. 0 = no cap.</p>
         </div>
     );
 }
@@ -1194,7 +1164,7 @@ export function ParametersStep({
                                 <motion.div
                                     key={brand.name}
                                     layout
-                                    className={`flex items-center gap-3 px-10 py-7 rounded-[1.5rem] border-2 shadow-sm group transition-all relative ${isTarget
+                                    className={`flex items-center gap-2 px-3 py-2 rounded-xl border-2 shadow-sm group transition-all relative ${isTarget
                                         ? 'bg-amber-50 dark:bg-amber-950/20 border-amber-400 dark:border-amber-500 shadow-amber-200/50'
                                         : brand.role === 'internal'
                                             ? 'bg-primary/10 border-primary/20 text-primary-soft'
@@ -1220,39 +1190,9 @@ export function ParametersStep({
                                         <Sparkles className={`w-3.5 h-3.5 ${isTarget ? 'fill-current' : 'opacity-60'}`} />
                                     </button>
 
-                                    <div className="flex flex-col">
-                                        <span className="text-[7px] font-black uppercase tracking-tighter opacity-60">
-                                            {brand.role === 'internal' ? 'Internal' : 'Competitor'}
-                                        </span>
-                                        <span className={`font-black text-sm ${isTarget ? 'text-amber-900 dark:text-amber-100' : ''}`}>
-                                            {brand.name}
-                                        </span>
-                                        {/* Blind Code Input */}
-                                        {formData.config?.testing_protocol === 'blind' && (
-                                            <div className="mt-1.5 flex flex-col gap-1">
-                                                <span className="text-[6px] font-black uppercase tracking-[0.2em] text-primary-soft">Blind Code</span>
-                                                <input
-                                                    type="text"
-                                                    value={formData.config?.blind_codes?.[brand.name] || ''}
-                                                    onChange={(e) => {
-                                                        const code = e.target.value;
-                                                        setFormData(prev => ({
-                                                            ...prev,
-                                                            config: {
-                                                                ...prev.config!,
-                                                                blind_codes: {
-                                                                    ...(prev.config!.blind_codes || {}),
-                                                                    [brand.name]: code
-                                                                }
-                                                            }
-                                                        }));
-                                                    }}
-                                                    placeholder="e.g. SAMPLE-123"
-                                                    className="bg-white/50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-md px-2 py-1 text-xs font-black uppercase tracking-widest outline-none focus:border-primary transition-all"
-                                                />
-                                            </div>
-                                        )}
-                                    </div>
+                                    <span className={`font-black text-sm ${isTarget ? 'text-amber-900 dark:text-amber-100' : ''}`}>
+                                        {brand.name}
+                                    </span>
 
                                     <button
                                         onClick={() => {
@@ -1382,8 +1322,8 @@ export function ParametersStep({
                                         ...prev,
                                         config: { ...(prev.config || DEFAULT_TASTE_CONFIG), pricing_unit_amount: e.target.value },
                                     }))}
-                                    placeholder="200"
-                                    className="w-28 bg-surface border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm font-black text-ink text-center focus:outline-none focus:border-primary transition-all"
+                                    placeholder="e.g. 200"
+                                    className="w-28 bg-white dark:bg-slate-900 border-2 border-slate-400 dark:border-slate-500 rounded-xl px-4 py-2.5 text-sm font-black text-slate-900 dark:text-slate-100 text-center shadow-sm placeholder:font-semibold placeholder:text-slate-400 hover:border-primary/60 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all"
                                 />
                                 <input
                                     type="text"
@@ -1392,8 +1332,8 @@ export function ParametersStep({
                                         ...prev,
                                         config: { ...(prev.config || DEFAULT_TASTE_CONFIG), pricing_unit_label: e.target.value },
                                     }))}
-                                    placeholder={"ml / g / جم"}
-                                    className="w-32 bg-surface border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm font-black text-ink text-center focus:outline-none focus:border-primary transition-all"
+                                    placeholder="e.g. ml"
+                                    className="w-32 bg-white dark:bg-slate-900 border-2 border-slate-400 dark:border-slate-500 rounded-xl px-4 py-2.5 text-sm font-black text-slate-900 dark:text-slate-100 text-center shadow-sm placeholder:font-semibold placeholder:text-slate-400 hover:border-primary/60 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all"
                                 />
                             </div>
 

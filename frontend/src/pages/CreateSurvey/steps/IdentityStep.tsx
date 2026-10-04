@@ -27,7 +27,7 @@ export const surveyTypesList = [
     {
         id: 'taste_test',
         name: 'Sensory Test',
-        desc: 'Compare products on taste, texture, and aroma. Builds preference maps and sensory profiles.',
+        points: ['Taste, texture, and aroma', 'Preference maps and sensory profiles'],
         icon: Beaker,
         color: 'text-primary-soft',
         bg: 'bg-primary/10',
@@ -35,7 +35,7 @@ export const surveyTypesList = [
     {
         id: 'product_test',
         name: 'Product Test',
-        desc: 'In-home use tests (IHUT) that track real-world performance, packaging, and trial feedback.',
+        points: ['In-home use tests (IHUT)', 'Performance, packaging, and trial feedback'],
         icon: Palette,
         color: 'text-emerald-600',
         bg: 'bg-emerald-50 dark:bg-emerald-950/40',
@@ -43,7 +43,7 @@ export const surveyTypesList = [
     {
         id: 'pack_test',
         name: 'Pack Testing',
-        desc: 'Packaging evaluation with click heatmaps on the design.',
+        points: ['Packaging evaluation', 'Click heatmaps on the design'],
         icon: Package,
         color: 'text-violet-600',
         bg: 'bg-violet-50 dark:bg-violet-950/40',
@@ -51,7 +51,7 @@ export const surveyTypesList = [
     {
         id: 'usage_attitude',
         name: 'Usage & Attitude',
-        desc: 'Awareness funnel, usage habits and pricing behaviour.',
+        points: ['Awareness funnel', 'Usage habits and pricing'],
         icon: Users,
         color: 'text-sky-600',
         bg: 'bg-sky-50 dark:bg-sky-950/40',
@@ -656,7 +656,7 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                         } : prev.purchase_funnel
                                     };
                                 })}
-                                title={type.desc}
+                                title={type.points.join('. ')}
                                 className={`text-left px-4 py-3 rounded-2xl border-2 transition-all group relative ${formData.survey_type === type.id
                                     ? 'border-primary bg-primary/5 dark:bg-primary/10 shadow-md'
                                     : 'border-line/80 dark:border-line/10 bg-surface/20 hover:border-primary/40'
@@ -666,9 +666,13 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                                     <type.icon className="w-4 h-4" />
                                 </div>
                                 <h4 className="text-sm font-black uppercase tracking-widest text-ink mb-2 pr-6">{type.name}</h4>
-                                <p className="text-xs font-medium leading-relaxed text-ink-muted">
-                                    {type.desc}
-                                </p>
+                                <ul className="space-y-1">
+                                    {type.points.map((point) => (
+                                        <li key={point} className="text-xs font-medium leading-snug text-ink-muted">
+                                            {point}
+                                        </li>
+                                    ))}
+                                </ul>
                                 {formData.survey_type === type.id && (
                                     <div className="absolute top-2.5 right-2.5">
                                         <div className="w-4 h-4 rounded-full bg-primary text-white flex items-center justify-center animate-in zoom-in">
@@ -1217,11 +1221,11 @@ export default function IdentityStep({ formData, setFormData, onOpenClone, draft
                             </label>
                             <div className="flex flex-wrap gap-2">
                                 {[
-                                    { en: 'Below 4,000 EGP', ar: 'أقل من ٤٠٠٠ جنيه' },
-                                    { en: '4,001 - 6,000 EGP', ar: '٤٠٠١ - ٦٠٠٠ جنيه' },
-                                    { en: '6,001 - 12,000 EGP', ar: '٦٠٠١ - ١٢٠٠٠ جنيه' },
-                                    { en: '12,001 - 40,000 EGP', ar: '١٢٠٠١ - ٤٠٠٠٠ جنيه' },
                                     { en: 'Above 40,000 EGP', ar: 'أكثر من ٤٠٠٠٠ جنيه' },
+                                    { en: '12,001 - 40,000 EGP', ar: '١٢٠٠١ - ٤٠٠٠٠ جنيه' },
+                                    { en: '6,001 - 12,000 EGP', ar: '٦٠٠١ - ١٢٠٠٠ جنيه' },
+                                    { en: '4,001 - 6,000 EGP', ar: '٤٠٠١ - ٦٠٠٠ جنيه' },
+                                    { en: 'Below 4,000 EGP', ar: 'أقل من ٤٠٠٠ جنيه' },
                                 ].map(inc => {
                                     const val = `${inc.en} / ${inc.ar}`;
                                     //@ts-ignore
