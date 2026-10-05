@@ -19,7 +19,15 @@ class FollowUpEngineContext:
     survey_type: str
     respondent_surface: Optional[str] = None
     previous_turns: list[dict[str, Any]] = field(default_factory=list)
-    language: str = "auto"
+    # Resolved from the survey in from_survey_request when not given. It used
+    # to default to the string "auto", which resolve_language_rule treats as
+    # "not English" — so every follow-up on every survey, including English
+    # ones, was moderated in Egyptian Arabic. The English instruction existed
+    # but had never once been used.
+    language: str = ""
+    #: What is being tested, e.g. "ice cream". Without it the model had no idea
+    #: what the study was about and invented a category to probe about.
+    category: str = ""
     survey_id: str = ""
     token: str = ""
     question_id: str = ""
@@ -44,12 +52,38 @@ class FollowUpEngineContext:
         custom_instructions: str,
         respondent_surface: Optional[str],
         previous_turns: Optional[list[dict[str, Any]]] = None,
-        language: str = "auto",
+        language: str = "",
     ) -> "FollowUpEngineContext":
+        # Resolved here, from the survey, rather than expected from the caller.
+        # Every caller forgot, and the resulting "auto" silently meant Arabic.
+        # Doing it at the point the survey is already in hand means a new
+        # caller cannot reintroduce that. The survey's own language governs —
+        # not the language the respondent happened to type in.
+        from backend.services.product_test_orchestration import (
+            resolve_orchestration_category,
+        )
+        from backend.services.product_test_public_gateway import (
+            resolve_respondent_language,
+        )
+
+        resolved_language = (language or "").strip().lower()
+        if not resolved_language or resolved_language == "auto":
+            resolved_language = resolve_respondent_language(survey)
+
+        category = resolve_orchestration_category(survey)
+        if category == "Category":  # the resolver's "nothing set" placeholder
+            category = ""
+
+        # `company_name` is the research agency, never the product under test.
+        # Using it as the brand fed the model the agency's name as the thing
+        # being tasted, which is a large part of why it invented a product.
+        resolved_brand = (brand_name or "").strip() or category or "the product"
+
         return cls(
             question=question_text,
             answer=answer_text,
-            brand_name=brand_name or survey.get("company_name") or "the product",
+            brand_name=resolved_brand,
+            category=category,
             survey_objective=(
                 survey_objective
                 or survey.get("survey_objective")
@@ -60,7 +94,7 @@ class FollowUpEngineContext:
             survey_type=str(survey.get("type") or "standard"),
             respondent_surface=respondent_surface,
             previous_turns=list(previous_turns or []),
-            language=language,
+            language=resolved_language,
             survey_id=str(survey_id or ""),
             token=str(token or ""),
             question_id=str(question_id or ""),

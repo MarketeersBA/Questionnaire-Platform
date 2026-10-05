@@ -147,14 +147,35 @@ export function isSameBrand(a: string, b: string): boolean {
     return levenshtein(skelA, skelB) <= MAX_EDIT_DISTANCE;
 }
 
+const ARABIC_CHARS = /[؀-ۿ]/;
+
+/** Whether a name is written in Arabic script rather than Latin. */
+function isArabicScript(value: string): boolean {
+    return ARABIC_CHARS.test(value);
+}
+
 /**
- * Merge brand-name lists into one, collapsing same-brand duplicates —
- * including ones that only differ by script. The first spelling seen for
- * each brand is the one kept, matching how the plain case-insensitive
- * `Map`-based dedup this replaces already behaved; call sites that need a
- * specific script's name back (e.g. to show the survey's own language)
- * should resolve that themselves from their own canonical brand data
- * instead of relying on which spelling happened to merge first.
+ * Merge brand-name lists into one, collapsing the same brand written twice.
+ *
+ * The phonetic comparison is applied **only across scripts**. That is the line
+ * between the two cases this has to get right:
+ *
+ *   - "Squizz" and "سكويز" are one brand transliterated — different scripts,
+ *     so the phonetic match is trusted and they collapse to one option.
+ *   - "Almarai" and "Lamar" are two different brands — both Latin, both typed
+ *     deliberately by the creator, and they must stay separate even though
+ *     their consonant skeletons are identical (`LMR`). Same for Juhayna /
+ *     Johnny (`GHN`) and Mirinda / Miranda (`MRND`), all real pairs that sit
+ *     in one study.
+ *
+ * Comparing within a single script is where the heuristic did damage: a
+ * skeleton cannot tell those pairs apart, so the two brands merged into one
+ * option, a respondent could not pick one of them at all, and its answers were
+ * credited to the other. Across scripts there is no such ambiguity to begin
+ * with — nobody types the same brand twice in two alphabets by accident.
+ *
+ * A cross-script name that matches more than one kept brand is kept as its own
+ * entry rather than guessed at.
  */
 export function dedupeBrandNames(...lists: (string[] | undefined)[]): string[] {
     const merged: string[] = [];
@@ -162,9 +183,38 @@ export function dedupeBrandNames(...lists: (string[] | undefined)[]): string[] {
         for (const raw of list || []) {
             const name = (raw ?? '').trim();
             if (!name) continue;
-            if (merged.some((kept) => isSameBrand(kept, name))) continue;
+
+            const lower = name.toLowerCase();
+            if (merged.some((kept) => kept.toLowerCase() === lower)) continue;
+
+            const transliterations = merged.filter(
+                (kept) => isArabicScript(kept) !== isArabicScript(name) && isSameBrand(kept, name),
+            );
+            if (transliterations.length === 1) continue;
+
             merged.push(name);
         }
     }
     return merged;
+}
+
+/**
+ * The one brand in `knownBrands` that `typed` refers to, or undefined.
+ *
+ * For canonicalizing something a respondent typed freehand — where the input is
+ * unknown and the candidate set is known. Exact match wins outright; the
+ * phonetic comparison is only consulted afterwards, and only when it points at
+ * exactly ONE brand. An ambiguous result returns undefined rather than picking
+ * the first hit, because guessing between two real brands silently files an
+ * answer under the wrong one.
+ */
+export function matchTypedBrand(typed: string, knownBrands: string[]): string | undefined {
+    const name = (typed ?? '').trim();
+    if (!name) return undefined;
+
+    const exact = knownBrands.find((b) => b.trim().toLowerCase() === name.toLowerCase());
+    if (exact) return exact;
+
+    const fuzzy = knownBrands.filter((b) => isSameBrand(b, name));
+    return fuzzy.length === 1 ? fuzzy[0] : undefined;
 }

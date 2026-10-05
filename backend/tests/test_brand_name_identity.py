@@ -9,6 +9,7 @@ from backend.services.brand_name_identity import (
     brand_phonetic_skeleton,
     dedupe_brand_names,
     is_same_brand,
+    match_typed_brand,
 )
 
 
@@ -99,3 +100,67 @@ def test_dedupe_ignores_blank_entries():
 
 def test_dedupe_handles_no_lists():
     assert dedupe_brand_names() == []
+
+
+# ── Same-script brands must never merge ────────────────────────────────────
+#
+# These are real pairs that sit in the same Egyptian study and reduce to the
+# same consonant skeleton. The phonetic comparison cannot separate them, so
+# dedupe must not consult it within one script. When it did, the two brands
+# became a single option: respondents could not pick one of them at all, and
+# its answers were credited to the other.
+
+SAME_SKELETON_DIFFERENT_BRANDS = [
+    ("Almarai", "Lamar"),      # both LMR
+    ("Juhayna", "Johnny"),     # both GHN
+    ("Mirinda", "Miranda"),    # both MRND
+    ("Faragello", "Farghaly"),
+]
+
+
+@pytest.mark.parametrize("a,b", SAME_SKELETON_DIFFERENT_BRANDS)
+def test_same_script_brands_are_never_merged(a, b):
+    assert dedupe_brand_names([a, b]) == [a, b]
+
+
+@pytest.mark.parametrize("a,b", SAME_SKELETON_DIFFERENT_BRANDS)
+def test_same_script_brands_stay_separate_across_source_lists(a, b):
+    """The taste-test list and the funnel's own list are merged together —
+    the pair must survive that too."""
+    assert dedupe_brand_names([a], [b]) == [a, b]
+
+
+def test_cross_script_transliteration_still_collapses():
+    """The original requirement, which must keep working: one brand typed once
+    in English and once in Arabic is one option, not two."""
+    assert dedupe_brand_names(["Squizz"], ["سكويز"]) == ["Squizz"]
+    assert dedupe_brand_names(["Pepsi", "Almarai"], ["بيبسي"]) == ["Pepsi", "Almarai"]
+
+
+def test_the_full_reported_scenario():
+    """Almarai + Lamar + Squizz in the study, and a respondent's Arabic
+    spelling of Squizz: four names in, three options out."""
+    assert dedupe_brand_names(["Almarai", "Lamar", "Squizz"], ["سكويز"]) == [
+        "Almarai", "Lamar", "Squizz",
+    ]
+
+
+# ── match_typed_brand: unknown input against a known set ───────────────────
+
+
+def test_typed_name_matches_its_brand_exactly():
+    assert match_typed_brand("almarai", ["Almarai", "Lamar"]) == "Almarai"
+
+
+def test_typed_arabic_name_matches_its_english_brand():
+    assert match_typed_brand("سكويز", ["Squizz", "KIKS"]) == "Squizz"
+
+
+def test_an_ambiguous_typed_name_matches_nothing():
+    """"Lamar" phonetically fits both Almarai and Lamar. Guessing would file
+    the answer under the wrong brand, so it returns nothing instead."""
+    assert match_typed_brand("Lamarr", ["Almarai", "Lamar"]) is None
+
+
+def test_blank_typed_name_matches_nothing():
+    assert match_typed_brand("   ", ["Almarai"]) is None

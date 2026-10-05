@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isSameBrand, dedupeBrandNames, brandPhoneticSkeleton } from './brandNameIdentity';
+import { isSameBrand, dedupeBrandNames, brandPhoneticSkeleton, matchTypedBrand } from './brandNameIdentity';
 
 /**
  * The reported bug: "Squizz" (typed by the creator, taste-test brand) and
@@ -103,5 +103,50 @@ describe('dedupeBrandNames', () => {
 
     it('handles an empty call with no lists at all', () => {
         expect(dedupeBrandNames()).toEqual([]);
+    });
+});
+
+/**
+ * Same-script brands must never merge. These are real pairs that sit in one
+ * Egyptian study and reduce to the same consonant skeleton — the phonetic
+ * comparison cannot separate them, so dedupe must not consult it within a
+ * single script. While it did, the two brands became one option: a respondent
+ * could not pick one of them at all, and its answers were credited to the other.
+ */
+describe('dedupeBrandNames — two real brands must stay two options', () => {
+    it.each([
+        ['Almarai', 'Lamar'],      // both LMR
+        ['Juhayna', 'Johnny'],     // both GHN
+        ['Mirinda', 'Miranda'],    // both MRND
+        ['Faragello', 'Farghaly'],
+    ])('keeps %s and %s separate', (a, b) => {
+        expect(dedupeBrandNames([a, b])).toEqual([a, b]);
+        // also across the two source lists they arrive on in a real survey
+        expect(dedupeBrandNames([a], [b])).toEqual([a, b]);
+    });
+
+    it('still collapses one brand written in both scripts', () => {
+        expect(dedupeBrandNames(['Squizz'], ['سكويز'])).toEqual(['Squizz']);
+    });
+
+    it('handles the full reported case: 4 names in, 3 options out', () => {
+        expect(dedupeBrandNames(['Almarai', 'Lamar', 'Squizz'], ['سكويز'])).toEqual([
+            'Almarai', 'Lamar', 'Squizz',
+        ]);
+    });
+});
+
+describe('matchTypedBrand — canonicalizing what a respondent typed', () => {
+    it('matches a typed name to its brand regardless of case', () => {
+        expect(matchTypedBrand('almarai', ['Almarai', 'Lamar'])).toBe('Almarai');
+    });
+
+    it('matches a typed Arabic name to its English brand', () => {
+        expect(matchTypedBrand('سكويز', ['Squizz', 'KIKS'])).toBe('Squizz');
+    });
+
+    it('returns nothing when the typed name fits two brands', () => {
+        // Guessing here would file the answer under the wrong brand.
+        expect(matchTypedBrand('Lamarr', ['Almarai', 'Lamar'])).toBeUndefined();
     });
 });

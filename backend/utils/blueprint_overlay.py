@@ -3,7 +3,18 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Tuple
+
+# Questions are addressed by (brand, question id), never by id alone.
+#
+# Taste-test questions keep the bare question-bank id, so every brand's copy of
+# a question carries the SAME id — `tt_q5` for one brand and `tt_q5` for the
+# next. Indexing analyst edits by id alone therefore collapsed all brands onto
+# one entry, the last one read winning, and that single question's text was
+# then written into every brand's section while the per-brand section titles
+# were left untouched. A blind study came out reading "circle" in the heading
+# and "square" in the questions underneath it, for every brand but the last.
+QuestionKey = Tuple[str, str]
 
 QUESTION_CONTENT_KEYS = (
     "label",
@@ -21,11 +32,22 @@ QUESTION_CONTENT_KEYS = (
 )
 
 
-def _question_key(question: Dict[str, Any]) -> Optional[str]:
+def _section_brand(section: Optional[Dict[str, Any]]) -> str:
+    """The brand a section belongs to, normalized. Empty for shared sections
+    (screening, before-taste, preference) which are not per-brand."""
+    if not isinstance(section, dict):
+        return ""
+    return str(section.get("brand") or "").strip().casefold()
+
+
+def _question_key(
+    question: Dict[str, Any],
+    section: Optional[Dict[str, Any]] = None,
+) -> Optional[QuestionKey]:
     key = question.get("id") or question.get("question_id")
     if key is None:
         return None
-    return str(key)
+    return (_section_brand(section), str(key))
 
 
 def _apply_question_overlay(base: Dict[str, Any], edited: Dict[str, Any]) -> Dict[str, Any]:
@@ -36,11 +58,11 @@ def _apply_question_overlay(base: Dict[str, Any], edited: Dict[str, Any]) -> Dic
     return merged
 
 
-def _index_layer_questions(schema: Optional[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
+def _index_layer_questions(schema: Optional[Dict[str, Any]]) -> Dict[QuestionKey, Dict[str, Any]]:
     if not schema:
         return {}
 
-    indexed: Dict[str, Dict[str, Any]] = {}
+    indexed: Dict[QuestionKey, Dict[str, Any]] = {}
     for layer_key, layer in schema.items():
         if not str(layer_key).endswith("_structure"):
             continue
@@ -52,17 +74,17 @@ def _index_layer_questions(schema: Optional[Dict[str, Any]]) -> Dict[str, Dict[s
             for question in section.get("questions") or []:
                 if not isinstance(question, dict):
                     continue
-                key = _question_key(question)
+                key = _question_key(question, section)
                 if key:
                     indexed[key] = question
     return indexed
 
 
-def _index_product_test_snapshot(snapshot: Optional[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
+def _index_product_test_snapshot(snapshot: Optional[Dict[str, Any]]) -> Dict[QuestionKey, Dict[str, Any]]:
     if not snapshot or not isinstance(snapshot, dict):
         return {}
 
-    indexed: Dict[str, Dict[str, Any]] = {}
+    indexed: Dict[QuestionKey, Dict[str, Any]] = {}
     for phase in snapshot.get("phases") or []:
         if not isinstance(phase, dict):
             continue
@@ -72,7 +94,7 @@ def _index_product_test_snapshot(snapshot: Optional[Dict[str, Any]]) -> Dict[str
             for question in section.get("questions") or []:
                 if not isinstance(question, dict):
                     continue
-                key = _question_key(question)
+                key = _question_key(question, section)
                 if key:
                     indexed[key] = question
     return indexed
@@ -81,9 +103,9 @@ def _index_product_test_snapshot(snapshot: Optional[Dict[str, Any]]) -> Dict[str
 def collect_blueprint_question_edits(
     edited_schema: Optional[Dict[str, Any]],
     edited_product_test_snapshot: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Dict[str, Any]]:
-    """Flatten edited architect schema into question-id → question payload."""
-    edits: Dict[str, Dict[str, Any]] = {}
+) -> Dict[QuestionKey, Dict[str, Any]]:
+    """Flatten edited architect schema into (brand, question id) → question payload."""
+    edits: Dict[QuestionKey, Dict[str, Any]] = {}
     edits.update(_index_layer_questions(edited_schema))
     edits.update(_index_product_test_snapshot(edited_product_test_snapshot))
     if edited_schema and isinstance(edited_schema.get("product_test_snapshot"), dict):
@@ -93,7 +115,7 @@ def collect_blueprint_question_edits(
 
 def _patch_section_questions(
     sections: Iterable[Dict[str, Any]],
-    edits: Dict[str, Dict[str, Any]],
+    edits: Dict[QuestionKey, Dict[str, Any]],
 ) -> List[Dict[str, Any]]:
     patched_sections: List[Dict[str, Any]] = []
     for section in sections:
@@ -106,7 +128,7 @@ def _patch_section_questions(
             if not isinstance(question, dict):
                 questions.append(question)
                 continue
-            key = _question_key(question)
+            key = _question_key(question, section_copy)
             if key and key in edits:
                 questions.append(_apply_question_overlay(question, edits[key]))
             else:
@@ -116,7 +138,7 @@ def _patch_section_questions(
     return patched_sections
 
 
-def _patch_layer_structures(schema: Dict[str, Any], edits: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
+def _patch_layer_structures(schema: Dict[str, Any], edits: Dict[QuestionKey, Dict[str, Any]]) -> Dict[str, Any]:
     patched = deepcopy(schema)
     for layer_key, layer in list(patched.items()):
         if not str(layer_key).endswith("_structure"):
@@ -129,7 +151,7 @@ def _patch_layer_structures(schema: Dict[str, Any], edits: Dict[str, Dict[str, A
 
 def _patch_product_test_snapshot(
     snapshot: Optional[Dict[str, Any]],
-    edits: Dict[str, Dict[str, Any]],
+    edits: Dict[QuestionKey, Dict[str, Any]],
 ) -> Optional[Dict[str, Any]]:
     if not snapshot or not isinstance(snapshot, dict):
         return snapshot
@@ -146,7 +168,7 @@ def _patch_product_test_snapshot(
                 if not isinstance(question, dict):
                     questions.append(question)
                     continue
-                key = _question_key(question)
+                key = _question_key(question, section)
                 if key and key in edits:
                     questions.append(_apply_question_overlay(question, edits[key]))
                 else:

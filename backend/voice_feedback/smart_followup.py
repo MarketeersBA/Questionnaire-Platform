@@ -51,10 +51,14 @@ def resolve_language_rule(language: str) -> tuple[str, str]:
     """
     Return ``(display_name, instruction)`` for a survey language.
 
-    Unknown or "auto" falls back to Arabic, which is what the platform's
-    studies have overwhelmingly been. The fallback is deliberate rather than
-    silent: a moderator with no language instruction drifts between languages
-    mid-interview, which is worse than one consistent choice.
+    The survey's language governs, always — including when the respondent
+    answers in the other language, or mixes the two. An Arabic speaker dropping
+    English words into an English study still gets an English probe.
+
+    Callers do not pass "auto" any more: FollowUpEngineContext resolves the
+    language from the survey itself. The Arabic fallback here is now only a
+    last resort for a context built by hand, kept because a moderator with no
+    language instruction drifts between languages mid-interview.
     """
     key = (language or "").strip().lower()
     if key.startswith("en"):
@@ -138,6 +142,7 @@ class SmartFollowUpEngine:
             answer=ctx.answer,
             conversation_history=self._build_conversation_history(ctx.question, ctx.previous_turns),
             brand_name=ctx.brand_name,
+            category=ctx.category or "not specified",
             objective=ctx.survey_objective,
             language=ctx.language,
             language_name=language_name,

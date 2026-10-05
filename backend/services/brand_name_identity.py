@@ -137,14 +137,70 @@ def find_same_brand_key(candidate: str, keys: Iterable[str]) -> Optional[str]:
     return None
 
 
+_ARABIC_CHARS = re.compile(r"[؀-ۿ]")
+
+
+def _is_arabic_script(value: str) -> bool:
+    """Whether a name is written in Arabic script rather than Latin."""
+    return bool(_ARABIC_CHARS.search(value or ""))
+
+
 def dedupe_brand_names(*lists: Optional[Iterable[str]]) -> List[str]:
+    """Merge brand-name lists, collapsing the same brand written twice.
+
+    The phonetic comparison applies **only across scripts**, which is the line
+    between the two cases this must get right:
+
+      - "Squizz" and "سكويز" are one brand transliterated — different scripts,
+        so they collapse to one option.
+      - "Almarai" and "Lamar" are two different brands — both Latin, both typed
+        deliberately, and they stay separate even though their skeletons are
+        identical (`LMR`). Same for Juhayna/Johnny (`GHN`) and Mirinda/Miranda
+        (`MRND`), all real pairs that appear in one study.
+
+    Comparing within a single script is where the heuristic did damage: it
+    merged two real brands into one option, so a respondent could not pick one
+    of them and its answers were credited to the other.
+    """
     merged: List[str] = []
     for lst in lists:
         for raw in lst or []:
             name = (raw or "").strip()
             if not name:
                 continue
-            if any(is_same_brand(kept, name) for kept in merged):
+
+            lower = name.lower()
+            if any(kept.lower() == lower for kept in merged):
                 continue
+
+            transliterations = [
+                kept for kept in merged
+                if _is_arabic_script(kept) != _is_arabic_script(name) and is_same_brand(kept, name)
+            ]
+            if len(transliterations) == 1:
+                continue
+
             merged.append(name)
     return merged
+
+
+def match_typed_brand(typed: str, known_brands: Iterable[str]) -> Optional[str]:
+    """The one brand in `known_brands` that `typed` refers to, or None.
+
+    For canonicalizing free-typed respondent input against a known candidate
+    set. Exact match wins outright; the phonetic comparison is consulted only
+    afterwards, and only when it points at exactly ONE brand — an ambiguous
+    result returns None rather than picking the first hit, because guessing
+    between two real brands files an answer under the wrong one.
+    """
+    name = (typed or "").strip()
+    if not name:
+        return None
+
+    candidates = list(known_brands)
+    for b in candidates:
+        if b.strip().lower() == name.lower():
+            return b
+
+    fuzzy = [b for b in candidates if is_same_brand(b, name)]
+    return fuzzy[0] if len(fuzzy) == 1 else None

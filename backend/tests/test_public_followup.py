@@ -756,3 +756,80 @@ def test_voice_upload_skips_stt_when_neither_ai_flag_enabled(mock_get_collection
 
     assert res.status_code == 200
     assert mock_save_voice_upload.call_args.kwargs["ai_analysis_enabled"] is False
+
+
+# ── Follow-up language and product context ─────────────────────────────────
+#
+# The follow-up never learned the survey's language: no caller passed one, so
+# it defaulted to "auto", which resolve_language_rule treats as "not English".
+# Every probe on every survey came back in Egyptian Arabic, and the English
+# instruction had never once been used. Separately, an unset brand fell back to
+# `company_name` — the research agency — so the model was told the agency was
+# the thing being tasted, and invented a product to probe about.
+
+from backend.voice_feedback.followup_context import FollowUpEngineContext
+from backend.voice_feedback.smart_followup import resolve_language_rule
+
+
+def _context(survey, brand_name=None):
+    return FollowUpEngineContext.from_survey_request(
+        survey=survey,
+        survey_id="s1",
+        token="t1",
+        question_id="q1",
+        current_round=1,
+        source="text",
+        question_text="What did you like most?",
+        answer_text="its taste",
+        question_category="likes",
+        brand_name=brand_name,
+        survey_objective=None,
+        custom_instructions="",
+        respondent_surface="product_test_open_end",
+    )
+
+
+def test_an_english_survey_is_moderated_in_english():
+    ctx = _context({"type": "product_test", "product_test_config": {"language": "en"}})
+    assert resolve_language_rule(ctx.language)[0] == "English"
+
+
+def test_an_arabic_survey_is_moderated_in_arabic():
+    ctx = _context({"type": "taste_test", "taste_test_config": {"language": "ar"}})
+    assert resolve_language_rule(ctx.language)[0] == "Arabic"
+
+
+def test_the_survey_language_wins_over_what_the_respondent_typed():
+    """An Arabic speaker answering an English survey — in Arabic, or mixing the
+    two — still gets an English probe. The creator's choice governs."""
+    survey = {"type": "product_test", "product_test_config": {"language": "en"}}
+    ctx = FollowUpEngineContext.from_survey_request(
+        survey=survey, survey_id="s1", token="t1", question_id="q1", current_round=1,
+        source="text", question_text="What did you like most?",
+        answer_text="الطعم حلو but also fresh",
+        question_category="likes", brand_name=None, survey_objective=None,
+        custom_instructions="", respondent_surface="product_test_open_end",
+    )
+    assert resolve_language_rule(ctx.language)[0] == "English"
+
+
+def test_the_research_agency_is_never_passed_off_as_the_product():
+    ctx = _context({
+        "type": "product_test",
+        "product_test_config": {"language": "en"},
+        "config": {"category": "ice cream"},
+        "company_name": "Marketeers Research",
+    })
+    assert "Marketeers" not in ctx.brand_name
+    assert ctx.brand_name == "ice cream"
+    assert ctx.category == "ice cream"
+
+
+def test_an_explicit_brand_still_wins_over_the_category():
+    ctx = _context(
+        {"type": "product_test", "product_test_config": {"language": "en"},
+         "config": {"category": "ice cream"}},
+        brand_name="Squizz",
+    )
+    assert ctx.brand_name == "Squizz"
+    assert ctx.category == "ice cream"
