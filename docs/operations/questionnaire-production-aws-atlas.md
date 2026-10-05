@@ -3,7 +3,7 @@
 > **Platform:** Questionnaire Platform (named **Survey Platform** in AWS)
 > **Production URL:** <https://questionnaire.marketeers-ba.com>
 > **Deployed by:** Farida Khaled
-> **Go-live period:** July – September 2026
+> **Go-live period:** July 1st – July 10th
 
 This document records how the Questionnaire Platform was moved from a local environment to production on AWS EC2, with its database hosted on MongoDB Atlas. It describes each stage in the order it was carried out, the configuration chosen, and the reason for each choice.
 
